@@ -7,6 +7,10 @@ import { bakeScene } from './lighthook.js';
 // no antialias: the anti-aliasing is our own, at the level of the settings (msaa.js)
 export const renderer = new THREE.WebGLRenderer({ antialias: false });
 renderer.localClippingEnabled = true;
+// Checking a program for errors the first time it draws asks the driver for its log, and in
+// Chrome that waits for everything the GPU process has queued (other programs compiling ahead
+// among it): 100-400 ms stalls on entering a cube. Only with the dev tools (?dev=1).
+renderer.debug.checkShaderErrors = new URLSearchParams(location.search).get('dev') === '1';
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 // The canvas fills the window by CSS (style.css, #view), so it can never be wider or taller than
 // the page: on an iPad a canvas bigger than the page for a moment (turning it, the keyboard) made

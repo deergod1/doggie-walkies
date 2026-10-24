@@ -4,6 +4,7 @@
 import * as THREE from 'three';
 import { N, CUBE_H } from '../core/constants.js';
 import { TRIALS } from '../core/trials.js';
+import { makeFadable } from './fade.js';
 
 let STONE = null;   // one per cube (cubes fade on their own)
 // sealed: an annex's portal before a quest opens it (world/layout.js): grey, and nothing glows
@@ -45,6 +46,21 @@ function warning(kind) {
   g.add(ring, glyph, light);
   g.userData.trialWarning = kind;
   return { obj: g, ring, glyph };
+}
+
+// A trial's warning as a cube has it, for the warm-up (render/cubeassets.js): a cube is warmed
+// before the game knows whether its portals warn (game/trials.js warnTrials), and the warning's
+// two programs were compiled while drawing the first one. (Without its light: the cube's lights
+// are taken out of it.)
+let warned = null;
+export function markerWarmup() {
+  if (!warned) {
+    const w = warning(Object.keys(TRIALS)[0]);
+    w.obj.remove(w.obj.children.find(o => o.isLight));
+    warned = new THREE.Group().add(w.obj);
+    makeFadable(warned);
+  }
+  return [warned];
 }
 
 function gate(p, [c, e], guardian, warn = null) {

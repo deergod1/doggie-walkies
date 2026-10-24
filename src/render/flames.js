@@ -13,6 +13,7 @@ import * as THREE from 'three';
 import { cutMaterial } from './section.js';
 import { glow, soft, emit, rand, ring } from './particles.js';
 import { scene } from './scene.js';
+import { makeFadable } from './fade.js';
 import { doused } from '../core/douse.js';
 import { FIRES } from '../core/propcatalog.js';
 import { sfx } from '../audio/sfx.js';
@@ -131,6 +132,24 @@ void main() {
 }`;
 
 const sets = new Set();
+const flameMaterial = () => cutMaterial(new THREE.ShaderMaterial({ vertexShader, fragmentShader, uniforms: { uTime },
+  transparent: true, depthWrite: false, clipping: true,
+  blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor }));
+
+// One flame material that is never disposed, compiled with every cube's warm-up
+// (render/cubeassets.js). three.js names a ShaderMaterial's program by ids of its shader texts,
+// which it forgets once no material uses them: when a cube went, the next cube's flames got new
+// ids, so a new program, compiled while drawing it (warming a cube ahead did not help, its copy
+// was thrown away too). While this one lives the ids stay, and the kept program serves them all.
+let pinned = null;
+export function flameWarmup() {
+  if (!pinned) {
+    pinned = new THREE.Group();
+    pinned.add(new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), flameMaterial(), 1));
+    makeFadable(pinned);   // (as in a cube: the same program)
+  }
+  return [pinned];
+}
 // A cube's flames (specs: [{ x, y, z, w, h }] in its group; lights: the point lights they give,
 // [{ light, gain, i, seed, pulse }], flickering with flame i (-1: none, a lantern's light flickers
 // on its own; pulse: it breathes instead, a glowing mushroom's)): one instanced mesh to add to the
@@ -143,9 +162,7 @@ export function flameSet(specs, lights = []) {
   specs.forEach((f, i) => data.set([f.w, f.h, f.seed ?? (f.x * 1.7 + f.z * 2.3) % 6.28, f.power ?? 1], i * 4));
   const attr = new THREE.InstancedBufferAttribute(data, 4);
   geometry.setAttribute('aFlame', attr);
-  const material = cutMaterial(new THREE.ShaderMaterial({ vertexShader, fragmentShader, uniforms: { uTime },
-    transparent: true, depthWrite: false, clipping: true,
-    blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor }));
+  const material = flameMaterial();
   const mesh = new THREE.InstancedMesh(geometry, material, Math.max(1, specs.length));
   mesh.count = specs.length;
   const m4 = new THREE.Matrix4();

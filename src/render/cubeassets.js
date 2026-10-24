@@ -16,6 +16,8 @@ import { buildWorld, disposeWorld } from './world.js';
 import { scene } from './scene.js';
 import { warm } from './warmup.js';
 import { warmBake } from './bake.js';
+import { flameWarmup } from './flames.js';
+import { markerWarmup } from './markers.js';
 import { turn } from './turns.js';
 import { speciesIn, kindsIn } from '../core/spawns.js';
 import { COINS } from '../core/items.js';
@@ -32,7 +34,7 @@ export async function warmCube(c) {
   scene.remove(world.group);   // never drawn
   const enemies = enemyWarmup(kindsIn(c.map));
   try {
-    await warm([world.group, ...proxyWarmup(c.geo, shownFar(c.map)), ...enemies.objects, ...lootWarmup(c.map.enemyFree ? [] : coins), ...warmBake()]);
+    await warm([world.group, ...proxyWarmup(c.geo, shownFar(c.map)), ...enemies.objects, ...lootWarmup(c.map.enemyFree ? [] : coins), ...warmBake(), ...flameWarmup(), ...markerWarmup()]);
   } finally {
     disposeWorld(world);
     enemies.dispose();

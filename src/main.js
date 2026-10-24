@@ -212,7 +212,7 @@ function frame(now = performance.now()) {
   beginFrame();   // anti-aliasing: draw into the multisampled buffer (render/msaa.js)
   renderer.render(scene, camera);
   endFrame();     // and onto the screen
-  keepPrograms();   // compiled shaders stay (render/programs.js)
+  keepPrograms(true);   // compiled shaders stay (render/programs.js); any new one was compiled while drawing
   tickResolution(start, frameRate());   // fewer pixels while the GPU cannot keep up (render/resolution.js)
   requestAnimationFrame(frame);
 }
@@ -250,7 +250,7 @@ function menuFrame(dt, start) {
   renderer.render(scene, camera);
   drawPortrait(heroBox());
   endFrame();
-  keepPrograms();
+  keepPrograms(true);
   tickResolution(start, frameRate());
   requestAnimationFrame(frame);
 }
