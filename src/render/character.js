@@ -48,7 +48,14 @@ const solid = (x, z, y) => cellAt(x, z) >= 0 && insideSolid(x, z, y);
 // every frame, once the figure and the camera stand where they stand (main.js)
 export function followHero(dt = 0) {
   const g = character.group;
-  if (!(character.ready && g.visible && g.parent === scene)) { light.intensity = 0; light.shadow.autoUpdate = false; return; }
+  if (!(character.ready && g.visible && g.parent === scene)) {
+    // off, but its shadow map drawn once all the same: without one three binds an empty cube
+    // texture that does not compare to the shadow sampler, and WebGL drops every lit draw (the
+    // main menu, where the hero never stood in the world)
+    light.intensity = 0; light.shadow.autoUpdate = false;
+    if (!light.shadow.map) light.shadow.needsUpdate = true;
+    return;
+  }
   light.shadow.autoUpdate = true;
   const p = g.position;
   let dx = camera.position.x - p.x, dz = camera.position.z - p.z;
