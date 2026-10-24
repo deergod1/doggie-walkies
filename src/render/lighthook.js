@@ -1,13 +1,14 @@
 // The lights in every lit shader (render/bake.js bakes the fixed ones' shadows). three.js
 // recompiles every lit shader when its number of point lights changes, so the game's lights are
-// instead lists of uniforms every lit shader walks, all of them always on, however far away:
+// instead tables (float textures) every lit shader walks, all of them always on, however far away:
 //   - the moving ones (render/lightpool.js: shots, enemies, loot, villagers' lamps), without
 //     shadows, where they are in the world;
-//   - the cube's fixed ones (lanterns, fires, lava, portals), each with its baked shadow: on the cube's solids from their lightmap (crisp at any zoom: signed distances to the
-// shadow's edge, antialiased over a pixel), on everything else (props, figures, fluids) from a
-// volume of the light's visibility round the cube (soft). The sun's shadow of the cube's fixed
-// parts is baked too (render/bake.js); three.js's own shadow map of the sun then only holds what
-// moves (render/scene.js: the fixed parts stay out of it).
+//   - the cube's fixed ones (lanterns, fires, lava, portals), each with its baked shadow: on the
+//     cube's solids from their lightmap (crisp at any zoom: signed distances to the shadow's edge,
+//     antialiased over a pixel), on everything else (props, figures, fluids) from a volume of the
+//     light's visibility round the cube (soft).
+// The sun's shadow of the cube's fixed parts is baked too (render/bake.js); three.js's own shadow
+// map of the sun then only holds what moves.
 //
 // Every lit material takes part without being told: this module wraps Material.onBeforeCompile
 // (whatever a material sets, three.js calls the wrapper), so it must be imported before any
@@ -15,26 +16,36 @@
 // steered by uniforms and defines, so no program's cache key changes:
 //   - BAKED_LM (render/bake.js bakedSurface): the cube's solids, lightmapped (attribute `lm`)
 //   - NO_BAKE: none of it (the proxies of the surroundings, render/neighbors.js)
-// A material that brings uniforms of the same names keeps its own (a cube's solids: their cube's
-// bake, also while another cube is the one played in).
+// A material that brings uniforms of the same names keeps its own: what a cube is built of shows
+// its own cube's lights (render/bake.js bakeMaterials), also while another cube is the one played
+// in; everything else (the hero, enemies, loot) the cube played in.
 import * as THREE from 'three';
 
-export const MAX_BAKED = 32;   // fixed lights a cube gives off at most
-export const MAX_MOVING = 32;  // moving lights shining at once at most (render/lightpool.js)
+export const MAX_BAKED = 128;  // fixed lights a cube gives off at most
+export const MAX_MOVING = 64;  // moving lights shining at once at most (render/lightpool.js)
+export const SETS = 3;         // the lightmap's (and volume's) textures, four channels each: the sun's and eleven for lights
+
+// a table of lights: two texels a light (x, y, z, reach; r, g, b, channel)
+export function lightTable(n) {
+  const t = new THREE.DataTexture(new Float32Array(n * 8), 2, n, THREE.RGBAFormat, THREE.FloatType);
+  t.minFilter = t.magFilter = THREE.NearestFilter;
+  t.needsUpdate = true;
+  return t;
+}
 
 // the shared uniforms: the bake of the cube being played in (render/bake.js setCurrentBake)
 export const BAKE = {
   uBakeOn: { value: 0 },                       // 1 while the world's scene is drawn
-  uBakeR: { value: 0 },                        // 1 once its shadows are baked
+  uBakeR: { value: 0 },                        // how far its baked shadows are trusted (0 before they are baked, fading to 1)
   uBakeN: { value: 0 },                        // how many fixed lights
-  uBakeL: { value: new Float32Array(MAX_BAKED * 8) },   // per light: x, y, z (in the cube), reach; r, g, b, channel
+  uBakeT: { value: null },                     // their table (x, y, z in the cube)
   uBakeO: { value: new THREE.Vector3() },      // the cube's origin in the world
-  uBakeVolA: { value: null }, uBakeVolB: { value: null },   // the volume's channels 0-3, 4-7
-  uBakeV0: { value: new THREE.Vector3() }, uBakeVS: { value: new THREE.Vector3(1, 1, 1) },   // its corner and size (in the cube)
+  ...Object.fromEntries(Array.from({ length: SETS }, (_, i) => [['uBakeLm' + i, { value: null }], ['uBakeVol' + i, { value: null }]]).flat()),
+  uBakeV0: { value: new THREE.Vector3() }, uBakeVS: { value: new THREE.Vector3(1, 1, 1) },   // the volume's corner and size (in the cube)
   uBakeSun: { value: null },                   // the sun's shadow map of the cube's fixed parts
   uBakeSunM: { value: new THREE.Matrix4() },   // from the cube's coordinates into it
   uMoveN: { value: 0 },                        // how many moving lights
-  uMoveL: { value: new Float32Array(MAX_MOVING * 8) },  // per light: x, y, z (in the world), reach; r, g, b, 0
+  uMoveT: { value: lightTable(MAX_MOVING) },   // their table (x, y, z in the world; channel unused)
   uBakeDbg: { value: 0 },                      // dev (/lightview): 1 the sun's baked shadow, 2 the fixed lights' light, 3 the lightmap's texels
 };
 
@@ -45,19 +56,18 @@ export function bakeScene(scene) {
   scene.onAfterRender = () => { BAKE.uBakeOn.value = 0; };
 }
 
+const sets = f => Array.from({ length: SETS }, (_, i) => f(i)).join('');
 const HEAD = `
 #ifndef NO_BAKE
 uniform float uBakeOn, uBakeR, uBakeDbg;
-uniform int uBakeN;
-uniform vec4 uBakeL[${MAX_BAKED * 2}];
-uniform int uMoveN;
-uniform vec4 uMoveL[${MAX_MOVING * 2}];
+uniform int uBakeN, uMoveN;
+uniform highp sampler2D uBakeT, uMoveT;
 uniform vec3 uBakeO;
 #ifdef BAKED_LM
   varying vec2 vBakeLm;
-  uniform sampler2D uBakeLmA, uBakeLmB;
+  ${sets(i => `uniform sampler2D uBakeLm${i};\n`)}
 #else
-  uniform highp sampler3D uBakeVolA, uBakeVolB;
+  ${sets(i => `uniform highp sampler3D uBakeVol${i};\n`)}
   uniform vec3 uBakeV0, uBakeVS;
   uniform highp sampler2DShadow uBakeSun;
   uniform mat4 uBakeSunM;
@@ -68,31 +78,33 @@ float bakeFalloff(float d, float reach) {
 #endif
 `;
 
-// before the lights: the visibility of the sun (bakeSun) and of the fixed lights' channels
-// (bakeA: 0-3, bakeB: 4-7; channel 0 is the sun's in the lightmap)
+// before the lights: where the point is (in the world: bakeW, in the cube: bakeP), the
+// visibility of the sun (bakeSun) and of the fixed lights' channels (bake0..: four each; channel
+// 0 is the sun's in the lightmap)
 const VIS = `
 #ifndef NO_BAKE
   float bakeSun = 1.0;
-  vec4 bakeA = vec4(1.0), bakeB = vec4(1.0);
+  ${sets(i => `vec4 bake${i} = vec4(1.0);\n`)}
+  vec3 bakeW = ((vec4(-vViewPosition, 1.0) - viewMatrix[3]) * viewMatrix).xyz, bakeP = bakeW - uBakeO;
   #ifdef BAKED_LM
     {
       // signed distances to the shadows' edges, 0.5 on the edge: one pixel wide whatever the zoom
-      vec4 sa = texture(uBakeLmA, vBakeLm), sb = texture(uBakeLmB, vBakeLm);
-      vec4 va = clamp((sa - 0.5) / max(fwidth(sa), vec4(1e-4)) + 0.5, 0.0, 1.0);
-      vec4 vb = clamp((sb - 0.5) / max(fwidth(sb), vec4(1e-4)) + 0.5, 0.0, 1.0);
-      if (uBakeR > 0.5 && uBakeOn > 0.5) { bakeA = va; bakeB = vb; bakeSun = va.r; }
+      ${sets(i => `vec4 s${i} = texture(uBakeLm${i}, vBakeLm), v${i} = clamp((s${i} - 0.5) / max(fwidth(s${i}), vec4(1e-4)) + 0.5, 0.0, 1.0);\n`)}
+      if (uBakeOn > 0.5) {
+        ${sets(i => `bake${i} = mix(vec4(1.0), v${i}, uBakeR);\n`)}
+        bakeSun = bake0.r;
+      }
     }
   #else
-    if (uBakeR > 0.5 && uBakeOn > 0.5) {
-      vec3 bakeW = ((vec4(-vViewPosition, 1.0) - viewMatrix[3]) * viewMatrix).xyz - uBakeO;
+    if (uBakeR > 0.0 && uBakeOn > 0.5) {
       vec3 bakeN = inverseTransformDirection(normal, viewMatrix);
-      vec3 vc = (bakeW + bakeN * 0.15 - uBakeV0) / uBakeVS;
-      if (all(greaterThanEqual(vc, vec3(0.0))) && all(lessThanEqual(vc, vec3(1.0)))) {
-        bakeA = texture(uBakeVolA, vc.xzy); bakeB = texture(uBakeVolB, vc.xzy);   // (its slices go up)
-      } else { bakeA = vec4(0.0); bakeB = vec4(0.0); }
-      vec4 sc = uBakeSunM * vec4(bakeW + bakeN * 0.03, 1.0);
+      vec3 vc = (bakeP + bakeN * 0.15 - uBakeV0) / uBakeVS;
+      bool inside = all(greaterThanEqual(vc, vec3(0.0))) && all(lessThanEqual(vc, vec3(1.0)));
+      // (its slices go up)
+      ${sets(i => `bake${i} = mix(vec4(1.0), inside ? texture(uBakeVol${i}, vc.xzy) : vec4(0.0), uBakeR);\n`)}
+      vec4 sc = uBakeSunM * vec4(bakeP + bakeN * 0.03, 1.0);
       sc.xyz /= sc.w;
-      if (all(greaterThan(sc.xyz, vec3(0.0))) && all(lessThan(sc.xyz, vec3(1.0)))) bakeSun = texture(uBakeSun, vec3(sc.xy, sc.z - 0.0004));
+      if (all(greaterThan(sc.xyz, vec3(0.0))) && all(lessThan(sc.xyz, vec3(1.0)))) bakeSun = mix(1.0, texture(uBakeSun, vec3(sc.xy, sc.z - 0.0004)), uBakeR);
     }
   #endif
 #endif
@@ -107,24 +119,28 @@ const LOOP = `
   if (uBakeOn > 0.5) {
     for (int i = 0; i < ${MAX_MOVING}; i++) {
       if (i >= uMoveN) break;
-      vec4 la = uMoveL[i * 2], lb = uMoveL[i * 2 + 1];
-      vec3 lv = (viewMatrix * vec4(la.xyz, 1.0)).xyz - geometryPosition;
-      float d = length(lv);
-      if (d >= la.w) continue;
-      directLight.direction = lv / d;
+      vec4 la = texelFetch(uMoveT, ivec2(0, i), 0);
+      vec3 lw = la.xyz - bakeW;
+      float d2 = dot(lw, lw);
+      if (d2 >= la.w * la.w) continue;
+      vec4 lb = texelFetch(uMoveT, ivec2(1, i), 0);
+      float d = sqrt(d2);
+      directLight.direction = normalize((viewMatrix * vec4(lw, 0.0)).xyz);
       directLight.color = lb.rgb * bakeFalloff(d, la.w);
       directLight.visible = true;
       RE_Direct( directLight, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, reflectedLight );
     }
     for (int i = 0; i < ${MAX_BAKED}; i++) {
       if (i >= uBakeN) break;
-      vec4 la = uBakeL[i * 2], lb = uBakeL[i * 2 + 1];
-      vec3 lv = (viewMatrix * vec4(la.xyz + uBakeO, 1.0)).xyz - geometryPosition;
-      float d = length(lv);
-      if (d >= la.w) continue;
+      vec4 la = texelFetch(uBakeT, ivec2(0, i), 0);
+      vec3 lw = la.xyz - bakeP;
+      float d2 = dot(lw, lw);
+      if (d2 >= la.w * la.w) continue;
+      vec4 lb = texelFetch(uBakeT, ivec2(1, i), 0);
+      float d = sqrt(d2);
       int ch = int(floor(lb.w + 0.5));
-      float vis = ch < 0 ? 1.0 : ch < 4 ? bakeA[ch] : bakeB[ch - 4];
-      directLight.direction = lv / d;
+      float vis = ch < 0 ? 1.0 : ${Array.from({ length: SETS - 1 }, (_, i) => `ch < ${4 * (i + 1)} ? bake${i}[ch - ${4 * i}] : `).join('')}bake${SETS - 1}[ch - ${4 * (SETS - 1)}];
+      directLight.direction = normalize((viewMatrix * vec4(lw, 0.0)).xyz);
       directLight.color = lb.rgb * (bakeFalloff(d, la.w) * vis);
       directLight.visible = true;
       bakeDbgL += directLight.color * saturate(dot(geometryNormal, directLight.direction));

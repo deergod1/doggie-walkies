@@ -1,42 +1,52 @@
 // The fixed lights of a cube and their baked shadows (the shaders' side: render/lighthook.js).
 //
 // A cube's fixed lights (lanterns, fires, lava, portals: what render/lightpool.js adoptLights
-// finds in it that does not move) all shine all the time, each with its shadow, baked once when
-// the cube is entered:
-//   - the lightmap (two RGBA8 atlases laid out in the worker, render/lightmap.js): for the sun
-//     and seven channels of lights, the signed distance of each texel of the cube's solids to the
-//     shadow's edge, found by testing points round it against the light's shadow map. Drawn,
+// finds in it that does not move) all shine all the time, each with its shadow, baked when the
+// cube is shown:
+//   - the lightmap (SETS RGBA8 atlases laid out in the worker, render/lightmap.js): for the sun
+//     and eleven channels of lights, the signed distance of each texel of the cube's solids to
+//     the shadow's edge, found by testing points round it against the light's shadow map. Drawn,
 //     it gives shadow edges as sharp as a pixel, smooth, however close the camera comes.
-//   - the volume (two RGBA8 3D textures, VOXEL a unit): how much of each light reaches each
+//   - the volume (SETS RGBA8 3D textures, VOXEL a unit): how much of each light reaches each
 //     point round the cube, for what is not lightmapped (props, figures, fluids).
 //   - the sun's shadow map of the fixed parts (for what is not lightmapped too).
-// Lights whose reaches overlap get different channels (assignChannels). What the shadows are cast
-// by: the cube's solids and its fixed props.
+// What the shadows are cast by: the cube's solids and its fixed props.
+//
+// Baking never holds a frame up: it goes a few steps a frame (tickBakes: the sun, then a light a
+// step, STEPS a frame), while the cube is still faded out (entering through a
+// portal it fades in after a moment; render/fade.js). Its lights stay dark until then and come on
+// over FADE_IN, the baked shadows with them. A cube built again as it was (the quests' changes,
+// a prop set come late) takes the bake it had at once (CACHE).
 import * as THREE from 'three';
 import { renderer, sun } from './scene.js';
-import { BAKE, MAX_BAKED } from './lighthook.js';
+import { BAKE, MAX_BAKED, SETS, lightTable } from './lighthook.js';
 
 const SUN_MAP = 2048;           // texels a side of the sun's shadow map of the fixed parts
 const CUBE_MAP = 1024;          // texels a side of each light's cube of shadow maps (while baking)
 const NEAR = 0.3;               // a light's shadow starts this far from it (not its own lamp's frame)
 const VOXEL = 4;                // volume samples a world unit
-const CHANNELS = 7;             // channels for lights (the lightmap's first is the sun's)
+const CHANNELS = SETS * 4 - 1;  // channels for lights (the lightmap's first is the sun's)
+const STEPS = 2;                // bake steps a frame (a light each: its six shadow maps, its lightmap, its volume)
+const BUDGET = 3;               // and no more than this many ms of the frame (at least a step)
+const FADE_IN = 350;            // ms: a cube's lights and baked shadows come on over this, once baked
+const CACHE = 3;                // bakes of cubes no longer shown, kept to be taken again
 
 // the bakes of the cubes built (their lights follow them every frame: updateBakes)
 const live = new Set();
+// geometry of a cube (render/cubegeo.js, the same for a cube built again) -> its bake when it went
+const kept = new Map();
 
-// A new cube's bake: its uniforms exist (and its lights shine, without shadows) before it is baked.
+const uniformsOf = () => ({
+  uBakeR: { value: 0 }, uBakeN: { value: 0 }, uBakeT: { value: lightTable(MAX_BAKED) }, uBakeO: { value: new THREE.Vector3() },
+  ...Object.fromEntries(Array.from({ length: SETS }, (_, i) => [['uBakeLm' + i, { value: null }], ['uBakeVol' + i, { value: null }]]).flat()),
+  uBakeV0: { value: new THREE.Vector3() }, uBakeVS: { value: new THREE.Vector3(1, 1, 1) },
+  uBakeSun: { value: null }, uBakeSunM: { value: new THREE.Matrix4() },
+});
+
+// A new cube's bake: its uniforms exist before it is baked (its lights dark until then).
 // group: the cube's (render/world.js); flip: Flip's turning box, not baked (its lights are moving ones)
 export function newBake(geo, group, flip = false) {
-  const bake = {
-    geo, group, flip, lights: [], ready: false, failed: false, textures: [],
-    u: {
-      uBakeR: { value: 0 }, uBakeN: { value: 0 }, uBakeL: { value: new Float32Array(MAX_BAKED * 8) },
-      uBakeO: { value: new THREE.Vector3() }, uBakeLmA: { value: null }, uBakeLmB: { value: null },
-    },
-    vol: { a: null, b: null, v0: new THREE.Vector3(), vs: new THREE.Vector3(1, 1, 1) },
-    sun: null, sunM: new THREE.Matrix4(),
-  };
+  const bake = { geo, group, flip, lights: [], ready: false, failed: false, job: null, readyAt: 0, owned: null, u: uniformsOf() };
   live.add(bake);
   return bake;
 }
@@ -53,17 +63,32 @@ export function addBakedLight(bake, light, group) {
 }
 
 // The cube's solids drawn with their baked shadows (render/partmeshes.js): their lightmap's
-// texels (attribute lm) and their own cube's lights, also while another cube is played in.
+// texels (attribute lm).
 export function bakedSurface(mat, bake) {
   if (!bake) return mat;
   mat.defines = { ...mat.defines, BAKED_LM: '' };
   const compile = mat.onBeforeCompile;
   mat.onBeforeCompile = (sh, r) => {
     compile.call(mat, sh, r);
-    Object.assign(sh.uniforms, bake.u);
     sh.vertexShader = 'attribute vec2 lm;\nvarying vec2 vBakeLm;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n  vBakeLm = lm;');
   };
   return mat;
+}
+
+// Everything a cube is built of shows its own cube's lights and shadows (also while travelling,
+// when another cube is the one played in). Like render/fade.js: a cube's materials are its own.
+export function bakeMaterials(group, bake) {
+  group.traverse(o => {
+    if (o.material) for (const m of [].concat(o.material)) {
+      if (m.userData.bakeU) continue;
+      m.userData.bakeU = bake.u;
+      const compile = m.onBeforeCompile;
+      m.onBeforeCompile = (sh, r) => {
+        compile.call(m, sh, r);
+        if ('uBakeOn' in sh.uniforms) Object.assign(sh.uniforms, bake.u);
+      };
+    }
+  });
 }
 
 // the fixed parts stay out of three's shadow map of the sun: their shadows are baked
@@ -71,9 +96,10 @@ function outOfSun(mesh) {
   const own = Object.getPrototypeOf(mesh).intersectsFrustum;
   mesh.intersectsFrustum = function (f) { return f !== sun.shadow._frustum && own.call(this, f); };
 }
-// what casts the baked shadows: the solids and the props that cast shadows
+// what casts the baked shadows: the solids and the props that cast shadows (render/fade.js turns
+// a faded cube's off: cast0 is what they do)
 const isSolid = o => o.isMesh && !o.isInstancedMesh && (o.userData.part === 'terrain' || o.userData.part === 'stone' || o.userData.part === 'wood') && !o.userData.cap;
-const isProp = o => o.isInstancedMesh && o.castShadow && o.userData.sharedGeo;
+const isProp = o => o.isInstancedMesh && (o.userData.cast0 ?? o.castShadow) && o.userData.sharedGeo;
 export function fixedParts(group) {
   const solids = [], props = [];
   group.traverse(o => { if (isSolid(o)) solids.push(o); else if (isProp(o)) props.push(o); });
@@ -84,46 +110,120 @@ export function keepFixedOutOfSun(group) {
   for (const m of [...solids, ...props]) outOfSun(m);
 }
 
-// Per frame: the cubes' lights where the cubes are now, as bright as they shine now.
-export function updateBakes() { for (const b of live) updateBake(b, b.group); }
-function updateBake(bake, group) {
+// Per frame: the cubes' lights where the cubes are now, as bright as they shine now, and how far
+// their bakes have come on.
+export function updateBakes() {
+  const now = performance.now();
+  for (const b of live) updateBake(b, now);
+}
+const smooth = t => t * t * (3 - 2 * t);
+function updateBake(bake, now) {
+  const group = bake.group;
   group.getWorldPosition(bake.u.uBakeO.value);
-  const L = bake.u.uBakeL.value, fade = group.userData.fade ?? 1;
+  // (not baked: its lights shine without shadows, a failed bake or none at all for Flip's box)
+  const on = bake.ready ? smooth(Math.min(1, (now - bake.readyAt) / FADE_IN)) : 0;
+  const lit = bake.failed ? 1 : on;
+  bake.u.uBakeR.value = bake.failed ? 0 : on;
+  const table = bake.u.uBakeT.value, L = table.image.data, fade = (group.userData.fade ?? 1) * lit;
   let n = 0;
-  if (group.visible) for (const s of bake.lights) {
+  if (group.visible && fade > 0) for (const s of bake.lights) {
     const l = s.light, o = n * 8, k = l.intensity * fade;
     if (k <= 0) continue;
     L[o] = s.at.x; L[o + 1] = s.at.y; L[o + 2] = s.at.z; L[o + 3] = l.distance || 1e3;
     L[o + 4] = l.color.r * k; L[o + 5] = l.color.g * k; L[o + 6] = l.color.b * k; L[o + 7] = bake.ready ? s.channel : -1;
     n++;
   }
+  if (n || bake.u.uBakeN.value) table.needsUpdate = true;
   bake.u.uBakeN.value = n;
 }
 
-// the cube being played in: its lights and shadows for everything not lightmapped
+// the cube being played in: its lights and shadows for everything not built with it
 export function setCurrentBake(bake) {
   if (!bake) { BAKE.uBakeN.value = 0; BAKE.uBakeR.value = 0; return; }
-  BAKE.uBakeN.value = bake.u.uBakeN.value;
-  BAKE.uBakeL.value = bake.u.uBakeL.value;
-  BAKE.uBakeO.value = bake.u.uBakeO.value;
-  BAKE.uBakeR.value = bake.ready ? 1 : 0;
-  BAKE.uBakeVolA.value = bake.vol.a?.texture ?? null;
-  BAKE.uBakeVolB.value = bake.vol.b?.texture ?? null;
-  BAKE.uBakeV0.value = bake.vol.v0; BAKE.uBakeVS.value = bake.vol.vs;
-  BAKE.uBakeSun.value = bake.sun?.shadow.map?.depthTexture ?? null;
-  BAKE.uBakeSunM.value = bake.sunM;
+  for (const k in bake.u) BAKE[k].value = bake.u[k].value;
 }
 
+// A cube's bake when it goes: kept a while (a cube built again takes it), else let go.
 export function disposeBake(bake) {
   if (!bake) return;
   live.delete(bake);
-  for (const t of bake.textures) t.dispose();
-  bake.textures = [];
-  bake.sun?.shadow.dispose();
+  bake.job?.return();
+  bake.job = null;
+  if (bake.ready && !bake.failed && bake.owned) {
+    kept.delete(bake.geo);
+    kept.set(bake.geo, { sig: bake.sig, owned: bake.owned, channels: bake.lights.map(s => s.channel), u: bake.u });
+    while (kept.size > CACHE) { const [g, k] = kept.entries().next().value; kept.delete(g); release(k.owned); }
+  } else if (bake.owned) release(bake.owned);
+  bake.u.uBakeT.value.dispose();
+  bake.owned = null;
   bake.ready = false;
+}
+function release(owned) {
+  for (const t of owned.targets) t.dispose();
+  owned.sun?.shadow.dispose();
 }
 
 // ---- baking ----
+
+// whether a cube's lights are baked (or never will be)
+export const baked = world => !world?.bake || world.bake.ready || world.bake.failed || world.bake.flip;
+
+// Bake what is shown a little each frame: the cube played in first, then the others (a cube
+// travelled into is the one played in from the start). Before drawing (main.js), after anything
+// that builds the cube again. hidden: nothing shows (game/hud.js curtained): all at once.
+export function tickBakes(current, hidden = false) {
+  const start = performance.now();
+  const order = [current?.bake, ...live].filter((b, i, a) => b && a.indexOf(b) === i && !b.ready && !b.failed && !b.flip && b.group.parent);
+  for (const bake of order) {
+    if (!bake.job) {
+      if (takeKept(bake)) continue;
+      bake.job = bakeSteps(bake);
+    }
+    const saved = saveState();
+    try {
+      for (let steps = 0; hidden || steps < STEPS && (steps === 0 || performance.now() - start < BUDGET); steps++)
+        if (bake.job.next().done) { bake.job = null; if (hidden) bake.readyAt = -Infinity; break; }   // (baked unseen: on at once)
+    } catch (e) {
+      console.error('bake failed', e);
+      bake.failed = true; bake.job = null;
+    } finally { restoreState(saved); }
+    break;   // (one cube a frame)
+  }
+  // (the light's cube of shadow maps is only needed while baking)
+  if (!order.some(b => b.job) && shared.light?.shadow.map) shared.light.shadow.dispose();
+}
+
+// what the cube looks like to its shadows: its lights and props (its solids are its geometry)
+function signature(bake) {
+  const { props } = fixedParts(bake.group), r = v => Math.round(v * 100);
+  const lights = bake.lights.map(s => [r(s.at.x), r(s.at.y), r(s.at.z), r(s.light.distance)].join(',')).join(';');
+  const things = props.map(p => { let h = 0; const a = p.instanceMatrix.array; for (let i = 12; i < a.length; i += 16) h += a[i] * 3 + a[i + 1] * 5 + a[i + 2] * 7; return p.name + ':' + p.count + ':' + r(h); }).join(';');
+  return lights + '|' + things + '|' + sun.position.toArray().map(r).join(',');
+}
+// the bake the cube had when it was last built, if it looks the same
+function takeKept(bake) {
+  bake.sig = signature(bake);
+  const k = kept.get(bake.geo);
+  if (!k || k.sig !== bake.sig) return false;
+  kept.delete(bake.geo);
+  bake.owned = k.owned;
+  bake.lights.forEach((s, i) => { s.channel = k.channels[i]; });
+  for (const key in bake.u) if (key !== 'uBakeR' && key !== 'uBakeN' && key !== 'uBakeT' && key !== 'uBakeO') bake.u[key].value = k.u[key].value;
+  bake.ready = true; bake.readyAt = -Infinity;
+  return true;
+}
+
+function saveState() {
+  const s = { target: renderer.getRenderTarget(), auto: renderer.autoClear, clear: renderer.getClearColor(new THREE.Color()), alpha: renderer.getClearAlpha() };
+  renderer.autoClear = false;
+  renderer.setClearColor(0x000000, 0);
+  return s;
+}
+function restoreState(s) {
+  renderer.setRenderTarget(s.target);
+  renderer.autoClear = s.auto;
+  renderer.setClearColor(s.clear, s.alpha);
+}
 
 // Lights whose reaches overlap get different channels: the brightest first, each the first
 // channel none of its neighbours has. (Reaches overlap only where both are faint: beyond REACH of
@@ -288,21 +388,30 @@ function materials() {
   return shared;
 }
 function shadowPass(light, casters) {
-  const S = shared;
   casters.add(light);
-  renderer.setRenderTarget(S.dummy);
-  renderer.render(casters, S.nowhere);
+  renderer.setRenderTarget(shared.dummy);
+  renderer.render(casters, shared.nowhere);
   casters.remove(light);
 }
 const MASKS = [0, 1, 2, 3].map(i => new THREE.Vector4(...[0, 1, 2, 3].map(j => +(i === j))));
 
-// Bake the cube's shadows (world: render/world.js's, with its bake). Synchronous: a few tens of
-// milliseconds on a desktop GPU.
-export function bakeWorld(world) {
-  const bake = world.bake, geo = bake?.geo;
-  if (!bake || bake.ready || bake.failed || bake.flip || !geo?.lightmap) return;
-  const t0 = performance.now();
-  const S = materials(), group = world.group;
+// The baking's programs compiled ahead (render/cubeassets.js warmCube), so the first cube baked
+// does not wait for the driver.
+let warmed = false;
+export function warmBake() {
+  if (warmed) return [];
+  warmed = true;
+  const S = materials(), g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0, 1, 0, 0, 0, 1, 0], 3));
+  g.setAttribute('normal', new THREE.Float32BufferAttribute([0, 0, 1, 0, 0, 1, 0, 0, 1], 3));
+  g.setAttribute('lm', new THREE.Float32BufferAttribute([0, 0, 1, 0, 0, 1], 2));
+  return [S.sun, S.point, S.cover, S.vol, S.fill].map(m => ({ object: new THREE.Mesh(g, m), material: m }));
+}
+
+// The steps of a bake (tickBakes runs them a few a frame): the sun, then each light.
+function* bakeSteps(bake) {
+  const S = materials(), group = bake.group, geo = bake.geo;
+  if (!geo?.lightmap) { bake.failed = true; return; }
   group.updateWorldMatrix(true, true);
   const origin = group.getWorldPosition(new THREE.Vector3());
   const { solids, props } = fixedParts(group);
@@ -311,39 +420,40 @@ export function bakeWorld(world) {
   const casters = new THREE.Scene(), lit = new THREE.Scene();
   for (const o of [...solids, ...props]) casters.add(standIn(o));
   for (const o of solids) { const m = standIn(o); m.frustumCulled = false; lit.add(m); }
-
-  const prevTarget = renderer.getRenderTarget(), prevAuto = renderer.autoClear, prevClear = renderer.getClearColor(new THREE.Color()), prevAlpha = renderer.getClearAlpha();
-  const prevShadowAuto = renderer.shadowMap.autoUpdate;
-  renderer.autoClear = false; renderer.shadowMap.autoUpdate = true;
-  renderer.setClearColor(0x000000, 0);
+  const { w, h } = geo.lightmap;
+  const target = () => {
+    const t = new THREE.WebGLRenderTarget(w, h, { type: THREE.UnsignedByteType, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, generateMipmaps: false, depthBuffer: false });
+    renderer.setRenderTarget(t); renderer.clear(); return t;
+  };
+  const owned = { targets: [], sun: null }, temp = [];
+  let done = false;
   try {
-    const { w, h } = geo.lightmap;
-    const target = () => {
-      const t = new THREE.WebGLRenderTarget(w, h, { type: THREE.UnsignedByteType, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, generateMipmaps: false, depthBuffer: false });
-      renderer.setRenderTarget(t); renderer.clear(); return t;
-    };
-    const lmA = target(), lmB = target(), cover = target();
+    const lm = Array.from({ length: SETS }, target), cover = target();
+    temp.push(...lm, cover);
     renderer.setRenderTarget(cover);
     lit.overrideMaterial = S.cover;
     renderer.render(lit, S.camera);
     // the volume round the cube
-    const b = geo.bounds;
-    bake.vol.v0.set(-1, b[1] - 1, -1);
-    bake.vol.vs.set(b[3] + 1 - -1, b[4] + 2 - (b[1] - 1), b[5] + 1 - -1);
-    const VX = Math.ceil(bake.vol.vs.x * VOXEL), VY = Math.ceil(bake.vol.vs.y * VOXEL), VZ = Math.ceil(bake.vol.vs.z * VOXEL);
+    const b = geo.bounds, v0 = bake.u.uBakeV0.value, vs = bake.u.uBakeVS.value;
+    v0.set(-1, b[1] - 1, -1);
+    vs.set(b[3] + 1 - -1, b[4] + 2 - (b[1] - 1), b[5] + 1 - -1);
+    const VX = Math.ceil(vs.x * VOXEL), VY = Math.ceil(vs.y * VOXEL), VZ = Math.ceil(vs.z * VOXEL);
     const volume = () => {
       const t = new THREE.WebGL3DRenderTarget(VX, VZ, VY, { type: THREE.UnsignedByteType, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, generateMipmaps: false, depthBuffer: false });
       t.texture.wrapR = t.texture.wrapS = t.texture.wrapT = THREE.ClampToEdgeWrapping;
       for (let z = 0; z < VY; z++) { renderer.setRenderTarget(t, z); renderer.clear(); }
       return t;
     };
-    const volA = volume(), volB = volume();
+    const vol = Array.from({ length: SETS }, volume);
+    owned.targets.push(...vol);
+    yield;
 
-    // the sun: its shadow map of the fixed parts, kept for what is not lightmapped
+    // the sun: its shadow map of the fixed parts (16-bit depth, its colour let go), kept for
+    // what is not lightmapped
     const sunDir = sun.position.clone().sub(sun.target.position).normalize();
     const centre = new THREE.Vector3((b[0] + b[3]) / 2, (b[1] + b[4]) / 2, (b[2] + b[5]) / 2).add(origin);
     const radius = Math.hypot(b[3] - b[0], b[4] - b[1], b[5] - b[2]) / 2 + 1;
-    const bakeSun = new THREE.DirectionalLight(0xffffff, 1);
+    const bakeSun = owned.sun = new THREE.DirectionalLight(0xffffff, 1);
     bakeSun.castShadow = true;
     bakeSun.position.copy(centre).addScaledVector(sunDir, radius + 5);
     bakeSun.target.position.copy(centre);
@@ -351,18 +461,22 @@ export function bakeWorld(world) {
     Object.assign(bakeSun.shadow.camera, { left: -radius, right: radius, top: radius, bottom: -radius, near: 1, far: radius * 2 + 10 });
     bakeSun.shadow.camera.updateProjectionMatrix();
     bakeSun.shadow.mapSize.set(SUN_MAP, SUN_MAP);
+    const map = bakeSun.shadow.map = new THREE.WebGLRenderTarget(SUN_MAP, SUN_MAP, { depthBuffer: true });
+    map.depthTexture = new THREE.DepthTexture(SUN_MAP, SUN_MAP, THREE.UnsignedShortType);
+    Object.assign(map.depthTexture, { format: THREE.DepthFormat, compareFunction: THREE.LessEqualCompare, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
     shadowPass(bakeSun, casters);
-    bake.sun = bakeSun;
+    map.texture.dispose();
     // (the map's matrix takes world points; the shaders give points in the cube)
-    bake.sunM.copy(bakeSun.shadow.matrix).multiply(new THREE.Matrix4().makeTranslation(origin.x, origin.y, origin.z));
+    const sunM = new THREE.Matrix4().copy(bakeSun.shadow.matrix).multiply(new THREE.Matrix4().makeTranslation(origin.x, origin.y, origin.z));
     const su = S.sun.uniforms;
-    su.uMap.value = bakeSun.shadow.map.depthTexture; su.uMapM.value.copy(bakeSun.shadow.matrix); su.uSunDir.value.copy(sunDir);
+    su.uMap.value = map.depthTexture; su.uMapM.value.copy(bakeSun.shadow.matrix); su.uSunDir.value.copy(sunDir);
     su.uMask.value.copy(MASKS[0]);
-    renderer.setRenderTarget(lmA);
+    renderer.setRenderTarget(lm[0]);
     lit.overrideMaterial = S.sun;
     renderer.render(lit, S.camera);
+    yield;
 
-    // the lights, one after the other
+    // the lights, one a step
     assignChannels(bake.lights);
     const pu = S.point.uniforms, vu = S.vol.uniforms;
     for (const s of bake.lights) {
@@ -370,56 +484,52 @@ export function bakeWorld(world) {
       const at = s.at.clone().add(origin), reach = s.light.distance || 6;
       S.light.position.copy(at); S.light.distance = reach; S.light.updateMatrixWorld();
       shadowPass(S.light, casters);
-      const map = S.light.shadow.map.depthTexture, mask = MASKS[s.channel % 4];
-      const lmT = s.channel < 4 ? lmA : lmB, volT = s.channel < 4 ? volA : volB;
+      const cube = S.light.shadow.map.depthTexture, mask = MASKS[s.channel % 4], set = s.channel >> 2;
       for (const U of [pu, vu]) {
-        U.uMap.value = map; U.uLight.value.copy(at); U.uNear.value = NEAR; U.uFar.value = reach; U.uReach.value = reach; U.uMask.value.copy(mask);
+        U.uMap.value = cube; U.uLight.value.copy(at); U.uNear.value = NEAR; U.uFar.value = reach; U.uReach.value = reach; U.uMask.value.copy(mask);
       }
-      renderer.setRenderTarget(lmT);
+      renderer.setRenderTarget(lm[set]);
       lit.overrideMaterial = S.point;
       renderer.render(lit, S.camera);
       // the slices of the volume it reaches
-      vu.uV0.value.copy(bake.vol.v0); vu.uVS.value.copy(bake.vol.vs); vu.uO.value.copy(origin);
+      vu.uV0.value.copy(v0); vu.uVS.value.copy(vs); vu.uO.value.copy(origin);
       S.quad.material = S.vol;
-      const y0 = Math.max(0, Math.floor((s.at.y - reach - bake.vol.v0.y) * VOXEL)), y1 = Math.min(VY - 1, Math.ceil((s.at.y + reach - bake.vol.v0.y) * VOXEL));
+      const y0 = Math.max(0, Math.floor((s.at.y - reach - v0.y) * VOXEL)), y1 = Math.min(VY - 1, Math.ceil((s.at.y + reach - v0.y) * VOXEL));
       for (let z = y0; z <= y1; z++) {
         vu.uZ.value = (z + 0.5) / VY;
-        renderer.setRenderTarget(volT, z);
+        renderer.setRenderTarget(vol[set], z);
         renderer.render(S.quadScene, S.camera);
       }
+      yield;
     }
 
     // the charts' edges filled outwards, into the textures kept
-    const fill = src => {
+    const filled = lm.map(src => {
       const t = target();
       S.fill.uniforms.uMap.value = src.texture; S.fill.uniforms.uCover.value = cover.texture; S.fill.uniforms.uTexel.value.set(1 / w, 1 / h);
       S.quad.material = S.fill;
       renderer.setRenderTarget(t);
       renderer.render(S.quadScene, S.camera);
       return t;
-    };
-    const A = fill(lmA), B = fill(lmB);
-    lmA.dispose(); lmB.dispose(); cover.dispose();
-    bake.textures.push(A, B, volA, volB);
-    bake.u.uBakeLmA.value = A.texture; bake.u.uBakeLmB.value = B.texture;
-    bake.vol.a = volA; bake.vol.b = volB;
-    bake.ready = true;
-    bake.u.uBakeR.value = 1;
-    bake.ms = performance.now() - t0;
-  } catch (e) {
-    console.error('bake failed', e);
-    bake.failed = true;
+    });
+    owned.targets.push(...filled);
+    filled.forEach((t, i) => { bake.u['uBakeLm' + i].value = t.texture; });
+    vol.forEach((t, i) => { bake.u['uBakeVol' + i].value = t.texture; });
+    bake.u.uBakeSun.value = map.depthTexture;
+    bake.u.uBakeSunM.value.copy(sunM);
+    bake.owned = owned;
+    bake.ready = true; bake.readyAt = performance.now();
+    done = true;
   } finally {
-    renderer.setRenderTarget(prevTarget);
-    renderer.autoClear = prevAuto; renderer.shadowMap.autoUpdate = prevShadowAuto;
-    renderer.setClearColor(prevClear, prevAlpha);
     lit.overrideMaterial = null;
+    for (const t of temp) t.dispose();
+    if (!done) release(owned);   // (given up: the cube went before it was baked)
   }
 }
 
-// dev: a bake's lightmap (0: A, 1: B) as a PNG data URL, one channel (0-3) as grey
+// dev: a bake's lightmap (0..SETS-1) as a PNG data URL, one channel (0-3) as grey
 export function lightmapImage(bake, which = 0, channel = 0) {
-  const t = bake.textures[which];
+  const t = bake.owned.targets.find(r => r.texture === bake.u['uBakeLm' + which].value);
   const { width: w, height: h } = t;
   const px = new Uint8Array(w * h * 4);
   renderer.readRenderTargetPixels(t, 0, 0, w, h, px);

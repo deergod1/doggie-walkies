@@ -6,6 +6,7 @@ import { isFaceOpen } from '../core/boundaries.js';
 import { state } from './state.js';
 import { population } from '../core/spawns.js';
 import { renderer } from '../render/scene.js';
+import { baked } from '../render/bake.js';
 
 const $ = id => document.getElementById(id);
 const shown = {};
@@ -52,7 +53,18 @@ export function flash() {
 }
 
 export const fadeOut = () => { $('fade').style.opacity = 1; };
-export const fadeIn = () => requestAnimationFrame(() => { $('fade').style.opacity = 0; });
+// (the curtain lifts once the cube's lights are baked, render/bake.js: they bake all at once
+// behind it; no longer than FADE_WAIT)
+const FADE_WAIT = 2000;
+export function fadeIn() {
+  const start = performance.now();
+  requestAnimationFrame(function wait() {
+    if (!baked(state.world) && performance.now() - start < FADE_WAIT) { requestAnimationFrame(wait); return; }
+    $('fade').style.opacity = 0;
+  });
+}
+// whether the curtain is down (nothing of the world shows)
+export const curtained = () => $('fade').style.opacity !== '0';
 
 // a spinner while waiting for the world worker (only if it takes more than a moment)
 export function whenReady(promise) {

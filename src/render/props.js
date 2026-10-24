@@ -131,13 +131,10 @@ export function propBatchGeometry(p, glow) {
 }
 
 const fireSeed = q => (q.x * 1.7 + q.z * 2.3) % 6.28;   // (a fire's flame and light flicker as one)
-// how many glowing props of a cube give off light (a theme may want more: themes/index.js `lights`)
-export const PROP_LIGHTS = 6;
-const LIGHT_SPACING = 2.2;   // lights of a cube at least this far apart while others are left (spread over it)
 // placed: [{ name, x, y, z, yaw, s, tint }] -> instanced meshes (and light sources) in group;
 // water: the cube's (render/wet.js waterUniforms): what lies all under it wavers with the bed
-// (render/underwater.js); maxLights: how many of them give off light
-export function buildProps(placed, group, water = null, maxLights = PROP_LIGHTS) {
+// (render/underwater.js)
+export function buildProps(placed, group, water = null) {
   const byName = new Map();
   for (const q of placed) { if (!byName.has(q.name)) byName.set(q.name, []); byName.get(q.name).push(q); }
   const m4 = new THREE.Matrix4(), col = new THREE.Color(), flames = [], fireLights = [], glowing = [];
@@ -171,18 +168,13 @@ export function buildProps(placed, group, water = null, maxLights = PROP_LIGHTS)
     if (p.light && !p.cover) for (const [qi, q] of list.entries()) if (!q.unlit)   // (unlit: e.g. daytime lamp posts in the town clearings)
       glowing.push({ p, q, flame: p.flames?.length ? first0 + qi : -1 });
   }
-  // a few glowing props light their surroundings (all of them, always: render/lightpool.js): the big ones
-  // first, then the brightest, spread over the cube; a fire's light flickers with its flame, a
-  // lantern's like a flame (`flicker` 'flame'), a glowing mushroom's breathes ('pulse')
+  // every glowing prop lights its surroundings, all the time (render/lightpool.js: the cube's fixed
+  // lights; the big ones first, then the brightest, should a cube ever have more than it takes); a
+  // fire's light flickers with its flame, a lantern's like a flame (`flicker` 'flame'), a glowing
+  // mushroom's breathes ('pulse')
   const big = g => g.p.landmark || g.p.vignette ? 1 : 0;
   glowing.sort((a, b) => big(b) - big(a) || b.p.intensity - a.p.intensity);
-  const lit = [];
-  for (const pass of [LIGHT_SPACING, 0]) for (const g of glowing) {
-    if (lit.length >= maxLights) break;
-    if (lit.includes(g) || lit.some(h => Math.hypot(h.q.x - g.q.x, h.q.z - g.q.z) < pass)) continue;
-    lit.push(g);
-  }
-  for (const { p, q, flame } of lit) {
+  for (const { p, q, flame } of glowing) {
     const l = new THREE.PointLight(p.light, p.intensity * 2, p.landmark || p.vignette ? 5 : 4, 2);
     l.position.set(q.x, q.y + (p.attach === 'ceiling' ? -0.4 : p.landmark || p.vignette ? 1.1 : 0.5), q.z);
     if (p.flames || p.flicker) fireLights.push({ light: l, gain: p.intensity * 2, seed: fireSeed(q), i: flame, pulse: p.flicker === 'pulse' });

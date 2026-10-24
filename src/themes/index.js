@@ -32,8 +32,7 @@
 //     it rolls in between (1) (cubegen/ground.js)
 //   vignettes: [min, max] little set pieces a room gets (cubegen/vignettes.js: the set's
 //     `vignette` props, an abandoned shed, a stone circle)
-//   lights: how many glowing props of a cube give off light (6; render/props.js); fireflies:
-//     glowing motes drifting round the character (render/fireflies.js)
+//   fireflies: glowing motes drifting round the character (render/fireflies.js)
 //   grove: a forest's own props (render/propplace.js grove): trees (bases of its set) in thickets
 //     and clearings, density (the most a floor gets one), scale [min, max]; waylights: the share
 //     of the floors beside the way that get a lantern post; lanterns: the share of the trees with
@@ -167,7 +166,7 @@ const DARKFOREST = T('Dark forest', {
   props: 'darkforest', propDensity: 0.34,
   depths: [1, 2], night: true, spans: { chance: 0.9, max: 2, route: 0.8, island: 0.15, sky: 0.05 },
   void: 0.1, relief: 0.95, layers: 0.3, hills: { count: [2, 4], roll: 1.8 }, heights: { tunnel: 0.5 },
-  vignettes: [1, 2], lights: 24, fireflies: true,
+  vignettes: [1, 2], fireflies: true,
   grove: { trees: ['dark_fir_tree', 'dark_fir_tree', 'gnarled_tree', 'bare_tree'], density: 0.6, scale: [0.95, 1.3], waylights: 0.22,
     lanterns: 0.3, strings: 3 },
   arche: { plain: 3, mesa: 2, chasm: 2, crater: 1, sinkhole: 1 },

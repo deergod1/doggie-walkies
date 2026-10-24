@@ -669,10 +669,9 @@ long gone. What makes it so, all in its theme entry:
   Checks: `tests/grove.test.js`.
 - **Vignettes** (`vignettes`, below): a shed, a cabin, a camp, a shrine, a stone circle or a
   wagon in most rooms.
-- **Lights** (`lights` 24): many glowing props give off light; lanterns flicker, mushrooms and
-  runes breathe (`flicker`, `render/props.js`, `render/flames.js`), their glowing parts with their
-  lights, each in its own time (seeded by where it stands); the light pool fades the
-  farthest of its lights out as they are about to be swapped (`render/lightpool.js`); fireflies
+- **Lights**: every glowing prop gives off light (as everywhere, `docs/lighting.md`); lanterns
+  flicker, mushrooms and runes breathe (`flicker`, `render/props.js`, `render/flames.js`), their
+  glowing parts with their lights, each in its own time (seeded by where it stands); fireflies
   drift round the character (`fireflies`, `render/fireflies.js`).
 - **Enemies:** Gloom spiders and Lantern-faces of its own (`core/spawns.js`, `where`; the
   ordinary spiders of depth 2 keep out of it, `'!darkforest'`), see [depths.md](depths.md).
@@ -898,8 +897,9 @@ cover; authored set pieces keep their count.
 
 They are drawn as one instanced mesh per prop (and per material part), with per-cube
 material clones so they fade and get cut with their cube. Props with `sway` bend in the
-wind in the vertex shader. Up to six glowing props per cube (a theme's `lights`: more) add light
-sources for the pool: landmarks and vignettes first, then the brightest, spread over the cube.
+wind in the vertex shader. Every glowing prop gives off light, a fixed light of its cube with a
+baked shadow (`docs/lighting.md`): landmarks and vignettes first, then the brightest, should a
+cube ever have more than it takes.
 A fire's light flickers with its flame; a prop's `flicker` makes its light flicker like a flame
 (lanterns, candles) or breathe slowly (`pulse`: glowing mushrooms, runes), and its glowing parts
 with it (a shader patch, `glowMaterial`). A placement may carry its own `matrix` instead of

@@ -23,7 +23,7 @@ import { ownShadowDepth } from './skinned.js';
 import { buildTrialView, tickTrialView } from './trials.js';
 import { flipPivot, tickFlipView } from './flipview.js';
 import { buildMoverView, tickMoverView } from './movers.js';
-import { newBake, disposeBake, keepFixedOutOfSun } from './bake.js';
+import { newBake, disposeBake, keepFixedOutOfSun, bakeMaterials } from './bake.js';
 
 export function disposeWorld(world) {
   if (!world) return;
@@ -56,7 +56,7 @@ export function buildWorld(m, showPath, seen, geo = buildCubeParts(m), open = []
   // the people out in the world (m.npcs, game/npcs.js) are colliders where they stand, like the villagers
   const people = indexBlockers((m.npcs || []).map(n => ({ x: n.x, z: n.z, r: NPC_R, bottom: n.y, top: n.y + NPC_H, npc: n.id })));
   m.blockers = placed.blockers.map((list, i) => [...(m.staticBlockers?.[i] || []), ...list, ...people[i]]);
-  buildProps(placed.out.map(q => opened?.has(q.site) ? openedChest(q) : q), group, water, themeOf(m).lights);
+  buildProps(placed.out.map(q => opened?.has(q.site) ? openedChest(q) : q), group, water);
   const villagers = buildVillagers([...(m.villagers || []), ...(m.npcs || [])], group);
   addGhosts(group);
   const trialView = buildTrialView(m, group, water);   // a trial room's parts and rising fluid (render/trials.js)
@@ -68,6 +68,7 @@ export function buildWorld(m, showPath, seen, geo = buildCubeParts(m), open = []
   makeFadable(group);
   ownShadowDepth(group);   // the props' instanced meshes
   if (!flip) keepFixedOutOfSun(group);
+  bakeMaterials(group, bake);
   scene.add(group);
   const world = { group, glass, fluidMeshes, splashes, lights, villagers, missingSets, trialView, flip, movers, bake, ...markers };
   setTownPortal(world, townPad);
