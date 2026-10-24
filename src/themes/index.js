@@ -186,5 +186,6 @@ export const THEMES = [MEADOW, CLOUDS, LAGOON, KARST, DARKFOREST, PEAKS, HIGHLAN
 // the town and its road (depth 0)
 export const TOWN = MEADOW;
 
-// every song the game plays: the town (and the merchant camp), one per theme, and the core (depth 20)
-export const SONGS = ['town', ...new Set(THEMES.map(t => t.music)), 'core'];
+// every song the game plays: the main menu's, the town (and the merchant camp), one per theme, and
+// the core (depth 20)
+export const SONGS = ['title', 'town', ...new Set(THEMES.map(t => t.music)), 'core'];

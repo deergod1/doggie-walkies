@@ -3,7 +3,10 @@
 Songs are plain-text [Scrimshaw](https://tools.simonwillison.net/scrimshaw-jukebox) scores in
 `music/<name>.scrim`, played by a Web Audio synth in the browser. There is no build step: the
 game fetches the score and compiles it when it is first needed. The parser and synth are
-vendored in `vendor/scrimshaw/` (Apache-2.0, from Simon Willison's tools).
+vendored in `vendor/scrimshaw/` (Apache-2.0, from Simon Willison's tools), with the game's own
+glass instruments added (`glassharp`, `crystal`, `bowl` and the drums `glasstap`, `chimes`,
+`shatter`: `music/README.md`). The jukebox page does not know those, so a score using them only
+plays in the game and `tools/player.html`.
 
 **Writing a song?** Start with `music/README.md`: the game's musical style, how to build the
 layers, a format cheat sheet and a full example score.
@@ -73,12 +76,14 @@ so a switch is heard within about 0.2 s. A leaving voice fades out from the next
 ## Songs
 
 Each theme names its song (`music:` in `src/themes/`); the town and the merchant camp
-(`map.enemyFree`) play `town` and depth 20 plays `core` (`songFor` in `src/game/music.js`).
+(`map.enemyFree`) play `town` and depth 20 plays `core` (`songFor` in `src/game/music.js`). The
+main menu plays `title` (`openMainMenu` in `src/game/menu.js`), always in `explore`.
 `SONGS` in `src/themes/index.js` lists them all, for the test and `tools/player.html`; the
 test also checks that every score in `music/` is one of them.
 
 | Song | Depths | Key, tempo, meter | Sound | `sense` drums |
 |---|---|---|---|---|
+| `title` | main menu | F major, then D minor and back, 92, 3/4 | crystal lead and echo, harp, glass harmonica chords and line, singing bowl, glass taps, wind chimes; explore only | — |
 | `town` | town, merchant camp | G major, 100, 3/4 | clarinet and echo, guitar, accordion off-beats, upright bass; explore and treasure only | — |
 | `overworld` | 0–2 meadow | E Dorian, 80 | marimba ostinato against the bar, music box echo, flute, bassoon | timpani, toms, shaker |
 | `peaks` | 3 snowy peaks | B Dorian, 56, 6/8 | oboe and echo, harp with added seconds, high pad, bell | timpani, triangle, bodhran |
@@ -93,7 +98,7 @@ test also checks that every score in `music/` is one of them.
 | `abyss` | 19 obsidian abyss | minor chords a tritone apart over an E pedal, 60 | choir, bell tolls, a broken music box | heartbeat, thunder, timpani, toms |
 | `core` | 20 the core | E harmonic minor, 70 | the overworld's tune in minor, harp, organ, tuba, bell | timpani, toms |
 
-Every song but the town has all six moods. Combat keeps the exploration tempo and meter,
+Every song but the title and the town has all six moods. Combat keeps the exploration tempo and meter,
 but replaces gentle motion with two combat-only voices: `drive` (an accented, short-gated
 ostinato) and `war` (denser battle drums with four-bar fills). Horns re-articulate the tune,
 brass attacks on the downbeat, and crashes have more weight. These layers also stay in

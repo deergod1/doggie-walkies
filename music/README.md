@@ -149,14 +149,29 @@ ignored (`x.o. x.oo x.o. xoxo`).
 Melodic instruments: steeldrum marimba vibes celesta glock xylophone musicbox bell organ
 pipe strings pad choir voices brass trumpet horn tuba flute clarinet oboe bassoon accordion
 fiddle harp guitar banjo harpsichord pizz upright fretless synbass timpani chip sine square
-saw triangle.
+saw triangle, and the game's glass instruments: glassharp crystal bowl.
 
 Drums: kick snare rim hat ohat ride crash shaker tamb conga tumba bongo bongolo clave block
-cowbell guiro tomlo tommid tomhi bodhran timbale tri clap gong thunder surf.
+cowbell guiro tomlo tommid tomhi bodhran timbale tri clap gong thunder surf, and the game's
+glass drums: glasstap chimes shatter.
+
+The glass instruments are the game's own (added to `vendor/scrimshaw/`), for a world inside
+glass cubes. The Scrimshaw Jukebox does not know them; listen in `tools/player.html`.
+
+- `glassharp`: a glass harmonica, a pure tone that swells in and slowly wavers, with a faint
+  rub. Sustained: chords (`att=` 0.3 or so) or a slow counter-line.
+- `crystal`: FM glass, a bell-like strike melting into a long pure ring. A lead or arpeggios
+  in octaves 5 and 6.
+- `bowl`: a struck singing bowl, its ring beating slowly. One stroke a bar or two, octaves 3
+  and 4: tolls and drones.
+- `glasstap`: a knuckle on the glass, a high tink; a light pulse like `tri` or `rim`.
+- `chimes`: a few glass wind chimes (C pentatonic, so keys around C, F, G and A, D, E minor),
+  different each hit; every few bars.
+- `shatter`: breaking glass, a crash for `fight` and `boss` accents.
 
 Good fits for this game: flute, oboe, clarinet, horn, trumpet, brass, strings, pad, choir,
 harp, pizz, glock, musicbox, bell, celesta, tuba, fretless, timpani, kick, snare, tomlo,
-crash, gong, tri. Avoid chip, square, saw, steeldrum and the latin percussion unless a
+crash, gong, tri, and the glass instruments. Avoid chip, square, saw, steeldrum and the latin percussion unless a
 place calls for it.
 
 ## Example

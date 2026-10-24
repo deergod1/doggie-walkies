@@ -1,0 +1,100 @@
+# Before writing or changing music, read music/README.md (style, moods, format).
+title    Title
+composer Claude
+about    The world in its glass cubes, seen from outside before the journey starts: a slow waltz in F like the town's, played on glass. A crystal lead and its echo over a harp, glass harmonica chords, a singing bowl and wind chimes. After a while it turns to D minor and a borrowed Bb minor, then finds its way home to F. Only the main menu plays it, so it only knows explore.
+tempo    92
+beats    3
+steps    4
+reverb   0.45
+
+# moods (music/README.md); the main menu only ever plays explore
+# mood explore:  lead echo glow chords harp bass bowl tap chimes
+
+voice lead    crystal    vol=1.0  pan=-0.1
+voice echo    crystal    vol=0.32 pan=0.45 rev=0.6
+voice glow    glassharp  vol=0.32 pan=0.25 rev=0.55
+voice chords  glassharp  vol=0.2  pan=-0.3 center=A4 att=0.3 rel=0.6
+voice harp    harp       vol=0.45 pan=0.3
+voice bass    upright    vol=0.7
+voice bowl    bowl       vol=0.28 pan=-0.2 rev=0.6
+voice tap     glasstap   vol=0.25 pan=0.35
+voice chimes  chimes     vol=0.3  pan=-0.4
+
+# the cubes come into view: two bars of F
+pattern intro
+chords    | [F]----------- | [Fmaj7]----------- |
+harp      | F3- C4- F4- A4- C5- A4- | F3- C4- E4- A4- C5- E5- |
+bass      | F2------- C3--- | F2------- C3--- |
+bowl      | F4----------- | _ |
+chimes    | x... .... .... | .... .... .... |
+
+# F Bb F C | F Dm Gm-C F; the tune opens on the game's motif, 1 2 3 5 4 (F G A C Bb)
+pattern A
+lead      | F5----- G5- A5--- | C6------- Bb5--- | A5--- G5--- F5--- | G5------- .--- |
+lead      | F5----- G5- A5--- | C6--- D6--- F6--- | D6--- C6- Bb5- A5- G5- | F5------- .--- |
+echo      | .- F5----- G5- A5- | -- C6------- Bb5- | -- A5--- G5--- F5- | -- G5------- .- |
+echo      | -- F5----- G5- A5- | -- C6--- D6--- F6- | -- D6--- C6- Bb5- A5- | G5- F5------- .- |
+chords    | [F]----------- | [Bb]----------- | [F]----------- | [C]----------- |
+chords    | [F]----------- | [Dm]----------- | [Gm]----- [C]----- | [F]----------- |
+harp      | F3- C4- F4- A4- C5- A4- | Bb2- F3- Bb3- D4- F4- D4- | F3- C4- F4- A4- C5- A4- | C3- G3- C4- E4- G4- E4- |
+harp      | F3- C4- F4- A4- C5- A4- | D3- A3- D4- F4- A4- F4- | G2- D3- Bb3- C3- G3- E4- | F3- C4- F4- A4- F4- C4- |
+bass      | F2------- C3--- | Bb2------- F2--- | F2------- C3--- | C3------- G2--- |
+bass      | F2------- C3--- | D3------- A2--- | G2----- C3----- | F2------- C3--- |
+bowl      | F4----------- | _ | A4----------- | _ |
+bowl      | F4----------- | _ | G4----------- | _ |
+tap       | x... o... o... | % | % | % |
+tap       | % | % | % | x... o.o. o... |
+chimes    | x... .... .... | _ | _ | _ |
+chimes    | x... .... .... | _ | _ | _ |
+
+# F Bb F C | Dm Bb Gm C7: the tune climbs, then stops short on C7, and a glass harmonica joins
+pattern A2
+lead      | F5----- G5- A5--- | C6------- Bb5--- | A5--- C6--- F6--- | E6------- D6- C6- |
+lead      | D6----- C6- A5--- | Bb5--- A5--- G5--- | Bb5------- A5- G5- | G5------- E5--- |
+echo      | .- F5----- G5- A5- | -- C6------- Bb5- | -- A5--- C6--- F6- | -- E6------- D6- |
+echo      | C6- D6----- C6- A5- | -- Bb5--- A5--- G5- | -- Bb5------- A5- | G5- G5------- E5- |
+glow      | C5----------- | D5----------- | C5----------- | C5----- Bb4----- |
+glow      | A4----------- | D5----------- | D5----------- | Bb4----------- |
+chords    | [F]----------- | [Bb]----------- | [F]----------- | [C]----------- |
+chords    | [Dm]----------- | [Bb]----------- | [Gm]----------- | [C7]----------- |
+harp      | F3- C4- F4- A4- C5- A4- | Bb2- F3- Bb3- D4- F4- D4- | F3- C4- F4- A4- C5- A4- | C3- G3- C4- E4- G4- E4- |
+harp      | D3- A3- D4- F4- A4- F4- | Bb2- F3- Bb3- D4- F4- D4- | G2- D3- G3- Bb3- D4- Bb3- | C3- G3- Bb3- E4- G4- E4- |
+bass      | F2------- C3--- | Bb2------- F2--- | F2------- C3--- | C3------- G2--- |
+bass      | D3------- A2--- | Bb2------- F2--- | G2------- D3--- | C3------- G2--- |
+bowl      | F4----------- | _ | A4----------- | _ |
+bowl      | D4----------- | _ | G4----------- | _ |
+tap       | x... o... o... | % | % | % |
+tap       | % | % | % | x... o.o. o.o. |
+chimes    | x... .... .... | _ | x... .... .... | _ |
+chimes    | x... .... .... | _ | _ | _ |
+
+# Dm Bb Gm A7 | Dm Gm Bbm C7: the sad edge. The tune in D minor, the glass harmonica under it an
+# octave down, the bowl tolling every bar, no chimes; the borrowed Bb minor turns it home
+pattern B
+lead      | D5----- E5- F5--- | A5------- G5--- | Bb5--- A5--- G5--- | A5--- G5- F5- E5--- |
+lead      | D5----- E5- F5--- | Bb5------- D6--- | Db6--- C6--- Bb5--- | G5------- E5--- |
+echo      | .- D5----- E5- F5- | -- A5------- G5- | -- Bb5--- A5--- G5- | -- A5--- G5- F5- E5- |
+echo      | -- D5----- E5- F5- | -- Bb5------- D6- | -- Db6--- C6--- Bb5- | -- G5------- E5- |
+glow      | D4----- E4- F4--- | A4------- G4--- | Bb4--- A4--- G4--- | A4--- G4- F4- E4--- |
+glow      | D4----- E4- F4--- | Bb4------- D5--- | Db5--- C5--- Bb4--- | G4------- E4--- |
+chords    | [Dm]----------- | [Bbmaj7]----------- | [Gm]----------- | [A7]----------- |
+chords    | [Dm]----------- | [Gm]----------- | [Bbm]----------- | [C7]----------- |
+harp      | D3- A3- D4- F4- A4- F4- | Bb2- F3- A3- D4- F4- D4- | G2- D3- G3- Bb3- D4- Bb3- | A2- E3- A3- C#4- G4- C#4- |
+harp      | D3- A3- D4- F4- A4- F4- | G2- D3- G3- Bb3- D4- Bb3- | Bb2- F3- Bb3- Db4- F4- Db4- | C3- G3- Bb3- E4- G4- E4- |
+bass      | D3------- A2--- | Bb2------- F2--- | G2------- D3--- | A2------- E2--- |
+bass      | D3------- A2--- | G2------- D3--- | Bb2------- F2--- | C3------- G2--- |
+bowl      | D4----------- | Bb3----------- | G3----------- | A3----------- |
+bowl      | D4----------- | G3----------- | Bb3----------- | C4----------- |
+tap       | x... .... o... | % | % | % |
+tap       | % | % | % | x... o... o.o. |
+
+# the first strain again, happy: the glass harmonica sings a line above the harp, chimes every
+# other bar
+pattern A3 from A
+glow      | C5----------- | D5----------- | C5----------- | E5----------- |
+glow      | C5----------- | F5----------- | Bb4----- E5----- | A4----------- |
+chimes    | x... .... .... | _ | x... .... .... | _ |
+chimes    | x... .... .... | _ | x... .... .... | _ |
+
+play intro
+loop A A2 B A3

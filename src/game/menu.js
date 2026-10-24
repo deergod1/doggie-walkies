@@ -14,6 +14,7 @@
 //               IndexedDB: game/skinfiles.js), or none; each painted on (game/skineditor.js) or
 //               deleted here, and a new one painted
 // ?join=CODE opens Join Game with the code filled in (state.js: never skipped).
+// The menu plays its own song (music/title.scrim), if the music is on.
 //
 // Behind the menu the cube the chosen hero left its world in (game/showcase.js), and over it the
 // hero, with the weapon in its hand (render/portrait.js, in the box heroBox gives): a click on
@@ -39,7 +40,7 @@ import { cleanName, heroLevel, heroStats, savedWorldName, MAX_HEROES, MAX_WORLDS
 import { readSeed } from '../core/names.js';
 import { ITEMS } from '../core/items.js';
 import { pictureImg } from '../render/itemviews.js';
-import { playSong } from '../audio/music.js';
+import { playSong, setMood } from '../audio/music.js';
 import { readCode } from '../net/protocol.js';
 import { online } from '../net/online.js';
 import { joinGame, leaveGame, sessionStatus, onSessionChange } from '../net/session.js';
@@ -85,7 +86,7 @@ export function openMainMenu() {
   state.mode = 'menu';
   document.body.classList.add('in-menu');
   overlay.hidden = false;
-  playSong(null);   // no music in the menu
+  playSong('title'); setMood('explore');   // the menu's own song (music/title.scrim), calm
   screen = invite ? 'join' : 'title';
   form = null; note = ''; shownHero = '';
   render();   // (and the living cubes behind it)

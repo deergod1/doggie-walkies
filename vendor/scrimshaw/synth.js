@@ -1,6 +1,7 @@
 // Scrimshaw synth: Web Audio instruments in the spirit of early-90s sound modules.
 // Vendored from https://tools.simonwillison.net/scrimshaw-jukebox (github.com/simonw/tools, scrimshaw-jukebox.html @ d97b73d).
-// Apache-2.0, see LICENSE. Changed: IIFE/UMD wrapper replaced by ES module exports.
+// Apache-2.0, see LICENSE. Changed: IIFE/UMD wrapper replaced by ES module exports; the glass
+// instruments (glassharp, crystal, bowl) and drums (glasstap, chimes, shatter) added for Cube Crawler.
 
 const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
 const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
@@ -97,7 +98,8 @@ const WAVES = {
   oboe: [.5, 1, .85, .5, .36, .22, .15, .1, .06],
   bassoon: [.45, 1, .78, .56, .42, .3, .22, .14, .1, .06],
   reed: [1, .55, .45, .32, .3, .22, .18, .13, .11, .08, .06, .05],
-  horn: [1, .5, .3, .18, .1, .05]
+  horn: [1, .5, .3, .18, .1, .05],
+  armonica: [1, .12, .05, .03]
 };
 function wave(S, name) {
   if (!S.waves[name]) {
@@ -393,6 +395,35 @@ const INST = {
     const end = adsr(g.gain, t, d, { a: p.att || .003, dc: .1, s: .8, r: p.rel || .04, peak: v * .3 });
     const o = O(S, 'square', f, t, end, p); o.connect(lp);
     vibrato(S, t, end, [o], { rate: 6, depth: 12, delay: .25, rise: .1 });
+  } },
+  // --- glass (Cube Crawler) ---
+  // glass harmonica: a wet finger on spinning glass. Nearly a pure tone that swells in, with a
+  // second sine 1.6 Hz off so it slowly wavers, and a faint pitched rub
+  glassharp: { rev: 0.5, level: 0.9, play(S, out, t, d, f, v, p) {
+    const g = G(S); g.connect(out);
+    const end = adsr(g.gain, t, d, { a: p.att || .14, dc: .5, s: .8, r: p.rel || .45, peak: v * .45 });
+    O(S, wave(S, 'armonica'), f, t, end, p).connect(g);
+    const beat = G(S, .5); O(S, 'sine', f, t, end, p, 1, 1200 * Math.log2(1 + 1.6 / f)).connect(beat).connect(g);
+    const n = noiseSrc(S, t, end); const bp = F(S, 'bandpass', f * 2, 12); const ng = G(S, .9 * p.bright);
+    n.connect(bp).connect(ng).connect(g);
+  } },
+  // FM glass (the old "Crystal" patches): a modulator at an inharmonic 3.5 gives a glassy,
+  // bell-like strike that melts into a pure, long ringing tone
+  crystal: { rev: 0.45, level: 0.76, play(S, out, t, d, f, v, p) {
+    const tau = clamp(0.9 * Math.pow(440 / f, 0.35), 0.3, 2);
+    const g = G(S); g.connect(out);
+    const end = perc(g.gain, t, { a: .002, tau, peak: v * .5, damp: t + d + 1.2, dampTau: .25 });
+    const car = O(S, 'sine', f, t, end, p); car.connect(g);
+    const idx = G(S), dev = f * 5 * p.bright * (0.5 + 0.5 * v);
+    idx.gain.setValueAtTime(dev, t); idx.gain.setTargetAtTime(dev * .08, t, tau * .2);
+    O(S, 'sine', f, t, end, p, 3.5).connect(idx).connect(car.frequency);
+  } },
+  // singing bowl: struck, inharmonic modes that each split in two a little apart, so the ring beats
+  bowl: { rev: 0.5, level: 0.7, play(S, out, t, d, f, v, p) {
+    const damp = t + d + 2.5;
+    [[1, 1, 2.6, .9], [2.71, .45, 1.4, 1.7], [5.15, .18 * p.bright, .6, 2.6]]
+      .forEach(([r, a, tau, beat]) => { for (const s of [-.5, .5]) partial(S, out, t, f * r + s * beat, { a: .004, tau, peak: v * a * .3, damp, dampTau: .45 }); });
+    noise(S, out, t, { f: f * 4, q: 1.5, tau: .012, peak: v * .05 });
   } }
 };
 ['sine', 'square', 'saw', 'triangle'].forEach(w => {
@@ -512,6 +543,36 @@ const DRUM = {
     lp.frequency.setValueAtTime(300, t); lp.frequency.linearRampToValueAtTime(1500, t + 1.5); lp.frequency.linearRampToValueAtTime(450, t + 4.5);
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v * .55, t + 1.5); g.gain.setTargetAtTime(0, t + 1.6, .9);
     n.connect(lp).connect(g).connect(out);
+  } },
+  // --- glass (Cube Crawler) ---
+  // a knuckle on a pane: a high inharmonic tink and a little thud
+  glasstap: { rev: 0.35, level: 0.5, hit(S, out, t, v) {
+    [[2150, .5, .14], [3720, .3, .07], [5630, .18, .04], [8100, .08, .02]]
+      .forEach(([f, a, tau]) => partial(S, out, t, f, { a: .001, tau, peak: v * a }));
+    partial(S, out, t, 260, { a: .001, tau: .018, peak: v * .25 });
+    noise(S, out, t, { type: 'highpass', f: 4000, q: .7, tau: .004, peak: v * .2 });
+  } },
+  // glass wind chimes: a few tubes of a C pentatonic set (fits C, F and G major, A, D and E
+  // minor), struck one after the other; each hit differs
+  chimes: { rev: 0.55, level: 0.5, hit(S, out, t, v) {
+    const tubes = [1568, 1760, 2093, 2349, 2637, 3136, 3520];
+    const n = 4 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < n; i++) {
+      const at = t + (i ? Math.random() * .3 : 0), f = tubes[Math.floor(Math.random() * tubes.length)];
+      const vv = v * (i ? .45 + Math.random() * .4 : 1) * .5;
+      partial(S, out, at, f, { a: .001, tau: .45, peak: vv * .5, damp: t + .9, dampTau: .07 });
+      partial(S, out, at, f * 2.76, { a: .001, tau: .12, peak: vv * .18 });
+      partial(S, out, at, f * 5.4, { a: .001, tau: .04, peak: vv * .08 });
+    }
+  } },
+  // breaking glass: the blow, a spray of grit and shards ringing as they fall
+  shatter: { rev: 0.45, level: 1.1, hit(S, out, t, v) {
+    noise(S, out, t, { f: 1800, q: .8, tau: .025, peak: v * .5 });
+    noise(S, out, t, { type: 'highpass', f: 5000, q: .5, a: .002, tau: .18, peak: v * .3 });
+    for (let i = 0; i < 14; i++) {
+      const at = t + Math.pow(Math.random(), 1.6) * .6, f = 2200 + Math.random() * 7000;
+      partial(S, out, at, f, { a: .001, tau: .02 + Math.random() * .08, peak: v * (.08 + Math.random() * .12) * (1 - (at - t)) });
+    }
   } }
 };
 function cymbal(S, out, t, v, tau, hpf, pk) {

@@ -39,7 +39,7 @@ for (const file of files) {
 }
 
 test('combat layers stay out of calmer moods and drive every bar', () => {
-  for (const name of SONGS.filter(name => name !== 'town')) {
+  for (const name of SONGS.filter(name => name !== 'town' && name !== 'title')) {
     const { song, moods, given } = loadScore(readFileSync(resolve(dir, `${name}.scrim`), 'utf8'));
     for (const mood of ['fight', 'boss']) {
       assert.ok(given.includes(mood), `${name}: explicit ${mood} arrangement`);

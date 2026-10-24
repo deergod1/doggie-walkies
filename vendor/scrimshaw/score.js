@@ -1,15 +1,17 @@
 // Scrimshaw score format: parser + compiler (no audio; runs in browser or node).
 // Vendored from https://tools.simonwillison.net/scrimshaw-jukebox (github.com/simonw/tools, scrimshaw-jukebox.html @ d97b73d).
-// Apache-2.0, see LICENSE. Changed: IIFE/UMD wrapper replaced by ES module exports.
+// Apache-2.0, see LICENSE. Changed: IIFE/UMD wrapper replaced by ES module exports; the glass
+// instruments and drums of synth.js added to MELODIC and DRUMS.
 
 const MELODIC = ['steeldrum', 'marimba', 'vibes', 'celesta', 'glock', 'xylophone', 'musicbox', 'bell',
   'organ', 'pipe', 'strings', 'pad', 'choir', 'voices', 'brass', 'trumpet', 'horn', 'tuba',
   'flute', 'clarinet', 'oboe', 'bassoon', 'accordion', 'fiddle',
   'harp', 'guitar', 'banjo', 'harpsichord', 'pizz', 'upright', 'fretless', 'synbass', 'timpani',
-  'chip', 'sine', 'square', 'saw', 'triangle'];
+  'chip', 'sine', 'square', 'saw', 'triangle', 'glassharp', 'crystal', 'bowl'];
 const DRUMS = ['kick', 'snare', 'rim', 'hat', 'ohat', 'ride', 'crash', 'shaker', 'tamb',
   'conga', 'tumba', 'bongo', 'bongolo', 'clave', 'block', 'cowbell', 'guiro',
-  'tomlo', 'tommid', 'tomhi', 'bodhran', 'timbale', 'tri', 'clap', 'gong', 'thunder', 'surf'];
+  'tomlo', 'tommid', 'tomhi', 'bodhran', 'timbale', 'tri', 'clap', 'gong', 'thunder', 'surf',
+  'glasstap', 'chimes', 'shatter'];
 
 const PC = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 };
 const NOTE_RE = /^([A-Ga-g])(##|bb|#|b)?([0-8])$/;
