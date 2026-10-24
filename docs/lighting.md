@@ -52,7 +52,10 @@ its baked shadows with them (`uBakeR`); a bake that fails leaves them on, withou
   below; Low 1024² for the sun, 512² cube maps, 2 volume samples a unit, 8 lightmap texels a unit
   (a quarter of the memory); Lowest the same without a volume. The lightmap's texels are the world
   worker's, chosen when the world starts (`bakeDensity`); the rest is for the next cube baked.
-- The baking's shaders are compiled ahead with the cube's (`render/cubeassets.js warmCube`).
+- The baking's shaders are compiled ahead with the cube's (`render/cubeassets.js warmCube`), for a
+  render target and a scene without the world's fog and lights (else others: the first bake
+  compiled them all while drawing), and three's programs of the shadow maps it draws (a sun's and
+  a light's drawn once). The fluids' patterns the same way (`render/watercells.js cellWarmup`).
 
 What it does:
 
@@ -192,7 +195,8 @@ changes is how much is drawn for that:
   map size simply switch.
 - **Auto** (`core/resolution.js`, with the resolution and the anti-aliasing): too slow, a step
   down: the MSAA samples first, then the level, then the resolution; CPU-bound slow frames take
-  only the level down. A level's step is judged a second later than the others (its fades). Up
+  only the level down. A second's hitches (frames over 3× its median: a shader compiling, a cube
+  built) are not counted. A level's step is judged a second later than the others (its fades). Up
   after a calm spell: the resolution, then the level, then the samples. The level reached is kept
   for the next visit (`crawler.quality`); a first visit starts at Low where the screen is touched,
   at Medium elsewhere.

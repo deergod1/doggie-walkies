@@ -5,7 +5,7 @@
 //     samples a level down (8, 4, 2, off: every sample is shaded and stored for every pixel), as many steps as the setting allows
 //     (`steps`, from render/msaa.js); `drop` says how many are dropped. Stepping up takes the
 //     resolution back to the full ratio first, then the samples.
-//   - Frames are judged a second at a time, by the time between frames and by how much of it the
+//   - Frames are judged a second at a time (its hitches left out: steady), by the time between frames and by how much of it the
 //     frame's own work (JavaScript, handing the draws to the GPU) took: slow frames that are
 //     mostly that work are CPU-bound, and fewer pixels would not help.
 //   - Every step down has to prove itself: if the next second is not clearly faster (a CPU-bound
@@ -33,10 +33,22 @@ const PROOF = 0.9;                   // a step down must make frames at least th
 const CALM = 4000, CALM_MAX = 64000; // ms of smooth frames before a step up
 const REST = 30000;                  // ms without stepping down after a step down that did not help
 const QUALITY_SETTLE = 1;           // windows a quality step waits before it is judged
+// A window's hitches are not counted: frames over HITCH times its median (and over HITCH_MS) are
+// a shader compiling or a cube built, not slow frames; a level stepped down for them was kept for
+// the next visit too (game/quality.js). Slow frames all along leave the median slow: counted.
+const HITCH = 3, HITCH_MS = 50;
+// the average without the window's hitches
+function steady(list) {
+  const s = [...list].sort((a, b) => a - b), cut = Math.max(HITCH_MS, s[s.length >> 1] * HITCH);
+  let sum = 0, n = 0;
+  for (const v of s) if (v <= cut) { sum += v; n++; }
+  return n ? sum / n : s[s.length >> 1];
+}
 
 export function resolutionController(max, min = Math.min(max, Math.max(0.6, max / 2)), quality = {}) {
   let levels = quality.levels ?? 0, level = quality.level ?? levels;
   let ratio = max, drop = 0, sum = 0, work = 0, n = 0, span = 0;
+  const seen = [];   // the window's intervals
   let smooth = 0, calm = CALM, rest = 0, trial = null, raised = -Infinity, clock = 0;
   const clamp = r => Math.min(max, Math.max(min, r));
   // interval: ms since the last frame; spent: ms the frame's own work took; target: ms between
@@ -46,11 +58,11 @@ export function resolutionController(max, min = Math.min(max, Math.max(0.6, max 
     drop = Math.min(drop, steps);
     if (!(interval > 0) || interval > STALL) return null;
     clock += interval; rest = Math.max(0, rest - interval);
-    sum += interval; work += spent; n++; span += interval;
+    sum += interval; work += spent; n++; span += interval; seen.push(interval);
     if (span < WINDOW) return null;
-    const avg = sum / n, busy = work / sum;
+    const avg = steady(seen), busy = work / sum;
     const slow = Math.max(SLOW, target * CAP_SLOW), fast = Math.max(SMOOTH, target * CAP_SMOOTH);
-    sum = work = n = span = 0;
+    sum = work = n = span = 0; seen.length = 0;
     if (trial) {   // the second after a step down: did it help?
       if (trial.wait > 0) { trial.wait--; return null; }
       const t = trial; trial = null;

@@ -197,3 +197,14 @@ test('without Auto the level stays where it was set', () => {
   c.setQuality(3, 1);
   assert.equal(c.level, 1);
 });
+
+test('a few hitches in a second of smooth frames step nothing down', () => {
+  const c = resolutionController(2, undefined, { levels: 3, level: 2 });
+  for (let s = 0; s < 5; s++) {
+    for (let i = 0; i < 55; i++) c.tick(16.7, 4, 0, 1);
+    for (let i = 0; i < 4; i++) c.tick(200, 150, 0, 1);   // a shader compiling, a cube built
+  }
+  assert.equal(c.ratio, 2);
+  assert.equal(c.drop, 0);
+  assert.ok(c.level >= 2, String(c.level));   // (smooth enough to try one up, even)
+});
