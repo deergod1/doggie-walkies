@@ -32,6 +32,8 @@ export const BUILDS = {
     bridges: { rope: 3, chain: 1, stone: 1 }, ladders: { rope: 3, wood: 1 } },
   lagoon: { stone: '#d4c49c', wood: '#94704a', rope: '#d8c090', iron: '#5a5c64', vine: '#4a8a3a',
     bridges: { plank: 2, rope: 2, log: 1 }, ladders: { rope: 2, wood: 1, vine: 1 } },
+  darkforest: { stone: '#7a7e74', wood: '#4e3e30', rope: '#8a7a5e', iron: '#3e4046', vine: '#2e4a2a',
+    bridges: { rockarch: 3, log: 3, rope: 2, stone: 1, plank: 1 }, ladders: { wood: 2, rope: 1, vine: 1 } },
   karst: { stone: '#b8b6aa', wood: '#9a4a2a', rope: '#c8b070', iron: '#5a5c64', vine: '#4e8a34',
     bridges: { stone: 2, rockarch: 2, plank: 1, rope: 1 }, ladders: { vine: 2, wood: 1, footholds: 1 } },
   highlands: { stone: '#d8d0c0', wood: '#7a3a2a', rope: '#e0c870', iron: '#5a5c64',

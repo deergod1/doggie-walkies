@@ -1,7 +1,7 @@
 // Deterministic ambient placement, independent of the terrain RNG. Destination arrangements
 // are emitted by the worker; ambient blockers stay away from routes and reservations.
 import { N, LH, BASE, DIRS, EDGE_CORNERS, FLUID_NAME } from '../core/constants.js';
-import { mulberry32, hash32, idx, inb } from '../core/util.js';
+import { mulberry32, hash32, idx, inb, makeNoise } from '../core/util.js';
 import { floorY } from '../core/surfaces.js';
 import { restY } from './surface.js';
 import { props, signatureProp, CLUTTER } from '../core/propcatalog.js';
@@ -139,5 +139,50 @@ export function placeProps(m, theme) {
       }
     }
   }
+  if (theme.grove && !m.sparse) grove(m, theme, add, blockers, { walkCols, reserved, nearSite, nearPortal, nearHorde });
   return { out, blockers };
+}
+
+// A forest's own passes (themes/index.js `grove`), on a random stream of their own (the other
+// themes' props stay as they were):
+//   trees: thickets and clearings, where the cube's noise says (density: the most a floor gets
+//     one), off the portals, the sites and the horde, on gentle slopes too; beside the way (half
+//     as often) they stand back from it, so the way runs between trunks. Only a tree's trunk is
+//     in the way, so one may walk between them
+//   waylights: lantern posts beside the way (the share of the floors next to it that get one),
+//     the post on the far side of the floor, its lantern hanging out over the way; only its post
+//     is in the way of anything, so the floor it stands on stays walkable
+function grove(m, theme, add, blockers, { walkCols, reserved, nearSite, nearPortal, nearHorde }) {
+  const G = theme.grove, R = mulberry32(hash32(m.seed ^ 0x6a07e)), noise = makeNoise(R);
+  const trees = G.trees.map(b => props.byName.get(`${theme.props}_${b}_a`) && b).filter(Boolean);
+  const free = f => !f.fluid && !f.covered && !m.pieces[f.c].length && !f.prot && !reserved(f) && !blockers[f.c].length
+    && !nearPortal(f) && !nearSite(f) && !nearHorde(f);
+  const above = f => { const col = m.cols[f.c], a = col[col.indexOf(f) + 1]; return a ? a.bottom * LH : Infinity; };
+  const way = f => DIRS.filter(([dx, dz]) => inb(f.x + dx, f.z + dz) && walkCols.has(idx(f.x + dx, f.z + dz)));
+  for (const f of m.floors) {
+    const slope = Math.max(...f.cs) - Math.min(...f.cs);
+    if (f.arenaCell || !free(f) || walkCols.has(f.c) || slope >= 0.6) continue;
+    const beside = way(f), n = noise(f.x * 0.22 + 5, f.z * 0.22 + 9);
+    const chance = G.density * Math.min(1, Math.max(0, (n - 0.38) / 0.24)) * (beside.length ? 0.5 : 1);
+    if (trees.length && R() < chance) {
+      const p = props.byName.get(`${theme.props}_${trees[Math.floor(R() * trees.length)]}_${R() < 0.5 ? 'a' : 'b'}`);
+      const s = G.scale[0] + R() * (G.scale[1] - G.scale[0]);
+      // (beside the way: back from it; elsewhere anywhere in the floor)
+      const back = beside.reduce(([ax, az], [dx, dz]) => [ax - dx, az - dz], [0, 0]), bl = Math.hypot(...back);
+      const [fx, fz] = beside.length ? (bl ? [0.5 + back[0] / bl * 0.3, 0.5 + back[1] / bl * 0.3] : [0.5, 0.5])
+        : [0.5 + (R() - 0.5) * 0.5, 0.5 + (R() - 0.5) * 0.5];
+      const y = floorY(f, fx, fz) - 0.02;
+      if (y + p.maxY * s + 0.2 >= above(f) || beside.length && !bl) continue;
+      add(p, f.x + fx, y, f.z + fz, R() * Math.PI * 2, s);
+      blockers[f.c].push({ x: f.x + fx, z: f.z + fz, r: 0.16 * s, bottom: y, top: y + p.height * s });
+    } else if (G.waylights && beside.length && slope < 0.25 && R() < G.waylights) {
+      // the post on the far side of the floor, the lantern out over the way
+      const p = props.byName.get(`${theme.props}_lantern_post_${R() < 0.5 ? 'a' : 'b'}`);
+      if (!p) continue;
+      const [dx, dz] = beside[0], x = f.x + 0.5 - dx * 0.36, z = f.z + 0.5 - dz * 0.36, y = floorY(f, 0.5 - dx * 0.36, 0.5 - dz * 0.36) - 0.02;
+      if (y + p.maxY + 0.2 >= above(f)) continue;
+      add(p, x, y, z, Math.atan2(-dz, dx), 1);
+      blockers[f.c].push({ x, z, r: 0.06, bottom: y, top: y + p.height });
+    }
+  }
 }

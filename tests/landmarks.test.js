@@ -12,7 +12,7 @@ const LANDMARKS = PROP_METADATA.filter(p => p.landmark);
 
 test('every theme has landmarks, each with a role and boxes derived from its mesh', () => {
   for (const t of THEMES) assert.ok(landmarksOf(t.props).length >= 2, t.props);
-  assert.equal(LANDMARKS.length, 47);
+  assert.equal(LANDMARKS.length, 50);
   for (const p of LANDMARKS) {
     assert.ok(['shrine', 'gate', 'camp', 'monument'].includes(p.role), p.name);
     assert.ok(p.colliders.length && p.occluders.length, p.name);
@@ -56,8 +56,8 @@ function checkLandmark(m, intent) {
   assert.equal(L.anchors.length, (p.anchors || []).length);
   assert.ok(m.sitePlacements.some(q => q.name === L.name && q.x === L.x && q.z === L.z && q.y === L.y));
   assert.ok(Math.abs(Math.round(L.yaw / (Math.PI / 2)) * Math.PI / 2 - L.yaw) < 1e-9, 'quarter turns');
-  // its colliders are boxes in the map, and the cutaway knows its volume
-  const boxes = new Set(m.staticBlockers.flat().filter(b => b.shape === 'box'));
+  // its colliders are boxes in the map (besides the vignettes', cubegen/vignettes.js), and the cutaway knows its volume
+  const boxes = new Set(m.staticBlockers.flat().filter(b => b.shape === 'box' && !b.vignette));
   assert.equal(boxes.size, p.colliders.length);
   assert.ok(m.occluders.length >= p.occluders.length);
   assert.ok(m.occluders.some(b => b.top > L.y + p.height - 0.6));

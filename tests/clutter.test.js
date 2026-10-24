@@ -17,11 +17,11 @@ function terrain(seed) {
     siteReservations: [], sitePlacements: [] };
 }
 
-test('checked-in metadata matches all 733 exported models, including the 222 clutter roots, the 325 theme roots, the chest, the town and the 42 trial pieces', () => {
+test('checked-in metadata matches all 780 exported models, including the 222 clutter roots, the 372 theme roots, the chest, the town and the 42 trial pieces', () => {
   const { metadata, files } = propCatalog(assets);
   assert.deepEqual(PROP_METADATA, metadata);
   assert.deepEqual(PROP_FILES, files);
-  assert.equal(new Set(PROP_METADATA.map(p => p.name)).size, 733);
+  assert.equal(new Set(PROP_METADATA.map(p => p.name)).size, 780);
   assert.equal(PROP_METADATA.filter(p => p.set === 'town').length, 10);
   // the trials' parts (blender/trials.py): one library, never scattered
   assert.deepEqual(PROP_FILES.trial, ['trials.glb']);
@@ -36,12 +36,12 @@ test('checked-in metadata matches all 733 exported models, including the 222 clu
   assert.equal(new Set(clutter.map(p => p.set)).size, 13);
   for (const mode of ['ground', 'wall', 'ceiling', 'lip', 'water']) assert.ok(clutter.some(p => p.attach === mode));
   const themes = PROP_METADATA.filter(p => p.cube_crawler_themes);
-  assert.equal(themes.length, 325);
-  // the eleven new sets, and landmarks for the eleven classic ones
-  assert.equal(new Set(themes.map(p => p.set)).size, 22);
+  assert.equal(themes.length, 372);
+  // the twelve new sets, and landmarks for the eleven classic ones
+  assert.equal(new Set(themes.map(p => p.set)).size, 23);
   for (const mode of ['ground', 'wall', 'ceiling', 'lip', 'water', 'line']) assert.ok(themes.some(p => p.attach === mode));
-  // landmarks and string segments are never scattered
-  for (const p of themes.filter(p => p.landmark || p.attach === 'line')) assert.ok(p.attach === 'line' || signatureProp(p), p.name);
+  // landmarks, vignettes and string segments are never scattered
+  for (const p of themes.filter(p => p.landmark || p.vignette || p.attach === 'line')) assert.ok(p.attach === 'line' || signatureProp(p), p.name);
 });
 
 test('catalog registration is idempotent, not an additional scatter weight on a reload, and keeps the order', () => {

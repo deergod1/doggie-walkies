@@ -57,6 +57,7 @@ export default {
   'Cloud kingdom': { text: 'Wolkenreich', g: 'n' },
   'Lagoon isles': { text: 'Lagunen-Inseln', g: 'pl' },
   'Karst terraces': { text: 'Karstterrassen', g: 'pl' },
+  'Dark forest': { text: 'Dunkler Wald', adj: 'Dunkl', g: 'm' },
   'Snowy peaks': { text: 'Schneegipfel', g: 'pl' },
   'Prayer highlands': { text: 'Gebetsfahnen-Hochland', g: 'n' },
   Badlands: { text: 'Ödland', g: 'n' },
@@ -124,6 +125,9 @@ export default {
   'witch hut': { text: 'Hexenhütte', g: 'f' },
   'fire shrine': { text: 'Feuerschrein', g: 'm' },
   fumarole: { text: 'Fumarole', g: 'f' },
+  'lantern tree': { text: 'Laternenbaum', g: 'm' },
+  'mossy arch': { text: 'Moosbogen', g: 'm' },
+  'forest chapel': { text: 'Waldkapelle', g: 'f' },
 
   // where a hiding place is (core/questplan.js clueOf)
   'up on the needle of rock': 'oben auf der Felsnadel',

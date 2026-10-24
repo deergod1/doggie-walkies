@@ -3,7 +3,7 @@
 import { DIRS } from '../core/constants.js';
 import { isFaceOpen, openedSides, discoveredFaces, visitedFaces, portalsOnly } from '../core/boundaries.js';
 import { setGlassShut } from '../render/glass.js';
-import { showNeighbors, clearNeighbors, clearNeighborCache } from '../render/neighbors.js';
+import { showNeighbors, clearNeighbors, clearNeighborCache, shownFar } from '../render/neighbors.js';
 import { discoveredCubes } from '../core/viewdistance.js';
 import { WorldClient } from '../world/client.js';
 import { step } from '../world/coords.js';
@@ -319,7 +319,7 @@ export function visitedNeighbors(k) {
   // (landmarks show in the surroundings too: they are what you find your way by)
   return discoveredCubes(state.cubes.cubes, k).map(c => ({ ...c, open: openedSides(state.openedFaces, c.key),
       shut: portalsOnly(state.cubes.cubes.get(c.key).map, state.run),
-      landmarks: (state.cubes.cubes.get(c.key).map.rewardSites || []).map(s => s.landmark).filter(Boolean) }));
+      landmarks: shownFar(state.cubes.cubes.get(c.key).map) }));
 }
 
 export function updateNeighbors() {

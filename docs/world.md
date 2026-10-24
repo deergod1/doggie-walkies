@@ -614,7 +614,7 @@ The town's meadows (depth 0) do not carry over. The picks are kept as stretches
 | Depths | Themes |
 |---|---|
 | 0 | Meadow islands (the town and its road, always: `TOWN`) |
-| 1–2 | Meadow islands, Cloud kingdom, Lagoon isles, Karst terraces |
+| 1–2 | Meadow islands, Cloud kingdom, Lagoon isles, Karst terraces, Dark forest (a night theme) |
 | 3 | Snowy peaks, Prayer highlands |
 | 4 | Badlands, Salt flats |
 | 5–6 | Deep canyon (walled in like a cave, under the sky) |
@@ -638,12 +638,59 @@ The town's meadows (depth 0) do not carry over. The picks are kept as stretches
   world yet (the menu before its first cube) it is the town's.
 - **Light in three bands:** light under the sky (0–6), medium in the sunlit caves (7–13), dark
   in the deep (14–20). Each theme's `light` belongs to its band; its `lamp` (0, about a half, 1)
-  sets how bright the character's own light is (`render/look.js`).
+  sets how bright the character's own light is (`render/look.js`). A **night** theme (`night`:
+  the dark forest) is under the sky in the light band but lit like the deep: a few stars, a dim
+  blue moon, fog, the character's full lamp, and its own lights.
 - **What the theme changes:** the themes of a depth agree on `cave`. The route, its guardians
   and hordes depend on the seed alone; the gorge spans (and with them where the branches go)
   are the theme's.
 - **Same per depth:** the enemy rosters (`DEPTH_SPAWNS`) go by depth, and the themes added later
   play the song of the first theme of their depths for now.
+
+### The dark forest (`darkforest`)
+
+Wooded hills at night (depths 1–2, next to the meadows): tall firs and gnarled trees, lanterns
+on posts and in the branches, glowing mushrooms, old stones, and the abandoned places of people
+long gone. What makes it so, all in its theme entry:
+
+- **Ground:** little void (`void` 0.1) and few floating floors (`layers` 0.3: a cube keeps the
+  upper layers the WFC gave it only that often, `world/wfc.js`), but more hills (`hills`: 2–4
+  round hills a cube and a rolling floor, `cubegen/ground.js`), gorges and rivers (`tiles`),
+  crossed by natural rock arches, logs and rope (`BUILDS.darkforest`), and short tunnels
+  through the ridges (`heights.tunnel` 0.5). Its spans (and its `heights`) keep to what the
+  route depends on, so the route is the same whatever a world picks.
+- **Grove** (`grove`, `render/propplace.js`): trees in thickets and clearings by the cube's
+  noise, beside the way too (back from it, so it runs between trunks), and lantern posts by the
+  way, their lanterns hanging out over it. A tree's collider is its trunk.
+- **Vignettes** (`vignettes`, below): a shed, a cabin, a camp, a shrine, a stone circle or a
+  wagon in most rooms.
+- **Lights** (`lights` 24): many glowing props give off light; lanterns flicker, mushrooms and
+  runes breathe (`flicker`, `render/props.js`, `render/flames.js`); the light pool fades the
+  farthest of its lights out as they are about to be swapped (`render/lightpool.js`); fireflies
+  drift round the character (`fireflies`, `render/fireflies.js`).
+
+### Vignettes (`cubegen/vignettes.js`)
+
+Little set pieces of a theme, scattered through its rooms (`vignettes`: [min, max] a room):
+the theme library's `vignette` props (bigger than a cell, with colliders and occluders derived
+from their mesh like landmarks, but never a reward site). Placed after the route, the reward
+sites and the spots have their ways and before the structures:
+
+- on dry ground of the bottom layer, off the portals, the reward sites, the spots, the horde's
+  patch and the way's structures, never blocking or levelling a floor of the way (one may reach
+  over it), with room overhead; ground up to two levels off is levelled under it;
+- near the way (scored by how far from it), each on a quarter turn, its origin in a cell's middle
+  or at a corner as it takes the fewest cells; where the one whose turn it is finds no room, the
+  next of the theme's (the smallest last), never the same one twice in a room;
+- never cutting anything off: with its cells blocked and levelled, every portal, reward site and
+  spot is still reached from where the cube is entered and leads to where it is left.
+
+They claim their cells like a landmark (`landmarkClaims` in `cubegen/sites.js`): blocked where
+the character could not stand, kept flat and free of structures under them. The map gets
+`vignettes` ([{ name, x, y, z, yaw }]; the surroundings show them like landmarks), their
+placements (with a few small things of the theme's around them), colliders and occluders, and
+their cells are kept free of ambient props. Optional: one that finds no room is left out. In the
+dark forest a room gets about 1.2 of them. Checks: `tests/vignettes.test.js`.
 - **Dev:** `?theme=clouds,forge` (with `?dev=1`) makes those themes win every depth they may
   appear at. `new World(seed, { themes: ['mines'] })` does the same in tests.
 - **Checks:** `tests/themes.test.js`: the picks (stable, even per depth, in stretches as often as
@@ -813,7 +860,7 @@ Routes can now also use these moves:
 ## Props (`render/props.js`, `render/propplace.js`)
 
 Decoration comes from `assets/props/` (133 models), `assets/clutter/`
-(222 additional models) and `assets/themes/` (274 models for the alternative themes, see
+(222 additional models) and `assets/themes/` (372 models for the alternative themes, see
 [the theme library](assets/themes.md)). Each theme names its prop set (`props`); neutral `any_*` rocks are
 tinted with the theme's rock colour. Placement runs on the main thread when a cube's meshes
 are built, seeded by the cube. It draws from the catalog (`core/propcatalog.js`), which knows
@@ -836,11 +883,17 @@ cover; authored set pieces keep their count.
 - **Lip props:** drape over cliff tops with sufficient hanging clearance.
 - **Signature assets:** reserved for deliberate destination recipes, not uniform scatter.
   So are the theme library's landmarks (bigger than a cell; reward sites place them, see
-  below) and string segments (`line`, which nothing places yet).
+  below) and string segments (`line`, which nothing places yet), and the vignettes (placed by
+  `cubegen/vignettes.js`).
+- **Grove:** a theme with a `grove` (the dark forest) gets its trees in thickets and clearings
+  and lantern posts by the way, on a random stream of its own (see "The dark forest").
 
 They are drawn as one instanced mesh per prop (and per material part), with per-cube
 material clones so they fade and get cut with their cube. Props with `sway` bend in the
-wind in the vertex shader. Up to six glowing props per cube add light sources for the pool.
+wind in the vertex shader. Up to six glowing props per cube (a theme's `lights`: more) add light
+sources for the pool: landmarks and vignettes first, then the brightest, spread over the cube.
+A fire's light flickers with its flame; a prop's `flicker` makes its light flicker like a flame
+(lanterns, candles) or breathe slowly (`pulse`: glowing mushrooms, runes).
 
 ## Reward sites (`world/sites.js`, `cubegen/sites.js`)
 

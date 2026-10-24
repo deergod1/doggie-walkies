@@ -85,15 +85,19 @@ test('every theme is complete: depths of its kind, structures, footing props, ar
   }
 });
 
-// a third of the depths each: light (the sky down to the canyons), medium (the sunlit caves), dark
+// a third of the depths each: light (the sky down to the canyons), medium (the sunlit caves), dark;
+// a night theme (the dark forest) is under the sky in the light band, but lit like the deep
 const band = d => d <= 6 ? 'light' : d <= 13 ? 'medium' : 'dark';
-test('the light comes in three bands of depths: light, medium and dark', () => {
+test('the light comes in three bands of depths: light, medium and dark (and night under the sky)', () => {
   const look = t => {
     const { sun, hemi, lamp = 0 } = t.light;
     return lamp === 0 && sun[1] >= 1.6 ? 'light' : lamp > 0 && lamp < 1 && sun[1] >= 1 && sun[1] < 1.6 ? 'medium'
       : lamp === 1 && sun[1] <= 0.6 && hemi[2] <= 0.6 ? 'dark' : '?';
   };
-  for (const t of THEMES) for (let d = t.depths[0]; d <= t.depths[1]; d++) assert.equal(look(t), band(d), `${t.props} at ${d}`);
+  for (const t of THEMES) for (let d = t.depths[0]; d <= t.depths[1]; d++)
+    assert.equal(look(t), t.night ? 'dark' : band(d), `${t.props} at ${d}`);
+  for (const t of THEMES.filter(t => t.night)) assert.ok(!t.cave && band(t.depths[1]) === 'light' && t.light.stars > 0, `${t.props}: a night sky`);
+  assert.ok(THEMES.some(t => t.night), 'the dark forest is a night theme');
   assert.deepEqual(['light', 'medium', 'dark'].map(b => DEPTHS.filter(d => band(d) === b).length), [7, 7, 7]);
   // under the sky in the light band, below the ground in the others
   for (const d of DEPTHS) assert.equal(themesAt(d)[0].cave, band(d) !== 'light', `depth ${d}`);
@@ -106,7 +110,7 @@ test('the route, its guardians and hordes never depend on the themes a world pic
   });
   for (const seed of [1, 2, 3, 4]) {
     const own = shape(makeLayouts(seed, worldThemes(seed)));
-    for (const force of [['clouds', 'highlands', 'saltflats', 'grotto', 'hive', 'ossuary', 'forge', 'cenote'], ['lagoon'], ['karst', 'nests']])
+    for (const force of [['clouds', 'highlands', 'saltflats', 'grotto', 'hive', 'ossuary', 'forge', 'cenote'], ['lagoon'], ['karst', 'nests'], ['darkforest']])
       assert.deepEqual(shape(makeLayouts(seed, worldThemes(seed, force))), own, `seed ${seed}: ${force}`);
   }
 });

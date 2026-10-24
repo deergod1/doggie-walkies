@@ -11,7 +11,7 @@ import { propSetsOf } from './propplace.js';
 import { loadPropSets } from './props.js';
 import { loadSpecies, enemyWarmup } from './enemies.js';
 import { loadLoot, lootWarmup } from './loot.js';
-import { proxyWarmup } from './neighbors.js';
+import { proxyWarmup, shownFar } from './neighbors.js';
 import { buildWorld, disposeWorld } from './world.js';
 import { scene } from './scene.js';
 import { warm } from './warmup.js';
@@ -31,7 +31,7 @@ export async function warmCube(c) {
   scene.remove(world.group);   // never drawn
   const enemies = enemyWarmup(kindsIn(c.map));
   try {
-    await warm([world.group, ...proxyWarmup(c.geo, (c.map.rewardSites || []).map(s => s.landmark).filter(Boolean)), ...enemies.objects, ...lootWarmup(c.map.enemyFree ? [] : coins)]);
+    await warm([world.group, ...proxyWarmup(c.geo, shownFar(c.map)), ...enemies.objects, ...lootWarmup(c.map.enemyFree ? [] : coins)]);
   } finally {
     disposeWorld(world);
     enemies.dispose();

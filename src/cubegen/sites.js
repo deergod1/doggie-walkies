@@ -21,6 +21,7 @@ export const RECIPES = {
   badlands: ['rib_cage', 'agave', 'broken_wagon_wheel'],
   clouds: ['rainbow_crystal', 'sky_nest', 'storm_jar'], lagoon: ['buried_chest', 'tiki_torch', 'driftwood'],
   karst: ['rice_sheaves', 'stone_lantern', 'banana_plant'], highlands: ['butter_lamps', 'mani_stones', 'chorten_small'],
+  darkforest: ['glow_mushrooms', 'lantern_post', 'mossy_stump'],
   saltflats: ['pink_halite', 'salt_cones', 'salt_bricks'], canyon: ['cairn', 'clay_pots', 'luminaria'], grotto: ['giant_clam', 'jelly_lantern', 'sunken_anchor'],
   hive: ['wax_candles', 'honey_pot', 'comb_mound'], ossuary: ['candelabra', 'funeral_urn', 'sarcophagus'],
   forge: ['crucible', 'ingot_stack', 'anvil_block'], cenote: ['copal_bowl', 'orchid_rock', 'jade_idol'],
@@ -131,24 +132,14 @@ export function reserveSites(ctx) {
   }
 }
 
-// A landmark site's landmark: its colliders and occluders in cube space (boxes, quarter turns
-// only), the cells it blocks and the cells it covers. A cell is blocked when the character could
-// not stand on its centre, and of two free neighbours with a wall between them the one nearer the
-// wall is too (never the chest's or its access cell), so whatever the route search walks the
+// The cells a landmark (or a vignette, cubegen/vignettes.js) takes on its floors, from its colliders
+// and occluders in cube space: { blocked, covered } (sets of cells). A cell is blocked when the
+// character could not stand on its centre, and of two free neighbours with a wall between them the
+// one nearer the wall is too (never one of `keep`), so whatever the route search walks the
 // character can walk. Covered cells stay flat and no structure runs through them.
-function placeLandmark(ctx, site) {
-  const p = propMetadata.get(site.landmark), yaw = -site.turn * Math.PI / 2 + Math.PI;
-  const point = (x, z) => toCube(site, site.lu - x, site.lv - z);
-  const box = b => {
-    const [ax, az] = point(b[0], b[1]), [bx, bz] = point(b[2], b[3]);
-    return { shape: 'box', x0: Math.min(ax, bx), z0: Math.min(az, bz), x1: Math.max(ax, bx), z1: Math.max(az, bz),
-      bottom: b[4], top: b[5] };
-  };
-  const colliders = p.colliders.map(box), occluders = p.occluders.map(box);
+export function landmarkClaims(floors, colliders, occluders, keep = new Set()) {
   const walls = colliders.filter(b => b.bottom < CHAR_H);   // in the character's way (not the overhangs)
   const near = (b, x0, z0, x1, z1, r) => x1 > b.x0 - r && x0 < b.x1 + r && z1 > b.z0 - r && z0 < b.z1 + r;
-  const floors = site.uv.map(({ c }) => ctx.layerFloor(c, site.layer)).filter(Boolean);
-  const keep = new Set([site.anchorCell, site.accessCell]);
   const blocked = new Set(floors.filter(f => walls.some(b => near(b, f.x + .5, f.z + .5, f.x + .5, f.z + .5, CHAR_R + .05)))
     .map(f => f.c));
   for (const f of floors) for (const [dx, dz] of [[1, 0], [0, 1]]) {
@@ -160,11 +151,29 @@ function placeLandmark(ctx, site) {
     const [a, b] = Math.hypot(f.x + .5 - mx, f.z + .5 - mz) < Math.hypot(g.x + .5 - mx, g.z + .5 - mz) ? [f, g] : [g, f];
     blocked.add(keep.has(a.c) ? b.c : a.c);
   }
+  const covered = new Set(floors.filter(f => blocked.has(f.c)
+    || [...colliders, ...occluders].some(b => near(b, f.x, f.z, f.x + 1, f.z + 1, 0))).map(f => f.c));
+  return { blocked, covered };
+}
+
+// A landmark site's landmark: its colliders and occluders in cube space (boxes, quarter turns
+// only), the cells it blocks and the cells it covers (landmarkClaims).
+function placeLandmark(ctx, site) {
+  const p = propMetadata.get(site.landmark), yaw = -site.turn * Math.PI / 2 + Math.PI;
+  const point = (x, z) => toCube(site, site.lu - x, site.lv - z);
+  const box = b => {
+    const [ax, az] = point(b[0], b[1]), [bx, bz] = point(b[2], b[3]);
+    return { shape: 'box', x0: Math.min(ax, bx), z0: Math.min(az, bz), x1: Math.max(ax, bx), z1: Math.max(az, bz),
+      bottom: b[4], top: b[5] };
+  };
+  const colliders = p.colliders.map(box), occluders = p.occluders.map(box);
+  const floors = site.uv.map(({ c }) => ctx.layerFloor(c, site.layer)).filter(Boolean);
+  const keep = new Set([site.anchorCell, site.accessCell]);
+  const { blocked, covered } = landmarkClaims(floors, colliders, occluders, keep);
   const height = Math.ceil(p.height / LH);
   for (const f of floors) {
-    const covered = blocked.has(f.c) || [...colliders, ...occluders].some(b => near(b, f.x, f.z, f.x + 1, f.z + 1, 0));
     if (blocked.has(f.c) && !keep.has(f.c)) { f.siteBlocked = true; f.siteBlockTop = f.top + height; }
-    if (covered) { f.siteDressing = true; f.siteClaimTop = f.top + height; }
+    if (covered.has(f.c)) { f.siteDressing = true; f.siteClaimTop = f.top + height; }
   }
   const [x, z] = point(0, 0);
   site.landmarkPlacement = { name: p.name, x, z, yaw, colliders, occluders,

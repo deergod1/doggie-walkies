@@ -50,6 +50,7 @@ export const FAMILY = {
   clouds: { water: ['glacier', 'sky', 'royal'] },
   lagoon: { water: ['lagoon', 'turquoise', 'sky', 'teal'], spread: 0.7 },
   karst: { water: ['turquoise', 'teal', 'sky', 'lagoon'] },
+  darkforest: { water: ['deepteal', 'murk', 'slate', 'navy'], spread: 0.35 },   // black forest pools
   peaks: { water: ['glacier', 'sky', 'slate'] },
   highlands: { water: ['sky', 'slate', 'royal', 'turquoise'] },
   badlands: { water: ['teal', 'turquoise', 'greyteal'], lava: ['magma', 'ember', 'amber'] },

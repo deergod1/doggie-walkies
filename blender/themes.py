@@ -20,9 +20,15 @@ library adds:
                       add footprint [x, z] in cells and height.
     anchors           optional extra: points (glTF space, Y up) where strings may be tied,
                       e.g. the top of a flag pole or a chorten's spire.
+    vignette: true    a ground prop bigger than one cell like a landmark (colliders,
+                      occluders, footprint and height), but a little set piece the generator
+                      scatters through a theme's rooms (an abandoned shed), never a reward site.
+    flicker           how a prop's light lives: "flame" (it flickers like a fire: lanterns,
+                      candles) or "pulse" (it breathes slowly: glowing mushrooms, runes).
     fluid "honey"     a new fluid for the honey hive.
 
-Builders live in themes_highlands.py, themes_surface.py, themes_caves.py and themes_canyon.py; the classic
+Builders live in themes_highlands.py, themes_surface.py, themes_caves.py, themes_canyon.py and
+themes_darkforest.py; the classic
 themes' landmarks (the sets of props.py and clutter.py) in themes_classic.py.
 
 Landmarks also get a role (how a reward site is built around them) and two lists of boxes
@@ -60,6 +66,7 @@ import themes_surface  # noqa: E402
 import themes_caves  # noqa: E402
 import themes_classic  # noqa: E402
 import themes_canyon  # noqa: E402
+import themes_darkforest  # noqa: E402
 
 SEED = 9137
 COLLECTION = "CubeCrawlerThemes"
@@ -71,8 +78,9 @@ ROLES = ("shrine", "gate", "camp", "monument")
 LANDMARK_TRIANGLES = 4000
 LINE_TRIANGLES = 400
 EXTRA_KEYS = clutter.EXTRA_KEYS + ("drop", "landmark", "role", "footprint", "height", "anchors", "colliders",
-                                   "occluders")
-BUILDERS = (themes_highlands, themes_surface, themes_caves, themes_classic, themes_canyon)
+                                   "occluders", "vignette", "flicker")
+FLICKERS = ("flame", "pulse")
+BUILDERS = (themes_highlands, themes_surface, themes_caves, themes_classic, themes_canyon, themes_darkforest)
 
 
 def spec(theme, prop, priority=1, variants=2, attach="ground", **hints):
@@ -92,6 +100,17 @@ def landmark(theme, prop, role, priority=1, variants=1, **hints):
     monument it stands beside the chest and frames it"""
     assert role in ROLES, role
     return spec(theme, prop, priority, variants, landmark=True, role=role, blocking=True, max_radius=None, **hints)
+
+
+def vignette(theme, prop, priority=1, variants=1, **hints):
+    """A little set piece the generator scatters through the theme's rooms (cubegen/vignettes.js):
+    bigger than a cell, with colliders and occluders like a landmark, but no reward site."""
+    return spec(theme, prop, priority, variants, vignette=True, blocking=True, max_radius=None, **hints)
+
+
+def big(hints):
+    """Landmarks and vignettes: bigger than a cell, placed deliberately, colliders of their own."""
+    return bool(hints.get("landmark") or hints.get("vignette"))
 
 
 def line(theme, prop, priority=1, variants=2, **hints):
@@ -274,6 +293,35 @@ SPECS = [
     spec("ossuary", "skull_ledge", attach="lip"),
     landmark("ossuary", "bone_arch", "gate"),
     landmark("ossuary", "crypt_shrine", "shrine", light="#ffb060", intensity=1),
+    # --- Dark forest: wooded hills at night, lanterns, glowing mushrooms, abandoned places ---
+    cover("darkforest", "leaf_litter"),
+    cover("darkforest", "glowcap_patch", light="#7af0ff", intensity=0.5, flicker="pulse"),
+    cover("darkforest", "moss_mound"),
+    spec("darkforest", "dark_fir_tree", blocking=True, sway=0.06),
+    spec("darkforest", "gnarled_tree", blocking=True, sway=0.08),
+    spec("darkforest", "bare_tree", priority=2, blocking=True, sway=0.05),
+    spec("darkforest", "glow_mushrooms", light="#5affc8", intensity=1, flicker="pulse"),
+    spec("darkforest", "giant_glowshroom", priority=2, blocking=True, light="#c890ff", intensity=1.4, flicker="pulse"),
+    spec("darkforest", "mossy_stump", priority=2, blocking=True, light="#5affc8", intensity=0.7, flicker="pulse"),
+    spec("darkforest", "lantern_post", priority=2, blocking=True, light="#ffb85a", intensity=1.5, flicker="flame"),
+    spec("darkforest", "standing_stone", priority=2, blocking=True, light="#8ab8ff", intensity=0.6, flicker="pulse"),
+    spec("darkforest", "rotten_log", priority=2, blocking=True, light="#7af0ff", intensity=0.5, flicker="pulse"),
+    spec("darkforest", "twig_charm", priority=2, sway=0.25),
+    spec("darkforest", "dark_fern", sway=0.3),
+    spec("darkforest", "bramble", sway=0.1),
+    spec("darkforest", "shelf_fungus", attach="wall", light="#5affc8", intensity=0.6, flicker="pulse"),
+    spec("darkforest", "root_drape", attach="lip", sway=0.3),
+    spec("darkforest", "hanging_lantern", attach="ceiling", light="#ffb85a", intensity=1.2, flicker="flame", sway=0.15),
+    spec("darkforest", "black_lilies", attach="water", fluid="water", light="#c8fff0", intensity=0.5, flicker="pulse"),
+    vignette("darkforest", "abandoned_shed", light="#ffb85a", intensity=1, flicker="flame"),
+    vignette("darkforest", "collapsed_cabin", light="#5affc8", intensity=0.8, flicker="pulse"),
+    vignette("darkforest", "woodcutter_camp", light="#ffb85a", intensity=0.9, flicker="flame"),
+    vignette("darkforest", "wayside_shrine", light="#ffc070", intensity=1, flicker="flame"),
+    vignette("darkforest", "stone_circle", light="#8ab8ff", intensity=1, flicker="pulse"),
+    vignette("darkforest", "overgrown_wagon", light="#ffb85a", intensity=0.8, flicker="flame"),
+    landmark("darkforest", "lantern_tree", "monument", light="#ffb85a", intensity=1.6, flicker="flame"),
+    landmark("darkforest", "mossy_arch", "gate", light="#7af0ff", intensity=1, flicker="pulse"),
+    landmark("darkforest", "forest_chapel", "shrine", light="#ffc070", intensity=1.3, flicker="flame"),
     # --- the classic themes' landmarks (themes_classic.py) ---
     landmark("meadow", "windmill", "monument"),
     landmark("meadow", "wishing_well", "shrine"),
@@ -334,12 +382,12 @@ def build(scene=None, priority=None):
             obj = props.finish(m, name, attach, info, collection)
             obj["priority"] = p
             obj["cube_crawler_themes"] = True
-            for key in ("cover", "shore", "fluid", "landmark", "role"):
+            for key in ("cover", "shore", "fluid", "landmark", "role", "vignette", "flicker"):
                 if key in info:
                     obj[key] = info[key]
             if attach == "lip":
                 obj["drop"] = round(-min(v.co.z for v in obj.data.vertices), 4)
-            if info.get("landmark"):
+            if big(info):
                 lo, hi = bounds(obj)
                 obj["footprint"] = [round(hi[0] - lo[0], 3), round(hi[1] - lo[1], 3)]
                 obj["height"] = round(hi[2], 3)
@@ -511,7 +559,9 @@ def validate(objects):
 
 def check(obj):
     """clutter.check for the clutter attachments; landmarks and lines checked here."""
-    if obj["attach"] != "line" and not obj.get("landmark"):
+    if obj.get("flicker"):
+        assert obj["flicker"] in FLICKERS and "light" in obj, (obj.name, "flicker without a light")
+    if obj["attach"] != "line" and not big(obj):
         entry = clutter.check(obj, fluids=FLUIDS)
     else:
         entry = check_big(obj)
@@ -557,7 +607,9 @@ def check_big(obj):
         assert colliders and obj["occluders"], obj.name
         assert len(colliders) <= 80, (obj.name, len(colliders))
         assert all(b[0] < b[2] and b[1] < b[3] and 0 <= b[4] < b[5] for b in colliders), obj.name
-        assert obj["role"] != "gate" or passage(colliders), (obj.name, "no passage at x = 0")
+        assert bool(obj.get("landmark")) != bool(obj.get("vignette")), (obj.name, "a landmark or a vignette")
+        assert obj.get("vignette") or obj["role"] in ROLES, obj.name
+        assert obj.get("role") != "gate" or passage(colliders), (obj.name, "no passage at x = 0")
     glowing = any(p.material_index == 1 for p in mesh.polygons)
     assert glowing == ("light" in obj), obj.name
     if glowing:
@@ -641,8 +693,8 @@ def setup_preview(scene, objects):
         names = lambda s: [by_name[name_of(theme, s[1], v)] for v in range(s[3])]  # noqa: E731
         x, top = 0.0, 2.0
         start = set(preview.objects)
-        members = [o for s in specs if not s[5].get("landmark") for o in names(s)]
-        for s in (s for s in specs if s[4] == "ground" and not s[5].get("landmark")):
+        members = [o for s in specs if not big(s[5]) for o in names(s)]
+        for s in (s for s in specs if s[4] == "ground" and not big(s[5])):
             objs = names(s)
             width = max(bounds(o)[1][0] - bounds(o)[0][0] for o in objs)
             for v, obj in enumerate(objs):
@@ -699,7 +751,7 @@ def setup_preview(scene, objects):
         # landmarks: their own row behind the props
         lx, ly, ltop = 0.0, oy + 5.5, 2.0
         start = set(preview.objects)
-        marks = [s for s in specs if s[5].get("landmark")]
+        marks = [s for s in specs if big(s[5])]
         for s in marks:
             for obj in names(s):
                 lo, hi = bounds(obj)

@@ -6,7 +6,8 @@
 // theme, so every step down is a little darker.
 // The light comes in three bands of depths: light on the surface and in the canyons (0-6),
 // medium in the sunlit caves (7-13: light falls in through cracks, glowing things), dark down
-// in the deep (14-20, only local lights). A theme's id is its prop set (`props`). The themes
+// in the deep (14-20, only local lights). A night theme (`night`: the dark forest) is under the
+// sky in the light band but lit like the deep. A theme's id is its prop set (`props`). The themes
 // that may appear at a depth agree on `cave`.
 //   depths: the first and last depth the theme may appear at (the town's depth, 0, is always TOWN's)
 //   top / side: colour stops by height in levels (grass tops, cliff strata)
@@ -24,6 +25,18 @@
 //   spans: gorge spans (world/spans.js), or null: the chance of any on a depth, at most `max`,
 //   the chance of one on the route where it fits, of a lonely island branch and of a span over
 //   the sky (no valley); deck: the highest deck level (22; lower under a cave's rock walls)
+//   night: under the sky, but dark: lit like the deep (its own lights, the lamp)
+//   layers: the chance a cube keeps the upper layers (slabs) the WFC gave it (1; world/wfc.js):
+//     fewer floors floating over the ground
+//   hills: { count: [min, max], roll }: the round hills a cube's ground gets (1-2) and how much
+//     it rolls in between (1) (cubegen/ground.js)
+//   vignettes: [min, max] little set pieces a room gets (cubegen/vignettes.js: the set's
+//     `vignette` props, an abandoned shed, a stone circle)
+//   lights: how many glowing props of a cube give off light (6; render/props.js); fireflies:
+//     glowing motes drifting round the character (render/fireflies.js)
+//   grove: a forest's own props (render/propplace.js grove): trees (bases of its set) in thickets
+//     and clearings, density (the most a floor gets one), scale [min, max]; waylights: the share
+//     of the floors beside the way that get a lantern post
 import { WATER } from '../core/constants.js';
 import { CAVE_THEMES } from './caves.js';
 
@@ -144,8 +157,27 @@ const CANYON = T('Deep canyon', {
   light: { sky: ['#1e3e6e', '#0a1630', '#8aa0c0', '#c0805a'], stars: 0.4, hemi: ['#ffe6cc', '#5a3020', 1.0], sun: ['#ffdcb0', 2.1], fog: 0.1 },
 });
 
+// the dark forest: wooded hills at night, tall firs and gnarled trees, lanterns on posts and in
+// the branches, glowing mushrooms, old stones and the abandoned places of people long gone. Few
+// holes and few floating floors: rolling hills, gorges and rivers crossed by rock arches and logs,
+// and short tunnels through the ridges
+const DARKFOREST = T('Dark forest', {
+  music: 'overworld',
+  props: 'darkforest', propDensity: 0.34,
+  depths: [1, 2], night: true, spans: { chance: 0.9, max: 2, route: 0.8, island: 0.15, sky: 0.05 },
+  void: 0.1, relief: 0.95, layers: 0.3, hills: { count: [2, 4], roll: 1.8 }, heights: { tunnel: 0.5 },
+  vignettes: [1, 2], lights: 24, fireflies: true,
+  grove: { trees: ['dark_fir_tree', 'dark_fir_tree', 'gnarled_tree', 'bare_tree'], density: 0.6, scale: [0.95, 1.3], waylights: 0.22 },
+  arche: { plain: 3, mesa: 2, chasm: 2, crater: 1, sinkhole: 1 },
+  top: [[0, '#1e3326'], [4, '#253e2b'], [8, '#2d4831'], [12, '#3a5236'], [16, '#4a5848'], [20, '#5e6660']],
+  side: [[0, '#2a221c'], [6, '#3a2e24'], [11, '#48423c'], [20, '#5c5854']],
+  soft: '#3e5e32', lip: '#24402a', under: '#1a1612', bed: ['#14161a', '#101215'], fluids: [0.95, 0, 0.05], river: WATER,
+  tiles: { slope: 2, highland: 1.3, gorge: 1.4, river: 1.3, lake: 0.6 },
+  light: { sky: ['#060a12', '#020406', '#0e1822', '#120e22'], stars: 0.4, hemi: ['#7084b4', '#0a0e0a', 0.55], sun: ['#9ab0e8', 0.55], fog: 0.45, lamp: 1 },
+});
+
 // every theme, the town's first
-export const THEMES = [MEADOW, CLOUDS, LAGOON, KARST, PEAKS, HIGHLANDS, BADLANDS, SALTFLATS, CANYON, ...CAVE_THEMES];
+export const THEMES = [MEADOW, CLOUDS, LAGOON, KARST, DARKFOREST, PEAKS, HIGHLANDS, BADLANDS, SALTFLATS, CANYON, ...CAVE_THEMES];
 // the town and its road (depth 0)
 export const TOWN = MEADOW;
 

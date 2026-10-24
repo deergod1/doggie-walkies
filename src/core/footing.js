@@ -17,6 +17,7 @@ const GROUND = {
   clouds: 'snow', lagoon: [[0, 'dirt'], [6, 'grass']], karst: [[0, 'grass'], [15, 'stone']],   // sand on the shores
   highlands: [[0, 'grass'], [13, 'gravel'], [17, 'snow']], saltflats: 'snow',   // salt crust crunches
   grotto: 'dirt', hive: 'mud', ossuary: 'stone', forge: 'gravel', cenote: 'dirt',
+  darkforest: [[0, 'dirt'], [3, 'grass'], [16, 'stone']],   // soft earth and needles, moss higher up
 };
 
 function terrain(props, level) {

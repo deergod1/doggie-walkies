@@ -28,6 +28,7 @@ import { generateGuardian } from './guardian.js';
 import { reserveSites, prepareSites, routeSites, finishSites } from './sites.js';
 import { reserveHorde, routeHorde, finishHorde } from './hordes.js';
 import { placeSpots, finishSpots } from './spots.js';
+import { placeVignettes, finishVignettes, indexBox } from './vignettes.js';
 import { spanBridge } from './span.js';
 import { descentRoute, pinnacleRoute } from './heights.js';
 import { areaRoute } from './areas.js';
@@ -100,6 +101,7 @@ function tryGenerate(seed, spec) {
   if (!routeTrial(ctx)) return null;   // the way to a trial's goal (cubegen/trials/)
   if (!routeHorde(ctx)) return null;
   placeSpots(ctx);
+  placeVignettes(ctx);   // a theme's little set pieces (cubegen/vignettes.js), off the ways just found
   addAccess(ctx);
   addEscapes(ctx);
   finishRoute(ctx);
@@ -115,7 +117,12 @@ function tryGenerate(seed, spec) {
   const trial = finishTrial(ctx, pathPoints);   // a trial room's goal, parts and checks (cubegen/trials/)
   if (!trial) return null;
   const clues = placeClues(ctx, safe);   // rune rooms' tablets, in a room before them
-  const sites = finishSites(ctx), horde = finishHorde(ctx, sites.staticBlockers);
+  const sites = finishSites(ctx), vignettes = finishVignettes(ctx);
+  sites.sitePlacements.push(...vignettes.placements);
+  for (const b of vignettes.blockers) indexBox(sites.staticBlockers, b);
+  sites.occluders.push(...vignettes.occluders);
+  sites.siteReservations.push(...vignettes.reservations);
+  const horde = finishHorde(ctx, sites.staticBlockers);
   if (horde === null) return null;
   // the spots (cubegen/spots.js): kept like the reward sites (no props on them, the camp's fire
   // among the site placements); one that failed is tried again for like a site
@@ -133,6 +140,7 @@ function tryGenerate(seed, spec) {
     x: p.c % N, z: (p.c / N) | 0, y: p.level * LH, floor: p.floor }));
   return {
     seed, K, B, cols, floors, pieces, runs, falls, fences, fenceList, stats, moves, portals, ...sites, horde, spots: spots.spots,
+    vignettes: vignettes.list,   // the theme's little set pieces (cubegen/vignettes.js): [{ name, x, y, z, yaw }]
     roomRole: spec.roomRole, biome: spec.biome, populationScale: spec.populationScale, annexRoom: !!spec.annexRoom,
     trialRoom: !!spec.trial, trialFaces: spec.trialFaces || [null, null, null, null],   // (world/trials.js)
     trial: trial.trial,   // what the trial is built of (cubegen/trials/)

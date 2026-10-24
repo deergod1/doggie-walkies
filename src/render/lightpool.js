@@ -1,11 +1,14 @@
 // A fixed set of point lights shared by all cubes. three.js recompiles every lit shader when
 // the number of lights changes, which made entering a cube stutter. Cubes still create their
 // point lights (portals, lava), but those are only light sources: every frame the pool lights
-// copy the ones nearest to the focus point. Unused pool lights are switched off.
+// copy the ones nearest to the focus point. Unused pool lights are switched off. Where there are
+// more sources than pool lights (the dark forest's lanterns), the farthest ones taken fade out as
+// they come near the first one left out, so walking about never makes a light pop on or off.
 import * as THREE from 'three';
 import { scene } from './scene.js';
 
 const POOL = 8;
+const FADE = 1.5;   // how far before the first source left out a taken one has faded out
 const pool = Array.from({ length: POOL }, () => { const l = new THREE.PointLight(0xffffff, 0, 1, 2); scene.add(l); return l; });
 let sources = [];
 const tmp = new THREE.Vector3();
@@ -38,13 +41,15 @@ export function updateLightPool(focus) {
     s.pos.copy(s.l.position).applyMatrix4(s.parent.matrixWorld);
     s.d = s.pos.distanceToSquared(focus);
   }
-  const best = sources.filter(s => s.group.visible && s.parent.visible && s.l.visible).sort((a, b) => a.d - b.d).slice(0, POOL);
+  const shown = sources.filter(s => s.group.visible && s.parent.visible && s.l.visible).sort((a, b) => a.d - b.d);
+  const best = shown.slice(0, POOL), cut = shown.length > POOL ? Math.sqrt(shown[POOL].d) : Infinity;
   pool.forEach((l, i) => {
     const s = best[i];
     if (!s) { l.intensity = 0; return; }
     l.position.copy(s.pos);
     l.color.copy(s.l.color);
-    l.intensity = s.l.intensity * s.gain * (s.group.userData.fade ?? 1);
+    const edge = Math.min(1, Math.max(0, (cut - Math.sqrt(s.d)) / FADE));
+    l.intensity = s.l.intensity * s.gain * (s.group.userData.fade ?? 1) * edge;
     l.distance = s.l.distance; l.decay = s.l.decay;
   });
 }

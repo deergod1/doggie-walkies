@@ -19,6 +19,8 @@ import { sfx } from '../audio/sfx.js';
 export const FIRE_COLORS = ['#fff0a0', '#ffd25a', '#ff8a2a', '#ff4a17'];
 // how a fire flickers (seed: its own phase): the flame's height and brightness and its light
 export const flicker = (t, seed) => 0.8 + 0.2 * Math.sin(t * 13 + seed * 7) * Math.sin(t * 7.3 + seed * 3);
+// how a glowing mushroom's (a rune's) light breathes: slowly, each in its own time
+export const breathe = (t, seed) => 0.72 + 0.28 * Math.sin(t * (0.9 + seed * 0.08) + seed * 5);
 const FLICKER = '(0.8 + 0.2 * sin(uTime * 13.0 + s * 7.0) * sin(uTime * 7.3 + s * 3.0))';
 
 // the props that burn (by base name) and the trials' flame pieces
@@ -130,8 +132,9 @@ void main() {
 
 const sets = new Set();
 // A cube's flames (specs: [{ x, y, z, w, h }] in its group; lights: the point lights they give,
-// [{ light, gain }], flickering with them): one instanced mesh to add to the group. power(i, v):
-// a flame lit (1) or out (0) (and on the way: it flares up, it dies down).
+// [{ light, gain, i, seed, pulse }], flickering with flame i (-1: none, a lantern's light flickers
+// on its own; pulse: it breathes instead, a glowing mushroom's)): one instanced mesh to add to the
+// group. power(i, v): a flame lit (1) or out (0) (and on the way: it flares up, it dies down).
 export function flameSet(specs, lights = []) {
   // (a quad from a little below the root, -0.15, to the top, 1, in heights; the shader's y)
   const geometry = new THREE.PlaneGeometry(1, 1.15);
@@ -203,7 +206,8 @@ export function tickFlames(dt, time, focus) {
       if (d < 100) near.push({ f, power, d, x: at.x, y: at.y, z: at.z });
     });
     if (changed) set.attr.needsUpdate = true;
-    for (const { light, gain, i = 0, seed = 0 } of set.lights) light.intensity = gain * flicker(time, seed) * (set.attr.array[i * 4 + 3] ?? 1);
+    for (const { light, gain, i = 0, seed = 0, pulse } of set.lights)
+      light.intensity = gain * (pulse ? breathe(time, seed) : flicker(time, seed)) * (set.attr.array[i * 4 + 3] ?? 1);
   }
   near.sort((a, b) => a.d - b.d);
   for (const { f, power, x, y, z } of near.slice(0, 6)) {

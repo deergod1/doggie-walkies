@@ -190,6 +190,36 @@
       "skull_pile",
       "skull_wall"
     ],
+    "darkforest": [
+      "abandoned_shed",
+      "bare_tree",
+      "black_lilies",
+      "bramble",
+      "collapsed_cabin",
+      "dark_fern",
+      "dark_fir_tree",
+      "forest_chapel",
+      "giant_glowshroom",
+      "glow_mushrooms",
+      "glowcap_patch",
+      "gnarled_tree",
+      "hanging_lantern",
+      "lantern_post",
+      "lantern_tree",
+      "leaf_litter",
+      "moss_mound",
+      "mossy_arch",
+      "mossy_stump",
+      "overgrown_wagon",
+      "root_drape",
+      "rotten_log",
+      "shelf_fungus",
+      "standing_stone",
+      "stone_circle",
+      "twig_charm",
+      "wayside_shrine",
+      "woodcutter_camp"
+    ],
     "meadow": [
       "windmill",
       "wishing_well"
@@ -235,7 +265,7 @@
       "void_throne"
     ]
   },
-  "triangles": 88625,
+  "triangles": 107441,
   "props": [
     {
       "name": "highlands_tussock_grass_a",
@@ -16543,6 +16573,3904 @@
           2.0
         ]
       ]
+    },
+    {
+      "name": "darkforest_leaf_litter_a",
+      "set": "darkforest",
+      "prop": "leaf_litter",
+      "variant": "a",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": false,
+      "radius": 0.35,
+      "triangles": 148,
+      "size": [
+        0.533,
+        0.322,
+        0.028
+      ],
+      "bounds_blender": [
+        [
+          -0.2392,
+          -0.1312,
+          0.0
+        ],
+        [
+          0.2935,
+          0.1907,
+          0.0278
+        ]
+      ],
+      "cover": true
+    },
+    {
+      "name": "darkforest_leaf_litter_b",
+      "set": "darkforest",
+      "prop": "leaf_litter",
+      "variant": "b",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": false,
+      "radius": 0.35,
+      "triangles": 160,
+      "size": [
+        0.327,
+        0.602,
+        0.028
+      ],
+      "bounds_blender": [
+        [
+          -0.2035,
+          -0.2554,
+          0.0
+        ],
+        [
+          0.1234,
+          0.3461,
+          0.028
+        ]
+      ],
+      "cover": true
+    },
+    {
+      "name": "darkforest_glowcap_patch_a",
+      "set": "darkforest",
+      "prop": "glowcap_patch",
+      "variant": "a",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": false,
+      "radius": 0.3,
+      "triangles": 166,
+      "size": [
+        0.481,
+        0.52,
+        0.165
+      ],
+      "bounds_blender": [
+        [
+          -0.2074,
+          -0.2352,
+          0.0
+        ],
+        [
+          0.2733,
+          0.2853,
+          0.1645
+        ]
+      ],
+      "light": "#7af0ff",
+      "intensity": 0.5,
+      "cover": true,
+      "flicker": "pulse"
+    },
+    {
+      "name": "darkforest_glowcap_patch_b",
+      "set": "darkforest",
+      "prop": "glowcap_patch",
+      "variant": "b",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": false,
+      "radius": 0.288,
+      "triangles": 166,
+      "size": [
+        0.533,
+        0.419,
+        0.156
+      ],
+      "bounds_blender": [
+        [
+          -0.2827,
+          -0.235,
+          0.0
+        ],
+        [
+          0.2508,
+          0.1842,
+          0.1562
+        ]
+      ],
+      "light": "#7af0ff",
+      "intensity": 0.5,
+      "cover": true,
+      "flicker": "pulse"
+    },
+    {
+      "name": "darkforest_moss_mound_a",
+      "set": "darkforest",
+      "prop": "moss_mound",
+      "variant": "a",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": false,
+      "radius": 0.2642,
+      "triangles": 150,
+      "size": [
+        0.481,
+        0.458,
+        0.09
+      ],
+      "bounds_blender": [
+        [
+          -0.2165,
+          -0.2311,
+          0.0
+        ],
+        [
+          0.2642,
+          0.2271,
+          0.09
+        ]
+      ],
+      "cover": true
+    },
+    {
+      "name": "darkforest_moss_mound_b",
+      "set": "darkforest",
+      "prop": "moss_mound",
+      "variant": "b",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": false,
+      "radius": 0.2638,
+      "triangles": 150,
+      "size": [
+        0.469,
+        0.46,
+        0.09
+      ],
+      "bounds_blender": [
+        [
+          -0.2638,
+          -0.2335,
+          0.0
+        ],
+        [
+          0.2055,
+          0.2268,
+          0.09
+        ]
+      ],
+      "cover": true
+    },
+    {
+      "name": "darkforest_dark_fir_tree_a",
+      "set": "darkforest",
+      "prop": "dark_fir_tree",
+      "variant": "a",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 0.45,
+      "triangles": 306,
+      "size": [
+        0.786,
+        0.884,
+        4.641
+      ],
+      "bounds_blender": [
+        [
+          -0.3865,
+          -0.4339,
+          0.0
+        ],
+        [
+          0.3993,
+          0.45,
+          4.6409
+        ]
+      ],
+      "sway": 0.06
+    },
+    {
+      "name": "darkforest_dark_fir_tree_b",
+      "set": "darkforest",
+      "prop": "dark_fir_tree",
+      "variant": "b",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 0.45,
+      "triangles": 276,
+      "size": [
+        0.817,
+        0.746,
+        4.116
+      ],
+      "bounds_blender": [
+        [
+          -0.3952,
+          -0.3691,
+          0.0
+        ],
+        [
+          0.4213,
+          0.3769,
+          4.1162
+        ]
+      ],
+      "sway": 0.06
+    },
+    {
+      "name": "darkforest_gnarled_tree_a",
+      "set": "darkforest",
+      "prop": "gnarled_tree",
+      "variant": "a",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 0.4468,
+      "triangles": 438,
+      "size": [
+        0.801,
+        0.795,
+        3.337
+      ],
+      "bounds_blender": [
+        [
+          -0.4155,
+          -0.4069,
+          0.0
+        ],
+        [
+          0.3857,
+          0.3879,
+          3.3365
+        ]
+      ],
+      "sway": 0.08
+    },
+    {
+      "name": "darkforest_gnarled_tree_b",
+      "set": "darkforest",
+      "prop": "gnarled_tree",
+      "variant": "b",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 0.45,
+      "triangles": 446,
+      "size": [
+        0.822,
+        0.802,
+        3.606
+      ],
+      "bounds_blender": [
+        [
+          -0.4199,
+          -0.3999,
+          0.0
+        ],
+        [
+          0.4025,
+          0.4021,
+          3.6064
+        ]
+      ],
+      "sway": 0.08
+    },
+    {
+      "name": "darkforest_bare_tree_a",
+      "set": "darkforest",
+      "prop": "bare_tree",
+      "variant": "a",
+      "priority": 2,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 0.3309,
+      "triangles": 256,
+      "size": [
+        0.631,
+        0.586,
+        2.923
+      ],
+      "bounds_blender": [
+        [
+          -0.3004,
+          -0.2967,
+          0.0
+        ],
+        [
+          0.3308,
+          0.2892,
+          2.9234
+        ]
+      ],
+      "sway": 0.05
+    },
+    {
+      "name": "darkforest_bare_tree_b",
+      "set": "darkforest",
+      "prop": "bare_tree",
+      "variant": "b",
+      "priority": 2,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 0.331,
+      "triangles": 256,
+      "size": [
+        0.629,
+        0.598,
+        3.273
+      ],
+      "bounds_blender": [
+        [
+          -0.3307,
+          -0.2961,
+          0.0
+        ],
+        [
+          0.2985,
+          0.3019,
+          3.2731
+        ]
+      ],
+      "sway": 0.05
+    },
+    {
+      "name": "darkforest_glow_mushrooms_a",
+      "set": "darkforest",
+      "prop": "glow_mushrooms",
+      "variant": "a",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": false,
+      "radius": 0.3588,
+      "triangles": 246,
+      "size": [
+        0.573,
+        0.429,
+        0.667
+      ],
+      "bounds_blender": [
+        [
+          -0.2518,
+          -0.1598,
+          0.0
+        ],
+        [
+          0.3215,
+          0.2688,
+          0.6673
+        ]
+      ],
+      "light": "#5affc8",
+      "intensity": 1,
+      "flicker": "pulse"
+    },
+    {
+      "name": "darkforest_glow_mushrooms_b",
+      "set": "darkforest",
+      "prop": "glow_mushrooms",
+      "variant": "b",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": false,
+      "radius": 0.3544,
+      "triangles": 300,
+      "size": [
+        0.603,
+        0.565,
+        0.667
+      ],
+      "bounds_blender": [
+        [
+          -0.2593,
+          -0.2988,
+          0.0
+        ],
+        [
+          0.3433,
+          0.2657,
+          0.6673
+        ]
+      ],
+      "light": "#5affc8",
+      "intensity": 1,
+      "flicker": "pulse"
+    },
+    {
+      "name": "darkforest_giant_glowshroom_a",
+      "set": "darkforest",
+      "prop": "giant_glowshroom",
+      "variant": "a",
+      "priority": 2,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 0.45,
+      "triangles": 352,
+      "size": [
+        0.821,
+        0.81,
+        1.862
+      ],
+      "bounds_blender": [
+        [
+          -0.3707,
+          -0.3939,
+          0.0
+        ],
+        [
+          0.4499,
+          0.4162,
+          1.8622
+        ]
+      ],
+      "light": "#c890ff",
+      "intensity": 1.4,
+      "flicker": "pulse"
+    },
+    {
+      "name": "darkforest_giant_glowshroom_b",
+      "set": "darkforest",
+      "prop": "giant_glowshroom",
+      "variant": "b",
+      "priority": 2,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 0.45,
+      "triangles": 352,
+      "size": [
+        0.872,
+        0.822,
+        2.062
+      ],
+      "bounds_blender": [
+        [
+          -0.4224,
+          -0.4099,
+          0.0
+        ],
+        [
+          0.4499,
+          0.4125,
+          2.0622
+        ]
+      ],
+      "light": "#c890ff",
+      "intensity": 1.4,
+      "flicker": "pulse"
+    },
+    {
+      "name": "darkforest_mossy_stump_a",
+      "set": "darkforest",
+      "prop": "mossy_stump",
+      "variant": "a",
+      "priority": 2,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 0.4107,
+      "triangles": 302,
+      "size": [
+        0.821,
+        0.821,
+        0.512
+      ],
+      "bounds_blender": [
+        [
+          -0.4106,
+          -0.4106,
+          0.0
+        ],
+        [
+          0.4106,
+          0.4106,
+          0.5122
+        ]
+      ],
+      "light": "#5affc8",
+      "intensity": 0.7,
+      "flicker": "pulse"
+    },
+    {
+      "name": "darkforest_mossy_stump_b",
+      "set": "darkforest",
+      "prop": "mossy_stump",
+      "variant": "b",
+      "priority": 2,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 0.4116,
+      "triangles": 302,
+      "size": [
+        0.71,
+        0.71,
+        0.607
+      ],
+      "bounds_blender": [
+        [
+          -0.3549,
+          -0.3549,
+          0.0
+        ],
+        [
+          0.3549,
+          0.3549,
+          0.6074
+        ]
+      ],
+      "light": "#5affc8",
+      "intensity": 0.7,
+      "flicker": "pulse"
+    },
+    {
+      "name": "darkforest_lantern_post_a",
+      "set": "darkforest",
+      "prop": "lantern_post",
+      "variant": "a",
+      "priority": 2,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 0.3757,
+      "triangles": 230,
+      "size": [
+        0.494,
+        0.345,
+        1.504
+      ],
+      "bounds_blender": [
+        [
+          -0.1301,
+          -0.1709,
+          0.0
+        ],
+        [
+          0.3638,
+          0.1743,
+          1.5043
+        ]
+      ],
+      "light": "#ffb85a",
+      "intensity": 1.5,
+      "flicker": "flame"
+    },
+    {
+      "name": "darkforest_lantern_post_b",
+      "set": "darkforest",
+      "prop": "lantern_post",
+      "variant": "b",
+      "priority": 2,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 0.3757,
+      "triangles": 230,
+      "size": [
+        0.534,
+        0.328,
+        1.654
+      ],
+      "bounds_blender": [
+        [
+          -0.1707,
+          -0.162,
+          0.0
+        ],
+        [
+          0.3638,
+          0.1655,
+          1.6539
+        ]
+      ],
+      "light": "#ffb85a",
+      "intensity": 1.5,
+      "flicker": "flame"
+    },
+    {
+      "name": "darkforest_standing_stone_a",
+      "set": "darkforest",
+      "prop": "standing_stone",
+      "variant": "a",
+      "priority": 2,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 0.3461,
+      "triangles": 166,
+      "size": [
+        0.549,
+        0.629,
+        1.396
+      ],
+      "bounds_blender": [
+        [
+          -0.2704,
+          -0.2924,
+          0.0
+        ],
+        [
+          0.2784,
+          0.3363,
+          1.3959
+        ]
+      ],
+      "light": "#8ab8ff",
+      "intensity": 0.6,
+      "flicker": "pulse"
+    },
+    {
+      "name": "darkforest_standing_stone_b",
+      "set": "darkforest",
+      "prop": "standing_stone",
+      "variant": "b",
+      "priority": 2,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 0.3179,
+      "triangles": 166,
+      "size": [
+        0.575,
+        0.541,
+        1.595
+      ],
+      "bounds_blender": [
+        [
+          -0.281,
+          -0.2349,
+          0.0
+        ],
+        [
+          0.2939,
+          0.3061,
+          1.5953
+        ]
+      ],
+      "light": "#8ab8ff",
+      "intensity": 0.6,
+      "flicker": "pulse"
+    },
+    {
+      "name": "darkforest_rotten_log_a",
+      "set": "darkforest",
+      "prop": "rotten_log",
+      "variant": "a",
+      "priority": 2,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 0.43,
+      "triangles": 316,
+      "size": [
+        0.832,
+        0.385,
+        0.33
+      ],
+      "bounds_blender": [
+        [
+          -0.4208,
+          -0.1589,
+          0.0
+        ],
+        [
+          0.4111,
+          0.2265,
+          0.3303
+        ]
+      ],
+      "light": "#7af0ff",
+      "intensity": 0.5,
+      "flicker": "pulse"
+    },
+    {
+      "name": "darkforest_rotten_log_b",
+      "set": "darkforest",
+      "prop": "rotten_log",
+      "variant": "b",
+      "priority": 2,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 0.45,
+      "triangles": 316,
+      "size": [
+        0.877,
+        0.389,
+        0.33
+      ],
+      "bounds_blender": [
+        [
+          -0.4419,
+          -0.1655,
+          0.0
+        ],
+        [
+          0.4351,
+          0.2239,
+          0.3304
+        ]
+      ],
+      "light": "#7af0ff",
+      "intensity": 0.5,
+      "flicker": "pulse"
+    },
+    {
+      "name": "darkforest_twig_charm_a",
+      "set": "darkforest",
+      "prop": "twig_charm",
+      "variant": "a",
+      "priority": 2,
+      "attach": "ground",
+      "blocking": false,
+      "radius": 0.2709,
+      "triangles": 222,
+      "size": [
+        0.522,
+        0.093,
+        1.302
+      ],
+      "bounds_blender": [
+        [
+          -0.2708,
+          -0.0414,
+          0.0
+        ],
+        [
+          0.2514,
+          0.0512,
+          1.3019
+        ]
+      ],
+      "sway": 0.25
+    },
+    {
+      "name": "darkforest_twig_charm_b",
+      "set": "darkforest",
+      "prop": "twig_charm",
+      "variant": "b",
+      "priority": 2,
+      "attach": "ground",
+      "blocking": false,
+      "radius": 0.2709,
+      "triangles": 286,
+      "size": [
+        0.541,
+        0.234,
+        1.402
+      ],
+      "bounds_blender": [
+        [
+          -0.2708,
+          -0.117,
+          0.0
+        ],
+        [
+          0.2704,
+          0.1167,
+          1.4018
+        ]
+      ],
+      "sway": 0.25
+    },
+    {
+      "name": "darkforest_dark_fern_a",
+      "set": "darkforest",
+      "prop": "dark_fern",
+      "variant": "a",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": false,
+      "radius": 0.4501,
+      "triangles": 276,
+      "size": [
+        0.817,
+        0.711,
+        0.306
+      ],
+      "bounds_blender": [
+        [
+          -0.4289,
+          -0.374,
+          0.0
+        ],
+        [
+          0.388,
+          0.3369,
+          0.306
+        ]
+      ],
+      "sway": 0.3
+    },
+    {
+      "name": "darkforest_dark_fern_b",
+      "set": "darkforest",
+      "prop": "dark_fern",
+      "variant": "b",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": false,
+      "radius": 0.45,
+      "triangles": 322,
+      "size": [
+        0.827,
+        0.798,
+        0.313
+      ],
+      "bounds_blender": [
+        [
+          -0.43,
+          -0.4176,
+          0.0
+        ],
+        [
+          0.3966,
+          0.3799,
+          0.3135
+        ]
+      ],
+      "sway": 0.3
+    },
+    {
+      "name": "darkforest_bramble_a",
+      "set": "darkforest",
+      "prop": "bramble",
+      "variant": "a",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": false,
+      "radius": 0.3642,
+      "triangles": 200,
+      "size": [
+        0.661,
+        0.618,
+        0.384
+      ],
+      "bounds_blender": [
+        [
+          -0.3122,
+          -0.333,
+          0.0
+        ],
+        [
+          0.3492,
+          0.2851,
+          0.3837
+        ]
+      ],
+      "sway": 0.1
+    },
+    {
+      "name": "darkforest_bramble_b",
+      "set": "darkforest",
+      "prop": "bramble",
+      "variant": "b",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": false,
+      "radius": 0.3639,
+      "triangles": 262,
+      "size": [
+        0.612,
+        0.652,
+        0.39
+      ],
+      "bounds_blender": [
+        [
+          -0.3275,
+          -0.3073,
+          0.0
+        ],
+        [
+          0.2847,
+          0.3446,
+          0.3895
+        ]
+      ],
+      "sway": 0.1
+    },
+    {
+      "name": "darkforest_shelf_fungus_a",
+      "set": "darkforest",
+      "prop": "shelf_fungus",
+      "variant": "a",
+      "priority": 1,
+      "attach": "wall",
+      "blocking": false,
+      "radius": 0.4005,
+      "triangles": 108,
+      "size": [
+        0.68,
+        0.24,
+        0.555
+      ],
+      "bounds_blender": [
+        [
+          -0.38,
+          0.0,
+          -0.235
+        ],
+        [
+          0.3,
+          0.24,
+          0.32
+        ]
+      ],
+      "light": "#5affc8",
+      "intensity": 0.6,
+      "flicker": "pulse"
+    },
+    {
+      "name": "darkforest_shelf_fungus_b",
+      "set": "darkforest",
+      "prop": "shelf_fungus",
+      "variant": "b",
+      "priority": 1,
+      "attach": "wall",
+      "blocking": false,
+      "radius": 0.4294,
+      "triangles": 108,
+      "size": [
+        0.68,
+        0.24,
+        0.595
+      ],
+      "bounds_blender": [
+        [
+          -0.38,
+          0.0,
+          -0.235
+        ],
+        [
+          0.3,
+          0.24,
+          0.36
+        ]
+      ],
+      "light": "#5affc8",
+      "intensity": 0.6,
+      "flicker": "pulse"
+    },
+    {
+      "name": "darkforest_root_drape_a",
+      "set": "darkforest",
+      "prop": "root_drape",
+      "variant": "a",
+      "priority": 1,
+      "attach": "lip",
+      "blocking": false,
+      "radius": 0.4008,
+      "triangles": 290,
+      "size": [
+        0.767,
+        0.299,
+        0.948
+      ],
+      "bounds_blender": [
+        [
+          -0.3664,
+          -0.1978,
+          -0.8865
+        ],
+        [
+          0.4008,
+          0.1009,
+          0.0611
+        ]
+      ],
+      "sway": 0.3,
+      "drop": 0.8865
+    },
+    {
+      "name": "darkforest_root_drape_b",
+      "set": "darkforest",
+      "prop": "root_drape",
+      "variant": "b",
+      "priority": 1,
+      "attach": "lip",
+      "blocking": false,
+      "radius": 0.4491,
+      "triangles": 348,
+      "size": [
+        0.773,
+        0.288,
+        0.963
+      ],
+      "bounds_blender": [
+        [
+          -0.3239,
+          -0.1869,
+          -0.9017
+        ],
+        [
+          0.4491,
+          0.101,
+          0.0611
+        ]
+      ],
+      "sway": 0.3,
+      "drop": 0.9017
+    },
+    {
+      "name": "darkforest_hanging_lantern_a",
+      "set": "darkforest",
+      "prop": "hanging_lantern",
+      "variant": "a",
+      "priority": 1,
+      "attach": "ceiling",
+      "blocking": false,
+      "radius": 0.1432,
+      "triangles": 142,
+      "size": [
+        0.224,
+        0.203,
+        0.55
+      ],
+      "bounds_blender": [
+        [
+          -0.1013,
+          -0.1013,
+          -0.5499
+        ],
+        [
+          0.1232,
+          0.1013,
+          0.0
+        ]
+      ],
+      "light": "#ffb85a",
+      "intensity": 1.2,
+      "sway": 0.15,
+      "flicker": "flame"
+    },
+    {
+      "name": "darkforest_hanging_lantern_b",
+      "set": "darkforest",
+      "prop": "hanging_lantern",
+      "variant": "b",
+      "priority": 1,
+      "attach": "ceiling",
+      "blocking": false,
+      "radius": 0.1432,
+      "triangles": 142,
+      "size": [
+        0.224,
+        0.203,
+        0.65
+      ],
+      "bounds_blender": [
+        [
+          -0.1013,
+          -0.1013,
+          -0.6499
+        ],
+        [
+          0.1232,
+          0.1013,
+          0.0
+        ]
+      ],
+      "light": "#ffb85a",
+      "intensity": 1.2,
+      "sway": 0.15,
+      "flicker": "flame"
+    },
+    {
+      "name": "darkforest_black_lilies_a",
+      "set": "darkforest",
+      "prop": "black_lilies",
+      "variant": "a",
+      "priority": 1,
+      "attach": "water",
+      "blocking": false,
+      "radius": 0.358,
+      "triangles": 156,
+      "size": [
+        0.428,
+        0.647,
+        0.104
+      ],
+      "bounds_blender": [
+        [
+          -0.2719,
+          -0.3575,
+          -0.012
+        ],
+        [
+          0.156,
+          0.2895,
+          0.092
+        ]
+      ],
+      "light": "#c8fff0",
+      "intensity": 0.5,
+      "fluid": "water",
+      "flicker": "pulse"
+    },
+    {
+      "name": "darkforest_black_lilies_b",
+      "set": "darkforest",
+      "prop": "black_lilies",
+      "variant": "b",
+      "priority": 1,
+      "attach": "water",
+      "blocking": false,
+      "radius": 0.3698,
+      "triangles": 196,
+      "size": [
+        0.643,
+        0.634,
+        0.104
+      ],
+      "bounds_blender": [
+        [
+          -0.3453,
+          -0.2641,
+          -0.012
+        ],
+        [
+          0.2975,
+          0.3696,
+          0.092
+        ]
+      ],
+      "light": "#c8fff0",
+      "intensity": 0.5,
+      "fluid": "water",
+      "flicker": "pulse"
+    },
+    {
+      "name": "darkforest_abandoned_shed_a",
+      "set": "darkforest",
+      "prop": "abandoned_shed",
+      "variant": "a",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 1.3258,
+      "triangles": 928,
+      "size": [
+        2.252,
+        1.814,
+        1.38
+      ],
+      "bounds_blender": [
+        [
+          -0.95,
+          -1.0636,
+          0.0
+        ],
+        [
+          1.302,
+          0.75,
+          1.3803
+        ]
+      ],
+      "light": "#ffb85a",
+      "intensity": 1,
+      "footprint": [
+        2.252,
+        1.814
+      ],
+      "height": 1.38,
+      "colliders": [
+        [
+          0.5,
+          -1.0,
+          0.75,
+          1.25,
+          0.0,
+          1.5
+        ],
+        [
+          -1.0,
+          0.75,
+          -0.75,
+          1.0,
+          1.25,
+          1.75
+        ],
+        [
+          -0.75,
+          -1.0,
+          0.5,
+          1.0,
+          0.0,
+          1.5
+        ],
+        [
+          0.75,
+          -1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.5
+        ],
+        [
+          -1.0,
+          -1.0,
+          -0.75,
+          0.75,
+          0.0,
+          1.5
+        ],
+        [
+          1.0,
+          -0.5,
+          1.5,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "occluders": [
+        [
+          0.5,
+          -1.0,
+          0.75,
+          1.25,
+          0.0,
+          1.5
+        ],
+        [
+          -1.0,
+          0.75,
+          -0.75,
+          1.0,
+          1.0,
+          1.5
+        ],
+        [
+          -0.75,
+          -1.0,
+          0.5,
+          1.0,
+          0.0,
+          1.5
+        ],
+        [
+          0.75,
+          -1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.5
+        ],
+        [
+          -1.0,
+          -1.0,
+          -0.75,
+          0.75,
+          0.0,
+          1.5
+        ],
+        [
+          1.0,
+          -0.5,
+          1.5,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "vignette": true,
+      "flicker": "flame"
+    },
+    {
+      "name": "darkforest_collapsed_cabin_a",
+      "set": "darkforest",
+      "prop": "collapsed_cabin",
+      "variant": "a",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 1.6202,
+      "triangles": 2004,
+      "size": [
+        2.71,
+        1.934,
+        2.108
+      ],
+      "bounds_blender": [
+        [
+          -1.1,
+          -0.854,
+          0.0
+        ],
+        [
+          1.6105,
+          1.08,
+          2.1077
+        ]
+      ],
+      "light": "#5affc8",
+      "intensity": 0.8,
+      "footprint": [
+        2.71,
+        1.934
+      ],
+      "height": 2.108,
+      "colliders": [
+        [
+          -1.25,
+          -0.5,
+          -0.75,
+          1.0,
+          0.0,
+          1.0
+        ],
+        [
+          -0.75,
+          0.5,
+          -0.25,
+          1.0,
+          0.0,
+          0.5
+        ],
+        [
+          0.25,
+          0.5,
+          1.25,
+          1.0,
+          0.0,
+          0.5
+        ],
+        [
+          -0.25,
+          0.5,
+          0.25,
+          0.75,
+          0.0,
+          0.5
+        ],
+        [
+          -0.25,
+          0.25,
+          0.0,
+          0.5,
+          0.0,
+          0.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.25,
+          0.5,
+          0.0,
+          1.0
+        ],
+        [
+          -0.75,
+          -0.5,
+          0.0,
+          0.25,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          -0.5,
+          1.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          -1.25,
+          -1.0,
+          -1.0,
+          -0.5,
+          0.0,
+          1.5
+        ],
+        [
+          -1.0,
+          -1.0,
+          -0.25,
+          -0.5,
+          0.0,
+          3.0
+        ],
+        [
+          -0.25,
+          -1.0,
+          0.5,
+          -0.5,
+          0.0,
+          1.5
+        ],
+        [
+          0.5,
+          -0.75,
+          1.25,
+          -0.5,
+          0.0,
+          1.0
+        ],
+        [
+          0.5,
+          -1.0,
+          1.25,
+          -0.75,
+          0.0,
+          1.5
+        ],
+        [
+          -1.0,
+          -1.25,
+          -0.5,
+          -1.0,
+          0.0,
+          3.0
+        ],
+        [
+          -0.5,
+          -1.25,
+          -0.25,
+          -1.0,
+          0.0,
+          2.0
+        ]
+      ],
+      "occluders": [
+        [
+          -1.25,
+          -0.5,
+          -0.75,
+          1.0,
+          0.0,
+          1.0
+        ],
+        [
+          -0.75,
+          0.5,
+          -0.25,
+          1.0,
+          0.0,
+          0.5
+        ],
+        [
+          0.25,
+          0.5,
+          1.25,
+          1.0,
+          0.0,
+          0.5
+        ],
+        [
+          -0.25,
+          0.5,
+          0.25,
+          0.75,
+          0.0,
+          0.5
+        ],
+        [
+          -0.25,
+          0.25,
+          0.0,
+          0.5,
+          0.0,
+          0.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.25,
+          0.5,
+          0.0,
+          1.0
+        ],
+        [
+          -0.75,
+          -0.5,
+          0.0,
+          0.25,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          -0.5,
+          1.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          -1.25,
+          -1.0,
+          -1.0,
+          -0.5,
+          0.0,
+          1.5
+        ],
+        [
+          -1.0,
+          -1.0,
+          -0.25,
+          -0.5,
+          0.0,
+          2.5
+        ],
+        [
+          -0.25,
+          -1.0,
+          0.5,
+          -0.5,
+          0.0,
+          1.5
+        ],
+        [
+          0.5,
+          -0.75,
+          1.25,
+          -0.5,
+          0.0,
+          1.0
+        ],
+        [
+          0.5,
+          -1.0,
+          1.25,
+          -0.75,
+          0.0,
+          1.5
+        ],
+        [
+          -1.0,
+          -1.25,
+          -0.5,
+          -1.0,
+          0.0,
+          2.5
+        ],
+        [
+          -0.5,
+          -1.25,
+          -0.25,
+          -1.0,
+          0.0,
+          2.0
+        ]
+      ],
+      "vignette": true,
+      "flicker": "pulse"
+    },
+    {
+      "name": "darkforest_woodcutter_camp_a",
+      "set": "darkforest",
+      "prop": "woodcutter_camp",
+      "variant": "a",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 1.2736,
+      "triangles": 1046,
+      "size": [
+        2.307,
+        1.283,
+        1.33
+      ],
+      "bounds_blender": [
+        [
+          -1.1,
+          -0.6825,
+          0.0
+        ],
+        [
+          1.207,
+          0.6,
+          1.3304
+        ]
+      ],
+      "light": "#ffb85a",
+      "intensity": 0.9,
+      "footprint": [
+        2.307,
+        1.283
+      ],
+      "height": 1.33,
+      "colliders": [
+        [
+          -0.75,
+          0.25,
+          -0.25,
+          0.75,
+          0.0,
+          1.0
+        ],
+        [
+          -1.25,
+          0.25,
+          -0.75,
+          0.5,
+          0.0,
+          1.0
+        ],
+        [
+          -0.25,
+          0.25,
+          0.75,
+          0.5,
+          0.0,
+          1.0
+        ],
+        [
+          0.75,
+          0.0,
+          1.0,
+          0.5,
+          0.0,
+          0.5
+        ],
+        [
+          -1.25,
+          -0.75,
+          0.5,
+          0.25,
+          0.0,
+          1.5
+        ],
+        [
+          0.5,
+          0.0,
+          0.75,
+          0.25,
+          0.0,
+          0.5
+        ],
+        [
+          0.5,
+          -0.5,
+          1.25,
+          -0.25,
+          0.0,
+          1.0
+        ]
+      ],
+      "occluders": [
+        [
+          -0.75,
+          0.25,
+          -0.25,
+          0.75,
+          0.0,
+          1.0
+        ],
+        [
+          -1.25,
+          0.25,
+          -0.75,
+          0.5,
+          0.0,
+          1.0
+        ],
+        [
+          -0.25,
+          0.25,
+          0.75,
+          0.5,
+          0.0,
+          1.0
+        ],
+        [
+          0.75,
+          0.0,
+          1.0,
+          0.5,
+          0.0,
+          0.5
+        ],
+        [
+          -1.25,
+          -0.75,
+          0.5,
+          0.25,
+          0.0,
+          1.5
+        ],
+        [
+          0.5,
+          0.0,
+          0.75,
+          0.25,
+          0.0,
+          0.5
+        ],
+        [
+          0.5,
+          -0.5,
+          1.25,
+          -0.25,
+          0.0,
+          1.0
+        ]
+      ],
+      "vignette": true,
+      "flicker": "flame"
+    },
+    {
+      "name": "darkforest_wayside_shrine_a",
+      "set": "darkforest",
+      "prop": "wayside_shrine",
+      "variant": "a",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 0.4939,
+      "triangles": 392,
+      "size": [
+        0.788,
+        0.739,
+        1.639
+      ],
+      "bounds_blender": [
+        [
+          -0.3784,
+          -0.4085,
+          0.0
+        ],
+        [
+          0.4094,
+          0.3309,
+          1.6387
+        ]
+      ],
+      "light": "#ffc070",
+      "intensity": 1,
+      "footprint": [
+        0.788,
+        0.739
+      ],
+      "height": 1.639,
+      "colliders": [
+        [
+          -0.5,
+          -0.5,
+          -0.25,
+          0.25,
+          1.25,
+          1.75
+        ],
+        [
+          -0.25,
+          -0.5,
+          0.25,
+          0.25,
+          0.0,
+          2.0
+        ],
+        [
+          0.25,
+          -0.5,
+          0.5,
+          0.25,
+          0.0,
+          1.5
+        ]
+      ],
+      "occluders": [
+        [
+          -0.5,
+          -0.5,
+          -0.25,
+          0.25,
+          1.0,
+          1.5
+        ],
+        [
+          -0.25,
+          -0.5,
+          0.25,
+          0.25,
+          0.0,
+          2.0
+        ],
+        [
+          0.25,
+          -0.5,
+          0.5,
+          0.25,
+          0.0,
+          1.5
+        ]
+      ],
+      "vignette": true,
+      "flicker": "flame"
+    },
+    {
+      "name": "darkforest_stone_circle_a",
+      "set": "darkforest",
+      "prop": "stone_circle",
+      "variant": "a",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 1.47,
+      "triangles": 726,
+      "size": [
+        2.662,
+        2.754,
+        1.285
+      ],
+      "bounds_blender": [
+        [
+          -1.337,
+          -1.4158,
+          0.0
+        ],
+        [
+          1.3253,
+          1.3387,
+          1.2847
+        ]
+      ],
+      "light": "#8ab8ff",
+      "intensity": 1,
+      "footprint": [
+        2.662,
+        2.754
+      ],
+      "height": 1.285,
+      "colliders": [
+        [
+          -0.5,
+          1.0,
+          0.5,
+          1.5,
+          0.0,
+          0.5
+        ],
+        [
+          0.5,
+          1.0,
+          1.0,
+          1.25,
+          0.0,
+          1.0
+        ],
+        [
+          -0.5,
+          0.75,
+          0.0,
+          1.0,
+          0.0,
+          0.5
+        ],
+        [
+          0.5,
+          0.75,
+          1.0,
+          1.0,
+          0.0,
+          1.5
+        ],
+        [
+          0.5,
+          0.5,
+          1.0,
+          0.75,
+          0.0,
+          1.0
+        ],
+        [
+          -1.5,
+          0.0,
+          -1.25,
+          0.5,
+          0.0,
+          0.5
+        ],
+        [
+          -1.25,
+          0.0,
+          -0.75,
+          0.5,
+          0.0,
+          1.5
+        ],
+        [
+          0.75,
+          -0.5,
+          1.5,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          -1.0,
+          -0.75,
+          -0.5,
+          -0.5,
+          0.0,
+          1.0
+        ],
+        [
+          -1.0,
+          -1.0,
+          -0.5,
+          -0.75,
+          0.0,
+          1.5
+        ],
+        [
+          0.0,
+          -1.0,
+          0.5,
+          -0.75,
+          0.0,
+          1.0
+        ],
+        [
+          -1.0,
+          -1.25,
+          -0.75,
+          -1.0,
+          0.0,
+          1.0
+        ],
+        [
+          -0.75,
+          -1.25,
+          -0.5,
+          -1.0,
+          0.0,
+          0.5
+        ],
+        [
+          0.0,
+          -1.25,
+          0.5,
+          -1.0,
+          0.0,
+          1.5
+        ],
+        [
+          0.5,
+          -1.25,
+          0.75,
+          -1.0,
+          0.0,
+          0.5
+        ],
+        [
+          0.25,
+          -1.5,
+          0.5,
+          -1.25,
+          0.0,
+          1.5
+        ]
+      ],
+      "occluders": [
+        [
+          -0.5,
+          1.0,
+          0.5,
+          1.5,
+          0.0,
+          0.5
+        ],
+        [
+          0.5,
+          1.0,
+          1.0,
+          1.25,
+          0.0,
+          1.0
+        ],
+        [
+          -0.5,
+          0.75,
+          0.0,
+          1.0,
+          0.0,
+          0.5
+        ],
+        [
+          0.5,
+          0.75,
+          1.0,
+          1.0,
+          0.0,
+          1.5
+        ],
+        [
+          0.5,
+          0.5,
+          1.0,
+          0.75,
+          0.0,
+          1.0
+        ],
+        [
+          -1.5,
+          0.0,
+          -1.25,
+          0.5,
+          0.0,
+          0.5
+        ],
+        [
+          -1.25,
+          0.0,
+          -0.75,
+          0.5,
+          0.0,
+          1.5
+        ],
+        [
+          0.75,
+          -0.5,
+          1.5,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          -1.0,
+          -0.75,
+          -0.5,
+          -0.5,
+          0.0,
+          1.0
+        ],
+        [
+          -1.0,
+          -1.0,
+          -0.5,
+          -0.75,
+          0.0,
+          1.5
+        ],
+        [
+          0.0,
+          -1.0,
+          0.5,
+          -0.75,
+          0.0,
+          1.0
+        ],
+        [
+          -1.0,
+          -1.25,
+          -0.75,
+          -1.0,
+          0.0,
+          1.0
+        ],
+        [
+          -0.75,
+          -1.25,
+          -0.5,
+          -1.0,
+          0.0,
+          0.5
+        ],
+        [
+          0.0,
+          -1.25,
+          0.5,
+          -1.0,
+          0.0,
+          1.5
+        ],
+        [
+          0.5,
+          -1.25,
+          0.75,
+          -1.0,
+          0.0,
+          0.5
+        ],
+        [
+          0.25,
+          -1.5,
+          0.5,
+          -1.25,
+          0.0,
+          1.5
+        ]
+      ],
+      "vignette": true,
+      "flicker": "pulse"
+    },
+    {
+      "name": "darkforest_overgrown_wagon_a",
+      "set": "darkforest",
+      "prop": "overgrown_wagon",
+      "variant": "a",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 1.4003,
+      "triangles": 926,
+      "size": [
+        2.598,
+        1.647,
+        1.627
+      ],
+      "bounds_blender": [
+        [
+          -1.3668,
+          -1.1663,
+          0.0
+        ],
+        [
+          1.231,
+          0.4807,
+          1.6275
+        ]
+      ],
+      "light": "#ffb85a",
+      "intensity": 0.8,
+      "footprint": [
+        2.598,
+        1.647
+      ],
+      "height": 1.627,
+      "colliders": [
+        [
+          -0.75,
+          0.0,
+          1.0,
+          0.75,
+          0.0,
+          1.0
+        ],
+        [
+          -1.25,
+          0.25,
+          -0.75,
+          0.5,
+          0.0,
+          0.5
+        ],
+        [
+          -1.0,
+          -0.25,
+          -0.75,
+          0.25,
+          0.0,
+          0.5
+        ],
+        [
+          -0.75,
+          -0.25,
+          0.75,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.75,
+          -0.5,
+          1.0,
+          0.0,
+          0.0,
+          2.0
+        ],
+        [
+          1.0,
+          -0.5,
+          1.25,
+          0.0,
+          0.0,
+          1.5
+        ],
+        [
+          -1.25,
+          -0.5,
+          -1.0,
+          -0.25,
+          0.0,
+          0.5
+        ],
+        [
+          -1.0,
+          -0.5,
+          0.5,
+          -0.25,
+          0.0,
+          1.0
+        ],
+        [
+          0.5,
+          -0.5,
+          0.75,
+          -0.25,
+          0.0,
+          2.0
+        ]
+      ],
+      "occluders": [
+        [
+          -0.75,
+          0.0,
+          1.0,
+          0.75,
+          0.0,
+          1.0
+        ],
+        [
+          -1.25,
+          0.25,
+          -0.75,
+          0.5,
+          0.0,
+          0.5
+        ],
+        [
+          -1.0,
+          -0.25,
+          -0.75,
+          0.25,
+          0.0,
+          0.5
+        ],
+        [
+          -0.75,
+          -0.25,
+          0.75,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.75,
+          -0.5,
+          1.0,
+          0.0,
+          0.0,
+          2.0
+        ],
+        [
+          1.0,
+          -0.5,
+          1.25,
+          0.0,
+          0.0,
+          1.5
+        ],
+        [
+          -1.25,
+          -0.5,
+          -1.0,
+          -0.25,
+          0.0,
+          0.5
+        ],
+        [
+          -1.0,
+          -0.5,
+          0.5,
+          -0.25,
+          0.0,
+          1.0
+        ],
+        [
+          0.5,
+          -0.5,
+          0.75,
+          -0.25,
+          0.0,
+          2.0
+        ]
+      ],
+      "vignette": true,
+      "flicker": "flame"
+    },
+    {
+      "name": "darkforest_lantern_tree_a",
+      "set": "darkforest",
+      "prop": "lantern_tree",
+      "variant": "a",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 1.6042,
+      "triangles": 1904,
+      "size": [
+        3.067,
+        2.935,
+        4.748
+      ],
+      "bounds_blender": [
+        [
+          -1.5371,
+          -1.4745,
+          0.0
+        ],
+        [
+          1.5303,
+          1.4609,
+          4.7481
+        ]
+      ],
+      "light": "#ffb85a",
+      "intensity": 1.6,
+      "landmark": true,
+      "role": "monument",
+      "footprint": [
+        3.067,
+        2.935
+      ],
+      "height": 4.748,
+      "colliders": [
+        [
+          -1.0,
+          1.0,
+          0.25,
+          1.5,
+          2.5,
+          4.0
+        ],
+        [
+          0.25,
+          1.25,
+          0.5,
+          1.5,
+          3.0,
+          4.0
+        ],
+        [
+          0.5,
+          1.0,
+          0.75,
+          1.5,
+          2.5,
+          4.0
+        ],
+        [
+          0.75,
+          1.25,
+          1.25,
+          1.5,
+          3.0,
+          4.0
+        ],
+        [
+          0.25,
+          1.0,
+          0.5,
+          1.25,
+          2.5,
+          4.0
+        ],
+        [
+          0.75,
+          0.5,
+          1.25,
+          1.25,
+          2.5,
+          4.0
+        ],
+        [
+          -1.0,
+          0.75,
+          -0.5,
+          1.0,
+          2.5,
+          4.0
+        ],
+        [
+          -0.5,
+          0.75,
+          -0.25,
+          1.0,
+          2.0,
+          4.0
+        ],
+        [
+          -0.25,
+          0.75,
+          0.25,
+          1.0,
+          2.5,
+          4.0
+        ],
+        [
+          0.25,
+          0.75,
+          0.75,
+          1.0,
+          2.0,
+          4.0
+        ],
+        [
+          -1.5,
+          0.25,
+          -1.0,
+          0.75,
+          3.0,
+          4.0
+        ],
+        [
+          -1.0,
+          0.25,
+          -0.75,
+          0.75,
+          2.5,
+          4.0
+        ],
+        [
+          -0.75,
+          0.5,
+          -0.5,
+          0.75,
+          2.5,
+          5.0
+        ],
+        [
+          -0.5,
+          0.5,
+          -0.25,
+          0.75,
+          1.5,
+          5.0
+        ],
+        [
+          -0.25,
+          -0.75,
+          0.25,
+          0.75,
+          0.0,
+          5.0
+        ],
+        [
+          0.25,
+          0.5,
+          0.5,
+          0.75,
+          2.0,
+          5.0
+        ],
+        [
+          0.5,
+          0.5,
+          0.75,
+          0.75,
+          2.0,
+          4.0
+        ],
+        [
+          -1.75,
+          0.0,
+          -1.5,
+          0.5,
+          3.0,
+          4.0
+        ],
+        [
+          -0.75,
+          -0.5,
+          -0.25,
+          0.5,
+          0.0,
+          5.0
+        ],
+        [
+          0.25,
+          -0.5,
+          0.75,
+          0.5,
+          0.0,
+          5.0
+        ],
+        [
+          0.75,
+          0.0,
+          1.0,
+          0.5,
+          2.5,
+          4.0
+        ],
+        [
+          1.0,
+          0.0,
+          1.25,
+          0.5,
+          3.0,
+          4.0
+        ],
+        [
+          1.25,
+          0.25,
+          1.5,
+          0.5,
+          3.5,
+          4.0
+        ],
+        [
+          -1.5,
+          -0.5,
+          -1.25,
+          0.25,
+          3.0,
+          4.0
+        ],
+        [
+          -1.25,
+          0.0,
+          -0.75,
+          0.25,
+          2.0,
+          4.0
+        ],
+        [
+          1.25,
+          -0.5,
+          1.5,
+          0.25,
+          3.0,
+          4.0
+        ],
+        [
+          -1.25,
+          -1.25,
+          -1.0,
+          0.0,
+          3.0,
+          4.0
+        ],
+        [
+          -1.0,
+          -0.25,
+          -0.75,
+          0.0,
+          2.5,
+          4.0
+        ],
+        [
+          0.75,
+          -0.25,
+          1.25,
+          0.0,
+          2.0,
+          5.0
+        ],
+        [
+          1.5,
+          -0.5,
+          1.75,
+          0.0,
+          3.5,
+          4.0
+        ],
+        [
+          -1.0,
+          -0.5,
+          -0.75,
+          -0.25,
+          3.0,
+          4.0
+        ],
+        [
+          0.75,
+          -0.5,
+          1.0,
+          -0.25,
+          2.5,
+          5.0
+        ],
+        [
+          1.0,
+          -0.5,
+          1.25,
+          -0.25,
+          3.0,
+          5.0
+        ],
+        [
+          -1.0,
+          -1.0,
+          -0.75,
+          -0.5,
+          2.5,
+          4.0
+        ],
+        [
+          -0.75,
+          -1.0,
+          -0.5,
+          -0.5,
+          2.0,
+          4.0
+        ],
+        [
+          -0.5,
+          -0.75,
+          -0.25,
+          -0.5,
+          1.5,
+          5.0
+        ],
+        [
+          0.25,
+          -0.75,
+          0.5,
+          -0.5,
+          2.0,
+          5.0
+        ],
+        [
+          0.5,
+          -0.75,
+          1.0,
+          -0.5,
+          2.5,
+          4.0
+        ],
+        [
+          1.0,
+          -0.75,
+          1.25,
+          -0.5,
+          3.0,
+          4.0
+        ],
+        [
+          1.25,
+          -0.75,
+          1.5,
+          -0.5,
+          3.5,
+          4.0
+        ],
+        [
+          -0.5,
+          -1.0,
+          -0.25,
+          -0.75,
+          2.0,
+          4.0
+        ],
+        [
+          -0.25,
+          -1.25,
+          0.25,
+          -0.75,
+          2.5,
+          4.0
+        ],
+        [
+          0.25,
+          -1.0,
+          0.5,
+          -0.75,
+          1.5,
+          4.0
+        ],
+        [
+          0.5,
+          -1.25,
+          0.75,
+          -0.75,
+          2.0,
+          4.0
+        ],
+        [
+          0.75,
+          -1.25,
+          1.0,
+          -0.75,
+          2.5,
+          4.0
+        ],
+        [
+          -1.0,
+          -1.25,
+          -0.25,
+          -1.0,
+          3.0,
+          4.0
+        ],
+        [
+          0.25,
+          -1.25,
+          0.5,
+          -1.0,
+          2.0,
+          4.0
+        ],
+        [
+          -1.0,
+          -1.5,
+          -0.5,
+          -1.25,
+          3.0,
+          4.0
+        ],
+        [
+          0.0,
+          -1.5,
+          0.75,
+          -1.25,
+          2.5,
+          4.0
+        ],
+        [
+          0.75,
+          -1.5,
+          1.0,
+          -1.25,
+          2.5,
+          3.0
+        ]
+      ],
+      "occluders": [
+        [
+          -1.0,
+          1.0,
+          0.25,
+          1.5,
+          2.5,
+          3.5
+        ],
+        [
+          0.25,
+          1.25,
+          0.5,
+          1.5,
+          3.0,
+          3.5
+        ],
+        [
+          0.5,
+          1.0,
+          0.75,
+          1.5,
+          2.5,
+          3.5
+        ],
+        [
+          0.75,
+          1.25,
+          1.25,
+          1.5,
+          3.0,
+          3.5
+        ],
+        [
+          0.25,
+          1.0,
+          0.5,
+          1.25,
+          2.5,
+          3.5
+        ],
+        [
+          0.75,
+          1.0,
+          1.25,
+          1.25,
+          2.5,
+          3.5
+        ],
+        [
+          -1.0,
+          0.75,
+          -0.5,
+          1.0,
+          2.5,
+          3.5
+        ],
+        [
+          -0.5,
+          0.75,
+          -0.25,
+          1.0,
+          2.0,
+          3.5
+        ],
+        [
+          -0.25,
+          0.75,
+          0.0,
+          1.0,
+          2.5,
+          3.5
+        ],
+        [
+          0.0,
+          0.75,
+          0.25,
+          1.0,
+          2.5,
+          4.0
+        ],
+        [
+          0.25,
+          0.75,
+          0.75,
+          1.0,
+          2.0,
+          4.0
+        ],
+        [
+          0.75,
+          0.0,
+          1.0,
+          1.0,
+          2.5,
+          4.0
+        ],
+        [
+          1.0,
+          0.5,
+          1.25,
+          1.0,
+          2.5,
+          3.5
+        ],
+        [
+          -1.5,
+          0.25,
+          -1.0,
+          0.75,
+          3.0,
+          4.0
+        ],
+        [
+          -1.0,
+          0.25,
+          -0.75,
+          0.75,
+          2.5,
+          4.0
+        ],
+        [
+          -0.75,
+          0.5,
+          -0.5,
+          0.75,
+          2.5,
+          4.5
+        ],
+        [
+          -0.5,
+          0.5,
+          -0.25,
+          0.75,
+          1.5,
+          4.5
+        ],
+        [
+          -0.25,
+          -0.75,
+          0.25,
+          0.75,
+          0.0,
+          5.0
+        ],
+        [
+          0.25,
+          0.5,
+          0.5,
+          0.75,
+          2.0,
+          5.0
+        ],
+        [
+          0.5,
+          0.5,
+          0.75,
+          0.75,
+          2.0,
+          4.0
+        ],
+        [
+          -1.75,
+          0.25,
+          -1.5,
+          0.5,
+          3.0,
+          3.5
+        ],
+        [
+          -0.75,
+          0.25,
+          -0.5,
+          0.5,
+          0.0,
+          4.5
+        ],
+        [
+          -0.5,
+          -0.5,
+          -0.25,
+          0.5,
+          0.0,
+          5.0
+        ],
+        [
+          0.25,
+          -0.5,
+          0.5,
+          0.5,
+          0.0,
+          5.0
+        ],
+        [
+          0.5,
+          0.25,
+          0.75,
+          0.5,
+          0.0,
+          4.5
+        ],
+        [
+          1.0,
+          0.0,
+          1.25,
+          0.5,
+          3.0,
+          4.0
+        ],
+        [
+          1.25,
+          0.25,
+          1.5,
+          0.5,
+          3.5,
+          4.0
+        ],
+        [
+          -1.75,
+          0.0,
+          -1.25,
+          0.25,
+          3.0,
+          4.0
+        ],
+        [
+          -1.25,
+          0.0,
+          -0.75,
+          0.25,
+          2.0,
+          4.0
+        ],
+        [
+          -0.75,
+          -0.25,
+          -0.5,
+          0.25,
+          0.0,
+          5.0
+        ],
+        [
+          0.5,
+          -0.5,
+          0.75,
+          0.25,
+          0.0,
+          5.0
+        ],
+        [
+          1.25,
+          -0.5,
+          1.5,
+          0.25,
+          3.0,
+          4.0
+        ],
+        [
+          -1.5,
+          -0.25,
+          -1.0,
+          0.0,
+          3.0,
+          4.0
+        ],
+        [
+          -1.0,
+          -0.25,
+          -0.75,
+          0.0,
+          2.5,
+          4.0
+        ],
+        [
+          0.75,
+          -0.25,
+          1.25,
+          0.0,
+          2.0,
+          4.5
+        ],
+        [
+          1.5,
+          -0.5,
+          1.75,
+          0.0,
+          3.5,
+          4.0
+        ],
+        [
+          -1.5,
+          -0.5,
+          -1.25,
+          -0.25,
+          3.0,
+          3.5
+        ],
+        [
+          -1.25,
+          -0.5,
+          -0.75,
+          -0.25,
+          3.0,
+          4.0
+        ],
+        [
+          -0.75,
+          -0.5,
+          -0.5,
+          -0.25,
+          0.0,
+          4.5
+        ],
+        [
+          0.75,
+          -0.5,
+          1.0,
+          -0.25,
+          2.5,
+          4.5
+        ],
+        [
+          1.0,
+          -0.5,
+          1.25,
+          -0.25,
+          3.0,
+          4.5
+        ],
+        [
+          -1.25,
+          -1.25,
+          -1.0,
+          -0.5,
+          3.0,
+          4.0
+        ],
+        [
+          -1.0,
+          -1.0,
+          -0.75,
+          -0.5,
+          2.5,
+          4.0
+        ],
+        [
+          -0.75,
+          -1.0,
+          -0.5,
+          -0.5,
+          2.0,
+          4.0
+        ],
+        [
+          -0.5,
+          -0.75,
+          -0.25,
+          -0.5,
+          1.5,
+          5.0
+        ],
+        [
+          0.25,
+          -0.75,
+          0.5,
+          -0.5,
+          2.0,
+          5.0
+        ],
+        [
+          0.5,
+          -0.75,
+          1.0,
+          -0.5,
+          2.5,
+          4.0
+        ],
+        [
+          1.0,
+          -0.75,
+          1.25,
+          -0.5,
+          3.0,
+          4.0
+        ],
+        [
+          1.25,
+          -0.75,
+          1.5,
+          -0.5,
+          3.5,
+          4.0
+        ],
+        [
+          -0.5,
+          -1.0,
+          -0.25,
+          -0.75,
+          2.0,
+          4.0
+        ],
+        [
+          -0.25,
+          -1.0,
+          0.0,
+          -0.75,
+          2.5,
+          4.0
+        ],
+        [
+          0.0,
+          -1.5,
+          0.25,
+          -0.75,
+          2.5,
+          3.5
+        ],
+        [
+          0.25,
+          -1.0,
+          0.5,
+          -0.75,
+          1.5,
+          3.5
+        ],
+        [
+          0.5,
+          -1.25,
+          0.75,
+          -0.75,
+          2.0,
+          3.5
+        ],
+        [
+          0.75,
+          -1.25,
+          1.0,
+          -0.75,
+          2.5,
+          3.5
+        ],
+        [
+          -1.0,
+          -1.25,
+          -0.25,
+          -1.0,
+          3.0,
+          4.0
+        ],
+        [
+          -0.25,
+          -1.25,
+          0.0,
+          -1.0,
+          2.5,
+          3.5
+        ],
+        [
+          0.25,
+          -1.25,
+          0.5,
+          -1.0,
+          2.0,
+          3.5
+        ],
+        [
+          -1.0,
+          -1.5,
+          -0.5,
+          -1.25,
+          3.0,
+          3.5
+        ],
+        [
+          0.25,
+          -1.5,
+          0.75,
+          -1.25,
+          2.5,
+          3.5
+        ],
+        [
+          0.75,
+          -1.5,
+          1.0,
+          -1.25,
+          2.5,
+          3.0
+        ]
+      ],
+      "flicker": "flame"
+    },
+    {
+      "name": "darkforest_mossy_arch_a",
+      "set": "darkforest",
+      "prop": "mossy_arch",
+      "variant": "a",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 1.4779,
+      "triangles": 892,
+      "size": [
+        2.932,
+        0.769,
+        3.0
+      ],
+      "bounds_blender": [
+        [
+          -1.4592,
+          -0.3755,
+          0.0
+        ],
+        [
+          1.473,
+          0.3936,
+          3.0
+        ]
+      ],
+      "light": "#7af0ff",
+      "intensity": 1,
+      "landmark": true,
+      "role": "gate",
+      "footprint": [
+        2.932,
+        0.769
+      ],
+      "height": 3.0,
+      "colliders": [
+        [
+          -1.5,
+          0.25,
+          -1.25,
+          0.5,
+          0.0,
+          2.0
+        ],
+        [
+          -1.25,
+          -0.5,
+          -0.75,
+          0.5,
+          0.0,
+          3.0
+        ],
+        [
+          -0.75,
+          0.25,
+          -0.5,
+          0.5,
+          0.0,
+          1.0
+        ],
+        [
+          -0.25,
+          0.0,
+          0.25,
+          0.5,
+          2.5,
+          3.0
+        ],
+        [
+          0.5,
+          0.25,
+          1.0,
+          0.5,
+          0.0,
+          1.5
+        ],
+        [
+          1.0,
+          -0.25,
+          1.5,
+          0.5,
+          0.0,
+          3.0
+        ],
+        [
+          -1.5,
+          -0.5,
+          -1.25,
+          0.25,
+          0.0,
+          3.0
+        ],
+        [
+          -0.75,
+          -0.5,
+          -0.5,
+          0.25,
+          0.0,
+          3.0
+        ],
+        [
+          -0.5,
+          -0.5,
+          -0.25,
+          0.25,
+          2.0,
+          3.0
+        ],
+        [
+          0.25,
+          -0.5,
+          0.5,
+          0.25,
+          2.0,
+          3.0
+        ],
+        [
+          0.5,
+          -0.5,
+          1.0,
+          0.25,
+          0.0,
+          3.0
+        ],
+        [
+          -0.25,
+          -0.25,
+          0.25,
+          0.0,
+          2.0,
+          3.0
+        ],
+        [
+          -0.25,
+          -0.5,
+          0.0,
+          -0.25,
+          2.5,
+          3.0
+        ],
+        [
+          0.0,
+          -0.5,
+          0.25,
+          -0.25,
+          2.0,
+          3.0
+        ],
+        [
+          1.0,
+          -0.5,
+          1.25,
+          -0.25,
+          0.0,
+          3.0
+        ],
+        [
+          1.25,
+          -0.5,
+          1.5,
+          -0.25,
+          0.0,
+          1.5
+        ]
+      ],
+      "occluders": [
+        [
+          -1.5,
+          0.25,
+          -1.25,
+          0.5,
+          0.0,
+          2.0
+        ],
+        [
+          -1.25,
+          0.25,
+          -0.75,
+          0.5,
+          0.0,
+          2.5
+        ],
+        [
+          -0.75,
+          0.25,
+          -0.5,
+          0.5,
+          0.0,
+          1.0
+        ],
+        [
+          -0.25,
+          0.0,
+          0.25,
+          0.5,
+          2.5,
+          3.0
+        ],
+        [
+          0.5,
+          0.25,
+          1.0,
+          0.5,
+          0.0,
+          1.5
+        ],
+        [
+          1.0,
+          0.25,
+          1.5,
+          0.5,
+          0.0,
+          2.5
+        ],
+        [
+          -1.5,
+          -0.5,
+          -1.25,
+          0.25,
+          0.0,
+          2.5
+        ],
+        [
+          -1.25,
+          -0.5,
+          -0.5,
+          0.25,
+          0.0,
+          3.0
+        ],
+        [
+          -0.5,
+          -0.5,
+          -0.25,
+          0.25,
+          2.0,
+          3.0
+        ],
+        [
+          0.25,
+          -0.5,
+          0.5,
+          0.25,
+          2.0,
+          3.0
+        ],
+        [
+          0.5,
+          -0.5,
+          1.25,
+          0.25,
+          0.0,
+          3.0
+        ],
+        [
+          1.25,
+          -0.25,
+          1.5,
+          0.25,
+          0.0,
+          2.5
+        ],
+        [
+          -0.25,
+          -0.25,
+          0.25,
+          0.0,
+          2.0,
+          3.0
+        ],
+        [
+          -0.25,
+          -0.5,
+          0.0,
+          -0.25,
+          2.5,
+          3.0
+        ],
+        [
+          0.0,
+          -0.5,
+          0.25,
+          -0.25,
+          2.0,
+          3.0
+        ],
+        [
+          1.25,
+          -0.5,
+          1.5,
+          -0.25,
+          0.0,
+          1.5
+        ]
+      ],
+      "flicker": "pulse"
+    },
+    {
+      "name": "darkforest_forest_chapel_a",
+      "set": "darkforest",
+      "prop": "forest_chapel",
+      "variant": "a",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": true,
+      "radius": 1.416,
+      "triangles": 744,
+      "size": [
+        2.183,
+        2.091,
+        3.327
+      ],
+      "bounds_blender": [
+        [
+          -1.0931,
+          -1.1,
+          0.0
+        ],
+        [
+          1.09,
+          0.9908,
+          3.3269
+        ]
+      ],
+      "light": "#ffc070",
+      "intensity": 1.3,
+      "landmark": true,
+      "role": "shrine",
+      "footprint": [
+        2.183,
+        2.091
+      ],
+      "height": 3.327,
+      "colliders": [
+        [
+          -1.25,
+          0.5,
+          -0.75,
+          1.0,
+          0.0,
+          1.0
+        ],
+        [
+          -0.5,
+          0.75,
+          0.0,
+          1.0,
+          0.0,
+          0.5
+        ],
+        [
+          0.25,
+          0.75,
+          0.75,
+          1.0,
+          0.0,
+          0.5
+        ],
+        [
+          0.75,
+          0.5,
+          1.25,
+          1.0,
+          0.0,
+          1.0
+        ],
+        [
+          -1.25,
+          0.0,
+          -0.75,
+          0.5,
+          0.0,
+          1.5
+        ],
+        [
+          0.75,
+          0.25,
+          1.25,
+          0.5,
+          0.0,
+          1.5
+        ],
+        [
+          0.75,
+          -0.25,
+          1.25,
+          0.25,
+          0.0,
+          2.0
+        ],
+        [
+          -1.25,
+          -0.25,
+          -1.0,
+          0.0,
+          0.0,
+          1.5
+        ],
+        [
+          -1.0,
+          -1.0,
+          -0.75,
+          0.0,
+          0.0,
+          3.0
+        ],
+        [
+          -1.25,
+          -1.0,
+          -1.0,
+          -0.25,
+          0.0,
+          3.0
+        ],
+        [
+          -0.75,
+          -0.5,
+          -0.5,
+          -0.25,
+          1.5,
+          3.0
+        ],
+        [
+          -0.5,
+          -0.5,
+          0.0,
+          -0.25,
+          0.0,
+          3.0
+        ],
+        [
+          0.0,
+          -0.5,
+          0.5,
+          -0.25,
+          0.0,
+          2.0
+        ],
+        [
+          0.5,
+          -0.5,
+          0.75,
+          -0.25,
+          1.5,
+          2.0
+        ],
+        [
+          0.75,
+          -0.75,
+          1.25,
+          -0.25,
+          0.0,
+          3.0
+        ],
+        [
+          -0.75,
+          -0.75,
+          -0.5,
+          -0.5,
+          2.0,
+          3.0
+        ],
+        [
+          -0.5,
+          -1.0,
+          0.5,
+          -0.5,
+          0.0,
+          4.0
+        ],
+        [
+          0.5,
+          -0.75,
+          0.75,
+          -0.5,
+          2.5,
+          3.0
+        ],
+        [
+          -0.75,
+          -1.0,
+          -0.5,
+          -0.75,
+          0.0,
+          3.0
+        ],
+        [
+          0.5,
+          -1.0,
+          1.0,
+          -0.75,
+          0.0,
+          3.0
+        ],
+        [
+          1.0,
+          -1.0,
+          1.25,
+          -0.75,
+          0.0,
+          2.0
+        ]
+      ],
+      "occluders": [
+        [
+          -1.25,
+          0.5,
+          -0.75,
+          1.0,
+          0.0,
+          1.0
+        ],
+        [
+          -0.5,
+          0.75,
+          0.0,
+          1.0,
+          0.0,
+          0.5
+        ],
+        [
+          0.25,
+          0.75,
+          0.75,
+          1.0,
+          0.0,
+          0.5
+        ],
+        [
+          0.75,
+          0.5,
+          1.25,
+          1.0,
+          0.0,
+          1.0
+        ],
+        [
+          -1.25,
+          0.0,
+          -0.75,
+          0.5,
+          0.0,
+          1.5
+        ],
+        [
+          0.75,
+          0.25,
+          1.25,
+          0.5,
+          0.0,
+          1.5
+        ],
+        [
+          0.75,
+          -0.25,
+          1.25,
+          0.25,
+          0.0,
+          2.0
+        ],
+        [
+          -1.25,
+          -0.25,
+          -1.0,
+          0.0,
+          0.0,
+          1.5
+        ],
+        [
+          -1.0,
+          -0.75,
+          -0.75,
+          0.0,
+          0.0,
+          2.5
+        ],
+        [
+          -1.25,
+          -1.0,
+          -1.0,
+          -0.25,
+          0.0,
+          2.5
+        ],
+        [
+          -0.75,
+          -0.5,
+          -0.5,
+          -0.25,
+          1.5,
+          2.5
+        ],
+        [
+          -0.5,
+          -0.5,
+          0.0,
+          -0.25,
+          0.0,
+          3.0
+        ],
+        [
+          0.0,
+          -0.5,
+          0.5,
+          -0.25,
+          0.0,
+          2.0
+        ],
+        [
+          0.5,
+          -0.5,
+          0.75,
+          -0.25,
+          1.5,
+          2.0
+        ],
+        [
+          0.75,
+          -0.75,
+          1.25,
+          -0.25,
+          0.0,
+          2.5
+        ],
+        [
+          -0.75,
+          -0.75,
+          -0.5,
+          -0.5,
+          2.0,
+          3.0
+        ],
+        [
+          -0.5,
+          -1.0,
+          0.5,
+          -0.5,
+          0.0,
+          3.5
+        ],
+        [
+          0.5,
+          -0.75,
+          0.75,
+          -0.5,
+          2.5,
+          3.0
+        ],
+        [
+          -1.0,
+          -1.0,
+          -0.5,
+          -0.75,
+          0.0,
+          3.0
+        ],
+        [
+          0.5,
+          -1.0,
+          1.0,
+          -0.75,
+          0.0,
+          3.0
+        ],
+        [
+          1.0,
+          -1.0,
+          1.25,
+          -0.75,
+          0.0,
+          2.0
+        ]
+      ],
+      "flicker": "flame"
     },
     {
       "name": "meadow_windmill_a",

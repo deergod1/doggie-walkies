@@ -51,7 +51,7 @@ import { teach, tickTeach } from './game/teach.js';
 import { updatePointer } from './game/pointer.js';
 import { updateMouseLook } from './game/mouselook.js';
 import { updateLockOn, updateLockMarker } from './game/lockon.js';
-import { depthOf } from './themes/depth.js';
+import { depthOf, themeById } from './themes/depth.js';
 import { goHorde, goSpan, goFeature } from './game/dev.js';
 import { spawnEnemies, killEnemies, clearEnemies } from './game/devspawn.js';
 import { updateSpiders, spiders } from './game/spiders.js';
@@ -72,6 +72,7 @@ import { projectiles } from './game/projectiles.js';
 import { beams } from './game/beams.js';
 import { tickBurning } from './render/burning.js';
 import { tickFlames } from './render/flames.js';
+import { tickFireflies } from './render/fireflies.js';
 import { tickChill } from './render/chilled.js';
 import { tickShock, tickDaze } from './render/shocked.js';
 import { tickStatuses } from './render/statuses.js';
@@ -158,6 +159,7 @@ function frame(now = performance.now()) {
   tickNeighbors(dt);
   tickProps(state.time);
   tickFlames(dt, state.time, focusPoint(player.x, player.visY, player.z));   // the fires: flames, embers, smoke (render/flames.js)
+  tickFireflies(dt, state.map?.biome && themeById(state.map.biome), player.x, player.visY, player.z);   // (render/fireflies.js)
   if (state.world) animateWorld(state.world, dt, state.time);
   updateHud(player, state.map);
   updateConsole();   // the chat box: the chronicle and the game's last word (game/console.js)

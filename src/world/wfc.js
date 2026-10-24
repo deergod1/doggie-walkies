@@ -83,7 +83,11 @@ export class WFC {
       let r = R() * sum, tile = bestDom[bestDom.length - 1];
       for (const t of bestDom) if ((r -= w(t)) < 0) { tile = t; break; }
       const near = [0, 1, 2, 3].map(d => this.tiles.get(step(best, d))?.K).filter(Boolean);
-      this.tiles.set(best, { ...tile, K: layersOf(tile.kind, R(), near) });
+      let K = layersOf(tile.kind, R(), near);
+      // a theme with fewer floating floors (themes/index.js `layers`) keeps them only now and then
+      const keep = this.layout(depthOf(best)).theme.layers;
+      if (keep !== undefined && K > 1 && R() >= keep) K = 1;
+      this.tiles.set(best, { ...tile, K });
       todo.delete(best);
     }
   }

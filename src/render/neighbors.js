@@ -239,7 +239,11 @@ function geometryFor(geo) {
   return entry;
 }
 
-// landmarks: [{ name, x, y, z, yaw }] (map.rewardSites[].landmark); their geometry is the catalog's
+// what of a cube's props shows in the surroundings: its landmarks (map.rewardSites[].landmark) and
+// its theme's little set pieces (map.vignettes, cubegen/vignettes.js), [{ name, x, y, z, yaw }]
+export const shownFar = map => [...(map.rewardSites || []).map(s => s.landmark).filter(Boolean), ...(map.vignettes || [])];
+
+// landmarks: shownFar(map); their geometry is the catalog's
 function addLandmarks(g) {
   if (g.disposed) return;
   for (const L of g.landmarks) {
