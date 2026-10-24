@@ -52,15 +52,18 @@ export function newBake(geo, group, flip = false) {
 }
 
 // a fixed light of the cube: where it is in the cube (it is taken out of the scene: the shaders
-// walk the list instead); false if the cube has as many as it can take
-export function addBakedLight(bake, light, group) {
+// walk the list instead); false if the cube has as many as it can take. holder: what it hung on
+// (it shines only while that shows: a portal's gate hidden once its face opens)
+export function addBakedLight(bake, light, group, holder = group) {
   if (bake.lights.length >= MAX_BAKED) return false;
   group.updateWorldMatrix(true, true);
   const at = light.getWorldPosition(new THREE.Vector3());
   group.worldToLocal(at);
-  bake.lights.push({ light, at, channel: -1, twin: null });
+  bake.lights.push({ light, at, holder, channel: -1, twin: null });
   return true;
 }
+// whether a fixed light's holder shows (all the way up to its cube)
+const shows = (s, group) => { for (let o = s.holder; o && o !== group; o = o.parent) if (!o.visible) return false; return s.light.visible; };
 
 // The cube's solids drawn with their baked shadows (render/partmeshes.js): their lightmap's
 // texels (attribute lm).
@@ -128,7 +131,7 @@ function updateBake(bake, now) {
   let n = 0;
   if (group.visible && fade > 0) for (const s of bake.lights) {
     const l = s.light, o = n * 8, k = l.intensity * fade;
-    if (k <= 0) continue;
+    if (k <= 0 || !shows(s, group)) continue;
     L[o] = s.at.x; L[o + 1] = s.at.y; L[o + 2] = s.at.z; L[o + 3] = l.distance || 1e3;
     L[o + 4] = l.color.r * k; L[o + 5] = l.color.g * k; L[o + 6] = l.color.b * k; L[o + 7] = bake.ready ? s.channel : -1;
     n++;

@@ -14,6 +14,7 @@ import { PROP_FILES } from '../core/propmetadata.js';
 import { splitFlames, flameSet } from './flames.js';
 
 import { props } from '../core/propcatalog.js';
+import { glowSpots } from '../core/glowspots.js';
 export { props } from '../core/propcatalog.js';
 
 const wind = { value: 0 };
@@ -29,6 +30,9 @@ export function registerProps(gltf) {
     const p = props.byName.get(o.name);
     if (!p) { console.warn('prop without metadata (tools/prop-metadata.mjs):', o.name); continue; }
     p.parts = parts; delete p.flames; delete p.wholeParts;
+    // where its light comes from: its glowing geometry (core/glowspots.js), a fire's flames too
+    const glow = parts.filter(x => x.material.name.endsWith('_glow'));
+    p.lightSpots = glow.length ? glowSpots(glow.map(x => ({ pos: x.geometry.attributes.position.array, index: x.geometry.index?.array }))) : null;
     splitFlames(p);   // a fire's flames are drawn as flames (render/flames.js)
     // an animated prop (the treasure chest) keeps its whole node tree and clips (render/chests.js)
     if (o.userData.clips) Object.assign(p, { template: o, clips: gltf.animations });
@@ -130,6 +134,7 @@ export function propBatchGeometry(p, glow) {
   return merged;
 }
 
+const LOWEST = 0.3;   // a ground prop's light at least this high over its foot
 const fireSeed = q => (q.x * 1.7 + q.z * 2.3) % 6.28;   // (a fire's flame and light flicker as one)
 // placed: [{ name, x, y, z, yaw, s, tint }] -> instanced meshes (and light sources) in group;
 // water: the cube's (render/wet.js waterUniforms): what lies all under it wavers with the bed
@@ -174,11 +179,20 @@ export function buildProps(placed, group, water = null) {
   // mushroom's breathes ('pulse')
   const big = g => g.p.landmark || g.p.vignette ? 1 : 0;
   glowing.sort((a, b) => big(b) - big(a) || b.p.intensity - a.p.intensity);
+  // a light where each spot of its glow is (core/glowspots.js: inside the prop it would be shut
+  // in by its baked shadow), sharing the prop's brightness; one over it if it has no glow loaded
+  const spotAt = new THREE.Vector3();
   for (const { p, q, flame } of glowing) {
-    const l = new THREE.PointLight(p.light, p.intensity * 2, p.landmark || p.vignette ? 5 : 4, 2);
-    l.position.set(q.x, q.y + (p.attach === 'ceiling' ? -0.4 : p.landmark || p.vignette ? 1.1 : 0.5), q.z);
-    if (p.flames || p.flicker) fireLights.push({ light: l, gain: p.intensity * 2, seed: fireSeed(q), i: flame, pulse: p.flicker === 'pulse' });
-    group.add(l);
+    const spots = p.lightSpots?.length ? p.lightSpots : [{ x: 0, y: p.attach === 'ceiling' ? -0.4 : p.landmark || p.vignette ? 1.1 : 0.5, z: 0 }];
+    const gain = p.intensity * 2 / Math.sqrt(spots.length);
+    placeMatrix(q, m4);
+    for (const spot of spots) {
+      const l = new THREE.PointLight(p.light, gain, p.landmark || p.vignette ? 5 : 4, 2);
+      // (a ground prop's light not down in the grass: from there it lights a puddle round it)
+      l.position.copy(spotAt.set(spot.x, p.attach === 'ground' ? Math.max(spot.y, LOWEST) : spot.y, spot.z).applyMatrix4(m4));
+      if (p.flames || p.flicker) fireLights.push({ light: l, gain, seed: fireSeed(q), i: flame, pulse: p.flicker === 'pulse' });
+      group.add(l);
+    }
   }
   if (flames.length || fireLights.length) group.add(flameSet(flames, fireLights).mesh);
 }

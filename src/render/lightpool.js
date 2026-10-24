@@ -25,7 +25,7 @@ export function adoptLights(group, bake = null) {
   group.traverse(o => { if (o.isPointLight) found.push(o); });
   for (const l of found) {
     const parent = l.parent;
-    if (bake && !bake.flip && !moves(l, group) && addBakedLight(bake, l, group)) { parent.remove(l); continue; }
+    if (bake && !bake.flip && !moves(l, group) && addBakedLight(bake, l, group, parent)) { parent.remove(l); continue; }
     parent.remove(l); sources.push({ l, parent, group, gain: 1, pos: new THREE.Vector3() });
   }
 }

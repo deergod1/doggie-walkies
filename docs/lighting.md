@@ -12,6 +12,15 @@ anti-aliasing (MSAA) and every material's own look stay what they were.
 | the fixed lights | what a cube's glowing things give off, every one of them (`render/props.js`): lanterns, fires, lava, portals, crystals, a trial's braziers (`render/lightpool.js adoptLights` takes those not on a villager; at most 128 a cube) | baked when the cube is shown (`render/bake.js`) |
 | the moving lights | the hero's lamp (`render/character.js`, a three.js light); shots, enemies, loot, villagers' lamps, a partner (`trackLight`, `render/lightpool.js`) | the hero's lamp: a cube of shadow maps every frame; the others: none |
 
+**Where a prop's light is:** where it glows (`core/glowspots.js`): its glowing triangles in
+pieces (a big piece in parts 0.8 across), the pieces nearer than 0.5 one spot, at most six a prop
+(the lantern tree's lanterns), each moved 0.35 out along the way its glow faces (a toadstool's
+gills face down: its lights go under the cap; a window out of its wall) and, on the ground, at
+least 0.3 over its foot. At the prop's middle a light would be inside the prop, shut in by its
+own baked shadow (a shed's walls, a furnace, a tree's trunk). A prop with several shares its
+brightness out between them. A fixed light shines only while what it hung on shows (a portal's
+gate, hidden once its face opens).
+
 **The fixed parts** cast the baked shadows: the cube's solids (terrain, stone, wood) and its props
 that cast shadows. They stay out of three.js's shadow map of the sun (`render/bake.js
 keepFixedOutOfSun`), which then only holds what moves.
