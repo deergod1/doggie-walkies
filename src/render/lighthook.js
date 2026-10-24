@@ -33,6 +33,14 @@ export function lightTable(n) {
   return t;
 }
 
+// uBakeSun before a cube's sun is baked (and where it never is): never sampled then (uBakeR is
+// 0), but a shadow sampler must always have a depth texture that compares, or WebGL drops the
+// draw (three's own fallback for an empty shadow sampler is never uploaded). needsUpdate: every
+// renderer (the item pictures have their own) makes its own.
+export const NO_SUN = new THREE.DepthTexture(1, 1);
+NO_SUN.compareFunction = THREE.LessEqualCompare;
+NO_SUN.needsUpdate = true;
+
 // the shared uniforms: the bake of the cube being played in (render/bake.js setCurrentBake)
 export const BAKE = {
   uBakeOn: { value: 0 },                       // 1 while the world's scene is drawn
@@ -42,7 +50,7 @@ export const BAKE = {
   uBakeO: { value: new THREE.Vector3() },      // the cube's origin in the world
   ...Object.fromEntries(Array.from({ length: SETS }, (_, i) => [['uBakeLm' + i, { value: null }], ['uBakeVol' + i, { value: null }]]).flat()),
   uBakeV0: { value: new THREE.Vector3() }, uBakeVS: { value: new THREE.Vector3(1, 1, 1) },   // the volume's corner and size (in the cube)
-  uBakeSun: { value: null },                   // the sun's shadow map of the cube's fixed parts
+  uBakeSun: { value: NO_SUN },                 // the sun's shadow map of the cube's fixed parts
   uBakeSunM: { value: new THREE.Matrix4() },   // from the cube's coordinates into it
   uMoveN: { value: 0 },                        // how many moving lights
   uMoveT: { value: lightTable(MAX_MOVING) },   // their table (x, y, z in the world; channel unused)

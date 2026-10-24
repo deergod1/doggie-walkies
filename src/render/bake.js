@@ -19,7 +19,7 @@
 // a prop set come late) takes the bake it had at once (CACHE).
 import * as THREE from 'three';
 import { renderer, sun } from './scene.js';
-import { BAKE, MAX_BAKED, SETS, lightTable } from './lighthook.js';
+import { BAKE, MAX_BAKED, SETS, NO_SUN, lightTable } from './lighthook.js';
 
 const SUN_MAP = 2048;           // texels a side of the sun's shadow map of the fixed parts
 const CUBE_MAP = 1024;          // texels a side of each light's cube of shadow maps (while baking)
@@ -40,7 +40,7 @@ const uniformsOf = () => ({
   uBakeR: { value: 0 }, uBakeN: { value: 0 }, uBakeT: { value: lightTable(MAX_BAKED) }, uBakeO: { value: new THREE.Vector3() },
   ...Object.fromEntries(Array.from({ length: SETS }, (_, i) => [['uBakeLm' + i, { value: null }], ['uBakeVol' + i, { value: null }]]).flat()),
   uBakeV0: { value: new THREE.Vector3() }, uBakeVS: { value: new THREE.Vector3(1, 1, 1) },
-  uBakeSun: { value: null }, uBakeSunM: { value: new THREE.Matrix4() },
+  uBakeSun: { value: NO_SUN }, uBakeSunM: { value: new THREE.Matrix4() },
 });
 
 // A new cube's bake: its uniforms exist before it is baked (its lights dark until then).
