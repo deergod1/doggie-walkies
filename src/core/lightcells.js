@@ -3,6 +3,7 @@
 // cube), each with the lights whose reach comes into it, the strongest there first (by how bright
 // each is at the cell's nearest point), `max` at most. lights: [{ x, z, reach, intensity }] ->
 // Float32Array: per cell `max` indices into the lights, -1 after the last.
+// learn: light.html#cells #cells-code (see learn/README.md)
 export function lightCells(lights, { cells, from, max }) {
   const out = new Float32Array(cells * cells * max).fill(-1);
   for (let cz = 0; cz < cells; cz++) for (let cx = 0; cx < cells; cx++) {

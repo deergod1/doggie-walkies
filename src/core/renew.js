@@ -28,6 +28,7 @@ import { ballAt } from './combat.js';
 // (his final rewind's end: how far he has risen, 0 .. 1, at time t of it)
 export const risenAt = t => { const u = Math.min(1, Math.max(0, t / RENEW_FIGHT.ascend.time)); return u * u * (3 - 2 * u); };
 
+// learn: memory.html#rewind (see learn/README.md)
 export const RENEW_FIGHT = Object.freeze({
   weapons: ['weapon_sword_medium', 'weapon_bow_hunting', 'weapon_flail_morningstar', 'weapon_flail_twin'],   // in his hands, phase by phase
   sample: 1 / 20,                // s between the frames of a tape
@@ -63,7 +64,9 @@ export const duskAt = (stage, share) => Math.min(1, Math.max(0, (stage - 1 + Mat
 
 // --- tapes ---------------------------------------------------------------------------------
 // A tape: frames at rising times (`t`, the room's clock), each what the caller recorded then.
+// learn: memory.html#rewind #tape-code (see learn/README.md)
 export const newTape = () => ({ frames: [] });
+// learn: memory.html#rewind #tape-code (see learn/README.md)
 export function record(tape, t, frame) {
   const last = tape.frames.at(-1);
   if (last && t <= last.t) return false;
@@ -74,6 +77,7 @@ export function record(tape, t, frame) {
 export const tapeLength = tape => tape.frames.at(-1)?.t ?? 0;
 // the frames round time t and how far between them: { a, b, k } (a === b at either end; null:
 // an empty tape)
+// learn: memory.html#rewind #tape-code (see learn/README.md)
 export function spanAt(tape, t) {
   const F = tape.frames;
   if (!F.length) return null;

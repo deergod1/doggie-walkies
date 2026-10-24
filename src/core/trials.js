@@ -82,7 +82,9 @@ export function parseForce(s) {
 
 // --- timing (docs/trials.md "Timing check") -----------------------------------------------------
 
+// learn: world.html#trial-check (see learn/README.md)
 export const ARM_TIME = 3;   // s of telegraph between arming and the clock running
+// learn: world.html#trial-check (see learn/README.md)
 export const SLACK = 1.5;    // a slow player: every arrival times this
 export const DRAIN_TIME = 5;   // s for the water to drain back once resolved
 

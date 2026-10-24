@@ -33,7 +33,7 @@ import { store, play, saveAs, newSavedWorld, savedHero, savedWorld, forget } fro
 import { quitToMenu } from './menu.js';
 import { setFluidPalettes, paletteOf } from '../render/fluidpal.js';
 import { rowSlot } from '../themes/fluids.js';
-import { BAKE } from '../render/lighthook.js';
+import { LIGHT_VIEWS, lightview } from './teach.js';
 
 const dev = cmd => addCommand(commands, { ...cmd, dev: true });
 const ahead = (d = 2.5) => ({ x: player.x + Math.sin(player.yaw) * d, y: player.y, z: player.z + Math.cos(player.yaw) * d });
@@ -323,13 +323,12 @@ dev({
   },
 });
 
-// what the fixed lights' baked shadows look like (render/lighthook.js uBakeDbg)
-const LIGHT_VIEWS = ['off', 'sun', 'lights', 'lightmap'];
+// what the fixed lights' baked shadows look like (game/teach.js lightview)
 addType(commands, { name: 'lightview', values: () => LIGHT_VIEWS.map(v => ({ value: v, label: v })) });
 dev({
   name: 'lightview', help: "show the baked light: the sun's shadow, the fixed lights alone, the lightmap's texels (off: the picture)",
   args: [{ name: 'view', type: 'lightview' }],
-  run({ view }) { BAKE.uBakeDbg.value = LIGHT_VIEWS.indexOf(view); return `Light view: ${view}`; },
+  run({ view }) { lightview(view); return `Light view: ${view}`; },
 });
 
 dev({

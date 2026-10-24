@@ -39,6 +39,7 @@ export function releaseLights(group) { sources = sources.filter(s => s.group !==
 // one added to its object is taken out again. gain: how much brighter it shines than the source
 // says (the lights of shots, projectiles, flask areas, loot and partners were tuned while they
 // shone twice, in the scene and from the old light pool: 2 keeps their look).
+// learn: light.html#kinds (see learn/README.md)
 export function trackLight(light, object, group = object, gain = 1) {
   if (light.parent) light.parent.remove(light);
   sources.push({ l: light, parent: object, group, gain, pos: new THREE.Vector3() });

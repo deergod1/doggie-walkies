@@ -53,7 +53,7 @@ export const camera = new THREE.PerspectiveCamera(28, innerWidth / innerHeight, 
 // learn: drawing.html#light (see learn/README.md)
 export const hemi = new THREE.HemisphereLight(0xdfeaff, 0x3a3020, 1.1);
 scene.add(hemi);
-// learn: drawing.html#light (see learn/README.md)
+// learn: drawing.html#light, light.html#shadow-map (see learn/README.md)
 export const sun = new THREE.DirectionalLight(0xfff1dd, 2.4);
 sun.position.set(N / 2 - 12, 34, N / 2 + 8);
 sun.target.position.set(N / 2, 0, N / 2);

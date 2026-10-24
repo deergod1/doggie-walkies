@@ -62,6 +62,7 @@ const LIMIT = 6 * N;   // how far (in cells walked) a way may go
 // The cheapest way from node `from` to node `to`, else to the reached node closest to goal
 // { x, y, z } (height counting like distance). bad: from -> Set of nodes not to go to from it.
 // { path: nodes, how: how each is got to (how[0]: null) }
+// learn: paths.html#hero-way #way-code (see learn/README.md)
 export function findWay(from, to, goal, bad) {
   const map = state.map;
   structureLinks(map);   // (gives the pieces their cells)

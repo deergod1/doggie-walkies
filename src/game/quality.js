@@ -14,11 +14,13 @@ import { setLampShadow } from '../render/character.js';
 import { sun } from '../render/scene.js';
 import { setMoteRate } from '../render/motes.js';
 
+// learn: light.html#looks #looks-code (see learn/README.md)
 export const LOOKS = {
   full: { baked: true, cells: CELL_MAX, lamp: true, sunMap: 2048, motes: 1 },
   simple: { baked: false, cells: 6, lamp: false, sunMap: 1024, motes: 0.5 },
 };
 let current = null;
+// learn: light.html#looks-code (see learn/README.md)
 function apply() {
   const g = graphics();
   if (g === current) return;

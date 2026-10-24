@@ -28,6 +28,8 @@
 //                                            these enemies
 //   pause(), resume(), await step(frames), speed(0.25)
 //   await tune('src/core/enemies.js#SPIDER.aggro', 6), tune(obj, 'key', value), untune(), tuned()
+//   lightview(view)                          the baked light alone: 'lights' (the fixed lamps' light),
+//                                            'sun' (its baked shadow), 'lightmap' (its texels), 'off'
 //   toScreen(at)                             where a place is in the game's window, in pixels
 //   status()                                 what is on, in words
 //   reset()                                  everything above undone
@@ -42,6 +44,7 @@ import { pace, pause, resume, step, setSpeed, resetPace } from './pace.js';
 import { tune, untune, tuned } from './tune.js';
 import { lens, lensesOn, tickLenses, resetLenses } from './lenses.js';
 import { DISPLAY } from '../render/fonts.js';
+import { BAKE } from '../render/lighthook.js';
 
 const root = new THREE.Group();
 root.name = 'teach';
@@ -152,21 +155,32 @@ export function toScreen(at) {
     onScreen: Math.abs(v.x) <= 1 && Math.abs(v.y) <= 1 };
 }
 
+// the baked light alone (render/lighthook.js uBakeDbg; the console's /lightview): what the fixed
+// lamps give, the sun's baked shadow, or the lightmap's texels; 'off': the picture again
+export const LIGHT_VIEWS = ['off', 'sun', 'lights', 'lightmap'];
+export function lightview(view = 'off') {
+  if (!LIGHT_VIEWS.includes(view)) throw new Error(`There is no light view "${view}". Views: ${LIGHT_VIEWS.join(', ')}`);
+  BAKE.uBakeDbg.value = LIGHT_VIEWS.indexOf(view);
+  return view;
+}
+const lightviewOn = () => LIGHT_VIEWS[BAKE.uBakeDbg.value] ?? 'off';
+
 // what is on, in a few words (for the Teacher's view of the game)
 export function status() {
   const parts = [];
   if (pace.paused) parts.push('paused');
   if (pace.speed !== 1) parts.push(`speed ${pace.speed}`);
   if (lensesOn().length) parts.push(`lenses: ${lensesOn().join(', ')}`);
+  if (lightviewOn() !== 'off') parts.push(`light view: ${lightviewOn()}`);
   if (drawings.size) parts.push(`${drawings.size} drawing${drawings.size > 1 ? 's' : ''} (${[...drawings.keys()].slice(0, 8).join(', ')})`);
   const t = tuned();
   if (t.length) parts.push(`tuned: ${t.map(c => `${c.label} ${JSON.stringify(c.before)} -> ${JSON.stringify(c.now)}`).join('; ')}`);
   return parts.join('; ');
 }
 
-// all of it undone: drawings, lenses, time and tuned values
+// all of it undone: drawings, lenses, the light view, time and tuned values
 export function reset() {
-  clear(); resetLenses(); resetPace();
+  clear(); resetLenses(); resetPace(); lightview('off');
   return untune();
 }
 
@@ -199,7 +213,7 @@ export function tickTeach() {
 
 export const teach = {
   pin, label, ring, sector, cell, arrow, path, clear, toScreen,
-  lens, lenses: lensesOn,
+  lens, lenses: lensesOn, lightview,
   pause, resume, step, speed: setSpeed, get paused() { return pace.paused; },
   tune, untune, tuned, status, reset,
 };

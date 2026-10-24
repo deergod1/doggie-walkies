@@ -57,7 +57,7 @@
   <p class="small muted" lang="de">S ist der Start, Z das Ziel. Die Farben zeigen, wie viele Schritte jedes Feld entfernt ist. Den A*-Knopf kannst du erst mal ignorieren, der kommt gleich.</p>
 </section>
 
-<section class="slide" id="bfs" data-lv="2" data-src="src/game/enemyai.js#decide,act">
+<section class="slide" id="bfs" data-lv="2" data-src="src/game/enemyai.js#decide,act src/physics/playernav.js#header">
   <h2 lang="en">Breadth-first search, and breadcrumbs</h2>
   <h2 lang="de">Breitensuche und Brotkrumen</h2>
   <div class="cols">
@@ -66,8 +66,8 @@
       <p lang="de">Die Flut hat einen echten Namen: <a class="w" href="words.html#bfs">Breitensuche</a> (Breadth-First Search, BFS). "Breite zuerst" heißt: Sie geht erst in die Breite, bevor sie weit geht.</p>
       <p lang="en">How does it know the way <i>back</i>? Every time the water reaches a new square, it leaves a <b>breadcrumb</b> there: "I came from that square". At the goal, follow the breadcrumbs back to the start, and turn the list around. That's the path!</p>
       <p lang="de">Woher kennt sie den Weg <i>zurück</i>? Jedes Mal, wenn das Wasser ein neues Feld erreicht, lässt es dort eine <b>Brotkrume</b> liegen: "Ich kam von dem Feld da." Am Ziel folgst du den Brotkrumen zurück zum Start und drehst die Liste um. Das ist der Weg!</p>
-      <p lang="en">Monsters use BFS to chase you. Your hero uses it too when you click on the floor. If the spot cannot be reached, the hero walks to the reachable square closest to it.</p>
-      <p lang="de">Monster benutzen die Breitensuche, um dich zu jagen. Dein Held benutzt sie auch, wenn du auf den Boden klickst. Wenn die Stelle nicht erreichbar ist, läuft der Held zum erreichbaren Feld, das am nächsten dran ist.</p>
+      <p lang="en">Monsters use BFS to chase you. When you click on the floor, your hero searches too, but in a smarter way, because he can climb ladders and jump: <a class="deeper" data-lv="2" href="#hero-way">the hero's way</a>.</p>
+      <p lang="de">Monster benutzen die Breitensuche, um dich zu jagen. Wenn du auf den Boden klickst, sucht dein Held auch, aber schlauer, denn er kann Leitern hochklettern und springen: <a class="deeper" data-lv="2" href="#hero-way">der Weg des Helden</a>.</p>
     </div>
     <div class="card">
       <h3 lang="en">Monsters give up</h3>
@@ -125,6 +125,39 @@
   </div>
 </section>
 
+<section class="slide" id="hero-way" data-lv="2" data-src="src/physics/playernav.js#header,findWay src/game/orders.js#header">
+  <h2 lang="en">The hero's way: cheapest first</h2>
+  <h2 lang="de">Der Weg des Helden: das Billigste zuerst</h2>
+  <div class="cols">
+    <div>
+      <p lang="en">Click on the floor, and the hero finds his own way there. He can do more than a monster: he <b>climbs ladders</b> and <b>jumps</b> over gaps, up onto a ledge or down off one.</p>
+      <p lang="de">Klick auf den Boden, und der Held findet selbst seinen Weg dorthin. Er kann mehr als ein Monster: Er <b>klettert Leitern</b> hoch und <b>springt</b> über Lücken, auf einen Absatz hinauf oder von einem hinunter.</p>
+      <p lang="en">But a ladder or a jump takes longer than walking. So every step gets a <b>cost</b>: a cell walked costs 1, a ladder or a jump more. The search always goes on from the place that was <b>cheapest</b> to get to so far (using the same <a class="w" href="words.html#heap">heap</a> as A*, just without the hunch). The first time it reaches the goal, it has the cheapest way.</p>
+      <p lang="de">Aber eine Leiter oder ein Sprung dauert länger als Laufen. Darum bekommt jeder Schritt <b>Kosten</b>: Ein gelaufenes Feld kostet 1, eine Leiter oder ein Sprung mehr. Die Suche macht immer bei dem Ort weiter, der bisher am <b>billigsten</b> zu erreichen war (mit demselben <a class="w" href="words.html#heap">Heap</a> wie A*, nur ohne die Ahnung). Wenn sie das Ziel zum ersten Mal erreicht, hat sie den billigsten Weg.</p>
+      <p lang="en">So the hero takes the stairs if they are not much longer, and the ladder if they are.</p>
+      <p lang="de">So nimmt der Held die Treppe, wenn sie nicht viel länger ist, und die Leiter, wenn doch.</p>
+    </div>
+    <div class="card">
+      <h3 lang="en">On the way</h3>
+      <h3 lang="de">Unterwegs</h3>
+      <ul>
+        <li lang="en">Can't get there? He walks to the reachable spot closest to it.</li>
+        <li lang="de">Kommt er nicht hin? Dann läuft er zu dem erreichbaren Ort, der am nächsten dran ist.</li>
+        <li lang="en">Where he only walks, he cuts the corners and goes straight, as long as the straight line stays on the way.</li>
+        <li lang="de">Wo er nur läuft, schneidet er die Ecken ab und geht gerade, solange die gerade Linie auf dem Weg bleibt.</li>
+        <li lang="en">A jump that doesn't work out is crossed off, and the way is planned again without it.</li>
+        <li lang="de">Ein Sprung, der nicht klappt, wird gestrichen, und der Weg wird ohne ihn neu geplant.</li>
+        <li lang="en">Click a monster, a chest, a person, a portal or a door: he walks up to it and uses it.</li>
+        <li lang="de">Klick auf ein Monster, eine Truhe, eine Person, ein Portal oder eine Tür: Er läuft hin und benutzt es.</li>
+        <li lang="en">Press a key to walk, and your keys take over at once.</li>
+        <li lang="de">Drück eine Taste zum Laufen, und deine Tasten übernehmen sofort.</li>
+      </ul>
+      <a class="deeper" data-lv="3" href="#way-code" lang="en">The real code</a>
+      <a class="deeper" data-lv="3" href="#way-code" lang="de">Der echte Code</a>
+    </div>
+  </div>
+</section>
+
 <section class="slide" id="sight" data-lv="2" data-src="src/physics/enemynav.js#clearLine">
   <h2 lang="en">Can it see me? Line of sight</h2>
   <h2 lang="de">Kann es mich sehen? Die Sichtlinie</h2>
@@ -175,6 +208,25 @@
       <p lang="de">Siehst du den Trick von der letzten Folie? Eine Bewegung, die schon in <code>have</code> ist, kostet nur <code>0.2</code>. Sonst kostet sie ihre normalen <code>cost</code> plus ein bisschen zufälliges <code>jitter</code>.</p>
       <p lang="en">Sometimes any of several floors will do, like "any safe floor" when the builder makes sure you can get back from a pit. Then <code>goal</code> is a test instead of one floor. There is no single goal to guess the distance to, so the hunch is always <code>0</code>, and A* spreads out like the flood (but still cheapest first). <code>ok</code> can skip moves, for example ones you could only take one way.</p>
       <p lang="de">Manchmal ist jeder von mehreren Böden recht, zum Beispiel "irgendein sicherer Boden", wenn der Baumeister prüft, dass du aus einer Grube wieder herauskommst. Dann ist <code>goal</code> ein Test statt eines Bodens. Es gibt kein einzelnes Ziel, zu dem man die Strecke schätzen könnte, also ist die Ahnung immer <code>0</code>, und A* breitet sich aus wie die Flut (aber immer noch das Billigste zuerst). <code>ok</code> kann Bewegungen überspringen, zum Beispiel solche, die nur in eine Richtung gehen.</p>
+    </div>
+  </div>
+</section>
+
+
+<section class="slide" id="way-code" data-lv="3" data-src="src/physics/playernav.js#findWay">
+  <h2 lang="en">The real code: the hero's way</h2>
+  <h2 lang="de">Der echte Code: der Weg des Helden</h2>
+  <div class="cols wide-left">
+    <pre data-code="src/physics/playernav.js#findWay"></pre>
+    <div>
+      <p lang="en"><code>cost</code>: the cheapest cost found so far to each floor; <code>prev</code>: the breadcrumbs, with <code>how</code> each floor was reached (walked, a ladder, a jump).</p>
+      <p lang="de"><code>cost</code>: die bisher billigsten Kosten zu jedem Boden; <code>prev</code>: die Brotkrumen, mit <code>how</code>, wie jeder Boden erreicht wurde (gelaufen, eine Leiter, ein Sprung).</p>
+      <p lang="en"><code>heap.pop()</code> hands out the floor that is cheapest to get to. <code>done</code> remembers the floors already handed out: their cost can't get any lower.</p>
+      <p lang="de"><code>heap.pop()</code> gibt den Boden heraus, der am billigsten zu erreichen ist. <code>done</code> merkt sich die Böden, die schon dran waren: Ihre Kosten können nicht mehr kleiner werden.</p>
+      <p lang="en"><code>far</code> measures how far a floor is from where you clicked. <code>best</code> keeps the closest one reached, for when the goal can't be.</p>
+      <p lang="de"><code>far</code> misst, wie weit ein Boden von der Stelle weg ist, wo du hingeklickt hast. <code>best</code> merkt sich den nächsten erreichten, für den Fall, dass das Ziel nicht erreichbar ist.</p>
+      <p lang="en"><code>bad</code> holds the jumps that didn't work out, so they are left out next time.</p>
+      <p lang="de"><code>bad</code> enthält die Sprünge, die nicht geklappt haben, damit sie beim nächsten Mal weggelassen werden.</p>
     </div>
   </div>
 </section>

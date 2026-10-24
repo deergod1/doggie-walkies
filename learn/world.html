@@ -381,6 +381,57 @@
   </div>
 </section>
 
+<section class="slide" id="trials" data-lv="1" data-src="src/core/trials.js#header">
+  <h2 lang="en">Try it: rooms with a puzzle</h2>
+  <h2 lang="de">Probier es: Räume mit einem Rätsel</h2>
+  <div class="cols wide-right">
+    <div>
+      <p lang="en">Some cubes are more than a way to the exit. A <b>trial room</b> is built around one goal:</p>
+      <p lang="de">Manche Würfel sind mehr als ein Weg zum Ausgang. Ein <b>Prüfungsraum</b> ist um ein Ziel herum gebaut:</p>
+      <ul>
+        <li lang="en"><b>Events</b> change the room while you are in it: the water rises, the floor crumbles behind you, fog sinks down. Get to the goal in time!</li>
+        <li lang="de"><b>Ereignisse</b> verändern den Raum, während du drin bist: Das Wasser steigt, der Boden bröckelt hinter dir weg, Nebel sinkt herab. Erreiche das Ziel rechtzeitig!</li>
+        <li lang="en"><b>Puzzles</b> take no hurry: turn mirrors until the beam hits, light every brazier, push crates onto plates, or slide across the ice.</li>
+        <li lang="de"><b>Rätsel</b> haben keine Eile: Dreh Spiegel, bis der Strahl trifft, zünde jede Feuerschale an, schieb Kisten auf Platten oder rutsch übers Eis.</li>
+      </ul>
+      <p lang="en">This is the <span data-name="Ice slide">Ice slide</span>, made and solved by the game's own code. On ice you can't stop: you slide until a rock or the rim stops you. Can you reach the golden plate in as few slides as the solver?</p>
+      <p lang="de">Das ist die <span data-name="Ice slide">Eisrutsche</span>, gebaut und gelöst vom echten Code des Spiels. Auf Eis kannst du nicht anhalten: Du rutschst, bis dich ein Stein oder der Rand stoppt. Schaffst du es mit so wenigen Rutschern zur goldenen Platte wie der Löser?</p>
+    </div>
+    <div class="demo real" data-demo="iceslide"></div>
+  </div>
+</section>
+
+<section class="slide" id="trial-check" data-lv="2" data-src="src/cubegen/trials/solve.js#makeSlide,solveSlide,makeCrates,pullSearch src/cubegen/trials/timing.js#header">
+  <h2 lang="en">Proving a puzzle can be solved</h2>
+  <h2 lang="de">Beweisen, dass ein Rätsel lösbar ist</h2>
+  <div class="cols">
+    <div>
+      <p lang="en">A puzzle made by dice could be impossible. Or far too easy. Or it could have a trap you can never get out of. So every puzzle is made together with a <a class="w" href="words.html#solver">solver</a>: a program that tries every way. The maker throws dice, the solver checks, and the field is thrown away until one is good. Just like the inspector!</p>
+      <p lang="de">Ein Rätsel aus Würfelwürfen könnte unmöglich sein. Oder viel zu leicht. Oder eine Falle haben, aus der du nie herauskommst. Darum wird jedes Rätsel zusammen mit einem <a class="w" href="words.html#solver">Löser</a> gebaut: einem Programm, das jeden Weg ausprobiert. Der Bauer würfelt, der Löser prüft, und das Feld wird weggeworfen, bis eines gut ist. Genau wie beim Prüfer!</p>
+      <ul>
+        <li lang="en"><b>Ice slide:</b> a <a class="w" href="words.html#bfs">breadth-first search</a> over the places where you can stop. Switch on "every stop" in the demo: that's what it found.</li>
+        <li lang="de"><b>Eisrutsche:</b> eine <a class="w" href="words.html#bfs">Breitensuche</a> über die Orte, an denen du anhalten kannst. Schalte in der Demo "jeder Halt" an: Das hat sie gefunden.</li>
+        <li lang="en"><b>Mirrors:</b> every setting of every mirror is tried, a few thousand. There must also be a wrong setting that <i>looks</i> right.</li>
+        <li lang="de"><b>Spiegel:</b> Jede Stellung jedes Spiegels wird ausprobiert, ein paar Tausend. Es muss auch eine falsche Stellung geben, die richtig <i>aussieht</i>.</li>
+        <li lang="en"><b>Crates on plates:</b> backwards! Start with every crate on its plate and <i>pull</i> them away, every way you can. The state furthest away becomes the start.</li>
+        <li lang="de"><b>Kisten auf Platten:</b> rückwärts! Fang mit jeder Kiste auf ihrer Platte an und <i>zieh</i> sie weg, auf jede mögliche Art. Der Zustand, der am weitesten weg ist, wird der Anfang.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 lang="en">Events: a slow player</h3>
+      <h3 lang="de">Ereignisse: ein langsamer Spieler</h3>
+      <p lang="en">For the rising water, the check works out how soon you could reach every floor, walking, climbing and jumping. But not like a perfect player: every time is taken <b data-val="src/core/trials.js#SLACK">1.5</b> times, plus <b data-val="src/core/trials.js#ARM_TIME">3</b> seconds to notice what's going on. The water must never catch that slow player.</p>
+      <p lang="de">Beim steigenden Wasser rechnet die Zeitprüfung aus, wie schnell du jeden Boden erreichen könntest, laufend, kletternd und springend. Aber nicht wie ein perfekter Spieler: Jede Zeit wird <b data-val="src/core/trials.js#SLACK">1,5</b>-mal genommen, plus <b data-val="src/core/trials.js#ARM_TIME">3</b> Sekunden, um zu merken, was los ist. Das Wasser darf diesen langsamen Spieler nie erwischen.</p>
+      <p lang="en">And the tests then let the real hero, with the real physics, run that way while the water rises. He has to make it.</p>
+      <p lang="de">Und die Tests lassen dann den echten Helden, mit der echten Physik, diesen Weg laufen, während das Wasser steigt. Er muss es schaffen.</p>
+      <p class="small muted" lang="en">Lesson: check against the player you have, not the perfect one.</p>
+      <p class="small muted" lang="de">Lehre: Prüf gegen den Spieler, den du hast, nicht gegen den perfekten.</p>
+      <a class="deeper" data-lv="3" href="#trial-code" lang="en">The real code</a>
+      <a class="deeper" data-lv="3" href="#trial-code" lang="de">Der echte Code</a>
+    </div>
+  </div>
+</section>
+
 <section class="slide" id="wfc-code" data-lv="3">
   <h2 lang="en">The real code: collapsing cubes</h2>
   <h2 lang="de">Der echte Code: Würfel kollabieren lassen</h2>
@@ -439,6 +490,30 @@
   </div>
 </section>
 
+
+<section class="slide" id="trial-code" data-lv="3" data-src="src/cubegen/trials/solve.js#slideGraph">
+  <h2 lang="en">The real code: every stop on the ice</h2>
+  <h2 lang="de">Der echte Code: jeder Halt auf dem Eis</h2>
+  <div class="cols wide-left">
+    <pre data-code="src/cubegen/trials/solve.js#slideGraph"></pre>
+    <div>
+      <ul class="small">
+        <li lang="en">A stop is named by its place as text, like <code>'3,4'</code>, so it can be a key of a <code>Map</code>.</li>
+        <li lang="de">Ein Halt heißt nach seinem Ort, als Text, wie <code>'3,4'</code>, damit er ein Schlüssel einer <code>Map</code> sein kann.</li>
+        <li lang="en"><code>dist</code>: how many slides from the start to each stop. <code>prev</code>: the breadcrumbs, to find the way back.</li>
+        <li lang="de"><code>dist</code>: wie viele Rutscher vom Start zu jedem Halt. <code>prev</code>: die Brotkrumen, um den Weg zurück zu finden.</li>
+        <li lang="en"><code>queue</code> is the to-do list of the breadth-first search. The loop takes the next stop and tries all four directions.</li>
+        <li lang="de"><code>queue</code> ist die Aufgabenliste der Breitensuche. Die Schleife nimmt den nächsten Halt und probiert alle vier Richtungen.</li>
+        <li lang="en"><code>slideStop</code> says where a slide ends. <code>'out'</code>, out through the entry, counts as being back at the start.</li>
+        <li lang="de"><code>slideStop</code> sagt, wo ein Rutscher endet. <code>'out'</code>, durch den Eingang hinaus, zählt als zurück am Start.</li>
+        <li lang="en"><code>edges</code> keeps where each stop leads. <code>solveSlide</code> uses it backwards, to check that from every stop you can get back: no traps.</li>
+        <li lang="de"><code>edges</code> merkt sich, wohin jeder Halt führt. <code>solveSlide</code> benutzt das rückwärts, um zu prüfen, dass du von jedem Halt zurückkommst: keine Fallen.</li>
+      </ul>
+      <a class="portal" href="paths.html#bfs" lang="en">Breadth-first search</a>
+      <a class="portal" href="paths.html#bfs" lang="de">Breitensuche</a>
+    </div>
+  </div>
+</section>
 
 </main>
 <script type="module" src="deck.js"></script>

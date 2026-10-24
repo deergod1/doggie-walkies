@@ -12,6 +12,7 @@ export const slideStart = F => slideStop(F, F.entry.x, F.entry.z, F.entry.side ^
 // Every stop reachable from the start (sliding off through the entry gap and in again counts as
 // being back at the start): { dist: Map('x,z' -> slides from the start), prev (for the way),
 // edges: Map('x,z' -> ['x,z', ...] by direction), start }
+// learn: world.html#trial-code (see learn/README.md)
 export function slideGraph(F) {
   const key = (x, z) => `${x},${z}`, s0 = slideStart(F), start = key(...s0);
   const dist = new Map([[start, 0]]), prev = new Map(), edges = new Map(), queue = [s0];
@@ -31,6 +32,7 @@ export function slideGraph(F) {
 // The puzzle's facts: the fewest slides to the goal from the start (Infinity: none; 0: you slide in
 // onto it), the way (directions), whether every stop leads back to the start (no trap), and how
 // many stops lead nowhere useful (on no shortest way to the goal)
+// learn: world.html#trial-check (see learn/README.md)
 export function solveSlide(F) {
   const { dist, prev, edges, start } = slideGraph(F), goal = `${F.goal.x},${F.goal.z}`;
   const slides = dist.get(goal) ?? Infinity, way = [];
@@ -56,6 +58,7 @@ export const slideBand = depth => depth >= 10 ? [6, 9] : [4, 6];
 // place, the goal on another side; kept when its fewest slides are in `band` ([lo, hi]; a number:
 // the depth's band), at least `decoys` stops lead nowhere useful and nothing traps you. null: none
 // found in `tries`.
+// learn: world.html#trial-check (see learn/README.md)
 export function makeSlide(R, w, h, band, entrySide, goalSides, tries = 600, decoys = 3) {
   const [lo, hi] = Array.isArray(band) ? band : slideBand(band);
   const along = side => side < 2 ? h : w;
@@ -278,6 +281,7 @@ export function solveSokoban(F, crates, p, goal = F.plates, max = 40000) {
 // the crates' cells (sorted) and the player's region (its least cell); `link` leads each one back a
 // push towards the plates: { from (the crate's cell), d (the push), up (the state it gives) }.
 //   -> { list: [{ cs, p, depth, link }], max } (cut off at `max` states)
+// learn: world.html#trial-check (see learn/README.md)
 export function pullSearch(F, max = 200000) {
   const { w, h } = F, cells = w * h, wall = new Uint8Array(cells), mark = new Uint8Array(cells);
   for (const c of F.walls) wall[c] = 1;
@@ -337,6 +341,7 @@ export function pullSearch(F, max = 200000) {
 // crate on a plate or the entry, and more than one crate moved in turns (switches: how often the
 // way goes over from one crate to another, at least n). Its way is the pull search's, read forwards.
 //   -> { field, start: [cells], solution: { pushes, way: [[crate index, dir], ...], switches } } or null
+// learn: world.html#trial-check (see learn/README.md)
 export function makeCrates(R, w, h, band, n, entrySide, tries = 60) {
   const ri = (a, b) => a + Math.floor(R() * (b - a + 1)), cells = w * h;
   for (let k = 0; k < tries; k++) {

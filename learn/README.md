@@ -177,7 +177,8 @@ To show things in the game, the game has teaching helpers, `window.__game.teach`
 (`src/game/teach.js`, `teach` in `run_js`): drawings over the world (pins, labels, arrows, rings,
 slices, squares, which can follow the hero or an enemy), lenses that draw the game's own rules
 as they work (`src/game/lenses.js`: the sword's reach, what enemies see and hear, the paths they
-plan, the grid, the routes), pause, step and slow motion (`src/game/pace.js`), and changing the
+plan, the grid, the routes), the baked light alone (`lightview`: the fixed lamps' light, the sun's shadow, the
+lightmap's texels), pause, step and slow motion (`src/game/pace.js`), and changing the
 game's numbers with a way back (`src/game/tune.js`: every value it changes is put back by
 `untune()`; the game's tables are plain objects so they can be changed). `teach.reset()` undoes it
 all; the game window's line in the `<page>` block says what is on.

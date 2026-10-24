@@ -11,12 +11,14 @@
 //
 // The atlas's texels are DENSITY a world unit, fewer if the cube would not fit in MAX texels
 // square; its width a power of two that holds the charts about square.
+// learn: light.html#unfold (see learn/README.md)
 export const DENSITY = 16;           // texels a world unit
 const PAD = 2;                       // texels round a chart
 const MAX = 4096;                    // the largest atlas side
 
 // arrays: triangle soups ({ pos }: xyz per corner, three corners a triangle). Sets a.lm (uv per
 // corner, 0..1 in the atlas) on each; -> { w, h, density } (the atlas's size in texels)
+// learn: light.html#unfold (see learn/README.md)
 export function layoutLightmap(arrays) {
   const tris = [];
   for (const a of arrays) {

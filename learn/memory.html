@@ -171,6 +171,46 @@
   </div>
 </section>
 
+<section class="slide" id="quests" data-lv="2" data-src="src/core/questplan.js#questPlan src/core/quests.js#header">
+  <h2 lang="en">Try it: a hundred quests from one seed</h2>
+  <h2 lang="de">Probier es: hundert Aufträge aus einem Seed</h2>
+  <div class="cols wide-right">
+    <div>
+      <p lang="en">The villagers in town, and the people living at camps out in the world, give you quests: find a lost thing, rescue somebody, beat a monster with a bounty on its head, deliver a letter, defend an outpost.</p>
+      <p lang="de">Die Leute in der Stadt und die Menschen, die draußen in der Welt in Lagern wohnen, geben dir Aufträge: etwas Verlorenes finden, jemanden retten, ein Monster mit Kopfgeld besiegen, einen Brief zustellen, einen Außenposten verteidigen.</p>
+      <p lang="en">Are they saved? No! Like the world, they are <b>planned from the seed</b>: a hundred of them, so many on each depth, each with its kind and who asks. Same seed, same quests, for you and for a friend who joins your world.</p>
+      <p lang="de">Werden sie gespeichert? Nein! Wie die Welt werden sie <b>aus dem Seed geplant</b>: hundert Stück, so viele auf jeder Tiefe, jeder mit seiner Art und wer fragt. Gleicher Seed, gleiche Aufträge, für dich und für einen Freund, der in deine Welt kommt.</p>
+      <p lang="en">What goes into the notebook is only what <i>you</i> did: a quest offered, taken, ready to hand in, done. That's <code>quests</code> in the run.</p>
+      <p lang="de">Ins Notizbuch kommt nur, was <i>du</i> gemacht hast: ein Auftrag angeboten, angenommen, fertig zum Abgeben, erledigt. Das ist <code>quests</code> im Run.</p>
+      <p class="small muted" lang="en">Each quest is a little state machine: offered → taken → ready → done (or failed).</p>
+      <p class="small muted" lang="de">Jeder Auftrag ist eine kleine Zustandsmaschine: angeboten → angenommen → fertig → erledigt (oder gescheitert).</p>
+      <a class="portal" href="enemies.html#state-machine" lang="en">State machines</a>
+      <a class="portal" href="enemies.html#state-machine" lang="de">Zustandsmaschinen</a>
+    </div>
+    <div class="demo real" data-demo="quests"></div>
+  </div>
+</section>
+
+<section class="slide" id="rewind" data-lv="2" data-src="src/core/renew.js#RENEW_FIGHT,newTape,record,spanAt">
+  <h2 lang="en">Try it: remembering the last minute</h2>
+  <h2 lang="de">Probier es: sich an die letzte Minute erinnern</h2>
+  <div class="cols wide-right">
+    <div>
+      <p lang="en">The boss Renew turns back time. When you've beaten one of his health bars, everything in the room runs <b>backwards</b>: him, his minions, the arrows in the air, and you, until the room is as it was when that part of the fight began.</p>
+      <p lang="de">Der Boss Renew dreht die Zeit zurück. Wenn du einen seiner Lebensbalken geschafft hast, läuft alles im Raum <b>rückwärts</b>: er, seine Helfer, die Pfeile in der Luft und du, bis der Raum so ist wie am Anfang dieses Teils des Kampfs.</p>
+      <p lang="en">To go back, the game has to remember. So it keeps a <b>tape</b>: every <b data-val="src/core/renew.js#RENEW_FIGHT.sample">0.05</b> seconds, a frame with where everybody is, which way they face, how much health they have.</p>
+      <p lang="de">Um zurückzugehen, muss sich das Spiel erinnern. Darum führt es ein <b>Band</b>: alle <b data-val="src/core/renew.js#RENEW_FIGHT.sample">0,05</b> Sekunden ein Bild davon, wo alle sind, wohin sie schauen, wie viel Gesundheit sie haben.</p>
+      <p lang="en">Rewinding is playing the tape backwards: the clock runs back, and everybody is put where the tape says, blended between two frames so it's smooth.</p>
+      <p lang="de">Zurückspulen heißt, das Band rückwärts abzuspielen: Die Uhr läuft zurück, und alle werden dorthin gesetzt, wo das Band es sagt, zwischen zwei Bildern gemischt, damit es glatt aussieht.</p>
+      <p lang="en">And then the twist: the old tape plays again, <i>forwards</i>. Your past self, the <b>echo</b>, does again everything you did, and its blows hurt you!</p>
+      <p lang="de">Und dann der Clou: Das alte Band läuft noch einmal, <i>vorwärts</i>. Dein früheres Ich, das <b>Echo</b>, macht alles noch einmal, was du gemacht hast, und seine Schläge tun dir weh!</p>
+      <a class="deeper" data-lv="3" href="#tape-code" lang="en">The real code</a>
+      <a class="deeper" data-lv="3" href="#tape-code" lang="de">Der echte Code</a>
+    </div>
+    <div class="demo real" data-demo="rewind"></div>
+  </div>
+</section>
+
 <section class="slide" id="bag" data-lv="1" data-src="src/core/inventory.js#addItem,addInstance,assignBar,takeItem">
   <h2 lang="en">Try it: your bag</h2>
   <h2 lang="de">Probier es: deine Tasche</h2>
@@ -255,6 +295,24 @@
   </div>
 </section>
 
+<section class="slide" id="tape-code" data-lv="3" data-src="src/core/renew.js#newTape,record,spanAt">
+  <h2 lang="en">The real code: a tape</h2>
+  <h2 lang="de">Der echte Code: ein Band</h2>
+  <div class="cols wide-left">
+    <pre data-code="src/core/renew.js#newTape,record,spanAt"></pre>
+    <div>
+      <ul class="small">
+        <li lang="en">A tape is just a list of frames. <code>record</code> adds one at the end, with its time <code>t</code>, but only if time has moved on.</li>
+        <li lang="de">Ein Band ist nur eine Liste von Bildern. <code>record</code> hängt eins hinten an, mit seiner Zeit <code>t</code>, aber nur, wenn die Zeit weitergegangen ist.</li>
+        <li lang="en"><code>spanAt</code> finds the two frames around time <code>t</code>, and <code>k</code>: how far between them (0 at the first, 1 at the second). Then everybody is blended: <code>lerp(a, b, k)</code>.</li>
+        <li lang="de"><code>spanAt</code> findet die zwei Bilder um die Zeit <code>t</code> herum und <code>k</code>: wie weit dazwischen (0 beim ersten, 1 beim zweiten). Dann wird jeder gemischt: <code>lerp(a, b, k)</code>.</li>
+        <li lang="en">The <code>while</code> loop halves the part of the list it looks at, again and again: in a tape of 1000 frames it finds the right one in 10 steps. That's called <b>binary search</b>: like finding a word in a dictionary by opening it in the middle.</li>
+        <li lang="de">Die <code>while</code>-Schleife halbiert den Teil der Liste, den sie anschaut, immer wieder: In einem Band mit 1000 Bildern findet sie das richtige in 10 Schritten. Das heißt <b>binäre Suche</b>: wie ein Wort im Wörterbuch finden, indem man es in der Mitte aufschlägt.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
 <section class="slide" id="remember" data-lv="1">
   <h2 lang="en">What to remember</h2>
   <h2 lang="de">Was du dir merken kannst</h2>
@@ -269,6 +327,8 @@
     <li lang="de"><b>Zeig, statt zu kopieren</b>, damit es jedes Ding nur einmal gibt.</li>
     <li lang="en"><b>Keep the facts, make the words later</b>, so everyone can read them their own way.</li>
     <li lang="de"><b>Heb die Fakten auf, mach die Wörter später</b>, damit jeder sie auf seine Art lesen kann.</li>
+    <li lang="en"><b>To go back in time, keep a tape</b>: what everybody was, a few times a second.</li>
+    <li lang="de"><b>Um in der Zeit zurückzugehen, führ ein Band</b>: wie alles war, ein paarmal pro Sekunde.</li>
   </ol>
 </section>
 

@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title data-de="Licht und Schatten · Rundgang durch Cube Crawler">Light and Shadow · Kids' Guide to Cube Crawler</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../vendor/fonts/fonts.css">
+<link rel="stylesheet" href="kids.css">
+<script src="lang.js"></script>
+<script type="importmap">{ "imports": { "three": "../vendor/three/three.module.js", "three/addons/": "../vendor/three/addons/" } }</script>
+</head>
+<body data-theme="ossuary">
+<main class="deck">
+
+<section class="slide" id="faking" data-lv="1">
+  <h2 lang="en">Try it: light the way nature makes it</h2>
+  <h2 lang="de">Probier es: Licht, wie die Natur es macht</h2>
+  <div class="cols wide-right">
+    <div>
+      <p class="lead" lang="en">A lamp sends out light in every direction: countless tiny bits of light, called <a class="w" href="words.html#photon">photons</a>.</p>
+      <p class="lead" lang="de">Eine Lampe schickt Licht in alle Richtungen: unzählige winzige Lichtteilchen, die <a class="w" href="words.html#photon">Photonen</a>.</p>
+      <p lang="en">Each one flies straight until it hits something. Some of it bounces off, and flies on. Where many of them pass, it is bright. Where none get to, it is dark: that's a shadow.</p>
+      <p lang="de">Jedes fliegt geradeaus, bis es auf etwas trifft. Ein Teil prallt ab und fliegt weiter. Wo viele vorbeikommen, ist es hell. Wo keins hinkommt, ist es dunkel: Das ist ein Schatten.</p>
+      <p lang="en">Animated films are drawn just like that, with billions of them. One picture can take minutes. The game has to draw <b>60 pictures every second</b>.</p>
+      <p lang="de">Animationsfilme werden genau so gemalt, mit Milliarden davon. Ein einziges Bild kann Minuten dauern. Das Spiel muss <b>60 Bilder in jeder Sekunde</b> malen.</p>
+      <p lang="en">Start with a few photons and watch the picture fill in. Then let them bounce: the light gets into the shadows too.</p>
+      <p lang="de">Fang mit wenigen Photonen an und schau, wie sich das Bild füllt. Dann lass sie abprallen: Das Licht kommt auch in die Schatten.</p>
+      <div class="note think" lang="en"><b>Think</b> Games don't follow the light. They <i>guess</i> how bright each pixel is, with a few quick rules. The rest of this room is about those rules, and their tricks.</div>
+      <div class="note think" lang="de"><b>Denk nach</b> Spiele verfolgen das Licht nicht. Sie <i>schätzen</i>, wie hell jedes Pixel ist, mit ein paar schnellen Regeln. Um diese Regeln und ihre Tricks geht es in diesem Raum.</div>
+    </div>
+    <div class="demo" data-demo="photons"></div>
+  </div>
+</section>
+
+<section class="slide" id="rules" data-lv="1">
+  <h2 lang="en">Try it: three rules for one pixel</h2>
+  <h2 lang="de">Probier es: drei Regeln für ein Pixel</h2>
+  <div class="cols wide-right">
+    <div>
+      <p lang="en">For every pixel, the <a class="w" href="words.html#gpu">graphics card</a> runs a little program, a <a class="w" href="words.html#shader">shader</a>. It asks each lamp three questions:</p>
+      <p lang="de">Für jedes Pixel lässt die <a class="w" href="words.html#gpu">Grafikkarte</a> ein kleines Programm laufen, einen <a class="w" href="words.html#shader">Shader</a>. Er stellt jeder Lampe drei Fragen:</p>
+      <ol class="steps">
+        <li lang="en"><b>Do I face the lamp?</b> Facing it straight: full light. Leaning away: less. Turned away: none. (The cyan arrow is the way the ground faces.)</li>
+        <li lang="de"><b>Zeige ich zur Lampe?</b> Genau zu ihr hin: volles Licht. Weggeneigt: weniger. Abgewandt: keins. (Der türkise Pfeil zeigt, wohin der Boden schaut.)</li>
+        <li lang="en"><b>How close is the lamp?</b> Light gets weaker the further it goes. In the game every lamp has a <b>reach</b>: beyond it, nothing.</li>
+        <li lang="de"><b>Wie nah ist die Lampe?</b> Licht wird schwächer, je weiter es geht. Im Spiel hat jede Lampe eine <b>Reichweite</b>: Dahinter kommt nichts mehr an.</li>
+        <li lang="en"><b>What colours?</b> The lamp's colour times the ground's colour. A red lamp on a green leaf: almost black! The leaf has no red to give back.</li>
+        <li lang="de"><b>Welche Farben?</b> Die Farbe der Lampe mal die Farbe des Bodens. Eine rote Lampe auf einem grünen Blatt: fast schwarz! Das Blatt hat kein Rot zum Zurückgeben.</li>
+      </ol>
+      <p lang="en">Multiply the answers, and you have the brightness. That's quick: a handful of sums for each pixel.</p>
+      <p lang="de">Nimm die Antworten mal, und du hast die Helligkeit. Das geht schnell: eine Handvoll Rechnungen für jedes Pixel.</p>
+    </div>
+    <div class="demo" data-demo="shade" data-show="rules"></div>
+  </div>
+</section>
+
+<section class="slide" id="adding" data-lv="1">
+  <h2 lang="en">Try it: more lamps, add them up</h2>
+  <h2 lang="de">Probier es: mehr Lampen, zusammenzählen</h2>
+  <div class="cols wide-right">
+    <div>
+      <p lang="en">With more lamps, a pixel asks every one of them, and <b>adds up</b> their light. A red and a green lamp together make yellow. Red, green and blue make white.</p>
+      <p lang="de">Mit mehr Lampen fragt ein Pixel jede einzelne und <b>zählt</b> ihr Licht <b>zusammen</b>. Eine rote und eine grüne Lampe zusammen ergeben Gelb. Rot, Grün und Blau ergeben Weiß.</p>
+      <p lang="en">The <b>sky light</b> is a soft light from everywhere at once. It stands in for all the light that bounces around, so nothing is ever pitch black.</p>
+      <p lang="de">Das <b>Himmelslicht</b> ist ein weiches Licht von überall gleichzeitig. Es steht für all das Licht, das herumprallt, damit nichts jemals stockdunkel ist.</p>
+      <p lang="en">Did you notice something wrong? Put a lamp behind a hill: the slope on the far side still lights up! These rules don't know what's <i>in between</i>. That's the hard part: shadows.</p>
+      <p lang="de">Ist dir etwas aufgefallen? Stell eine Lampe hinter einen Hügel: Der Hang auf der anderen Seite leuchtet trotzdem! Diese Regeln wissen nicht, was <i>dazwischen</i> ist. Das ist der schwierige Teil: Schatten.</p>
+      <div class="note think" lang="en"><b>Think</b> Every pixel asks every lamp. Twice as many lamps: twice the work, for every single pixel.</div>
+      <div class="note think" lang="de"><b>Denk nach</b> Jedes Pixel fragt jede Lampe. Doppelt so viele Lampen: doppelte Arbeit, für jedes einzelne Pixel.</div>
+    </div>
+    <div class="demo" data-demo="shade" data-show="add"></div>
+  </div>
+</section>
+
+<section class="slide" id="shadow-map" data-lv="2" data-src="src/render/scene.js#sun">
+  <h2 lang="en">Try it: the light's own picture</h2>
+  <h2 lang="de">Probier es: das eigene Bild des Lichts</h2>
+  <div class="cols wide-right">
+    <div>
+      <p lang="en">Is something between this spot and the lamp? Walking along the line to the lamp for every pixel would be slow. So before the real picture, the game takes a picture <b>from the lamp's point of view</b>.</p>
+      <p lang="de">Ist etwas zwischen diesem Fleck und der Lampe? Für jedes Pixel die Linie zur Lampe abzulaufen, wäre langsam. Darum macht das Spiel vor dem echten Bild ein Bild <b>aus Sicht der Lampe</b>.</p>
+      <p lang="en">That picture has no colours. Each of its pixels only says <b>how far the lamp can see</b> that way, until something is in the way. It's called a <a class="w" href="words.html#shadowmap">shadow map</a>.</p>
+      <p lang="de">Dieses Bild hat keine Farben. Jedes seiner Pixel sagt nur, <b>wie weit die Lampe</b> in diese Richtung <b>sehen kann</b>, bis etwas im Weg ist. Das heißt <a class="w" href="words.html#shadowmap">Schattenkarte</a> (Shadow Map).</p>
+      <p lang="en">Then every spot asks: "Am I further away than what the lamp saw?" Yes: something is in front of me. Shadow!</p>
+      <p lang="de">Dann fragt jeder Fleck: "Bin ich weiter weg als das, was die Lampe gesehen hat?" Ja: Etwas ist vor mir. Schatten!</p>
+      <ul>
+        <li lang="en"><b>The sun</b> shines one way: one picture does it (in the game 2048 by 2048 pixels).</li>
+        <li lang="de"><b>Die Sonne</b> scheint in eine Richtung: Ein Bild reicht (im Spiel 2048 mal 2048 Pixel).</li>
+        <li lang="en"><b>A lamp</b> shines all round. In 2D its picture is a ring; in 3D it takes <b>six</b> pictures, one for each side of a cube around the lamp.</li>
+        <li lang="de"><b>Eine Lampe</b> leuchtet rundherum. In 2D ist ihr Bild ein Ring, in 3D braucht sie <b>sechs</b> Bilder, eins für jede Seite eines Würfels um die Lampe.</li>
+      </ul>
+      <p lang="en">Make the picture small, and the shadows get steps. A bigger picture: smoother, but more work.</p>
+      <p lang="de">Mach das Bild klein, und die Schatten bekommen Stufen. Ein größeres Bild: glatter, aber mehr Arbeit.</p>
+    </div>
+    <div class="demo" data-demo="shadowmap"></div>
+  </div>
+</section>
+
+<section class="slide" id="bill" data-lv="1">
+  <h2 lang="en">Try it: the bill for many lamps</h2>
+  <h2 lang="de">Probier es: die Rechnung für viele Lampen</h2>
+  <div class="cols wide-right">
+    <div>
+      <p lang="en">A cube of the dark forest has 40 to 50 lamps: lanterns on posts and in the trees, glowing mushrooms, portals. Down in the spider nests, glowing eggs and pale fungus.</p>
+      <p lang="de">Ein Würfel im dunklen Wald hat 40 bis 50 Lampen: Laternen auf Pfählen und in den Bäumen, leuchtende Pilze, Portale. Unten in den Spinnennestern leuchtende Eier und bleiche Pilze.</p>
+      <p lang="en">Let's count what that costs, for <b>your</b> screen:</p>
+      <p lang="de">Rechnen wir aus, was das kostet, für <b>deinen</b> Bildschirm:</p>
+      <ul>
+        <li lang="en">Every pixel asks every lamp, 60 times a second.</li>
+        <li lang="de">Jedes Pixel fragt jede Lampe, 60-mal pro Sekunde.</li>
+        <li lang="en">Every lamp with a shadow needs its six pictures first. Each one means drawing the whole cube again!</li>
+        <li lang="de">Jede Lampe mit Schatten braucht zuerst ihre sechs Bilder. Jedes heißt: den ganzen Würfel noch einmal malen!</li>
+      </ul>
+      <p lang="en">The game has <b>16 milliseconds</b> for a picture, everything included: the monsters, the sword, the sounds. That's the challenge. Switch on the two tricks and see the bill shrink: they come next.</p>
+      <p lang="de">Das Spiel hat <b>16 Millisekunden</b> für ein Bild, alles inklusive: die Monster, das Schwert, die Geräusche. Das ist die Herausforderung. Schalte die zwei Tricks an und sieh zu, wie die Rechnung schrumpft: Sie kommen als Nächstes.</p>
+      <a class="portal" href="loop.html#flipbook" lang="en">Why 60 pictures a second</a>
+      <a class="portal" href="loop.html#flipbook" lang="de">Warum 60 Bilder pro Sekunde</a>
+    </div>
+    <div class="demo" data-demo="bill"></div>
+  </div>
+</section>
+
+<section class="slide" id="many" data-lv="1">
+  <h2 lang="en">Try it: what games do about it</h2>
+  <h2 lang="de">Probier es: was Spiele dagegen tun</h2>
+  <p lang="en">This little room really works out its light, pixel by pixel, lamp by lamp, with shadows. The time in the corner is real. Add lamps until it's too slow. Then try the two ways out:</p>
+  <p lang="de">Dieser kleine Raum rechnet sein Licht wirklich aus, Pixel für Pixel, Lampe für Lampe, mit Schatten. Die Zeit in der Ecke ist echt. Gib Lampen dazu, bis es zu langsam wird. Dann probier die zwei Auswege:</p>
+  <div class="cols wide-right">
+    <div>
+      <ul>
+        <li lang="en"><b>Only the nearest lamps.</b> What many games do: only the few lamps closest to you shine. Fast! But walk around: far lamps go dark, and pop on when you come near.</li>
+        <li lang="de"><b>Nur die nächsten Lampen.</b> Das machen viele Spiele: Nur die paar Lampen, die dir am nächsten sind, leuchten. Schnell! Aber lauf herum: Ferne Lampen gehen aus und springen an, wenn du näher kommst.</li>
+        <li lang="en"><b>Work out once what stays.</b> Cube Crawler's way. The lamps on posts don't move, and neither do the walls. So their light can be worked out <i>once</i> and kept. Every frame, only your own lamp is worked out new.</li>
+        <li lang="de"><b>Einmal ausrechnen, was bleibt.</b> So macht es Cube Crawler. Die Lampen auf den Pfählen bewegen sich nicht, die Wände auch nicht. Also kann ihr Licht <i>einmal</i> ausgerechnet und aufgehoben werden. In jedem Bild wird nur deine eigene Lampe neu ausgerechnet.</li>
+      </ul>
+      <p class="small muted" lang="en">The game does this on the graphics card, which is much faster than this page. But the bill grows the same way.</p>
+      <p class="small muted" lang="de">Das Spiel macht das auf der Grafikkarte, die viel schneller ist als diese Seite. Aber die Rechnung wächst genauso.</p>
+    </div>
+    <div class="demo" data-demo="lamps"></div>
+  </div>
+</section>
+
+<section class="slide" id="bake" data-lv="1" data-src="src/render/bake.js#tickBakes">
+  <h2 lang="en">Paint the shadows on</h2>
+  <h2 lang="de">Die Schatten aufmalen</h2>
+  <div class="cols">
+    <div>
+      <p class="lead" lang="en">When you come into a cube, the game works out the light of every lamp that stays, with its shadows, and <b>paints it onto the ground</b>, like paint that stays on.</p>
+      <p class="lead" lang="de">Wenn du in einen Würfel kommst, rechnet das Spiel das Licht jeder Lampe aus, die bleibt, mit ihren Schatten, und <b>malt es auf den Boden</b>, wie Farbe, die draufbleibt.</p>
+      <p lang="en">That paint is a picture glued over the cube's ground and walls: the <a class="w" href="words.html#lightmap">lightmap</a>. Game makers call this <a class="w" href="words.html#bake">baking</a>: like a cake, it's made before it's needed. While drawing, a pixel just reads its spot of the lightmap. That's cheap, whether there's one lamp or fifty.</p>
+      <p lang="de">Diese Farbe ist ein Bild, das über den Boden und die Wände des Würfels geklebt ist: die <a class="w" href="words.html#lightmap">Lichtkarte</a> (Lightmap). Spielemacher nennen das <a class="w" href="words.html#bake">Backen</a>: Wie ein Kuchen wird es fertig gemacht, bevor man es braucht. Beim Malen liest ein Pixel nur seinen Fleck auf der Lichtkarte. Das ist billig, ob es eine Lampe gibt oder fünfzig.</p>
+      <p lang="en">What it costs:</p>
+      <p lang="de">Was es kostet:</p>
+      <ul>
+        <li lang="en"><b>Time, when you arrive.</b> The game bakes two lamps each frame, while the new cube is still fading in. The lamps come on when they are done.</li>
+        <li lang="de"><b>Zeit, wenn du ankommst.</b> Das Spiel backt zwei Lampen pro Bild, während der neue Würfel noch eingeblendet wird. Die Lampen gehen an, wenn sie fertig sind.</li>
+        <li lang="en"><b>Memory</b> for the pictures.</li>
+        <li lang="de"><b>Speicher</b> für die Bilder.</li>
+        <li lang="en"><b>Only for what stays.</b> Shots, glowing monsters and loot move, so their light is worked out every frame, without shadows. Only your own lamp gets real shadows, worked out new every frame.</li>
+        <li lang="de"><b>Nur für das, was bleibt.</b> Schüsse, leuchtende Monster und Beute bewegen sich, also wird ihr Licht in jedem Bild ausgerechnet, ohne Schatten. Nur deine eigene Lampe bekommt echte Schatten, in jedem Bild neu ausgerechnet.</li>
+      </ul>
+    </div>
+    <div class="demo real" data-demo="lightview"></div>
+  </div>
+</section>
+
+<section class="slide" id="unfold" data-lv="2" data-src="src/render/lightmap.js#header,layoutLightmap">
+  <h2 lang="en">Try it: unfolding the world</h2>
+  <h2 lang="de">Probier es: die Welt auseinanderfalten</h2>
+  <div class="cols wide-right">
+    <div>
+      <p lang="en">A picture is flat. The ground has hills, cliffs and steps. How do you glue a flat picture over it?</p>
+      <p lang="de">Ein Bild ist flach. Der Boden hat Hügel, Klippen und Stufen. Wie klebt man ein flaches Bild darüber?</p>
+      <p lang="en">Like a cardboard box, the other way round: <b>cut it open and lay it flat</b>. The triangles that face the same way and touch stay together as one piece. Each piece is laid flat, and all the pieces are packed into one picture, like a puzzle.</p>
+      <p lang="de">Wie bei einer Pappschachtel, nur umgekehrt: <b>aufschneiden und flach hinlegen</b>. Die Dreiecke, die in dieselbe Richtung zeigen und sich berühren, bleiben als ein Stück zusammen. Jedes Stück wird flach hingelegt, und alle Stücke werden in ein Bild gepackt, wie ein Puzzle.</p>
+      <p lang="en">The lightmap's pixels are called <b>texels</b>. The game gives every cell of the world <b data-val="src/render/lightmap.js#DENSITY">16</b> by <b data-val="src/render/lightmap.js#DENSITY">16</b> of them. The light is worked out once for each texel, then the picture is glued back on.</p>
+      <p lang="de">Die Pixel der Lichtkarte heißen <b>Texel</b>. Das Spiel gibt jedem Feld der Welt <b data-val="src/render/lightmap.js#DENSITY">16</b> mal <b data-val="src/render/lightmap.js#DENSITY">16</b> davon. Das Licht wird einmal für jedes Texel ausgerechnet, dann wird das Bild wieder aufgeklebt.</p>
+      <p class="small muted" lang="en">This demo uses the game's own layout code. Move the lamp: its light has to be baked again.</p>
+      <p class="small muted" lang="de">Diese Demo benutzt den echten Code des Spiels, der die Stücke anordnet. Beweg die Lampe: Ihr Licht muss neu gebacken werden.</p>
+    </div>
+    <div class="demo real" data-demo="unfold"></div>
+  </div>
+</section>
+
+<section class="slide" id="sharp" data-lv="2" data-src="src/render/lighthook.js#VIS">
+  <h2 lang="en">Try it: sharp shadows from a small picture</h2>
+  <h2 lang="de">Probier es: scharfe Schatten aus einem kleinen Bild</h2>
+  <div class="cols wide-right">
+    <div>
+      <p lang="en">Zoom in close, and one texel covers many pixels of your screen. If a texel only says "lit" or "dark", the shadows get blocky steps. Blend between texels, and they get blurry.</p>
+      <p lang="de">Zoom nah heran, und ein Texel bedeckt viele Pixel deines Bildschirms. Sagt ein Texel nur "hell" oder "dunkel", bekommen die Schatten klobige Stufen. Mischt man zwischen den Texeln, werden sie verschwommen.</p>
+      <p lang="en">The trick: each texel keeps <b>how far it is from the edge of the shadow</b> (minus inside the shadow). Blended between texels, that distance is still about right. Where it crosses zero is the edge. The shader draws that edge exactly one pixel wide, however close you come.</p>
+      <p lang="de">Der Trick: Jedes Texel merkt sich, <b>wie weit es vom Rand des Schattens weg ist</b> (im Schatten mit Minus). Zwischen den Texeln gemischt, stimmt dieser Abstand immer noch ungefähr. Wo er durch null geht, ist der Rand. Der Shader malt diesen Rand genau ein Pixel breit, egal wie nah du kommst.</p>
+      <p lang="en">It's the same idea as the monsters' digital clay: a shape described by distances.</p>
+      <p lang="de">Das ist dieselbe Idee wie die digitale Knete der Monster: eine Form, beschrieben durch Abstände.</p>
+      <a class="portal" href="art.html#sdf" lang="en">Shapes made of distances</a>
+      <a class="portal" href="art.html#sdf" lang="de">Formen aus Abständen</a>
+      <a class="deeper" data-lv="3" href="#edge-code" lang="en">The shader's line</a>
+      <a class="deeper" data-lv="3" href="#edge-code" lang="de">Die Zeile im Shader</a>
+    </div>
+    <div class="demo" data-demo="sharpedge"></div>
+  </div>
+</section>
+
+<section class="slide" id="pots" data-lv="2" data-src="src/render/bake.js#assignChannels src/render/lighthook.js#SETS">
+  <h2 lang="en">Try it: sharing the paint pots</h2>
+  <h2 lang="de">Probier es: die Farbtöpfe teilen</h2>
+  <div class="cols wide-right">
+    <div>
+      <p lang="en">A picture has four colour channels: red, green, blue, and see-through. The lightmap is <b>three</b> pictures, so it has twelve: one for the sun, eleven for lamps. Fifty lamps, eleven pots. How?</p>
+      <p lang="de">Ein Bild hat vier Farbkanäle: Rot, Grün, Blau und Durchsichtigkeit. Die Lichtkarte besteht aus <b>drei</b> Bildern, hat also zwölf: einen für die Sonne, elf für Lampen. Fünfzig Lampen, elf Töpfe. Wie geht das?</p>
+      <p lang="en">Lamps far apart can share a pot: their light never meets, so their shadows never mix up. Only lamps whose light overlaps need different pots.</p>
+      <p lang="de">Lampen, die weit auseinander sind, können sich einen Topf teilen: Ihr Licht trifft sich nie, also kommen ihre Schatten nie durcheinander. Nur Lampen, deren Licht sich überlappt, brauchen verschiedene Töpfe.</p>
+      <p lang="en">The brightest lamp goes first, and takes the first pot none of its neighbours has. That's the same puzzle as colouring a map so no two countries next to each other have the same colour.</p>
+      <p lang="de">Die hellste Lampe ist zuerst dran und nimmt den ersten Topf, den keiner ihrer Nachbarn hat. Das ist dasselbe Rätsel, wie eine Landkarte so anzumalen, dass keine zwei Nachbarländer dieselbe Farbe haben.</p>
+      <p lang="en">Too many lamps in one spot? The last ones find no pot, and shine without a shadow. In a dark forest cube that happens to about one lamp in forty.</p>
+      <p lang="de">Zu viele Lampen an einer Stelle? Die letzten finden keinen Topf und leuchten ohne Schatten. In einem Würfel im dunklen Wald passiert das etwa einer von vierzig Lampen.</p>
+    </div>
+    <div class="demo" data-demo="channels"></div>
+  </div>
+</section>
+
+<section class="slide" id="kinds" data-lv="2" data-src="src/render/lighthook.js#MAX_BAKED,MAX_MOVING src/render/lightpool.js#trackLight">
+  <h2 lang="en">Three kinds of light, three ways</h2>
+  <h2 lang="de">Drei Arten von Licht, drei Wege</h2>
+  <p lang="en">The lightmap only covers the cube's ground and walls. Everything else gets its light another way:</p>
+  <p lang="de">Die Lichtkarte bedeckt nur den Boden und die Wände des Würfels. Alles andere bekommt sein Licht auf anderem Weg:</p>
+  <table>
+    <tr><th lang="en">LIGHT</th> <th lang="de">LICHT</th><th lang="en">ON THE GROUND</th> <th lang="de">AUF DEM BODEN</th><th lang="en">ON PLANTS, PROPS AND MONSTERS</th> <th lang="de">AUF PFLANZEN, DINGEN UND MONSTERN</th></tr>
+    <tr><td lang="en"><b>The sun</b> (or the moon)</td> <td lang="de"><b>Die Sonne</b> (oder der Mond)</td><td lang="en">baked into the lightmap</td> <td lang="de">in die Lichtkarte gebacken</td><td lang="en">a shadow map, kept from the bake; what moves gets a shadow map drawn every frame</td> <td lang="de">eine Schattenkarte, vom Backen aufgehoben; was sich bewegt, bekommt eine Schattenkarte, die jedes Bild neu gemalt wird</td></tr>
+    <tr><td lang="en"><b>Lamps that stay</b> (at most 128 a cube)</td> <td lang="de"><b>Lampen, die bleiben</b> (höchstens 128 pro Würfel)</td><td lang="en">baked into the lightmap, sharp</td> <td lang="de">in die Lichtkarte gebacken, scharf</td><td lang="en">a 3D grid of light around the cube, baked too: soft</td> <td lang="de">ein 3D-Gitter aus Licht um den Würfel, auch gebacken: weich</td></tr>
+    <tr><td lang="en"><b>Lights that move</b> (at most 64 at once)</td> <td lang="de"><b>Lichter, die sich bewegen</b> (höchstens 64 auf einmal)</td><td lang="en" colspan="2">worked out every frame, without shadows. Only your lamp casts shadows: six pictures, every frame.</td> <td lang="de" colspan="2">in jedem Bild ausgerechnet, ohne Schatten. Nur deine Lampe wirft Schatten: sechs Bilder, in jedem Bild.</td></tr>
+  </table>
+  <p lang="en">Why no shadows for a glowing monster? Its light sits <i>inside</i> its body. The body would block all of it!</p>
+  <p lang="de">Warum keine Schatten für ein leuchtendes Monster? Sein Licht sitzt <i>in</i> seinem Körper. Der Körper würde alles davon abschirmen!</p>
+</section>
+
+<section class="slide" id="cells" data-lv="2" data-src="src/core/lightcells.js#lightCells src/render/lighthook.js#CELLS">
+  <h2 lang="en">Try it: ask only the lamps that reach</h2>
+  <h2 lang="de">Probier es: nur die Lampen fragen, die hinreichen</h2>
+  <div class="cols wide-right">
+    <div>
+      <p lang="en">Baking took away the shadows' bill. But every pixel still asks every lamp "how close are you?", and most answer "too far".</p>
+      <p lang="de">Das Backen hat die Rechnung für die Schatten weggenommen. Aber jedes Pixel fragt immer noch jede Lampe "Wie nah bist du?", und die meisten antworten "zu weit".</p>
+      <p lang="en">So when the cube is baked, the game also cuts its ground into <b>cells</b> of one square each. Every cell gets a list of the lamps whose light comes into it, the strongest first. A pixel asks only the lamps on its cell's list.</p>
+      <p lang="de">Darum schneidet das Spiel beim Backen den Boden des Würfels auch in <b>Zellen</b> von je einem Feld. Jede Zelle bekommt eine Liste der Lampen, deren Licht in sie hineinkommt, die stärkste zuerst. Ein Pixel fragt nur die Lampen auf der Liste seiner Zelle.</p>
+      <p lang="en">A list holds at most 16. With more, the faintest are left out: you'd hardly see them anyway.</p>
+      <p lang="de">Eine Liste fasst höchstens 16. Bei mehr fallen die schwächsten weg: Die würdest du sowieso kaum sehen.</p>
+      <p lang="en">On a slow computer, a cube of the spider nests went from about 4 to 7 pictures a second with this trick.</p>
+      <p lang="de">Auf einem langsamen Computer ging ein Würfel der Spinnennester mit diesem Trick von etwa 4 auf 7 Bilder pro Sekunde.</p>
+      <a class="deeper" data-lv="3" href="#cells-code" lang="en">The real code</a>
+      <a class="deeper" data-lv="3" href="#cells-code" lang="de">Der echte Code</a>
+    </div>
+    <div class="demo real" data-demo="cells"></div>
+  </div>
+</section>
+
+<section class="slide" id="looks" data-lv="2" data-src="src/game/quality.js#LOOKS">
+  <h2 lang="en">Full or Simple: you choose</h2>
+  <h2 lang="de">Voll oder Einfach: Du entscheidest</h2>
+  <div class="cols">
+    <div>
+      <p lang="en">A phone or an old laptop can't pay the whole bill. So the settings have <b>Lighting: Full or Simple</b>. Every game has knobs like this: shadow quality, how many lights, how big the pictures are.</p>
+      <p lang="de">Ein Handy oder ein alter Laptop kann nicht die ganze Rechnung bezahlen. Darum gibt es in den Einstellungen <b>Licht: Voll oder Einfach</b>. Jedes Spiel hat solche Regler: Schattenqualität, wie viele Lichter, wie groß die Bilder sind.</p>
+      <table>
+        <tr><th></th><th lang="en">FULL</th> <th lang="de">VOLL</th><th lang="en">SIMPLE</th> <th lang="de">EINFACH</th></tr>
+        <tr><td lang="en">baked shadows of the lamps</td> <td lang="de">gebackene Schatten der Lampen</td><td lang="en">yes</td> <td lang="de">ja</td><td lang="en">no: nothing to wait for</td> <td lang="de">nein: kein Warten</td></tr>
+        <tr><td lang="en">lamps a pixel asks</td> <td lang="de">Lampen, die ein Pixel fragt</td><td>16</td><td>6</td></tr>
+        <tr><td lang="en">your lamp's shadows</td> <td lang="de">Schatten deiner Lampe</td><td lang="en">yes</td> <td lang="de">ja</td><td lang="en">no</td> <td lang="de">nein</td></tr>
+        <tr><td lang="en">the sun's picture</td> <td lang="de">das Bild der Sonne</td><td>2048²</td><td>1024²</td></tr>
+      </table>
+    </div>
+    <div>
+      <p lang="en">Simple is about a fifth faster, and you come into a cube at once. On a slow computer, Full baked a cube's 46 lamps for 10 to 20 seconds.</p>
+      <p lang="de">Einfach ist ungefähr ein Fünftel schneller, und du kommst sofort in einen Würfel. Auf einem langsamen Computer hat Voll die 46 Lampen eines Würfels 10 bis 20 Sekunden lang gebacken.</p>
+      <p lang="en">The game picks Simple at first on a touch screen. You can switch any time: the shaders are built again once, with the new rules.</p>
+      <p lang="de">Auf einem Touchscreen wählt das Spiel zuerst Einfach. Du kannst jederzeit umschalten: Die Shader werden einmal neu gebaut, mit den neuen Regeln.</p>
+      <div class="note think" lang="en"><b>Think</b> There's no "best" here. Prettier costs time. The game lets you pick what your computer can pay.</div>
+      <div class="note think" lang="de"><b>Denk nach</b> Ein "Bestes" gibt es hier nicht. Schöner kostet Zeit. Das Spiel lässt dich wählen, was dein Computer bezahlen kann.</div>
+      <a class="deeper" data-lv="3" href="#looks-code" lang="en">The real code</a>
+      <a class="deeper" data-lv="3" href="#looks-code" lang="de">Der echte Code</a>
+    </div>
+  </div>
+</section>
+
+<section class="slide" id="water" data-lv="2" data-src="src/render/underwater.js#header">
+  <h2 lang="en">Light under water</h2>
+  <h2 lang="de">Licht unter Wasser</h2>
+  <div class="cols">
+    <div>
+      <p lang="en">Look at the bottom of a swimming pool on a sunny day: bright wobbly lines dance on it. The waves bend the sunlight like many little lenses, and gather it into lines. Those are called <b>caustics</b>.</p>
+      <p lang="de">Schau an einem sonnigen Tag auf den Boden eines Schwimmbads: Helle, wackelige Linien tanzen darauf. Die Wellen biegen das Sonnenlicht wie viele kleine Linsen und sammeln es zu Linien. Die heißen <b>Kaustiken</b>.</p>
+      <p lang="en">Working them out for real would mean following the light through every wave again. The game fakes them: it lays a moving pattern of lines over what lies under clear water, softer and fainter the deeper it is.</p>
+      <p lang="de">Sie echt auszurechnen hieße, das Licht wieder durch jede Welle zu verfolgen. Das Spiel schummelt: Es legt ein bewegtes Muster aus Linien über das, was unter klarem Wasser liegt, weicher und schwächer, je tiefer es ist.</p>
+    </div>
+    <div>
+      <p lang="en">And what lies under the water wavers: each corner of a triangle is pushed a little sideways by the slope of the waves above it, the more the deeper it is. Never above the water line, so a bridge's pier only bends under the water.</p>
+      <p lang="de">Und was unter dem Wasser liegt, wabert: Jede Ecke eines Dreiecks wird ein bisschen zur Seite geschoben, je nachdem, wie schräg die Wellen darüber sind, und umso mehr, je tiefer sie liegt. Nie über der Wasserlinie, darum biegt sich der Pfeiler einer Brücke nur unter Wasser.</p>
+      <div class="note think" lang="en"><b>Think</b> That's the game's lighting in a nutshell: not real, but it looks right, and it's cheap.</div>
+      <div class="note think" lang="de"><b>Denk nach</b> Das ist das Licht des Spiels im Kleinen: nicht echt, aber es sieht richtig aus, und es ist billig.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" id="cells-code" data-lv="3" data-src="src/core/lightcells.js#lightCells">
+  <h2 lang="en">The real code: a list for every cell</h2>
+  <h2 lang="de">Der echte Code: eine Liste für jede Zelle</h2>
+  <div class="cols wide-left">
+    <pre data-code="src/core/lightcells.js#lightCells"></pre>
+    <div>
+      <ul class="small">
+        <li lang="en">Two loops go over every cell: <code>cz</code> down, <code>cx</code> across.</li>
+        <li lang="de">Zwei Schleifen gehen über jede Zelle: <code>cz</code> nach unten, <code>cx</code> quer.</li>
+        <li lang="en"><code>dx</code> and <code>dz</code>: how far the lamp is from the cell's nearest edge (0 if it's inside). <code>Math.max</code> picks the right side.</li>
+        <li lang="de"><code>dx</code> und <code>dz</code>: wie weit die Lampe vom nächsten Rand der Zelle weg ist (0, wenn sie drin ist). <code>Math.max</code> sucht die richtige Seite aus.</li>
+        <li lang="en"><code>d2 &lt; l.reach * l.reach</code>: does it reach? (Comparing squares saves a square root.)</li>
+        <li lang="de"><code>d2 &lt; l.reach * l.reach</code>: Reicht sie hin? (Quadrate vergleichen spart eine Wurzel.)</li>
+        <li lang="en"><code>w</code>: how strong it is there. The list is sorted by it, strongest first, and cut after <code>max</code>.</li>
+        <li lang="de"><code>w</code>: wie stark sie dort ist. Danach wird die Liste sortiert, die stärkste zuerst, und nach <code>max</code> abgeschnitten.</li>
+        <li lang="en">The lists go into one long array of numbers, a <code>Float32Array</code>, so the graphics card can read it as a picture. <code>-1</code> means "end of the list".</li>
+        <li lang="de">Die Listen kommen in ein langes Feld aus Zahlen, ein <code>Float32Array</code>, damit die Grafikkarte es wie ein Bild lesen kann. <code>-1</code> heißt "Ende der Liste".</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="slide" id="looks-code" data-lv="3" data-src="src/game/quality.js#LOOKS,apply">
+  <h2 lang="en">The real code: the two looks</h2>
+  <h2 lang="de">Der echte Code: die zwei Looks</h2>
+  <div class="cols wide-left">
+    <pre data-code="src/game/quality.js#LOOKS,apply"></pre>
+    <div>
+      <ul class="small">
+        <li lang="en"><code>LOOKS</code> is a little table: one object for each choice. <code>baked</code>, <code>cells</code>, <code>lamp</code>, <code>sunMap</code>: the knobs from the slide before.</li>
+        <li lang="de"><code>LOOKS</code> ist eine kleine Tabelle: ein Objekt für jede Wahl. <code>baked</code>, <code>cells</code>, <code>lamp</code>, <code>sunMap</code>: die Regler von der Folie davor.</li>
+        <li lang="en"><code>apply</code> reads the setting and turns every knob. If nothing changed, <code>return</code> stops it right away.</li>
+        <li lang="de"><code>apply</code> liest die Einstellung und dreht jeden Regler. Hat sich nichts geändert, hört <code>return</code> sofort auf.</li>
+        <li lang="en"><code>BAKE.uBakeK.value</code> is a number the shaders read: how many lamps of a cell's list a pixel asks.</li>
+        <li lang="de"><code>BAKE.uBakeK.value</code> ist eine Zahl, die die Shader lesen: wie viele Lampen von der Liste einer Zelle ein Pixel fragt.</li>
+        <li lang="en">A new size for the sun's picture: the old one is thrown away, and three.js makes a new one.</li>
+        <li lang="de">Eine neue Größe für das Bild der Sonne: Das alte wird weggeworfen, und three.js macht ein neues.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="slide" id="edge-code" data-lv="3" data-src="src/render/lighthook.js#VIS">
+  <h2 lang="en">The real code: one pixel wide</h2>
+  <h2 lang="de">Der echte Code: ein Pixel breit</h2>
+  <div class="cols wide-left">
+    <pre data-src="src/render/lighthook.js#VIS"><code>// the lightmap's distance to the shadow's edge, read
+// smoothly between texels (0.5 on the edge)
+vec4 s = texture(uBakeLm0, vBakeLm);
+// fwidth(s): how much s changes from this pixel to the next
+vec4 v = clamp((s - 0.5) / fwidth(s) + 0.5, 0.0, 1.0);</code></pre>
+    <div>
+      <ul class="small">
+        <li lang="en">This runs for every pixel of the ground. <code>vec4</code> is four numbers at once: four lamps' channels in one go.</li>
+        <li lang="de">Das läuft für jedes Pixel des Bodens. <code>vec4</code> sind vier Zahlen auf einmal: die Kanäle von vier Lampen in einem Rutsch.</li>
+        <li lang="en">In the picture, distances are stored from 0 to 1, so the edge is at <code>0.5</code>. <code>s - 0.5</code> is the distance again: below 0 in the shadow.</li>
+        <li lang="de">Im Bild werden Abstände von 0 bis 1 gespeichert, darum ist der Rand bei <code>0.5</code>. <code>s - 0.5</code> ist wieder der Abstand: unter 0 im Schatten.</li>
+        <li lang="en">Dividing by <code>fwidth(s)</code> turns it into "pixels to the edge". Zoomed in, <code>s</code> changes slowly from pixel to pixel, so the same distance becomes more pixels.</li>
+        <li lang="de">Durch <code>fwidth(s)</code> teilen macht daraus "Pixel bis zum Rand". Reingezoomt ändert sich <code>s</code> von Pixel zu Pixel nur langsam, also wird derselbe Abstand zu mehr Pixeln.</li>
+        <li lang="en"><code>clamp(..., 0.0, 1.0)</code>: more than half a pixel inside: 0, dark. More than half a pixel outside: 1, lit. In between: the one soft pixel of the edge.</li>
+        <li lang="de"><code>clamp(..., 0.0, 1.0)</code>: mehr als ein halbes Pixel drin: 0, dunkel. Mehr als ein halbes Pixel draußen: 1, hell. Dazwischen: das eine weiche Pixel des Rands.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="slide" id="pots-code" data-lv="3" data-src="src/render/bake.js#assignChannels">
+  <h2 lang="en">The real code: handing out the pots</h2>
+  <h2 lang="de">Der echte Code: die Töpfe verteilen</h2>
+  <div class="cols wide-left">
+    <pre data-code="src/render/bake.js#assignChannels"></pre>
+    <div>
+      <ul class="small">
+        <li lang="en"><code>order</code>: the lamps sorted, brightest first (how bright, times how far it reaches, squared).</li>
+        <li lang="de"><code>order</code>: die Lampen sortiert, die hellste zuerst (wie hell, mal wie weit sie reicht, zum Quadrat).</li>
+        <li lang="en"><code>taken</code>: a <code>Set</code> of the pots the lamp's neighbours already have. A neighbour is a lamp closer than their two reaches together (times <code>REACH</code>).</li>
+        <li lang="de"><code>taken</code>: ein <code>Set</code> der Töpfe, die die Nachbarn der Lampe schon haben. Ein Nachbar ist eine Lampe, die näher ist als ihre beiden Reichweiten zusammen (mal <code>REACH</code>).</li>
+        <li lang="en">The loop over <code>c</code> takes the first free pot. The pots are counted from 1: pot 0 is the sun's.</li>
+        <li lang="de">Die Schleife über <code>c</code> nimmt den ersten freien Topf. Die Töpfe werden ab 1 gezählt: Topf 0 gehört der Sonne.</li>
+        <li lang="en">No free pot: a lamp very close by (<code>TWIN</code>) lends its shadow, like the lanterns on a string. Otherwise the lamp has none.</li>
+        <li lang="de">Kein freier Topf: Eine Lampe ganz in der Nähe (<code>TWIN</code>) leiht ihren Schatten her, wie die Laternen an einer Schnur. Sonst hat die Lampe keinen.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="slide" id="end" data-lv="1">
+  <h2 lang="en">A picture is a budget</h2>
+  <h2 lang="de">Ein Bild ist ein Budget</h2>
+  <p class="lead" lang="en">Real light is too slow for a game. So games guess, and spend their 16 milliseconds wisely:</p>
+  <p class="lead" lang="de">Echtes Licht ist zu langsam für ein Spiel. Also schätzen Spiele und geben ihre 16 Millisekunden klug aus:</p>
+  <table>
+    <tr><th lang="en">TRICK</th> <th lang="de">TRICK</th><th lang="en">WHAT IT SAVES</th> <th lang="de">WAS ES SPART</th><th lang="en">WHAT IT COSTS</th> <th lang="de">WAS ES KOSTET</th></tr>
+    <tr><td lang="en">a few rules instead of photons</td> <td lang="de">ein paar Regeln statt Photonen</td><td lang="en">almost everything</td> <td lang="de">fast alles</td><td lang="en">no real bouncing light: the sky light stands in</td> <td lang="de">kein echtes Abprallen: Das Himmelslicht springt ein</td></tr>
+    <tr><td lang="en">the light's own picture (shadow map)</td> <td lang="de">das eigene Bild des Lichts (Schattenkarte)</td><td lang="en">walking a line for every pixel</td> <td lang="de">für jedes Pixel eine Linie ablaufen</td><td lang="en">extra pictures; steps if too small</td> <td lang="de">zusätzliche Bilder; Stufen, wenn sie zu klein sind</td></tr>
+    <tr><td lang="en">bake what stays (lightmap)</td> <td lang="de">backen, was bleibt (Lichtkarte)</td><td lang="en">the shadows of 50 lamps every frame</td> <td lang="de">die Schatten von 50 Lampen in jedem Bild</td><td lang="en">time on arrival, memory, nothing that moves</td> <td lang="de">Zeit beim Ankommen, Speicher, nichts, was sich bewegt</td></tr>
+    <tr><td lang="en">ask only lamps that reach (cells)</td> <td lang="de">nur Lampen fragen, die hinreichen (Zellen)</td><td lang="en">questions to faraway lamps</td> <td lang="de">Fragen an ferne Lampen</td><td lang="en">the faintest are left out</td> <td lang="de">die schwächsten fallen weg</td></tr>
+    <tr><td lang="en">Full or Simple</td> <td lang="de">Voll oder Einfach</td><td lang="en">whatever your computer can't pay</td> <td lang="de">was dein Computer nicht bezahlen kann</td><td lang="en">the shadows of the lamps</td> <td lang="de">die Schatten der Lampen</td></tr>
+  </table>
+  <p lang="en">Work it out once, ask only what matters, and let the player choose. That's how most of a game stays fast, not just its light.</p>
+  <p lang="de">Einmal ausrechnen, nur fragen, was zählt, und den Spieler wählen lassen. So bleibt das meiste in einem Spiel schnell, nicht nur sein Licht.</p>
+</section>
+
+</main>
+<script type="module" src="deck.js"></script>
+</body>
+</html>

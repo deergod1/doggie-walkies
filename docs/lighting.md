@@ -101,7 +101,8 @@ every shader, so no program changes its cache key.
 ## Dev
 
 `/lightview sun | lights | lightmap | off` (docs/console.md): the sun's baked shadow alone, the
-fixed lights' light alone, the lightmap's texels.
+fixed lights' light alone, the lightmap's texels. The Teacher (learn/tutor/) switches the same views with
+`teach.lightview(view)` (`game/teach.js`).
 
 ## Light in the deep
 

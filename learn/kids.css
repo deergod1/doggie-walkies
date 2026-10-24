@@ -19,6 +19,7 @@
 [data-theme=swamp]    { --sky1: #141a10; --sky2: #050704; --accent: #7dff3a; }
 [data-theme=cenote]   { --sky1: #14281a; --sky2: #040a06; --accent: #8ab070; }
 [data-theme=nests]    { --sky1: #1c1520; --sky2: #020203; --accent: #d0503a; }
+[data-theme=ossuary]  { --sky1: #241c16; --sky2: #040302; --accent: #ffc890; }
 [data-theme=mines]    { --sky1: #121630; --sky2: #020203; --accent: #8fd8ff; }
 [data-theme=ruins]    { --sky1: #2a1e10; --sky2: #030201; --accent: #e0c080; }
 [data-theme=volcanic] { --sky1: #3a0e06; --sky2: #050101; --accent: #ff8a2a; }

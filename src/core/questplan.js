@@ -35,6 +35,7 @@ const weighted = (R, list) => {
 const plans = new WeakMap();
 // The plan: { slots: [{ id, depth, kind, giver }], byGiver: giver -> its slots, by depth }
 // layout: depth -> the depth's layout (world/layout.js makeLayouts)
+// learn: memory.html#quests (see learn/README.md)
 export function questPlan(seed, layout) {
   if (plans.has(layout)) return plans.get(layout);
   const slots = [];

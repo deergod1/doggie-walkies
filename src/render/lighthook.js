@@ -21,13 +21,17 @@
 // in; everything else (the hero, enemies, loot) the cube played in.
 import * as THREE from 'three';
 
+// learn: light.html#kinds (see learn/README.md)
 export const MAX_BAKED = 128;  // fixed lights a cube gives off at most
+// learn: light.html#kinds (see learn/README.md)
 export const MAX_MOVING = 64;  // moving lights shining at once at most (render/lightpool.js)
+// learn: light.html#pots (see learn/README.md)
 export const SETS = 3;         // the lightmap's (and volume's) textures, four channels each: the sun's and eleven for lights
 // The fixed lights a point walks are its cell's (render/bake.js lightCells): the cube's ground in
 // cells of a unit (CELLS a side from CELL0, a little round the cube), each with the lights that
 // reach it, the strongest first, CELL_MAX at most (uBakeK: how many of them a point takes, fewer
 // in the simple look). A dark forest's cube has 40-50 lights, a point is reached by a dozen.
+// learn: light.html#cells (see learn/README.md)
 export const CELLS = 20, CELL0 = -2, CELL_MAX = 16;
 
 // a table of lights: two texels a light (x, y, z, reach; r, g, b, channel)
@@ -96,6 +100,7 @@ float bakeFalloff(float d, float reach) {
 // before the lights: where the point is (in the world: bakeW, in the cube: bakeP), the
 // visibility of the sun (bakeSun) and of the fixed lights' channels (bake0..: four each; channel
 // 0 is the sun's in the lightmap)
+// learn: light.html#edge-code #sharp (see learn/README.md)
 const VIS = `
 #ifndef NO_BAKE
   float bakeSun = 1.0;

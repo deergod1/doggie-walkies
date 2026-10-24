@@ -202,6 +202,7 @@ export const baked = world => !shadows || !world?.bake || world.bake.ready || wo
 // Bake what is shown a little each frame: the cube played in first, then the others (a cube
 // travelled into is the one played in from the start). Before drawing (main.js), after anything
 // that builds the cube again. hidden: nothing shows (game/hud.js curtained): all at once.
+// learn: light.html#bake (see learn/README.md)
 export function tickBakes(current, hidden = false) {
   if (!shadows) return;
   const start = performance.now();
@@ -263,6 +264,7 @@ function restoreState(s) {
 // one takes the shadow of one next to it (TWIN: the lanterns on a string), else none (-1).
 // twin: the light whose shadow it shares (not baked itself).
 const REACH = 0.85, TWIN = 1.2;
+// learn: light.html#pots #pots-code (see learn/README.md)
 function assignChannels(lights) {
   const order = [...lights].sort((a, b) => b.light.intensity * b.light.distance ** 2 - a.light.intensity * a.light.distance ** 2);
   for (const s of order) { s.channel = -1; s.twin = null; }
