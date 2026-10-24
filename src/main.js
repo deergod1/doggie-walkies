@@ -1,6 +1,8 @@
 // Entry point: load the first cube and run the frame loop.
+import './render/lighthook.js';   // (first: every lit material takes the fixed lights, render/lighthook.js)
 import * as THREE from 'three';
 import { renderer, scene, camera, fitView } from './render/scene.js';
+import { bakeWorld, updateBakes, setCurrentBake } from './render/bake.js';
 import { animateWorld } from './render/world.js';
 import { animateCharacter } from './render/animator.js';
 import { generate } from './cubegen/index.js';
@@ -191,6 +193,8 @@ function frame(now = performance.now()) {
   applyLook(state.lookDepth, camera.position.distanceTo(focusPoint(player.x, player.visY, player.z)), state.cubes?.layout.themes, state.lookDark, state.lookMist, state.lookVoid, state.lookDusk);
   followHero(dt);   // the hero's light where it stands (render/character.js)
   updateLightPool(focusPoint(player.x, player.visY + 1, player.z));
+  if (state.world) bakeWorld(state.world);   // the cube's fixed lights' shadows, once (render/bake.js)
+  updateBakes(); setCurrentBake(state.world?.bake);
   // (the close view's camera stays out of the solids: nothing of the neighbours is cut either)
   cullNeighbors(player.x, player.z, !state.transitioning && !closeView(), state.showNeighbors, player.visY + (player.swimming ? 0.6 : 0.3));
   updatePlayerBar(closeView());
@@ -237,6 +241,8 @@ function menuFrame(dt, start) {
   applyLook(state.lookDepth, camera.position.distanceTo(menuFocus), state.cubes?.layout.themes);
   followHero();   // (off: the hero is not in the world here)
   updateLightPool(menuFocus);
+  if (state.world) bakeWorld(state.world);
+  updateBakes(); setCurrentBake(state.world?.bake);
   tickSky(performance.now() / 1000);
   fitView();
   beginFrame();

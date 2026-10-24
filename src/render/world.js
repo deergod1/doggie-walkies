@@ -23,11 +23,13 @@ import { ownShadowDepth } from './skinned.js';
 import { buildTrialView, tickTrialView } from './trials.js';
 import { flipPivot, tickFlipView } from './flipview.js';
 import { buildMoverView, tickMoverView } from './movers.js';
+import { newBake, disposeBake, keepFixedOutOfSun } from './bake.js';
 
 export function disposeWorld(world) {
   if (!world) return;
   scene.remove(world.group);
   releaseLights(world.group);
+  disposeBake(world.bake);
   world.group.traverse(o => { if (!o.userData.sharedGeo) o.geometry?.dispose(); if (o.material) [].concat(o.material).forEach(m => m.userData.keep || m.dispose()); });
 }
 
@@ -38,10 +40,12 @@ export function buildWorld(m, showPath, seen, geo = buildCubeParts(m), open = []
   const group = new THREE.Group();
   // Flip's box turns about its middle: its meshes and markers hang in a pivot (render/flipview.js)
   const flip = m.flip ? flipPivot(group, m) : null, host = flip ? flip.inner : group;
+  // its fixed lights and their baked shadows (render/bake.js: baked once it is shown)
+  const bake = newBake(geo, group, !!flip);
   // what its fluids meet (render/wet.js)
   const water = waterUniforms(m);
   // (Flip's box draws its sides itself, render/flipview.js: the cube's parts are its proxy's)
-  const fluidMeshes = flip ? [] : partMeshes(geo, host, m.interior ? ['stone'] : [], water);
+  const fluidMeshes = flip ? [] : partMeshes(geo, host, m.interior ? ['stone'] : [], water, bake);
   const { splashes, lights } = buildFalls(m, group);
   lavaLights(m, group, lights);
   const markers = buildMarkers(m, host, showPath, seen, open, locked);
@@ -60,11 +64,12 @@ export function buildWorld(m, showPath, seen, geo = buildCubeParts(m), open = []
   const glass = makeGlass(1, open);
   glass.visible = !m.interior;   // inside a house: walls, no glass box
   group.add(glass);
-  adoptLights(group);
+  adoptLights(group, bake);
   makeFadable(group);
   ownShadowDepth(group);   // the props' instanced meshes
+  if (!flip) keepFixedOutOfSun(group);
   scene.add(group);
-  const world = { group, glass, fluidMeshes, splashes, lights, villagers, missingSets, trialView, flip, movers, ...markers };
+  const world = { group, glass, fluidMeshes, splashes, lights, villagers, missingSets, trialView, flip, movers, bake, ...markers };
   setTownPortal(world, townPad);
   return world;
 }
@@ -83,7 +88,7 @@ export function setTownPortal(world, pad) {
   }
   if (!pad) return;
   const fx = townPortalFx(pad);
-  fx.obj.remove(fx.light);   // a pool light source (render/lightpool.js), not a scene light
+  fx.obj.remove(fx.light);   // a light source (render/lightpool.js), not a scene light
   world.group.add(fx.obj);
   adoptFade(world.group, fx.obj);
   trackLight(fx.light, fx.obj, world.group);

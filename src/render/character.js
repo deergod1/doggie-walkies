@@ -27,9 +27,15 @@ export const character = { ready: false };
 // the ones it took to draw the world.
 // It hangs over the hero and a little towards the camera, like a lantern held up: in the body
 // (it once was, at the chest) every face of the figure looks away from it, and the hero stood
-// dark in a pool of light. It casts no shadow, so it stays out of ceilings and walls: there it
-// would light the far side of them.
+// dark in a pool of light. It casts shadows (a cube of shadow maps, drawn every frame it
+// shines), so walls, trees and the hero itself stand dark against it; it stays out of ceilings
+// and walls all the same, where it would light their far side.
 const light = new THREE.PointLight(0xffd9a0, 1.2, 3.5, 2);
+light.castShadow = true;   // (always: one coming or going recompiles every lit shader)
+light.shadow.mapSize.set(512, 512);
+light.shadow.camera.near = 0.15;
+light.shadow.bias = -0.002;
+light.shadow.radius = 1.5;
 scene.add(light);
 const LIFT = 2.3;          // over the feet (the hero is ~1.1 tall; closer, the head is blown out)
 const LEAD = 0.55;         // towards the camera, level
@@ -42,7 +48,8 @@ const solid = (x, z, y) => cellAt(x, z) >= 0 && insideSolid(x, z, y);
 // every frame, once the figure and the camera stand where they stand (main.js)
 export function followHero(dt = 0) {
   const g = character.group;
-  if (!(character.ready && g.visible && g.parent === scene)) { light.intensity = 0; return; }
+  if (!(character.ready && g.visible && g.parent === scene)) { light.intensity = 0; light.shadow.autoUpdate = false; return; }
+  light.shadow.autoUpdate = true;
   const p = g.position;
   let dx = camera.position.x - p.x, dz = camera.position.z - p.z;
   const len = Math.hypot(dx, dz);

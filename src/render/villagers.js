@@ -35,7 +35,7 @@ export function buildVillagers(list, group) {
     f.group.userData.villager = v.id ?? v.name;
     for (const w of Object.values(f.worn)) {
       const glow = ITEMS[w.id].glow;
-      // a point light: the cube's light pool takes it over as a source (render/lightpool.js)
+      // a point light: a moving light source of the cube (render/lightpool.js)
       if (glow) { const l = new THREE.PointLight(glow, .9, 1.8, 2); w.object.add(l); }
     }
     group.add(f.group);

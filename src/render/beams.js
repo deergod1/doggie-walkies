@@ -37,7 +37,7 @@ function makeView(b) {
   }
   const spot = new THREE.Mesh(ball, halo);
   const light = new THREE.PointLight(color, 2.5, 3, 2);
-  group.add(spot); scene.add(group); trackLight(light, spot);   // a pool light source, not in the scene
+  group.add(spot); scene.add(group); trackLight(light, spot);   // a light source, not in the scene
   return { group, rays, spot, light, owned: [core, halo], colors: ['#ffffff', '#' + color.getHexString(), '#d8ff7a'] };
 }
 function eyeAt(b, i, off, out) {

@@ -57,6 +57,7 @@ const BESIDE_WALL = `
 // caps show through a cut instead of fighting the proxy's wall behind them.
 function batchMaterial(mat, data, key, edit = sh => sh, cut = REVEAL) {
   Object.assign(mat, { polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 2 });
+  mat.defines = { ...mat.defines, NO_BAKE: '' };   // (not lit by the active cube's fixed lights, render/lighthook.js)
   inject(mat, fs => fs.replace('#include <clipping_planes_fragment>',
     cut + '#include <clipping_planes_fragment>' + dither('vProxy.x', 'vProxy.y', 'vProxy.z')), key);
   const compile = mat.onBeforeCompile;

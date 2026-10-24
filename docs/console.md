@@ -108,6 +108,7 @@ Developer (`?dev=1`):
 | `/wear <thing\|off>` | a hat on (a Vanilla one into the bag: hats are head armor, `docs/armor.md`), or off what is on the head |
 | `/gold <amount>`, `/heal`, `/level <n>` | the hero |
 | `/music <mood\|auto>` | hold one mood of the music |
+| `/lightview <off\|sun\|lights\|lightmap>` | what the cube's fixed lights' baked shadows look like: the sun's baked shadow alone, the fixed lights' light alone, the lightmap's texels on the solids; `off`: the picture (`docs/lighting.md`) |
 | `/saves` | the saved heroes and worlds, and what is being saved now |
 | `/save <hero>` | save as this hero (overwritten, or a new one) in this world (a new saved world unless it is saved already, now the hero's world); from then on it saves itself |
 | `/load <hero> [world\|new]` | play a saved hero in a saved world (no world: the hero's own one, else a new one) |

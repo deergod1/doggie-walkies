@@ -77,7 +77,7 @@ function makeView(pr) {
     group.add(mesh);
   }
   const [color, intensity, distance] = look.light, light = new THREE.PointLight(pr.profile?.light ?? color, intensity, distance, 2);
-  scene.add(group); trackLight(light, group, group, 2);   // a pool light source, not in the scene
+  scene.add(group); trackLight(light, group, group, 2);   // a light source, not in the scene
   return { group, light, look, trail: pr.profile?.sparks ?? look.trail, owned, base: intensity };
 }
 export function drawProjectiles(list, dt, off = { x: 0, y: 0, z: 0 }) {

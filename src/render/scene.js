@@ -1,6 +1,8 @@
 // Renderer, scene, lights and camera.
+import './lighthook.js';   // (before any material: render/lighthook.js)
 import * as THREE from 'three';
 import { N } from '../core/constants.js';
+import { bakeScene } from './lighthook.js';
 
 // no antialias: the anti-aliasing is our own, at the level of the settings (msaa.js)
 export const renderer = new THREE.WebGLRenderer({ antialias: false });
@@ -40,6 +42,7 @@ renderer.shadowMap.type = THREE.PCFShadowMap;   // soft since r182 (PCFSoftShado
 document.body.prepend(renderer.domElement);
 
 export const scene = new THREE.Scene();
+bakeScene(scene);   // (the cube's fixed lights shine in it, render/lighthook.js)
 scene.fog = new THREE.Fog(0x000000, 1e4, 2e4);   // always present (adding fog later recompiles shaders)
 
 // the backdrop (sky gradient, clouds, stars) is in sky.js

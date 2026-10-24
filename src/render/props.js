@@ -171,7 +171,7 @@ export function buildProps(placed, group, water = null, maxLights = PROP_LIGHTS)
     if (p.light && !p.cover) for (const [qi, q] of list.entries()) if (!q.unlit)   // (unlit: e.g. daytime lamp posts in the town clearings)
       glowing.push({ p, q, flame: p.flames?.length ? first0 + qi : -1 });
   }
-  // a few glowing props light their surroundings (the light pool picks the nearest): the big ones
+  // a few glowing props light their surroundings (all of them, always: render/lightpool.js): the big ones
   // first, then the brightest, spread over the cube; a fire's light flickers with its flame, a
   // lantern's like a flame (`flicker` 'flame'), a glowing mushroom's breathes ('pulse')
   const big = g => g.p.landmark || g.p.vignette ? 1 : 0;

@@ -177,7 +177,7 @@ function makeFx(r) {
     const light = new THREE.PointLight(k.color, g.light, 3.5, 2);
     light.position.y = 0.6;
     fx.userData.light = light;
-    trackLight(light, fx, fx, 2);   // a pool light source, not in the scene (render/lightpool.js)
+    trackLight(light, fx, fx, 2);   // a light source, not in the scene (render/lightpool.js)
   }
   return fx;
 }
