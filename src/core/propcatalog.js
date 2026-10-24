@@ -18,9 +18,32 @@ export const signatureProp = p => p.landmark || p.vignette || SIGNATURES.has(p.b
 export const propMetadata = new Map(PROP_METADATA.map(p => [p.name, p]));
 export const props = { byName: new Map(), sets: new Map() };
 
+// the props that burn (by base name): their models' glowing spikes are drawn as flames, their
+// light flickers with them (render/flames.js)
+export const FIRES = new Set(['brazier', 'torch_sconce', 'tiki_torch', 'copal_bowl', 'fire_shrine', 'wall_brazier', 'oil_lamps',
+  'temple_gate']);
+
+// How the light of the older libraries' glowing props lives (the theme library's own say so in
+// their `flicker`, assets/themes/manifest.json): 'flame' flickers like a fire (candles, lanterns,
+// lamps), 'pulse' breathes slowly (crystals, runes, fungus, magma, the sea's glow). Fires flicker
+// with their flames anyway (render/flames.js); the town's windows and the trials' parts stay still.
+const words = s => s.split(' ');
+export const FLICKER = Object.fromEntries([
+  ...words('lantern hanging_lantern wall_lantern headframe hanging_censer luminaria crucible furnace butter_lamps chorten_great'
+    + ' sang_burner wax_candles stone_lantern wall_shrine bone_chandelier bone_lantern candelabra candle_niche candle_stubs'
+    + ' crypt_shrine witch_hut').map(b => [b, 'flame']),
+  ...words('rune_stone ritual_circle void_crystal wall_runes chained_obelisk void_throne ice_crystal ice_throne crystal_cluster'
+    + ' ore_vein giant_geode glow_mushroom mushroom_shelf spore_pod acid_foam fungal_tree swamp_lilies tiny_glowcaps'
+    + ' giant_toadstool magma_rock cinders fire_crystal lava_crust lava_stalactite magma_seep fumarole glowworm_threads'
+    + ' rainbow_crystal storm_jar gauge_panel slag_bits slag_raft anemone coral_wall giant_clam giant_shell glow_strands'
+    + ' jelly_lantern jellyfish sea_glass comb_mound comb_tower royal_cell wall_comb glow_spores glow_eggs pale_fungus'
+    + ' dew_web glow_silk glyph_stone').map(b => [b, 'pulse']),
+]);
+
 // a prop's catalog entry from its metadata: the extras the exporters may leave out get their defaults
 export const catalogEntry = m => ({ attach: 'ground', radius: 0.3, intensity: 1, sway: 0, priority: 1, drop: 0, ...m,
-  blocking: !!m.blocking, cover: !!m.cover, shore: !!m.shore });
+  blocking: !!m.blocking, cover: !!m.cover, shore: !!m.shore,
+  ...(m.light && !m.flicker && FLICKER[m.base] ? { flicker: FLICKER[m.base] } : {}) });
 
 // add an entry, or replace one in its place (placement draws from the sets in their order)
 export function catalogProp(p) {

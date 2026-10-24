@@ -41,6 +41,7 @@ GEODE = ("#6a6a72", "#7a7a84", "#5a5a62")
 MARBLE = ("#d8d0c0", "#c8c0b0", "#e4dccc")
 LAVA_GLOW = "#ff6a20"
 EMBER = "#ffb040"
+NEST_GLOW = "#d0a8ff"
 SULFUR_CRUST = "#d8c040"
 RUNE = "#ff3030"
 VOID = "#a050ff"
@@ -340,8 +341,10 @@ def build_web_gate(m, v):
     for sx in (-1, 1):
         m.lathe((sx * 1.15, 0, 0), [(0, 0.38), (0.4, 0.32), (1.8, 0.27), (2.4, 0.2), (2.7, 0)], WEB, n=8, jitter=0.1,
                 colors=["#d8d4dc", WEB, "#c8c4cc"])
+        start = len(m.faces)
         for sy in (-1, 1):
-            m.blob((sx * 1.15, sy * 0.48, 0.2), (0.18, 0.16, 0.22), EGG[sy > 0], n=5)
+            m.blob((sx * 1.15, sy * 0.48, 0.2), (0.18, 0.16, 0.22), NEST_GLOW, n=5)
+        lit(m, start)   # (its eggs glow in the dark of the nests)
     # the canopy of web strung between them, high over the way through
     for k in range(5):
         z = 1.75 + 0.12 * k
@@ -352,7 +355,9 @@ def build_web_gate(m, v):
     for k in range(4):
         x = -0.75 + 0.5 * k
         m.tube([(x, -0.05, 1.8), (x + 0.05, -0.08, 1.62 + 0.05 * k)], 0.006, WEB, n=3)
-        m.blob((x + 0.05, -0.08, 1.58 + 0.05 * k), (0.06, 0.06, 0.09), EGG[k % 3], n=4)
+        start = len(m.faces)
+        m.blob((x + 0.05, -0.08, 1.58 + 0.05 * k), (0.06, 0.06, 0.09), NEST_GLOW, n=4)
+        lit(m, start)
 
 
 def build_brood_cluster(m, v):
@@ -362,12 +367,17 @@ def build_brood_cluster(m, v):
         a = i * TAU / 9 + 0.2 * (i % 2)
         r = 0.6 + 0.25 * (i % 3)
         h = 0.3 + 0.08 * ((i * 5) % 3)
-        m.blob(polar(r, a, 0.4 + h * 0.6), (h * 0.7, h * 0.65, h), EGG[i % 3], n=6)
+        start = len(m.faces)
+        m.blob(polar(r, a, 0.4 + h * 0.6), (h * 0.7, h * 0.65, h), NEST_GLOW if i % 3 == 0 else EGG[i % 3], n=6)
+        if i % 3 == 0:
+            lit(m, start)
     for k in range(6):
         a = k * TAU / 6 + 0.5
         m.tube([(0, 0.15, 2.4 - 0.1 * k), polar(0.9, a, 1.2), polar(1.4, a + 0.2, 0.05)], [0.012, 0.01, 0.006], WEB, n=3)
+    start = len(m.faces)
     for k in range(3):
-        m.blob(polar(0.25, k * 2.1, 1.6 + 0.3 * k), (0.15, 0.15, 0.22), EGG[k], n=5)
+        m.blob(polar(0.25, k * 2.1, 1.6 + 0.3 * k), (0.15, 0.15, 0.22), NEST_GLOW, n=5)
+    lit(m, start)
 
 
 # ================================== mines =====================================
@@ -442,14 +452,26 @@ def build_temple_gate(m, v):
     letters(m, (-0.9, -0.31, 2.62), (1, 0, 0), (0, 0, 1), 18, 0.05, "#8a8274")
     for i, (x, y, r) in enumerate(((1.0, -0.85, 0.28), (1.3, -0.45, 0.2), (-1.15, -0.75, 0.22), (-1.1, 0.8, 0.25))):
         m.box((x, y, r / 2), (r * 1.6, r * 1.2, r), MARBLE[i % 3], tilt=i * 0.7, jitter=0.02)
+    # braziers burning before its columns, either side of the way through
+    for sx in (-1, 1):
+        x, y = sx * 1.15, -0.62
+        m.lathe((x, y, 0), [(0, 0.16), (0.08, 0.1), (0.62, 0.07), (0.7, 0.12), (0.84, 0.22), (0.9, 0.24)], MARBLE[1], n=8)
+        m.lathe((x, y, 0.88), [(0, 0.2), (0.02, 0.17)], "#3a2a20", n=8)
+        start = len(m.faces)
+        flame(m, (x, y, 0.9), 0.42, EMBER, r=0.14)
+        flame(m, (x + 0.06, y + 0.05, 0.9), 0.3, EMBER, r=0.09)
+        lit(m, start)
 
 
 def build_colossus_head(m, v):
     s = len(m.vertices)
     m.blob((0, 0, 1.0), (1.05, 1.0, 1.05), "#b8b0a0", n=10, jitter=0.05)
     m.box((0, -0.98, 1.0), (0.3, 0.3, 0.5), "#b0a898")
+    start = len(m.faces)
     for sx in (-1, 1):
-        m.box((sx * 0.38, -0.88, 1.35), (0.3, 0.12, 0.12), "#7a7266")
+        m.box((sx * 0.38, -0.88, 1.35), (0.3, 0.12, 0.12), "#ffc060")
+    lit(m, start)   # (its eyes still burn)
+    for sx in (-1, 1):
         m.box((sx * 0.38, -0.8, 1.52), (0.36, 0.2, 0.08), "#a8a090")
     m.box((0, -0.86, 0.55), (0.5, 0.12, 0.1), "#8a8274")
     for k in range(7):

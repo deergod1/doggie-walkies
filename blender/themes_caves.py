@@ -801,6 +801,13 @@ def build_great_gear(m, v):
     gear(m, (0.0, -0.0, 0.42), 0.32, 10, 0.12, COPPER, axis="x", hub=IRON)
     m.box((-0.5, 0.42, 0.42), (0.35, 0.02, 0.3), BRASS)
     m.box((-0.5, 0.44, 0.42), (0.2, 0.02, 0.1), "#7aff9a")
+    # a pan of coals glowing at its foot, in front
+    m.lathe((0.55, -0.62, 0.0), [(0, 0.12), (0.18, 0.2), (0.26, 0.26), (0.3, 0.25)], IRON, n=8)
+    start = len(m.faces)
+    for k in range(5):
+        m.blob((0.55 + 0.1 * math.cos(k * 1.3) * (k > 0), -0.62 + 0.1 * math.sin(k * 1.3) * (k > 0), 0.28),
+               (0.07, 0.07, 0.04), HOT, n=4)
+    lit(m, start)
 
 
 def build_furnace(m, v):
@@ -974,6 +981,15 @@ def build_bone_arch(m, v):
     skull_lite(m, (0, -0.28, 2.55), scale=1.4, yaw=0)
     for s in (-1, 1):
         bone_lite(m, (s * 0.2, -0.3, 2.35), (s * -0.35, -0.3, 2.75), r=0.03)
+    # candles burning on ledges before the pillars
+    for s in (-1, 1):
+        for r, (dx, h) in enumerate(((-0.08, 0.12), (0.1, 0.16))):
+            z = 0.62 + 0.56 * r
+            m.box((s * 1.0, -0.33, z - 0.02), (0.36, 0.14, 0.04), CRYPT[2])
+            m.lathe((s * 1.0 + dx, -0.34, z), [(0, 0.025), (h, 0.022)], CANDLE, n=5)
+            start = len(m.faces)
+            flame(m, (s * 1.0 + dx, -0.34, z + h), 0.06, "#ffc070", r=0.015)
+            lit(m, start)
 
 
 def build_crypt_shrine(m, v):

@@ -1,4 +1,5 @@
-// Themes below the ground (depth 7 and deeper): caves without sun or sky. See index.js. The
+// Themes below the ground (depth 7 and deeper): caves without sun or sky. See index.js. Every cave
+// has something drifting in its air (`motes`, render/motes.js), the dark ones a few wisps with lights. The
 // first ones (7-13) are lit from above through cracks and by glowing things (medium light,
 // `lamp` about a half), the deep ones (14-20) only by their own fires and crystals (dark).
 import { WATER, LAVA, ACID } from '../core/constants.js';
@@ -7,7 +8,7 @@ const T = (name, o) => ({ name, tiles: {}, cave: true, spans: null, ...o });
 
 const ROOTS = T('Root caves', {
   music: 'roots',
-  props: 'roots',
+  props: 'roots', motes: { colors: ['#7fd8ff', '#a8e8ff'], rate: 2, drift: 0.1, rise: [-0.02, 0.06], life: [4, 7], size: [0.025, 0.04] },
   depths: [7, 8], spans: { chance: 0.35, max: 1, route: 0.8, island: 0.4, sky: 0, deck: 15 },
   void: 0.08, relief: 0.5,
   arche: { plain: 2, sinkhole: 2, chasm: 1, crater: 1 },
@@ -19,7 +20,7 @@ const ROOTS = T('Root caves', {
 });
 const FROZEN = T('Frozen caves', {
   music: 'frozen',
-  props: 'frozen',
+  props: 'frozen', motes: { colors: ['#e0f4ff', '#b8e0ff'], rate: 3, drift: 0.12, rise: [-0.12, -0.04], life: [4, 7], size: [0.025, 0.045] },
   depths: [9, 10], spans: { chance: 0.35, max: 1, route: 0.8, island: 0.4, sky: 0, deck: 15 },
   void: 0.08, relief: 0.6,
   arche: { crater: 2, sinkhole: 2, plain: 2 },
@@ -31,7 +32,7 @@ const FROZEN = T('Frozen caves', {
 });
 const SWAMP = T('Fungal swamp', {
   music: 'swamp',
-  props: 'swamp',
+  props: 'swamp', motes: { colors: ['#b8ff8a', '#d8ff9a'], rate: 4, drift: 0.15, rise: [0.0, 0.1], life: [4, 7], size: [0.03, 0.05], wisps: 2, wisp: '#8fff7a' },
   depths: [11, 12], spans: { chance: 0.3, max: 1, route: 0.8, island: 0.4, sky: 0, deck: 15 },
   void: 0.06, relief: 0.4,
   arche: { archipelago: 2, plain: 2, crater: 1 },
@@ -43,7 +44,8 @@ const SWAMP = T('Fungal swamp', {
 });
 const NESTS = T('Spider nests', {
   music: 'nests',
-  props: 'nests',
+  waylights: { props: ['nests_glow_eggs', 'nests_pale_fungus'], share: 0.1 },
+  props: 'nests', motes: { colors: ['#d0a8ff', '#b890ff'], rate: 4, drift: 0.12, rise: [0.0, 0.08], life: [4, 7], size: [0.03, 0.05], wisps: 2, wisp: '#b890ff' },
   depths: [14, 15], spans: { chance: 0.4, max: 1, route: 0.8, island: 0.4, sky: 0, deck: 15 },
   void: 0.1, relief: 0.7,
   arche: { chasm: 2, sinkhole: 2, spire: 1, plain: 1 },
@@ -55,7 +57,8 @@ const NESTS = T('Spider nests', {
 });
 const MINES = T('Crystal mines', {
   music: 'mines',
-  props: 'mines',
+  waylights: { props: ['mines_lantern'], share: 0.12 },
+  props: 'mines', motes: { colors: ['#c8d8ff', '#e8f0ff'], rate: 2, drift: 0.1, rise: [-0.05, 0.03], life: [3, 6], size: [0.02, 0.035] },
   depths: [16, 16], spans: { chance: 0.4, max: 1, route: 0.8, island: 0.4, sky: 0, deck: 15 },
   void: 0.08, relief: 0.8,
   arche: { chasm: 2, mesa: 2, spire: 2, plain: 1 },
@@ -67,7 +70,8 @@ const MINES = T('Crystal mines', {
 });
 const RUINS = T('Buried ruins', {
   music: 'ruins',
-  props: 'ruins',
+  waylights: { props: ['ruins_oil_lamps', 'ruins_brazier'], share: 0.1, back: 0.3, foot: 0.12 },
+  props: 'ruins', motes: { colors: ['#ffb060', '#ff8a3a'], rate: 4, drift: 0.15, rise: [0.15, 0.35], life: [2, 4], size: [0.025, 0.045], wisps: 1, wisp: '#ffa050' },
   depths: [17, 17], spans: { chance: 0.35, max: 1, route: 0.8, island: 0.4, sky: 0, deck: 15 },
   void: 0.1, relief: 0.6,
   arche: { mesa: 3, sinkhole: 1, plain: 2 },
@@ -79,7 +83,7 @@ const RUINS = T('Buried ruins', {
 });
 const VOLCANIC = T('Volcanic depths', {
   music: 'volcanic',
-  props: 'volcanic',
+  props: 'volcanic', motes: { colors: ['#ffb030', '#ff6a20', '#ffd060'], rate: 8, drift: 0.25, rise: [0.3, 0.7], life: [1.5, 3], size: [0.025, 0.05] },
   depths: [18, 18], spans: { chance: 0.4, max: 1, route: 0.8, island: 0.4, sky: 0, deck: 15 },
   void: 0.12, relief: 0.8,
   arche: { crater: 3, chasm: 2, spire: 1 },
@@ -91,7 +95,8 @@ const VOLCANIC = T('Volcanic depths', {
 });
 const ABYSS = T('Obsidian abyss', {
   music: 'abyss',
-  props: 'abyss',
+  waylights: { props: ['abyss_rune_stone'], share: 0.08, back: 0.3, foot: 0.15 },
+  props: 'abyss', motes: { colors: ['#c070ff', '#ff4a8a'], rate: 5, drift: 0.15, rise: [0.1, 0.3], life: [2.5, 4.5], size: [0.025, 0.045], wisps: 2, wisp: '#b060ff' },
   depths: [19, 20], spans: { chance: 0.5, max: 1, route: 0.8, island: 0.4, sky: 0.4, deck: 15 },
   void: 0.6, relief: 0.6,
   arche: { archipelago: 4, spire: 2, chasm: 1 },
@@ -105,7 +110,7 @@ const ABYSS = T('Obsidian abyss', {
 // the sunken grotto: kelp, clams and glowing jellies around wide pools of sea water
 const GROTTO = T('Sunken grotto', {
   music: 'frozen',
-  props: 'grotto',
+  props: 'grotto', motes: { colors: ['#8af0ff', '#a8ffe8'], rate: 4, drift: 0.12, rise: [0.02, 0.1], life: [4, 7], size: [0.03, 0.05], wisps: 1, wisp: '#7fe8ff' },
   depths: [9, 10], spans: { chance: 0.35, max: 1, route: 0.8, island: 0.4, sky: 0, deck: 15 },
   void: 0.08, relief: 0.5,
   arche: { archipelago: 2, crater: 2, plain: 2, sinkhole: 1 },
@@ -119,7 +124,7 @@ const GROTTO = T('Sunken grotto', {
 // fluid exists, see docs/assets/themes.md)
 const HIVE = T('Honey hive', {
   music: 'swamp',
-  props: 'hive',
+  props: 'hive', motes: { colors: ['#ffd870', '#ffe8a0'], rate: 3, drift: 0.2, rise: [-0.04, 0.06], life: [3, 6], size: [0.025, 0.04] },
   depths: [11, 12], spans: { chance: 0.3, max: 1, route: 0.8, island: 0.4, sky: 0, deck: 15 },
   void: 0.06, relief: 0.5,
   arche: { crater: 2, sinkhole: 2, plain: 2, mesa: 1 },
@@ -132,7 +137,8 @@ const HIVE = T('Honey hive', {
 // the ossuary: candlelit catacombs, bone walls and urns (spooky, but friendly)
 const OSSUARY = T('Ossuary', {
   music: 'nests',
-  props: 'ossuary',
+  waylights: { props: ['ossuary_candelabra', 'ossuary_bone_lantern'], share: 0.1, back: 0.3, foot: 0.1 },
+  props: 'ossuary', motes: { colors: ['#ffe0b0', '#d8d0c0'], rate: 3, drift: 0.1, rise: [-0.03, 0.05], life: [4, 7], size: [0.02, 0.035], wisps: 2, wisp: '#9ad0ff' },
   depths: [14, 15], spans: { chance: 0.3, max: 1, route: 0.8, island: 0.4, sky: 0, deck: 15 },
   void: 0.08, relief: 0.6,
   arche: { mesa: 2, chasm: 2, plain: 2, sinkhole: 1 },
@@ -145,7 +151,8 @@ const OSSUARY = T('Ossuary', {
 // the dwarven forge: pipes, gears and anvils, pools of slag
 const FORGE = T('Dwarven forge', {
   music: 'mines',
-  props: 'forge',
+  waylights: { props: ['forge_crucible'], share: 0.06, back: 0.3, foot: 0.15 },
+  props: 'forge', motes: { colors: ['#ffc060', '#ff9a3a'], rate: 4, drift: 0.2, rise: [0.2, 0.5], life: [1.5, 3], size: [0.025, 0.04] },
   depths: [16, 16], spans: { chance: 0.4, max: 1, route: 0.8, island: 0.4, sky: 0, deck: 15 },
   void: 0.08, relief: 0.8,
   arche: { mesa: 3, chasm: 2, crater: 1, plain: 1 },
@@ -158,7 +165,7 @@ const FORGE = T('Dwarven forge', {
 // the jungle cenote: a sunlit sinkhole temple, jade, glyphs and vines over clear pools
 const CENOTE = T('Jungle cenote', {
   music: 'ruins',
-  props: 'cenote',
+  props: 'cenote', motes: { colors: ['#d8ff6a', '#ffe8a0'], rate: 3, drift: 0.2, rise: [-0.04, 0.1], life: [3, 5], size: [0.03, 0.05] },
   depths: [13, 13], spans: { chance: 0.4, max: 1, route: 0.8, island: 0.4, sky: 0, deck: 15 },
   void: 0.08, relief: 0.6,
   arche: { sinkhole: 3, mesa: 2, crater: 1, plain: 1 },

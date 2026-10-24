@@ -140,6 +140,7 @@ export function placeProps(m, theme) {
     }
   }
   if (theme.grove && !m.sparse) grove(m, theme, add, out, blockers, { walkCols, reserved, nearSite, nearPortal, nearHorde });
+  if (theme.waylights && !m.sparse) waylights(m, theme, add, out, blockers, { walkCols, reserved, nearSite, nearPortal, nearHorde });
   return { out, blockers };
 }
 
@@ -149,9 +150,6 @@ export function placeProps(m, theme) {
 //     one), off the portals, the sites and the horde, on gentle slopes too; beside the way (half
 //     as often) they stand back from it, so the way runs between trunks. Only a tree's trunk is
 //     in the way, so one may walk between them
-//   waylights: lantern posts beside the way (the share of the floors next to it that get one),
-//     the post on the far side of the floor, its lantern hanging out over the way; only its post
-//     is in the way of anything, so the floor it stands on stays walkable
 //   lanterns: the share of the trees with branches (their props' `anchors` away from the trunk)
 //     that have a lantern hanging from one, high enough to walk under (`hanging_lantern`)
 //   strings: the most strings of lanterns (`lantern_string`, attach 'line') a cube gets, tied
@@ -190,17 +188,34 @@ function grove(m, theme, add, out, blockers, { walkCols, reserved, nearSite, nea
         const [ax, ay, az] = branches[Math.floor(R() * branches.length)];
         if (ay + lantern.minY - y >= CHAR_H + 0.15) add(lantern, ax, ay, az, R() * Math.PI * 2, 1);
       }
-    } else if (G.waylights && beside.length && slope < 0.25 && R() < G.waylights) {
-      // the post on the far side of the floor, the lantern out over the way
-      const p = props.byName.get(`${theme.props}_lantern_post_${R() < 0.5 ? 'a' : 'b'}`);
-      if (!p) continue;
-      const [dx, dz] = beside[0], x = f.x + 0.5 - dx * 0.36, z = f.z + 0.5 - dz * 0.36, y = floorY(f, 0.5 - dx * 0.36, 0.5 - dz * 0.36) - 0.02;
-      if (y + p.maxY + 0.2 >= above(f)) continue;
-      add(p, x, y, z, Math.atan2(-dz, dx), 1);
-      blockers[f.c].push({ x, z, r: 0.06, bottom: y, top: y + p.height });
     }
   }
   if (G.strings) strings(m, theme, G, R, placed, out, walkCols);
+}
+
+// Lights by the way (a theme's `waylights`: { props: [names, a variant drawn], share, back, foot }):
+// on the floors beside the way (the share of them), a lamp on the far side of the floor (`back`
+// from its middle), turned so that what it holds out (a lantern on its arm) hangs over the way. In
+// the way only by its foot (`foot`: a post's, a candelabra's), so the floor it stands on stays
+// walkable. On a random stream of their own.
+function waylights(m, theme, add, out, blockers, { walkCols, reserved, nearSite, nearPortal, nearHorde }) {
+  const W = theme.waylights, R = mulberry32(hash32(m.seed ^ 0x3a7119));
+  const list = W.props.flatMap(n => ['a', 'b'].map(v => props.byName.get(`${n}_${v}`)).filter(Boolean));
+  const back = W.back ?? 0.36, foot = W.foot ?? 0.06;
+  if (!list.length) return;
+  for (const f of m.floors) {
+    if (f.arenaCell || f.fluid || f.covered || m.pieces[f.c].length || f.prot || reserved(f) || blockers[f.c].length
+      || walkCols.has(f.c) || nearPortal(f) || nearSite(f) || nearHorde(f) || Math.max(...f.cs) - Math.min(...f.cs) >= 0.25) continue;
+    const beside = DIRS.filter(([dx, dz]) => inb(f.x + dx, f.z + dz) && walkCols.has(idx(f.x + dx, f.z + dz)));
+    if (!beside.length || R() >= W.share) continue;
+    const p = list[Math.floor(R() * list.length)], [dx, dz] = beside[0];
+    const x = f.x + 0.5 - dx * back, z = f.z + 0.5 - dz * back, y = floorY(f, 0.5 - dx * back, 0.5 - dz * back) - 0.02;
+    const col = m.cols[f.c], above = col[col.indexOf(f) + 1];
+    if (above && y + p.maxY + 0.2 >= above.bottom * LH) continue;
+    add(p, x, y, z, Math.atan2(-dz, dx), 1);
+    out[out.length - 1].way = true;
+    if (p.blocking) blockers[f.c].push({ x, z, r: foot, bottom: y, top: y + p.height });
+  }
 }
 
 // the ground (or water) under a point of a string and whether the string runs into something there
@@ -236,7 +251,7 @@ function strings(m, theme, G, R, trees, out, walkCols) {
     const { p, q } = best, L = Math.hypot(q[0] - p[0], q[2] - p[2]), sag = 0.1 + 0.08 * L;
     const at = t => [p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t - sag * 4 * t * (1 - t), p[2] + (q[2] - p[2]) * t];
     let ok = true, over = 0;
-    for (let k = 1, n = Math.ceil(L * 4); k < n && ok; k++) {
+    for (let k = 0, n = Math.ceil(L * 4); k <= n && ok; k++) {   // (its ends too: a branch may reach out over higher ground)
       const [x, y, z] = at(k / n), u = under(m, x, y, z);
       ok = !u.hit && y - 0.3 - u.ground >= CHAR_H + 0.3;
       if (walkCols.has(idx(Math.floor(x), Math.floor(z)))) over = 1;

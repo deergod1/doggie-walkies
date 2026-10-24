@@ -12,10 +12,10 @@ import { PINNACLE_TOP } from './heights.js';
 export const RECIPES = {
   mines: { storage: ['sacks', 'plank_stack', 'lantern'], gallery: ['sacks', 'pickaxe_in_rock', 'lantern'],
     excavation: ['ore_pile', 'tipped_cart', 'crystal_cluster'] },
-  ruins: { burial: ['sarcophagus', 'urn', 'brazier'], hall: ['column_base', 'stone_tablet', 'brazier'],
+  ruins: { burial: ['oil_lamps', 'sarcophagus', 'urn'], hall: ['column_base', 'stone_tablet', 'brazier'],
     courtyard: ['altar', 'obelisk_broken', 'urn'] },
   roots: ['moss_rock', 'mushroom_cluster', 'cave_fern'], frozen: ['frozen_adventurer', 'ice_crystal', 'ice_pillar'],
-  swamp: ['fungal_tree', 'puffballs', 'glow_mushroom'], nests: ['webbed_crate', 'egg_sac', 'bone_pile'],
+  swamp: ['fungal_tree', 'puffballs', 'glow_mushroom'], nests: ['glow_eggs', 'egg_sac', 'webbed_crate'],
   volcanic: ['fire_crystal', 'scorched_bones', 'obsidian_shard'], abyss: ['broken_altar', 'void_crystal', 'ritual_circle'],
   meadow: ['fairy_ring', 'fern', 'berry_bush'], peaks: ['expedition_flag', 'alpine_flowers', 'ice_crystal'],
   badlands: ['rib_cage', 'agave', 'broken_wagon_wheel'],

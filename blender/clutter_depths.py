@@ -732,3 +732,128 @@ def build_broken_altar(m, v):
     m.box((0, -0.3, 0.04), (0.1, 0.08, 0.06), "#32303e", tilt=0.5)
     if v:
         skull_lite(m, (0.17, 0.0, 0.58), scale=0.8, yaw=0.3)
+
+
+# --- lights for the dark depths: the spider nests and the buried ruins ---------
+NEST_GLOW = "#d0a8ff"
+DEW = "#bfe0ff"
+CLAY = "#9a6a48"
+
+
+def build_glow_spores(m, v):
+    """Cover: a scrap of web on the ground, spores glowing in it."""
+    m.lathe((0, 0, 0), [(0, 0.26), (0.01, 0.2), (0.015, 0)], WEB, n=7, jitter=0.25)
+    start = len(m.faces)
+    for i in range(6 + v):
+        m.blob(polar(0.04 + 0.18 * ((i * 0.618) % 1), i * 2.4 + v, 0.03), (0.025, 0.025, 0.02), NEST_GLOW, n=4)
+    lit(m, start)
+
+
+def build_glow_eggs(m, v):
+    """A clutch of pale eggs on a pad of web, lit from within."""
+    m.lathe((0, 0, 0), [(0, 0.34), (0.015, 0.28), (0.03, 0)], WEB, n=8, jitter=0.2)
+    start = len(m.faces)
+    for i in range(5 + v):
+        a, d, r = i * 2.4 + v, 0.05 + 0.18 * ((i * 0.618) % 1), 0.07 + 0.02 * (i % 3)
+        m.blob(polar(d, a, r * 1.05), (r, r * 0.95, r * 1.2), NEST_GLOW, n=5)
+    lit(m, start)
+    for i in range(4):
+        a = i * TAU / 4 + 0.3
+        m.tube([polar(0.36, a, 0.0), polar(0.12, a + 0.2, 0.16)], 0.005, WEB, n=3)
+
+
+def build_pale_fungus(m, v):
+    """Pale fungus glowing on an old husk."""
+    m.blob((0.0, 0.02, 0.06), (0.2, 0.13, 0.07), "#8a8070", n=6)
+    bone_lite(m, polar(0.22, 1.2 + v, 0.02), polar(0.08, 2.4 + v, 0.04), r=0.015)
+    start = len(m.faces)
+    for i in range(4 + v):
+        p = polar(0.04 + 0.16 * ((i * 0.618) % 1), i * 2.3 + v, 0.0)
+        h = 0.1 + 0.06 * (i % 3)
+        m.tube([p, (p[0], p[1], h)], 0.012, "#d8d0e8", n=4)
+        m.lathe((p[0], p[1], h - 0.01), [(0, 0.015), (0.015, 0.05), (0.035, 0.035), (0.05, 0)], "#e8e0ff", n=6)
+    lit(m, start)
+
+
+def build_dew_web(m, v):
+    """Wall: a web beaded with glowing dew."""
+    for i in range(6):
+        a = i * TAU / 6 + 0.2 * v
+        m.tube([(0, 0.02, 0), (0.42 * math.cos(a), 0.005, 0.36 * math.sin(a))], 0.004, WEB, n=3)
+    for k in (0.14, 0.27):
+        pts = [(k * 1.15 * math.cos(i * TAU / 6 + 0.2 * v), 0.012, k * math.sin(i * TAU / 6 + 0.2 * v)) for i in range(7)]
+        m.tube(pts, 0.003, WEB, n=3)
+    start = len(m.faces)
+    for i in range(9 + v):
+        a, d = i * 2.4 + v, 0.08 + 0.3 * ((i * 0.618) % 1)
+        m.blob((d * 1.1 * math.cos(a), 0.02, d * 0.9 * math.sin(a)), (0.022, 0.018, 0.024), DEW, n=4)
+    lit(m, start)
+    flatten_back(m)
+
+
+def silk(m, v, glow):
+    """Threads of silk over an edge, beads along them (glowing or dew-pale)."""
+    m.blob((0.0, -0.08, 0.01), (0.26, 0.08, 0.02), WEB, n=5)
+    beads = []
+    for k in range(3 + v):
+        x = -0.24 + 0.48 * k / (2 + v)
+        drop = 0.35 + 0.25 * ((k * 0.618) % 1)
+        m.tube([(x, -0.1, 0.02), (x, 0.02, 0.01), (x + 0.02, 0.04, -drop)], 0.005, WEB, n=3)
+        beads += [(x + 0.01, 0.035, -drop * t) for t in (0.4, 0.75, 1.0)]
+    start = len(m.faces)
+    for b in beads:
+        m.blob(b, (0.022, 0.022, 0.026), NEST_GLOW if glow else "#d8d4dc", n=4)
+    if glow:
+        lit(m, start)
+    clamp_lip(m)
+
+
+def build_glow_silk(m, v):
+    """Lip: threads of silk over an edge, beads of glow along them."""
+    silk(m, v, True)
+
+
+def build_silk_drape(m, v):
+    """Lip: threads of silk over an edge, pale beads of dew along them."""
+    silk(m, v, False)
+
+
+def build_oil_lamps(m, v):
+    """Clay oil lamps on a broken step, their little flames still burning."""
+    m.box((0, 0, 0.05), (0.62, 0.36, 0.1), RUIN, jitter=0.01)
+    for i in range(3 + v):
+        x = -0.22 + 0.44 * i / (2 + v)
+        y = 0.04 * (i % 2)
+        m.lathe((x, y, 0.1), [(0, 0.03), (0.025, 0.06), (0.05, 0.05), (0.055, 0.02)], CLAY, n=6)
+        start = len(m.faces)
+        m.shard((x + 0.04, y, 0.15), 0.018, 0.08 + 0.03 * (i % 2), "#ffb860", n=4)
+        lit(m, start)
+
+
+def build_wall_brazier(m, v):
+    """Wall: an iron bowl on a bracket, burning."""
+    m.box((0, 0.02, 0.0), (0.18, 0.04, 0.3), IRON)
+    m.tube([(0, 0.02, -0.08), (0, 0.18, -0.02), (0, 0.24, 0.06)], 0.018, IRON, n=4)
+    m.lathe((0, 0.26, 0.06), [(0, 0.04), (0.05, 0.12), (0.11, 0.16), (0.13, 0.15)], IRON, n=8,
+            colors=[IRON, "#3a3a40", "#2a2a2e"])
+    m.blob((0, 0.26, 0.17), (0.11, 0.11, 0.03), "#3a2a20", n=5)
+    for i in range(3):
+        start = len(m.faces)
+        m.shard((0.05 * math.cos(i * 2.4), 0.26 + 0.05 * math.sin(i * 2.4), 0.17), 0.045, 0.2 + 0.08 * (i == v), "#ffa040",
+                n=5, glow=True)
+        lit(m, start)
+    flatten_back(m)
+
+
+def build_glyph_stone(m, v):
+    """A fallen tablet, its glyphs still glowing."""
+    s = len(m.vertices)
+    m.box((0, 0, 0.08), (0.62, 0.38, 0.16), RUIN_LIGHT, jitter=0.01)
+    start = len(m.faces)
+    for i in range(4 + v):
+        x, y = -0.2 + 0.4 * (i % 3) / 2, -0.09 + 0.18 * (i // 3)
+        m.box((x, y, 0.165), (0.08 if i % 2 else 0.02, 0.02 if i % 2 else 0.08, 0.012), "#8ad8ff")
+    lit(m, start)
+    xform(m, s, rot=(0.06, -0.05, 0.3 * v))
+    m.blob((0.25, 0.15, 0.02), (0.12, 0.1, 0.04), RUIN, n=4)
+    clamp_ground(m)

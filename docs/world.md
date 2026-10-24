@@ -672,7 +672,7 @@ long gone. What makes it so, all in its theme entry:
 - **Lights**: every glowing prop gives off light (as everywhere, `docs/lighting.md`); lanterns
   flicker, mushrooms and runes breathe (`flicker`, `render/props.js`, `render/flames.js`), their
   glowing parts with their lights, each in its own time (seeded by where it stands); fireflies
-  drift round the character (`fireflies`, `render/fireflies.js`).
+  drift round the character (`motes`, `render/motes.js`).
 - **Enemies:** Gloom spiders and Lantern-faces of its own (`core/spawns.js`, `where`; the
   ordinary spiders of depth 2 keep out of it, `'!darkforest'`), see [depths.md](depths.md).
 
@@ -892,8 +892,11 @@ cover; authored set pieces keep their count.
   So are the theme library's landmarks (bigger than a cell; reward sites place them, see
   below) and string segments (`line`: the dark forest's strings of lanterns, its grove ties them), and the
   vignettes (placed by `cubegen/vignettes.js`).
-- **Grove:** a theme with a `grove` (the dark forest) gets its trees in thickets and clearings
-  and lantern posts by the way, on a random stream of its own (see "The dark forest").
+- **Grove:** a theme with a `grove` (the dark forest) gets its trees in thickets and clearings,
+  on a random stream of its own (see "The dark forest").
+- **Lamps by the way:** a theme with `waylights` (the dark forest's lantern posts, the deep's
+  lanterns, candelabras, braziers) puts them beside the way, on the far side of the floor, only
+  their foot in the way (`docs/lighting.md`, "Light in the deep").
 
 They are drawn as one instanced mesh per prop (and per material part), with per-cube
 material clones so they fade and get cut with their cube. Props with `sway` bend in the

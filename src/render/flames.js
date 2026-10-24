@@ -14,6 +14,7 @@ import { cutMaterial } from './section.js';
 import { glow, soft, emit, rand, ring } from './particles.js';
 import { scene } from './scene.js';
 import { doused } from '../core/douse.js';
+import { FIRES } from '../core/propcatalog.js';
 import { sfx } from '../audio/sfx.js';
 
 export const FIRE_COLORS = ['#fff0a0', '#ffd25a', '#ff8a2a', '#ff4a17'];
@@ -23,9 +24,8 @@ export const flicker = (t, seed) => 0.8 + 0.2 * Math.sin(t * 13 + seed * 7) * Ma
 export const breathe = (t, seed) => 0.72 + 0.28 * Math.sin(t * (0.9 + seed * 0.08) + seed * 5);
 const FLICKER = '(0.8 + 0.2 * sin(uTime * 13.0 + s * 7.0) * sin(uTime * 7.3 + s * 3.0))';
 
-// the props that burn (by base name) and the trials' flame pieces
-const FIRE_BASES = new Set(['brazier', 'torch_sconce', 'tiki_torch', 'copal_bowl', 'fire_shrine']);
-export const isFire = p => FIRE_BASES.has(p.base) || /^trial_.*_flame$/.test(p.name);
+// the props that burn (core/propcatalog.js FIRES) and the trials' flame pieces
+export const isFire = p => FIRES.has(p.base) || /^trial_.*_flame$/.test(p.name);
 
 // --- the flames in a fire prop's model ---------------------------------------------------------
 // A fire prop's glowing part split into its pieces (triangles joined by shared corners); the

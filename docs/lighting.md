@@ -98,6 +98,24 @@ every shader, so no program changes its cache key.
 `/lightview sun | lights | lightmap | off` (docs/console.md): the sun's baked shadow alone, the
 fixed lights' light alone, the lightmap's texels.
 
+## Light in the deep
+
+From depth 13 down no theme has a room without lights of its own, about 15–30 a room
+(`tests/lights.test.js`):
+
+- **Glowing props** in every set: the spider nests' glowing eggs, pale fungus, dewy webs and
+  glowing silk; the buried ruins' oil lamps, wall braziers and glyph stones (`assets/clutter/`); the
+  deep's landmarks glow too (the web gate's and the brood cluster's eggs, the temple gate's
+  braziers, the colossus's eyes, the bone arch's candles, the great gear's coals).
+- **Lamps by the way** (a theme's `waylights`, `render/propplace.js`): mine lanterns, candelabras
+  and bone lanterns, oil lamps and braziers, crucibles, rune stones, glowing eggs.
+- **They live:** candles and lanterns flicker, crystals, runes, fungus, magma and the sea's glow
+  breathe (`flicker`; the older libraries' by their kind, `core/propcatalog.js FLICKER`), their
+  glowing parts with their lights; fires burn with flames (`FIRES`); lava pulses.
+- **What drifts** (a theme's `motes`, `render/motes.js`): spores, embers, sparks, dust and
+  plankton round the character, and in the darkest themes a few **wisps**, glowing orbs that
+  wander about with moving lights of their own (no shadows, like shots).
+
 ## Not yet
 
 - Baking takes the GPU's time while a portal's travel goes on: two lights a frame are a few

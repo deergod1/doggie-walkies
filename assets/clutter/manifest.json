@@ -83,9 +83,15 @@
       "tiny_glowcaps"
     ],
     "nests": [
+      "dew_web",
+      "glow_eggs",
+      "glow_silk",
+      "glow_spores",
       "hanging_egg_sacs",
       "husk_scraps",
+      "pale_fungus",
       "shed_exoskeleton",
+      "silk_drape",
       "wall_eggs",
       "web_floor",
       "web_pillar",
@@ -111,12 +117,15 @@
       "altar",
       "broken_tiles",
       "collapsed_arch",
+      "glyph_stone",
       "hanging_censer",
       "obelisk_broken",
+      "oil_lamps",
       "sand_drift",
       "stone_tablet",
       "toppled_column",
       "urn",
+      "wall_brazier",
       "wall_relief"
     ],
     "volcanic": [
@@ -142,7 +151,7 @@
       "weapon_graveyard"
     ]
   },
-  "triangles": 40102,
+  "triangles": 44584,
   "props": [
     {
       "name": "any_gravel_patch_a",
@@ -2753,6 +2762,372 @@
       ]
     },
     {
+      "name": "nests_glow_spores_a",
+      "set": "nests",
+      "prop": "glow_spores",
+      "variant": "a",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": false,
+      "radius": 0.3146,
+      "triangles": 170,
+      "size": [
+        0.542,
+        0.495,
+        0.05
+      ],
+      "bounds_blender": [
+        [
+          -0.2714,
+          -0.2465,
+          0.0
+        ],
+        [
+          0.2703,
+          0.2489,
+          0.05
+        ]
+      ],
+      "light": "#c8a0ff",
+      "intensity": 0.4,
+      "cover": true
+    },
+    {
+      "name": "nests_glow_spores_b",
+      "set": "nests",
+      "prop": "glow_spores",
+      "variant": "b",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": false,
+      "radius": 0.3113,
+      "triangles": 194,
+      "size": [
+        0.54,
+        0.505,
+        0.05
+      ],
+      "bounds_blender": [
+        [
+          -0.2805,
+          -0.2584,
+          0.0
+        ],
+        [
+          0.2598,
+          0.2465,
+          0.05
+        ]
+      ],
+      "light": "#c8a0ff",
+      "intensity": 0.4,
+      "cover": true
+    },
+    {
+      "name": "nests_glow_eggs_a",
+      "set": "nests",
+      "prop": "glow_eggs",
+      "variant": "a",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": false,
+      "radius": 0.3939,
+      "triangles": 212,
+      "size": [
+        0.749,
+        0.74,
+        0.264
+      ],
+      "bounds_blender": [
+        [
+          -0.3939,
+          -0.3936,
+          0.0
+        ],
+        [
+          0.355,
+          0.3462,
+          0.264
+        ]
+      ],
+      "light": "#c8a0ff",
+      "intensity": 0.9
+    },
+    {
+      "name": "nests_glow_eggs_b",
+      "set": "nests",
+      "prop": "glow_eggs",
+      "variant": "b",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": false,
+      "radius": 0.4054,
+      "triangles": 242,
+      "size": [
+        0.803,
+        0.748,
+        0.264
+      ],
+      "bounds_blender": [
+        [
+          -0.4054,
+          -0.3466,
+          0.0
+        ],
+        [
+          0.3979,
+          0.4019,
+          0.264
+        ]
+      ],
+      "light": "#c8a0ff",
+      "intensity": 0.9
+    },
+    {
+      "name": "nests_pale_fungus_a",
+      "set": "nests",
+      "prop": "pale_fungus",
+      "variant": "a",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": false,
+      "radius": 0.2451,
+      "triangles": 256,
+      "size": [
+        0.405,
+        0.345,
+        0.27
+      ],
+      "bounds_blender": [
+        [
+          -0.2081,
+          -0.1203,
+          0.0
+        ],
+        [
+          0.1968,
+          0.2249,
+          0.27
+        ]
+      ],
+      "light": "#e0d8ff",
+      "intensity": 0.7
+    },
+    {
+      "name": "nests_pale_fungus_b",
+      "set": "nests",
+      "prop": "pale_fungus",
+      "variant": "b",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": false,
+      "radius": 0.2448,
+      "triangles": 302,
+      "size": [
+        0.382,
+        0.345,
+        0.27
+      ],
+      "bounds_blender": [
+        [
+          -0.1959,
+          -0.1242,
+          0.0
+        ],
+        [
+          0.1864,
+          0.2208,
+          0.27
+        ]
+      ],
+      "light": "#e0d8ff",
+      "intensity": 0.7
+    },
+    {
+      "name": "nests_dew_web_a",
+      "set": "nests",
+      "prop": "dew_web",
+      "variant": "a",
+      "priority": 1,
+      "attach": "wall",
+      "blocking": false,
+      "radius": 0.4202,
+      "triangles": 340,
+      "size": [
+        0.84,
+        0.038,
+        0.628
+      ],
+      "bounds_blender": [
+        [
+          -0.4201,
+          0.0,
+          -0.314
+        ],
+        [
+          0.4201,
+          0.0383,
+          0.314
+        ]
+      ],
+      "light": "#a8d0ff",
+      "intensity": 0.6
+    },
+    {
+      "name": "nests_dew_web_b",
+      "set": "nests",
+      "prop": "dew_web",
+      "variant": "b",
+      "priority": 1,
+      "attach": "wall",
+      "blocking": false,
+      "radius": 0.418,
+      "triangles": 364,
+      "size": [
+        0.825,
+        0.035,
+        0.685
+      ],
+      "bounds_blender": [
+        [
+          -0.4123,
+          0.0,
+          -0.3422
+        ],
+        [
+          0.4123,
+          0.0351,
+          0.343
+        ]
+      ],
+      "light": "#a8d0ff",
+      "intensity": 0.6
+    },
+    {
+      "name": "nests_silk_drape_a",
+      "set": "nests",
+      "prop": "silk_drape",
+      "variant": "a",
+      "priority": 1,
+      "attach": "lip",
+      "blocking": false,
+      "radius": 0.2723,
+      "triangles": 288,
+      "size": [
+        0.521,
+        0.214,
+        0.56
+      ],
+      "bounds_blender": [
+        [
+          -0.2488,
+          -0.1554,
+          -0.5305
+        ],
+        [
+          0.2723,
+          0.0582,
+          0.03
+        ]
+      ],
+      "sway": 0.2,
+      "drop": 0.5305
+    },
+    {
+      "name": "nests_silk_drape_b",
+      "set": "nests",
+      "prop": "silk_drape",
+      "variant": "b",
+      "priority": 1,
+      "attach": "lip",
+      "blocking": false,
+      "radius": 0.2688,
+      "triangles": 374,
+      "size": [
+        0.523,
+        0.22,
+        0.62
+      ],
+      "bounds_blender": [
+        [
+          -0.2544,
+          -0.163,
+          -0.5895
+        ],
+        [
+          0.2687,
+          0.0572,
+          0.03
+        ]
+      ],
+      "sway": 0.2,
+      "drop": 0.5895
+    },
+    {
+      "name": "nests_glow_silk_a",
+      "set": "nests",
+      "prop": "glow_silk",
+      "variant": "a",
+      "priority": 2,
+      "attach": "lip",
+      "blocking": false,
+      "radius": 0.2821,
+      "triangles": 288,
+      "size": [
+        0.554,
+        0.214,
+        0.56
+      ],
+      "bounds_blender": [
+        [
+          -0.282,
+          -0.1554,
+          -0.5305
+        ],
+        [
+          0.2715,
+          0.0589,
+          0.03
+        ]
+      ],
+      "light": "#d0b0ff",
+      "intensity": 0.5,
+      "sway": 0.2,
+      "drop": 0.5305
+    },
+    {
+      "name": "nests_glow_silk_b",
+      "set": "nests",
+      "prop": "glow_silk",
+      "variant": "b",
+      "priority": 2,
+      "attach": "lip",
+      "blocking": false,
+      "radius": 0.2705,
+      "triangles": 374,
+      "size": [
+        0.523,
+        0.211,
+        0.62
+      ],
+      "bounds_blender": [
+        [
+          -0.2531,
+          -0.1529,
+          -0.5895
+        ],
+        [
+          0.2704,
+          0.058,
+          0.03
+        ]
+      ],
+      "light": "#d0b0ff",
+      "intensity": 0.5,
+      "sway": 0.2,
+      "drop": 0.5895
+    },
+    {
       "name": "mines_ore_chips_a",
       "set": "mines",
       "prop": "ore_chips",
@@ -3501,6 +3876,126 @@
           1.8495
         ]
       ]
+    },
+    {
+      "name": "ruins_oil_lamps_a",
+      "set": "ruins",
+      "prop": "oil_lamps",
+      "variant": "a",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": false,
+      "radius": 0.3585,
+      "triangles": 210,
+      "size": [
+        0.62,
+        0.36,
+        0.264
+      ],
+      "bounds_blender": [
+        [
+          -0.31,
+          -0.18,
+          0.0
+        ],
+        [
+          0.31,
+          0.18,
+          0.2641
+        ]
+      ],
+      "light": "#ffb860",
+      "intensity": 1.0
+    },
+    {
+      "name": "ruins_oil_lamps_b",
+      "set": "ruins",
+      "prop": "oil_lamps",
+      "variant": "b",
+      "priority": 1,
+      "attach": "ground",
+      "blocking": false,
+      "radius": 0.3585,
+      "triangles": 276,
+      "size": [
+        0.62,
+        0.36,
+        0.263
+      ],
+      "bounds_blender": [
+        [
+          -0.31,
+          -0.18,
+          0.0
+        ],
+        [
+          0.31,
+          0.18,
+          0.2628
+        ]
+      ],
+      "light": "#ffb860",
+      "intensity": 1.0
+    },
+    {
+      "name": "ruins_wall_brazier_a",
+      "set": "ruins",
+      "prop": "wall_brazier",
+      "variant": "a",
+      "priority": 1,
+      "attach": "wall",
+      "blocking": false,
+      "radius": 0.4559,
+      "triangles": 206,
+      "size": [
+        0.309,
+        0.416,
+        0.6
+      ],
+      "bounds_blender": [
+        [
+          -0.1552,
+          0.0,
+          -0.15
+        ],
+        [
+          0.1539,
+          0.416,
+          0.45
+        ]
+      ],
+      "light": "#ffa040",
+      "intensity": 1.4
+    },
+    {
+      "name": "ruins_wall_brazier_b",
+      "set": "ruins",
+      "prop": "wall_brazier",
+      "variant": "b",
+      "priority": 1,
+      "attach": "wall",
+      "blocking": false,
+      "radius": 0.4503,
+      "triangles": 206,
+      "size": [
+        0.323,
+        0.42,
+        0.6
+      ],
+      "bounds_blender": [
+        [
+          -0.1654,
+          0.0,
+          -0.15
+        ],
+        [
+          0.1577,
+          0.4204,
+          0.45
+        ]
+      ],
+      "light": "#ffa040",
+      "intensity": 1.4
     },
     {
       "name": "volcanic_cinders_a",
@@ -6155,6 +6650,66 @@
           0.8125
         ]
       ]
+    },
+    {
+      "name": "ruins_glyph_stone_a",
+      "set": "ruins",
+      "prop": "glyph_stone",
+      "variant": "a",
+      "priority": 2,
+      "attach": "ground",
+      "blocking": false,
+      "radius": 0.4017,
+      "triangles": 84,
+      "size": [
+        0.657,
+        0.419,
+        0.193
+      ],
+      "bounds_blender": [
+        [
+          -0.3185,
+          -0.1992,
+          0.0
+        ],
+        [
+          0.3384,
+          0.2199,
+          0.1932
+        ]
+      ],
+      "light": "#8ad8ff",
+      "intensity": 0.7
+    },
+    {
+      "name": "ruins_glyph_stone_b",
+      "set": "ruins",
+      "prop": "glyph_stone",
+      "variant": "b",
+      "priority": 2,
+      "attach": "ground",
+      "blocking": false,
+      "radius": 0.4094,
+      "triangles": 96,
+      "size": [
+        0.737,
+        0.556,
+        0.194
+      ],
+      "bounds_blender": [
+        [
+          -0.3571,
+          -0.2838,
+          0.0
+        ],
+        [
+          0.3798,
+          0.2719,
+          0.1936
+        ]
+      ],
+      "light": "#8ad8ff",
+      "intensity": 0.7
     },
     {
       "name": "volcanic_rope_lava_a",
