@@ -8,21 +8,27 @@
 // works on it in the background and we wait until it is done (travel waits for that behind
 // its spinner, game/hud.js whenReady); without it the first draw still waits for whatever is
 // left, but the work was started long before.
+import * as THREE from 'three';
 import { renderer, scene, camera } from './scene.js';
 import { keepPrograms } from './programs.js';
 
 const LIMIT = 3000;   // ms: a driver this slow does not hold travel up for good
 
 // entries: objects (not in the scene, or hidden in it) to compile as they are, or
-// { object, material }: object drawn with material instead (the proxies' glass, a second
-// draw of the same batch, render/neighbors.js). Resolves once their programs are ready.
+// { object, material, scene, offscreen }: object drawn with material instead (the proxies' glass,
+// a second draw of the same batch, render/neighbors.js), and/or into another scene than the
+// world's (a bake's, the fluids' patterns: without the world's lights and fog), and/or into a
+// render target, not the screen (its colours come out linear: another program). Resolves once
+// their programs are ready.
+let offscreen = null;
 export function warm(entries) {
-  const materials = new Set();
+  const materials = new Set(), screen = renderer.getRenderTarget();
   for (const e of entries) {
-    const object = e.isObject3D ? e : e.object, swap = e.isObject3D ? null : object.material;
+    const object = e.isObject3D ? e : e.object, swap = e.isObject3D || !e.material ? null : object.material;
     if (swap) object.material = e.material;
-    try { for (const m of renderer.compile(object, camera, scene)) materials.add(m); }
-    finally { if (swap) object.material = swap; }
+    if (e.offscreen) renderer.setRenderTarget(offscreen ??= new THREE.WebGLRenderTarget(1, 1));
+    try { for (const m of renderer.compile(object, camera, e.scene ?? scene)) materials.add(m); }
+    finally { if (swap) object.material = swap; if (e.offscreen) renderer.setRenderTarget(screen); }
   }
   keepPrograms();   // before the throwaway materials are disposed, which would delete them
   return ready(materials);

@@ -468,16 +468,30 @@ function shadowPass(light, casters) {
 const MASKS = [0, 1, 2, 3].map(i => new THREE.Vector4(...[0, 1, 2, 3].map(j => +(i === j))));
 
 // The baking's programs compiled ahead (render/cubeassets.js warmCube), so the first cube baked
-// does not wait for the driver.
+// does not wait for the driver: its own, for render targets and scenes without the world's lights
+// and fog (compiled for the screen they were others, and the first bake compiled them all while
+// drawing), and three's
+// programs of the shadow maps it draws, made only when one is drawn: a sun's and a light's, drawn
+// once over a plain and an instanced mesh.
 let warmed = false;
 export function warmBake() {
   if (warmed) return [];
   warmed = true;
-  const S = materials(), g = new THREE.BufferGeometry();
+  const S = materials(), g = new THREE.BufferGeometry(), bare = new THREE.Scene();
   g.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0, 1, 0, 0, 0, 1, 0], 3));
   g.setAttribute('normal', new THREE.Float32BufferAttribute([0, 0, 1, 0, 0, 1, 0, 0, 1], 3));
   g.setAttribute('lm', new THREE.Float32BufferAttribute([0, 0, 1, 0, 0, 1], 2));
-  return [S.sun, S.point, S.cover, S.vol, S.fill].map(m => ({ object: new THREE.Mesh(g, m), material: m }));
+  const box = new THREE.BoxGeometry(), stuff = new THREE.MeshStandardMaterial(), casters = new THREE.Scene();
+  for (const m of [new THREE.Mesh(box, stuff), new THREE.InstancedMesh(box, stuff, 1)]) { m.castShadow = true; casters.add(m); }
+  const sunlight = new THREE.DirectionalLight();
+  sunlight.castShadow = true; sunlight.shadow.mapSize.set(16, 16);
+  S.light.shadow.mapSize.set(16, 16); S.light.shadow.dispose();
+  const saved = saveState();
+  try { shadowPass(sunlight, casters); shadowPass(S.light, casters); } finally {
+    restoreState(saved);
+    sunlight.shadow.dispose(); S.light.shadow.dispose(); box.dispose(); stuff.dispose();
+  }
+  return [S.sun, S.point, S.cover, S.vol, S.fill].map(m => ({ object: new THREE.Mesh(g, m), material: m, scene: bare, offscreen: true }));
 }
 
 // The steps of a bake (tickBakes runs them a few a frame): the sun, then each light.

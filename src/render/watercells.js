@@ -156,6 +156,14 @@ for (const [name, s] of Object.entries(STYLES)) {
   });
   CELLS[name] = { tex: { value: target.texture }, tile: s.tile, perUnit: s.perUnit, used: -Infinity, target, material };
 }
+// the patterns' programs compiled ahead with a cube (render/cubeassets.js): drawn into render
+// targets, in a scene of their own (once)
+let warmedCells = false;
+export function cellWarmup() {
+  if (warmedCells) return [];
+  warmedCells = true;
+  return Object.values(CELLS).map(c => ({ object: quad, material: c.material, scene: bakeScene, offscreen: true }));
+}
 // (the water's, for what rides on it: render/falls.js)
 export const CELL_TEX = CELLS.water.tex, TILE = CELLS.water.tile, CELLS_PER_UNIT = CELLS.water.perUnit;
 
