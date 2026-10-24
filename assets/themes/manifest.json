@@ -205,6 +205,7 @@
       "gnarled_tree",
       "hanging_lantern",
       "lantern_post",
+      "lantern_string",
       "lantern_tree",
       "leaf_litter",
       "moss_mound",
@@ -265,7 +266,7 @@
       "void_throne"
     ]
   },
-  "triangles": 107441,
+  "triangles": 107733,
   "props": [
     {
       "name": "highlands_tussock_grass_a",
@@ -645,9 +646,9 @@
       "sway": 0.2,
       "anchors": [
         [
-          0.2211,
+          0.2113,
           1.3,
-          -0.0935
+          -0.0893
         ]
       ]
     },
@@ -681,9 +682,9 @@
       "sway": 0.2,
       "anchors": [
         [
-          0.2211,
+          0.2121,
           1.3,
-          -0.0935
+          -0.0897
         ]
       ]
     },
@@ -1448,27 +1449,27 @@
       "anchors": [
         [
           0.0,
-          3.696,
-          0.0
+          3.716,
+          -0.0
         ],
         [
           -0.75,
-          1.42,
+          1.44,
           0.75
         ],
         [
           -0.75,
-          1.42,
+          1.44,
           -0.75
         ],
         [
           0.75,
-          1.42,
+          1.44,
           0.75
         ],
         [
           0.75,
-          1.42,
+          1.44,
           -0.75
         ]
       ],
@@ -1874,7 +1875,7 @@
       "anchors": [
         [
           1.1,
-          1.88,
+          1.8811,
           0.3
         ]
       ],
@@ -2304,13 +2305,13 @@
       "anchors": [
         [
           -1.35,
-          1.05,
-          0.0
+          1.0559,
+          -0.0
         ],
         [
           1.35,
-          1.05,
-          0.0
+          1.0559,
+          -0.0
         ]
       ],
       "colliders": [
@@ -16781,7 +16782,14 @@
           4.6409
         ]
       ],
-      "sway": 0.06
+      "sway": 0.06,
+      "anchors": [
+        [
+          0.0,
+          2.2253,
+          -0.0
+        ]
+      ]
     },
     {
       "name": "darkforest_dark_fir_tree_b",
@@ -16810,7 +16818,14 @@
           4.1162
         ]
       ],
-      "sway": 0.06
+      "sway": 0.06,
+      "anchors": [
+        [
+          0.0,
+          1.9751,
+          -0.0
+        ]
+      ]
     },
     {
       "name": "darkforest_gnarled_tree_a",
@@ -16839,7 +16854,29 @@
           3.3365
         ]
       ],
-      "sway": 0.08
+      "sway": 0.08,
+      "anchors": [
+        [
+          0.1396,
+          2.1705,
+          -0.1952
+        ],
+        [
+          -0.1952,
+          2.4015,
+          -0.1396
+        ],
+        [
+          -0.1396,
+          2.6325,
+          0.1952
+        ],
+        [
+          0.1952,
+          2.8635,
+          0.1396
+        ]
+      ]
     },
     {
       "name": "darkforest_gnarled_tree_b",
@@ -16868,7 +16905,29 @@
           3.6064
         ]
       ],
-      "sway": 0.08
+      "sway": 0.08,
+      "anchors": [
+        [
+          -0.0866,
+          2.3144,
+          -0.2174
+        ],
+        [
+          -0.2174,
+          2.5664,
+          0.0866
+        ],
+        [
+          0.0866,
+          2.8184,
+          0.2174
+        ],
+        [
+          0.2174,
+          3.0704,
+          -0.0866
+        ]
+      ]
     },
     {
       "name": "darkforest_bare_tree_a",
@@ -16897,7 +16956,29 @@
           2.9234
         ]
       ],
-      "sway": 0.05
+      "sway": 0.05,
+      "anchors": [
+        [
+          0.0841,
+          1.9984,
+          0.2482
+        ],
+        [
+          0.1056,
+          2.2534,
+          -0.2398
+        ],
+        [
+          -0.2399,
+          2.5084,
+          0.1055
+        ],
+        [
+          0.2482,
+          2.7634,
+          0.0843
+        ]
+      ]
     },
     {
       "name": "darkforest_bare_tree_b",
@@ -16926,7 +17007,29 @@
           3.2731
         ]
       ],
-      "sway": 0.05
+      "sway": 0.05,
+      "anchors": [
+        [
+          0.1928,
+          2.1907,
+          0.1775
+        ],
+        [
+          -0.0223,
+          2.4807,
+          -0.2611
+        ],
+        [
+          -0.16,
+          2.7707,
+          0.2076
+        ],
+        [
+          0.2582,
+          3.0607,
+          -0.045
+        ]
+      ]
     },
     {
       "name": "darkforest_glow_mushrooms_a",
@@ -17723,6 +17826,68 @@
       "intensity": 0.5,
       "fluid": "water",
       "flicker": "pulse"
+    },
+    {
+      "name": "darkforest_lantern_string_a",
+      "set": "darkforest",
+      "prop": "lantern_string",
+      "variant": "a",
+      "priority": 1,
+      "attach": "line",
+      "blocking": false,
+      "radius": 1.0001,
+      "triangles": 146,
+      "size": [
+        1.0,
+        0.095,
+        0.209
+      ],
+      "bounds_blender": [
+        [
+          -0.0001,
+          -0.0476,
+          -0.2052
+        ],
+        [
+          1.0001,
+          0.0476,
+          0.0035
+        ]
+      ],
+      "light": "#ffc070",
+      "intensity": 0.8,
+      "flicker": "flame"
+    },
+    {
+      "name": "darkforest_lantern_string_b",
+      "set": "darkforest",
+      "prop": "lantern_string",
+      "variant": "b",
+      "priority": 1,
+      "attach": "line",
+      "blocking": false,
+      "radius": 1.0001,
+      "triangles": 146,
+      "size": [
+        1.0,
+        0.104,
+        0.223
+      ],
+      "bounds_blender": [
+        [
+          -0.0001,
+          -0.052,
+          -0.22
+        ],
+        [
+          1.0001,
+          0.052,
+          0.0035
+        ]
+      ],
+      "light": "#ffc070",
+      "intensity": 0.8,
+      "flicker": "flame"
     },
     {
       "name": "darkforest_abandoned_shed_a",

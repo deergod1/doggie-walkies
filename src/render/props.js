@@ -70,6 +70,28 @@ function swayMaterial(mat, sway) {
   return mat;
 }
 
+// a glowing part of a prop whose light lives (`flicker`): its glow flickers like a flame ('flame',
+// render/flames.js flicker) or breathes ('pulse', breathe), each instance in its own time and in
+// step with its light (both seeded by where it stands: fireSeed below; wind is the game's clock)
+function glowMaterial(mat, kind) {
+  const prev = mat.onBeforeCompile, key = mat.customProgramCacheKey();
+  mat.onBeforeCompile = (sh, r) => {
+    prev.call(mat, sh, r);
+    sh.uniforms.uWind = wind;
+    sh.vertexShader = 'uniform float uWind;\nvarying float vGlowK;\n' + sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
+      float glowSeed = 0.0;
+      #ifdef USE_INSTANCING
+        glowSeed = mod(instanceMatrix[3].x * 1.7 + instanceMatrix[3].z * 2.3, 6.28);
+      #endif
+      vGlowK = ${kind === 'pulse' ? '0.72 + 0.28 * sin(uWind * (0.9 + glowSeed * 0.08) + glowSeed * 5.0)'
+        : '0.8 + 0.2 * sin(uWind * 13.0 + glowSeed * 7.0) * sin(uWind * 7.3 + glowSeed * 3.0)'};`);
+    sh.fragmentShader = 'varying float vGlowK;\n' + sh.fragmentShader.replace('#include <emissivemap_fragment>',
+      '#include <emissivemap_fragment>\n  totalEmissiveRadiance *= vGlowK;');
+  };
+  mat.customProgramCacheKey = () => key + '|glow-' + kind;
+  return mat;
+}
+
 const qt = new THREE.Quaternion(), tilt = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0), at = new THREE.Vector3(), size = new THREE.Vector3();
 // where a placed prop { x, y, z, yaw, s, normal } stands, in its cube (also the proxies' landmarks)
 export function propMatrix(q, target = new THREE.Matrix4()) {
@@ -77,6 +99,8 @@ export function propMatrix(q, target = new THREE.Matrix4()) {
   if (q.normal) qt.premultiply(tilt.setFromUnitVectors(up, new THREE.Vector3(...q.normal).normalize()));
   return target.compose(at.set(q.x, q.y, q.z), qt, size.setScalar(q.s ?? 1));
 }
+// ... or its own matrix (`matrix`, 16 numbers: a string's segments, sheared along its curve)
+const placeMatrix = (q, target) => q.matrix ? target.fromArray(q.matrix) : propMatrix(q, target);
 
 // A prop's parts as one plain geometry for the proxies' batch (render/neighbors.js): position,
 // normal, color (vertex colour times the part's colour) and glow (its emissive light times
@@ -124,11 +148,12 @@ export function buildProps(placed, group, water = null, maxLights = PROP_LIGHTS)
     for (const part of p.parts) {
       const c = cutMaterial(part.material.clone(), 'self', true);
       if (water) underwaterMaterial(c, water, p.maxY ?? p.height ?? 0);
+      if (p.flicker && part.material.name.endsWith('_glow')) glowMaterial(c, p.flicker);
       const mesh = new THREE.InstancedMesh(part.geometry, p.sway ? swayMaterial(c, p.sway) : c, list.length);
       mesh.name = p.name;
       mesh.userData.sharedGeo = true;   // the catalog owns the geometry
       list.forEach((q, i) => {
-        mesh.setMatrixAt(i, propMatrix(q, m4));
+        mesh.setMatrixAt(i, placeMatrix(q, m4));
         mesh.setColorAt(i, col.set(q.tint || '#ffffff'));
       });
       // glowing parts (windows, lantern glass) are light, not matter: no shadow
@@ -140,7 +165,7 @@ export function buildProps(placed, group, water = null, maxLights = PROP_LIGHTS)
     // first0 + its index in the list)
     const first0 = flames.length;
     for (const f of p.flames ?? []) for (const q of list) {
-      const at = new THREE.Vector3(f.x, f.y, f.z).applyMatrix4(propMatrix(q, m4)), s = q.s ?? 1;
+      const at = new THREE.Vector3(f.x, f.y, f.z).applyMatrix4(placeMatrix(q, m4)), s = q.s ?? 1;
       flames.push({ x: at.x, y: at.y, z: at.z, w: f.w * s, h: f.h * s, seed: fireSeed(q) });
     }
     if (p.light && !p.cover) for (const [qi, q] of list.entries()) if (!q.unlit)   // (unlit: e.g. daytime lamp posts in the town clearings)

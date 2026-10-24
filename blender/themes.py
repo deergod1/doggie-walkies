@@ -313,6 +313,7 @@ SPECS = [
     spec("darkforest", "root_drape", attach="lip", sway=0.3),
     spec("darkforest", "hanging_lantern", attach="ceiling", light="#ffb85a", intensity=1.2, flicker="flame", sway=0.15),
     spec("darkforest", "black_lilies", attach="water", fluid="water", light="#c8fff0", intensity=0.5, flicker="pulse"),
+    line("darkforest", "lantern_string", light="#ffc070", intensity=0.8, flicker="flame"),
     vignette("darkforest", "abandoned_shed", light="#ffb85a", intensity=1, flicker="flame"),
     vignette("darkforest", "collapsed_cabin", light="#5affc8", intensity=0.8, flicker="pulse"),
     vignette("darkforest", "woodcutter_camp", light="#ffb85a", intensity=0.9, flicker="flame"),
@@ -379,6 +380,13 @@ def build(scene=None, priority=None):
             builder(prop)(m, variant)
             info = {k: v for k, v in hints.items() if k != "per_variant"}
             info.update(hints.get("per_variant", {}).get(variant, {}))
+            # (finish shrinks a small prop to its radius and stands it on the ground: its anchors too)
+            limit, k, dz = info.get("max_radius", props.MAX_RADIUS), 1.0, 0.0
+            if m.anchors and limit is not None and attach not in ("wall", "lip"):
+                k = min(1, limit / max(math.hypot(x, y) for x, y, z in m.vertices))
+            if m.anchors and attach == "ground":
+                dz = -min(z for x, y, z in m.vertices)
+            m.anchors = [(x * k, y * k, z + dz) for x, y, z in m.anchors]
             obj = props.finish(m, name, attach, info, collection)
             obj["priority"] = p
             obj["cube_crawler_themes"] = True

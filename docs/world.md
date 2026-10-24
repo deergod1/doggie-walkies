@@ -661,13 +661,21 @@ long gone. What makes it so, all in its theme entry:
   route depends on, so the route is the same whatever a world picks.
 - **Grove** (`grove`, `render/propplace.js`): trees in thickets and clearings by the cube's
   noise, beside the way too (back from it, so it runs between trunks), and lantern posts by the
-  way, their lanterns hanging out over it. A tree's collider is its trunk.
+  way, their lanterns hanging out over it. A tree's collider is its trunk. Lanterns hang from the
+  branches of some trees (the trees' `anchors`), and strings of paper lanterns (`lantern_string`,
+  attach `line`) are tied between the anchors of trees 2–5 apart, at most three a room, over the
+  way first: each segment sheared along the sagging curve (an explicit `matrix` on the
+  placement), never into the ground or what is over it, always a head's room over the ground.
+  Checks: `tests/grove.test.js`.
 - **Vignettes** (`vignettes`, below): a shed, a cabin, a camp, a shrine, a stone circle or a
   wagon in most rooms.
 - **Lights** (`lights` 24): many glowing props give off light; lanterns flicker, mushrooms and
-  runes breathe (`flicker`, `render/props.js`, `render/flames.js`); the light pool fades the
+  runes breathe (`flicker`, `render/props.js`, `render/flames.js`), their glowing parts with their
+  lights, each in its own time (seeded by where it stands); the light pool fades the
   farthest of its lights out as they are about to be swapped (`render/lightpool.js`); fireflies
   drift round the character (`fireflies`, `render/fireflies.js`).
+- **Enemies:** Gloom spiders and Lantern-faces of its own (`core/spawns.js`, `where`; the
+  ordinary spiders of depth 2 keep out of it, `'!darkforest'`), see [depths.md](depths.md).
 
 ### Vignettes (`cubegen/vignettes.js`)
 
@@ -860,7 +868,7 @@ Routes can now also use these moves:
 ## Props (`render/props.js`, `render/propplace.js`)
 
 Decoration comes from `assets/props/` (133 models), `assets/clutter/`
-(222 additional models) and `assets/themes/` (372 models for the alternative themes, see
+(222 additional models) and `assets/themes/` (374 models for the alternative themes, see
 [the theme library](assets/themes.md)). Each theme names its prop set (`props`); neutral `any_*` rocks are
 tinted with the theme's rock colour. Placement runs on the main thread when a cube's meshes
 are built, seeded by the cube. It draws from the catalog (`core/propcatalog.js`), which knows
@@ -883,8 +891,8 @@ cover; authored set pieces keep their count.
 - **Lip props:** drape over cliff tops with sufficient hanging clearance.
 - **Signature assets:** reserved for deliberate destination recipes, not uniform scatter.
   So are the theme library's landmarks (bigger than a cell; reward sites place them, see
-  below) and string segments (`line`, which nothing places yet), and the vignettes (placed by
-  `cubegen/vignettes.js`).
+  below) and string segments (`line`: the dark forest's strings of lanterns, its grove ties them), and the
+  vignettes (placed by `cubegen/vignettes.js`).
 - **Grove:** a theme with a `grove` (the dark forest) gets its trees in thickets and clearings
   and lantern posts by the way, on a random stream of its own (see "The dark forest").
 
@@ -893,7 +901,9 @@ material clones so they fade and get cut with their cube. Props with `sway` bend
 wind in the vertex shader. Up to six glowing props per cube (a theme's `lights`: more) add light
 sources for the pool: landmarks and vignettes first, then the brightest, spread over the cube.
 A fire's light flickers with its flame; a prop's `flicker` makes its light flicker like a flame
-(lanterns, candles) or breathe slowly (`pulse`: glowing mushrooms, runes).
+(lanterns, candles) or breathe slowly (`pulse`: glowing mushrooms, runes), and its glowing parts
+with it (a shader patch, `glowMaterial`). A placement may carry its own `matrix` instead of
+x, y, z, yaw and scale (a string's sheared segments).
 
 ## Reward sites (`world/sites.js`, `cubegen/sites.js`)
 

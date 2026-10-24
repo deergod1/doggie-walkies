@@ -1,6 +1,6 @@
 // Deterministic ambient placement, independent of the terrain RNG. Destination arrangements
 // are emitted by the worker; ambient blockers stay away from routes and reservations.
-import { N, LH, BASE, DIRS, EDGE_CORNERS, FLUID_NAME } from '../core/constants.js';
+import { N, LH, BASE, DIRS, EDGE_CORNERS, FLUID_NAME, CHAR_H } from '../core/constants.js';
 import { mulberry32, hash32, idx, inb, makeNoise } from '../core/util.js';
 import { floorY } from '../core/surfaces.js';
 import { restY } from './surface.js';
@@ -139,7 +139,7 @@ export function placeProps(m, theme) {
       }
     }
   }
-  if (theme.grove && !m.sparse) grove(m, theme, add, blockers, { walkCols, reserved, nearSite, nearPortal, nearHorde });
+  if (theme.grove && !m.sparse) grove(m, theme, add, out, blockers, { walkCols, reserved, nearSite, nearPortal, nearHorde });
   return { out, blockers };
 }
 
@@ -152,13 +152,19 @@ export function placeProps(m, theme) {
 //   waylights: lantern posts beside the way (the share of the floors next to it that get one),
 //     the post on the far side of the floor, its lantern hanging out over the way; only its post
 //     is in the way of anything, so the floor it stands on stays walkable
-function grove(m, theme, add, blockers, { walkCols, reserved, nearSite, nearPortal, nearHorde }) {
+//   lanterns: the share of the trees with branches (their props' `anchors` away from the trunk)
+//     that have a lantern hanging from one, high enough to walk under (`hanging_lantern`)
+//   strings: the most strings of lanterns (`lantern_string`, attach 'line') a cube gets, tied
+//     between the anchors of two trees 2 to 5 apart and sagging between them, never into the
+//     ground or anything over it and always a head's room over the ground; over the way first
+function grove(m, theme, add, out, blockers, { walkCols, reserved, nearSite, nearPortal, nearHorde }) {
   const G = theme.grove, R = mulberry32(hash32(m.seed ^ 0x6a07e)), noise = makeNoise(R);
   const trees = G.trees.map(b => props.byName.get(`${theme.props}_${b}_a`) && b).filter(Boolean);
   const free = f => !f.fluid && !f.covered && !m.pieces[f.c].length && !f.prot && !reserved(f) && !blockers[f.c].length
     && !nearPortal(f) && !nearSite(f) && !nearHorde(f);
   const above = f => { const col = m.cols[f.c], a = col[col.indexOf(f) + 1]; return a ? a.bottom * LH : Infinity; };
   const way = f => DIRS.filter(([dx, dz]) => inb(f.x + dx, f.z + dz) && walkCols.has(idx(f.x + dx, f.z + dz)));
+  const placed = [];   // the trees: [{ x, y, z, anchors: [[x, y, z]] in the cube }]
   for (const f of m.floors) {
     const slope = Math.max(...f.cs) - Math.min(...f.cs);
     if (f.arenaCell || !free(f) || walkCols.has(f.c) || slope >= 0.6) continue;
@@ -173,8 +179,17 @@ function grove(m, theme, add, blockers, { walkCols, reserved, nearSite, nearPort
         : [0.5 + (R() - 0.5) * 0.5, 0.5 + (R() - 0.5) * 0.5];
       const y = floorY(f, fx, fz) - 0.02;
       if (y + p.maxY * s + 0.2 >= above(f) || beside.length && !bl) continue;
-      add(p, f.x + fx, y, f.z + fz, R() * Math.PI * 2, s);
+      const yaw = R() * Math.PI * 2, c = Math.cos(yaw), sn = Math.sin(yaw);
+      add(p, f.x + fx, y, f.z + fz, yaw, s);
       blockers[f.c].push({ x: f.x + fx, z: f.z + fz, r: 0.16 * s, bottom: y, top: y + p.height * s });
+      // its anchors in the cube (turned like the tree, three.js about Y), and a lantern from a branch
+      const anchors = (p.anchors || []).map(([ax, ay, az]) => [f.x + fx + s * (ax * c + az * sn), y + s * ay, f.z + fz + s * (-ax * sn + az * c), Math.hypot(ax, az)]);
+      placed.push({ x: f.x + fx, y, z: f.z + fz, anchors, used: 0 });
+      const branches = anchors.filter(a => a[3] > 0.12), lantern = props.byName.get(`${theme.props}_hanging_lantern_${R() < 0.5 ? 'a' : 'b'}`);
+      if (lantern && branches.length && R() < (G.lanterns ?? 0)) {
+        const [ax, ay, az] = branches[Math.floor(R() * branches.length)];
+        if (ay + lantern.minY - y >= CHAR_H + 0.15) add(lantern, ax, ay, az, R() * Math.PI * 2, 1);
+      }
     } else if (G.waylights && beside.length && slope < 0.25 && R() < G.waylights) {
       // the post on the far side of the floor, the lantern out over the way
       const p = props.byName.get(`${theme.props}_lantern_post_${R() < 0.5 ? 'a' : 'b'}`);
@@ -183,6 +198,62 @@ function grove(m, theme, add, blockers, { walkCols, reserved, nearSite, nearPort
       if (y + p.maxY + 0.2 >= above(f)) continue;
       add(p, x, y, z, Math.atan2(-dz, dx), 1);
       blockers[f.c].push({ x, z, r: 0.06, bottom: y, top: y + p.height });
+    }
+  }
+  if (G.strings) strings(m, theme, G, R, placed, out, walkCols);
+}
+
+// the ground (or water) under a point of a string and whether the string runs into something there
+function under(m, x, y, z) {
+  if (!inb(Math.floor(x), Math.floor(z))) return { ground: Infinity, hit: true };
+  let ground = -Infinity, hit = false;
+  for (const f of m.cols[idx(Math.floor(x), Math.floor(z))]) {
+    const top = f.fluid ? f.surf * LH : Math.max(...f.cs);
+    if (top <= y) ground = Math.max(ground, top);
+    else if (f.bottom * LH < y + 0.1) hit = true;   // (through a floor, or a slab over the ground)
+  }
+  return { ground, hit };
+}
+
+// strings of lanterns between the cube's trees (grove, above): each segment of the line prop
+// sheared along the sagging curve (its X axis the step, Y up, so the lanterns hang straight;
+// blender/themes.py string_segments), as an explicit matrix
+function strings(m, theme, G, R, trees, out, walkCols) {
+  const line = props.byName.get(`${theme.props}_lantern_string_a`);
+  if (!line) return;
+  const options = [];
+  for (let i = 0; i < trees.length; i++) for (let j = i + 1; j < trees.length; j++) {
+    const a = trees[i], b = trees[j], d = Math.hypot(a.x - b.x, a.z - b.z);
+    if (d < 2 || d > 5) continue;
+    // the pair of anchors most level with each other, both high enough
+    let best = null;
+    for (const p of a.anchors) for (const q of b.anchors) {
+      if (p[1] - a.y < 1.9 || q[1] - b.y < 1.9) continue;
+      const dy = Math.abs(p[1] - q[1]);
+      if (dy <= 0.9 && (!best || dy < best.dy)) best = { p, q, dy };
+    }
+    if (!best) continue;
+    const { p, q } = best, L = Math.hypot(q[0] - p[0], q[2] - p[2]), sag = 0.1 + 0.08 * L;
+    const at = t => [p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t - sag * 4 * t * (1 - t), p[2] + (q[2] - p[2]) * t];
+    let ok = true, over = 0;
+    for (let k = 1, n = Math.ceil(L * 4); k < n && ok; k++) {
+      const [x, y, z] = at(k / n), u = under(m, x, y, z);
+      ok = !u.hit && y - 0.3 - u.ground >= CHAR_H + 0.3;
+      if (walkCols.has(idx(Math.floor(x), Math.floor(z)))) over = 1;
+    }
+    if (ok) options.push({ a, b, at, L, score: over * 2 + R() });
+  }
+  options.sort((x, y) => y.score - x.score);
+  let n = 0;
+  for (const o of options) {
+    if (n >= G.strings) break;
+    if (o.a.used >= 2 || o.b.used >= 2) continue;
+    o.a.used++; o.b.used++; n++;
+    const steps = Math.max(2, Math.round(o.L / 0.85)), v = R() < 0.5 ? 'a' : 'b';
+    for (let k = 0; k < steps; k++) {
+      const a = o.at(k / steps), b = o.at((k + 1) / steps), d = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], h = Math.hypot(d[0], d[2]) || 1;
+      out.push({ name: `${theme.props}_lantern_string_${v}`, x: a[0], y: a[1] - 0.2, z: a[2], yaw: 0, s: 1,
+        matrix: [d[0], d[1], d[2], 0, 0, 1, 0, 0, -d[2] / h, 0, d[0] / h, 0, a[0], a[1], a[2], 1] });
     }
   }
 }

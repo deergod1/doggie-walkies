@@ -132,6 +132,7 @@ again. The lineup is planned with the room (`cubegen/testrooms.js` `lineUp`), so
 | Spider | (base) | `ink.dark` | | | | | | 2, 4–8, 15 |
 | Frost spider | Spider | `frost.pale` | ×1.35 | ×1.1 | ×0.9 | 1 | ×1.2 | 3, 9–10, 16 |
 | Bog spider | Spider | `moss.deep` | ×1.15 | ×1.25 | ×1.05 | 1 | ×1.2 | 7–8, 11–14 |
+| Gloom spider | Spider | `violet.deep` | ×0.95 | ×0.95 | ×1.1 | 1 | ×0.95 | 1–2 (Dark forest) |
 | Redback | Spider | `crimson.deep` | ×1.3 | ×1.4 | ×1.2 | ×1.1 | ×1.35 | 4–6, 8, 13–18, 20 |
 | Stunder | (base) | `moss.mid` | | | | | | 1–2, 4–8, 11 |
 | Frost stunder | Stunder | `frost.pale@-8` | ×1.25 | 1 | ×0.9 | 1 | ×1.11 | 3, 9–10 |
@@ -148,6 +149,7 @@ again. The lineup is planned with the room (`cubegen/testrooms.js` `lineUp`), so
 | Coral octonaut | Octonaut | `crimson.light@+8` | ×1.3 | ×1.35 | ×1.2 | 1 | ×1.33 | 10, 13–17 |
 | Fire-face | (base) | `ember.glow` | | | | | | 18–19 |
 | Blaze-face | Fire-face | `ochre.glow` | ×1.25 | ×1.2 | 1 | 1 | ×1.22 | 11–12, 19 |
+| Lantern-face | Fire-face | `jade.glow` | ×0.45 | ×0.5 | ×0.85 | ×0.85 | ×0.47 | 1–2 (Dark forest) |
 | Wisp-face | Fire-face | `azure.glow` | ×1.5 | ×1.45 | ×1.1 | 1 | ×1.48 | 20 |
 | Triangle | (base) | `violet.glow` | | | | | | 3, 10, 15–17, 20 |
 | Emerald triangle | Triangle | `jade.glow` | ×1.25 | ×1.1 | 1 | 1 | ×1.17 | 13, 16–17 |
@@ -205,7 +207,8 @@ Amethyst shraps keeps the ice head and its ice balls (they still chill), recolou
 with a light and a trail of its own.
 
 The fire species burn hotter the deeper they live: the Fire-face's orange flame, the Blaze-face's
-yellow one (the honey hive and the abyss) and the Wisp-face's blue one (the core); the
+yellow one (the honey hive and the abyss) and the Wisp-face's blue one (the core), all but the
+Lantern-face, a weak little teal flame of the dark forest high up (depths 1–2); the
 Fire-cat, the grey Ash cat with red flames (the forge and the volcanic depths) and the black
 Void cat with blue ones (the abyss). Each sets its flames' colour with `colors` (its fireballs
 too) and its light and embers with `light` and `sparks`.

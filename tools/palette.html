@@ -72,7 +72,7 @@ other kinds of the species (OKLab ΔE, red under 0.08). Under it, the ground of 
 
 <script type="module">
 import { ENEMY_KINDS } from './src/core/enemies.js';
-import { DEPTH_SPAWNS, population } from './src/core/spawns.js';
+import { DEPTH_SPAWNS, population, livesIn } from './src/core/spawns.js';
 import { THEMES } from './src/themes/index.js';
 import { themesAt } from './src/themes/depth.js';
 import { recolorTable, parseColor, fromOklch, toOklch, linearToOklab, toHex } from './src/core/oklch.js';
@@ -108,7 +108,7 @@ function themesOf(type) {
   const out = new Set();
   DEPTH_SPAWNS.forEach((row, d) => {
     for (const e of row.roster) if (e.kinds[type])
-      for (const t of themesAt(d)) if (!e.where || e.where.includes(t.props)) out.add(t.props);
+      for (const t of themesAt(d)) if (livesIn(e, t.props)) out.add(t.props);
   });
   return [...out];
 }

@@ -10,7 +10,8 @@
 //       species' kinds take turns down the depths, so that each turns up about as often as the
 //       others (tools/palette.html measures it), each where its look and name fit.
 //     where: the themes (map.biome, the theme's prop set) the species lives in, if not all of the
-//       depth's (the Squirtles keep to the waters: the lagoons, the sunken grotto, the cenote)
+//       depth's (the Squirtles keep to the waters: the lagoons, the sunken grotto, the cenote);
+//       '!theme': everywhere but there (the dark forest has spiders of its own)
 //   mix: the most species one cube holds. If more roll present, the extra ones are dropped:
 //     always-present species are kept first, the others in a random order weighted by chance.
 //   The lead: one present species (picked by chance) dominates the cube. It draws its count
@@ -26,9 +27,11 @@ export const D = (mix, ...roster) => ({ mix, roster: roster.map(([type, chance, 
 export const DEPTH_SPAWNS = [
   /*  0 road out of town */ D(1, ['snake', 1, 1, 2]),
   /*  1 meadow islands */ D(2, ['snake', 1, 2, 4], ['stunder', .2, 1, 1], ['wolk', .25, 1, 1],
-    ['squirtle', .6, 1, 2, 1, { squirtle: 1 }, ['lagoon']]),
-  /*  2 meadow islands */ D(3, ['snake', 1, 2, 5, 1, { snake: 3, sandviper: 1 }], ['spider', .6, 2, 4, 2], ['stunder', .25, 1, 1],
-    ['wolk', .35, 1, 2], ['tornado', .3, 1, 1], ['squirtle', .6, 1, 3, 1, { squirtle: 1 }, ['lagoon']]),
+    ['squirtle', .6, 1, 2, 1, { squirtle: 1 }, ['lagoon']],
+    ['spider', .7, 2, 4, 2, { gloomspider: 1 }, ['darkforest']], ['fireface', .3, 1, 1, 1, { lanternface: 1 }, ['darkforest']]),
+  /*  2 meadow islands */ D(3, ['snake', 1, 2, 5, 1, { snake: 3, sandviper: 1 }], ['spider', .6, 2, 4, 2, { spider: 1 }, ['!darkforest']],
+    ['stunder', .25, 1, 1], ['wolk', .35, 1, 2], ['tornado', .3, 1, 1], ['squirtle', .6, 1, 3, 1, { squirtle: 1 }, ['lagoon']],
+    ['spider', .8, 3, 5, 2, { gloomspider: 3, spider: 1 }, ['darkforest']], ['fireface', .4, 1, 2, 1, { lanternface: 1 }, ['darkforest']]),
   /*  3 snowy peaks */ D(3, ['spider', 1, 8, 14, 3, { frostspider: 1 }], ['stunder', .7, 1, 2, 1, { froststunder: 1 }],
     ['shraps', .3, 1, 1], ['wolk', .5, 1, 2, 1, { stormwolk: 2, wolk: 1 }], ['snake', .7, 2, 4, 2, { frostadder: 1 }], ['triangle', .2, 1, 1],
     ['tornado', .35, 1, 2, 1, { frosttornado: 2, tornado: 1 }]),
@@ -87,6 +90,9 @@ export const DEPTH_SPAWNS = [
     ['triangle', .8, 2, 3, 1, { crimsontriangle: 1, triangle: 1 }], ['stunder', .7, 2, 3, 1, { magmastunder: 1 }],
     ['wolla', .4, 1, 2, 1, { emberwolla: 1 }], ['spider', .3, 18, 26, 8, { redback: 1 }]),
 ];
+// does a roster entry's species live in a theme (map.biome)? (`where`, above)
+export const livesIn = (e, biome) => !e.where
+  || (e.where.every(w => w.startsWith('!')) ? !e.where.includes('!' + biome) : e.where.includes(biome));
 export const spawnsAt = depth => DEPTH_SPAWNS[Math.min(DEPTH_SPAWNS.length - 1, Math.max(0, depth | 0))];
 
 const SALT = 0x3e1a5c7;
@@ -113,7 +119,7 @@ export function population(map) {
   if (map.populationScale === 0) return new Map();   // (nobody: the hunter's room, docs/trials.md `chase`)
   const R = mulberry32(hash32(map.seed ^ SALT)), row = map.spawns ?? spawnsAt(map.depth || 0);
   const rolled = [];
-  for (const e of row.roster) if (R() < e.chance && (!e.where || e.where.includes(map.biome))) rolled.push({ e, key: e.chance >= 1 ? 1 + R() : R() ** (1 / e.chance) });
+  for (const e of row.roster) if (R() < e.chance && livesIn(e, map.biome)) rolled.push({ e, key: e.chance >= 1 ? 1 + R() : R() ** (1 / e.chance) });
   let present = rolled.sort((a, b) => b.key - a.key).slice(0, row.mix).map(r => r.e);
   if (!present.length) present = [row.roster[0]];
   let w = R() * present.reduce((n, e) => n + e.chance, 0), lead = present[present.length - 1];

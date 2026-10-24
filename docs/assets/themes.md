@@ -8,8 +8,8 @@
 
 ![Dark forest vignettes and landmarks](../../blender/previews/themes/darkforest-landmarks.png)
 
-Artwork for twelve alternative themes, and landmarks for the eleven classic ones: **214 prop
-types, 372 meshes, 107,441 triangles**. These were built and checked through Blender MCP. The
+Artwork for twelve alternative themes, and landmarks for the eleven classic ones: **215 prop
+types, 374 meshes, 107,733 triangles**. These were built and checked through Blender MCP. The
 style and contract are the same as `blender/clutter.py` (low-poly, flat-shaded,
 vertex-coloured, one mesh per prop). **Hooked up to the game** as themes a world may pick for
 their depths alongside the classic ones, and every depth builds its major reward site around one of its
@@ -79,7 +79,7 @@ theme's landmarks (see "Integration"); flag lines and the honey fluid are not bu
 | forge landmarks | `great_gear`, `furnace` (light #ff7a30) |
 | ossuary | `bone_dust` (ground; cover), `candle_stubs` (ground; cover; light #ffb060), `skull_pile` (ground), `candelabra` (ground; light #ffc070), `sarcophagus` (ground; blocking), `funeral_urn` (ground), `bone_lantern` (ground; light #ffc070), `skull_wall` (wall), `candle_niche` (wall; light #ffb060), `bone_chandelier` (ceiling; light #ffc070; sway 0.15), `skull_ledge` (lip) |
 | ossuary landmarks | `bone_arch`, `crypt_shrine` (light #ffb060) |
-| darkforest | `leaf_litter` (ground; cover), `glowcap_patch` (ground; cover; light #7af0ff; pulse), `moss_mound` (ground; cover), `dark_fir_tree` (ground; blocking; sway 0.06), `gnarled_tree` (ground; blocking; sway 0.08), `bare_tree` (ground; blocking; sway 0.05), `glow_mushrooms` (ground; light #5affc8; pulse), `giant_glowshroom` (ground; blocking; light #c890ff; pulse), `mossy_stump` (ground; blocking; light #5affc8; pulse), `lantern_post` (ground; blocking; light #ffb85a; flame), `standing_stone` (ground; blocking; light #8ab8ff; pulse), `rotten_log` (ground; blocking; light #7af0ff; pulse), `twig_charm` (ground; sway 0.25), `dark_fern` (ground; sway 0.3), `bramble` (ground; sway 0.1), `shelf_fungus` (wall; light #5affc8; pulse), `root_drape` (lip; sway 0.3), `hanging_lantern` (ceiling; light #ffb85a; flame; sway 0.15), `black_lilies` (water; light #c8fff0; pulse) |
+| darkforest | `leaf_litter` (ground; cover), `glowcap_patch` (ground; cover; light #7af0ff; pulse), `moss_mound` (ground; cover), `dark_fir_tree` (ground; blocking; sway 0.06; anchor on the trunk), `gnarled_tree` (ground; blocking; sway 0.08; 4 anchors at its branch ends), `bare_tree` (ground; blocking; sway 0.05; 4 anchors), `glow_mushrooms` (ground; light #5affc8; pulse), `giant_glowshroom` (ground; blocking; light #c890ff; pulse), `mossy_stump` (ground; blocking; light #5affc8; pulse), `lantern_post` (ground; blocking; light #ffb85a; flame), `standing_stone` (ground; blocking; light #8ab8ff; pulse), `rotten_log` (ground; blocking; light #7af0ff; pulse), `twig_charm` (ground; sway 0.25), `dark_fern` (ground; sway 0.3), `bramble` (ground; sway 0.1), `shelf_fungus` (wall; light #5affc8; pulse), `root_drape` (lip; sway 0.3), `hanging_lantern` (ceiling; light #ffb85a; flame; sway 0.15), `black_lilies` (water; light #c8fff0; pulse), `lantern_string` (line; light #ffc070; flame) |
 | darkforest vignettes | `abandoned_shed` (light #ffb85a; flame), `collapsed_cabin` (light #5affc8; pulse), `woodcutter_camp` (light #ffb85a; flame), `wayside_shrine` (light #ffc070; flame), `stone_circle` (light #8ab8ff; pulse), `overgrown_wagon` (light #ffb85a; flame) |
 | darkforest landmarks | `lantern_tree` (light #ffb85a; flame), `mossy_arch` (light #7af0ff; pulse), `forest_chapel` (light #ffc070; flame) |
 
@@ -127,7 +127,7 @@ Everything in `docs/assets/clutter.md` applies. In addition:
 | `landmark: true` | A ground prop bigger than one cell. It is a destination piece placed deliberately, like town buildings, and is never scattered. Radius ≤ 1.75, ≤ 4000 triangles. Adds `footprint` [x, z] in cells and `height`. Its front (what faces the approach) is glTF +Z. |
 | `role` | Landmarks: `shrine`, `gate`, `camp` or `monument` (see "Landmarks"). |
 | `colliders` / `occluders` | Landmarks: `[x0, z0, x1, z1, bottom, top]` boxes in glTF space, derived from the mesh. |
-| `anchors` | Points in glTF space (Y up) where flag strings may be tied: pole tops, chorten spires, tent ridges, wall ends. |
+| `anchors` | Points in glTF space (Y up) where flag strings may be tied: pole tops, chorten spires, tent ridges, wall ends; on the dark forest's trees, where lanterns hang and their strings are tied. They follow the prop when `finish` shrinks it to its radius and stands it on the ground. |
 | `fluid: "honey"` | A new fluid for the hive. |
 | `vignette: true` | A little set piece the generator scatters through the theme's rooms (`cubegen/vignettes.js`): a ground prop bigger than one cell like a landmark (radius ≤ 1.75, ≤ 4000 triangles, `footprint`, `height`, `colliders`, `occluders` derived from the mesh, front glTF +Z), but no role and never a reward site. |
 | `flicker` | How a prop's light lives: `"flame"` flickers like a fire (lanterns, candles), `"pulse"` breathes slowly (glowing mushrooms, runes). Needs `light`. |
@@ -158,6 +158,9 @@ Done (see [world.md](../world.md#themes-per-world-themesindexjs-themescavesjs-th
   never cut anything off (`cubegen/vignettes.js`, [world.md](../world.md#vignettes-cubegenvignettesjs)),
   colliders and occluders like a landmark's; they show in the surroundings too. Checks:
   `tests/vignettes.test.js`.
+- Lines: the dark forest ties strings of lanterns (`lantern_string`) between its trees' anchors
+  (`render/propplace.js` strings, `tests/grove.test.js`); the highlands' flag lines are not tied
+  yet.
 
 Still to do:
 

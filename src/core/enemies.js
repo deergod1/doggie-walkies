@@ -885,6 +885,12 @@ export const BOG_SPIDER = enemyKind(SPIDER, {
   colors: paints({ body: 'moss.deep', eyes: 'eyes.sun' }),
   mods: { hp: 1.15, damage: 1.25, speed: 1.05 },
 });
+// the dark forest's: deep violet, pale eyes in the dark
+export const GLOOM_SPIDER = enemyKind(SPIDER, {
+  type: 'gloomspider', label: 'Gloom spider', reason: 'Bitten by a Gloom spider!',
+  colors: paints({ body: 'violet.deep', eyes: 'eyes.ice' }), ichor: ['#d6a8ff', '#4a2a7a'],
+  mods: { hp: 0.95, damage: 0.95, speed: 1.1 },
+});
 export const REDBACK = enemyKind(SPIDER, {
   type: 'redback', label: 'Redback', reason: 'Bitten by a Redback!', toxin: { time: 5, ticks: 5, share: 0.6 },
   colors: paints({ body: 'crimson.deep', eyes: 'eyes.sun' }), ichor: ['#d8442e', '#5a1008'],
@@ -964,6 +970,12 @@ export const BLAZE_FACE = enemyKind(FIREFACE, {
   type: 'blazeface', label: 'Blaze-face', reason: 'Scorched by a Blaze-face!',
   colors: paints({ flame: 'ochre.glow', eyes: 'eyes.bone' }), light: '#ffc23a', sparks: ['#fff3b0', '#ffd84a', '#ffa82a'],
   ichor: ['#fff0a0', '#d08a1a'], mods: { hp: 1.25, damage: 1.2 },
+});
+// the dark forest's (depths 1-2): a little teal lantern of a face, weak, far from the fires below
+export const LANTERN_FACE = enemyKind(FIREFACE, {
+  type: 'lanternface', label: 'Lantern-face', reason: 'Scorched by a Lantern-face!',
+  colors: paints({ flame: 'jade.glow', eyes: 'eyes.bone' }), light: '#5affc8', sparks: ['#d8fff0', '#7af0d8', '#3ac8a0'],
+  ichor: ['#c8fff0', '#1e8a6a'], mods: { hp: 0.45, damage: 0.5, speed: 0.85, size: 0.85 },
 });
 export const WISP_FACE = enemyKind(FIREFACE, {
   type: 'wispface', label: 'Wisp-face', reason: 'Scorched by a Wisp-face!',
@@ -1209,8 +1221,8 @@ export const TOT_STUNDER = enemyKind(STUNDER, {
   mods: { hp: 0.55, damage: 0.55, speed: 1.1, size: 0.72, xp: 0.12 },
 });
 export const ENEMY_KINDS = Object.fromEntries([...ENEMY_PROFILES, ...Object.values(GUARDIAN_KINDS), ...Object.values(DESCENT_GUARDIAN_KINDS), SAND_VIPER, BLOOD_VIPER, FROST_ADDER, VENOM_ADDER, SHADOW_MAMBA, FROST_SPIDER, BOG_SPIDER,
-  REDBACK, FROST_STUNDER, STONE_STUNDER, MAGMA_STUNDER, BOG_OCTONAUT, CORAL_OCTONAUT, EMERALD_TRIANGLE, CRIMSON_TRIANGLE, FIRE_SHRAPS,
-  BOG_WOLLA, STORM_WOLLA, EMBER_WOLLA, CORAL_SQUIRTLE, BLAZE_FACE, WISP_FACE, ASH_CAT, VOID_CAT, AMETHYST_SHRAPS, HABANERO,
+  GLOOM_SPIDER, REDBACK, FROST_STUNDER, STONE_STUNDER, MAGMA_STUNDER, BOG_OCTONAUT, CORAL_OCTONAUT, EMERALD_TRIANGLE, CRIMSON_TRIANGLE, FIRE_SHRAPS,
+  BOG_WOLLA, STORM_WOLLA, EMBER_WOLLA, CORAL_SQUIRTLE, BLAZE_FACE, LANTERN_FACE, WISP_FACE, ASH_CAT, VOID_CAT, AMETHYST_SHRAPS, HABANERO,
   NIGHTSHADE, DUST_WOLK, STORM_WOLK, MOSS_SQUIRTLE, FROST_MECKED, BOG_MECKED, BONE_MECKED, DUST_TORNADO, FROST_TORNADO, FIRE_TORNADO, ...BOSS_PROFILES, CUSTO_TRIANGLE, SNAP_SKULL, TOT_SPIDER, TOT_STUNDER,
   TIDE_SQUIRTLE, SKY_WOLLA, FOG_FACE, FOG_CAT, REN_SPIDER, REN_FACE].map(k => [k.type, k]));
 // gone: not here for now (Gusto between his vanishing and his coming back, game/gusto.js), or

@@ -206,6 +206,8 @@ def build_dark_fir_tree(m, v):
         m.lathe((0.015 * (i % 2), -0.012 * (i % 3), z), [(0, r * 0.72), (th * 0.16, r), (th, 0)], FIR[i % 3], n=8,
                 jitter=0.14, phase=i * 0.7, colors=[FIR_UNDER, FIR[i % 3]])
     m.lathe((0, 0, h * 0.86), [(0, 0.08), (h * 0.14, 0)], FIR_TIP, n=6)
+    # where a string of lanterns may be tied: the trunk, inside the boughs
+    m.anchors += [(0.0, 0.0, h * 0.5)]
     for k in range(3):
         a = k * 2.1 + v
         p = Vector(polar(0.32, a, h * 0.32))
@@ -229,6 +231,8 @@ def build_gnarled_tree(m, v):
         end = polar(0.24, a + 0.35, z0 + 0.62)
         m.tube([(0.0, 0.0, z0), mid, end], [0.055, 0.035, 0.014], BARK_BLACK, n=4)
         ends.append(end)
+        # a lantern may hang (a string be tied) from the branch's end, under the leaves
+        m.anchors.append((end[0], end[1], end[2] - 0.06))
     for i, e in enumerate(ends + [(0.03, 0.0, h * 0.9)]):
         m.blob(Vector(e) + Vector((0, 0, 0.12)), (0.21, 0.2, 0.22), OAK_LEAF[i % 3], n=7)
     for k in range(2 + v):
@@ -252,6 +256,8 @@ def build_bare_tree(m, v):
         p = Vector(polar(0.18, a, z + 0.22))
         end = Vector(polar(0.3, a + 0.3, z + 0.55 - 0.05 * i))
         m.tube([(0, 0, z), p, end], [0.04, 0.025, 0.006], BARK_BLACK, n=4)
+        if i >= 2:
+            m.anchors.append(tuple(p.lerp(end, 0.7)))
         if i % 2 == 0:
             m.tube([p, p + Vector(polar(0.14, a - 0.7, 0.2))], [0.014, 0.004], BARK_BLACK, n=3)
     p = Vector(polar(0.24, 1.0 + v, h * 0.5))
@@ -391,6 +397,24 @@ def build_bramble(m, v):
         if k % 2 == 0:
             m.blob(p1 + Vector((0, 0, 0.03)), (0.025, 0.025, 0.025), "#4a1a2a", n=4)
         m.leaf(p1, p1 + Vector(polar(0.09, a - 0.5, 0.03)), 0.03, "#2a3a26")
+
+
+# =============================== lines ========================================
+def build_lantern_string(m, v):
+    """One segment of a string of paper lanterns (attach "line"): the cord along X from 0 to 1,
+    a lantern hanging near its start, so a string has one at every knot."""
+    m.tube([(0, 0, 0), (0.5, 0, -0.004), (1, 0, 0)], 0.007, "#5a4a36", n=3)
+    x = 0.09
+    m.tube([(x, 0, -0.004), (x, 0, -0.06)], 0.003, "#3a3028", n=3)
+    start = len(m.faces)
+    if v == 0:
+        m.lathe((x, 0, -0.2), [(0, 0.025), (0.03, 0.055), (0.11, 0.055), (0.14, 0.025)], "#ffc070", n=6, jitter=0.0)
+    else:
+        m.lathe((x, 0, -0.22), [(0, 0.02), (0.05, 0.06), (0.11, 0.06), (0.16, 0.02)], "#ffb060", n=6, jitter=0.0)
+    lit(m, start)
+    for z in (-0.2, -0.06 - (0.02 if v else 0)):
+        m.ring((x, 0, z), 0.03, 0.006, "#3a3028", n=6, section=3)
+    blade(m, (0.55, 0.0, -0.005), (0.58, 0.0, -0.12 - 0.04 * v), 0.018, RAG[v], ref=(0, 1, 0))
 
 
 # =============================== wall, lip, ceiling, water ====================
