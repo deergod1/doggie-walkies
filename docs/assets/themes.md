@@ -1,12 +1,12 @@
 # Theme library (artwork for new themes)
 
-![All 10 sets](../../blender/previews/themes-preview.png)
+![All 10 sets](../img/themes.jpg)
 
-![Prayer highlands vignette](../../blender/previews/themes/highlands-vignette.png)
+![Prayer highlands vignette](../img/themes-highlands-vignette.jpg)
 
-![Dark forest](../../blender/previews/themes/darkforest.png)
+![Dark forest](../img/themes-darkforest.jpg)
 
-![Dark forest vignettes and landmarks](../../blender/previews/themes/darkforest-landmarks.png)
+![Dark forest vignettes and landmarks](../img/themes-darkforest-landmarks.jpg)
 
 Artwork for twelve alternative themes, and landmarks for the eleven classic ones: **215 prop
 types, 374 meshes, 107,733 triangles**. These were built and checked through Blender MCP. The
@@ -31,7 +31,8 @@ theme's landmarks (see "Integration"); flag lines and the honey fluid are not bu
   cliff with wall/lip props, a pool for water props and a slab for ceiling props), plus a
   landmark row and the highlands vignette scene.
 - `blender/previews/themes/<set>.png`, `<set>-landmarks.png`, `highlands-vignette.png`,
-  `blender/previews/themes-preview.png`.
+  `blender/previews/themes-preview.png` (local renders, not committed; the pictures above are
+  copies in `docs/img/`, `node tools/preview-images.mjs`).
 
 `props.py`'s `finish()` gained a `line` radius case and `clutter.check()` takes a
 `fluids` argument. The clutter library still exports byte-identically and `test_clutter.py` passes.

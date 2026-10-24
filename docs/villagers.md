@@ -1,6 +1,6 @@
 # Villagers and the things characters wear
 
-![The villagers, standing in their hold poses](../blender/previews/loadout-villagers-front.png)
+![The villagers, standing in their hold poses](img/loadout-villagers.jpg)
 
 Villagers are humans like the player: the same clay figure (`assets/character.glb`), tinted,
 standing at their trades in the two clearings. What sets them apart is what they wear on the

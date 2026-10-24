@@ -61,7 +61,7 @@ Plain HTML, CSS and ES modules, no build step, like the game.
 | `<room>.html` | one room: `<main class="deck">` with `<section class="slide">` slides; its `<head>` has the import map for three.js, so demos can draw items from their models (`src/render/itempictures.js`), as the game does |
 | `words.html` | the glossary; `<a class="w" href="words.html#seed">` anywhere shows its entry on hover |
 | `demos/*.js` | interactive demos, loaded when they scroll into view |
-| `img/` | screenshots of the game |
+| `img/` | screenshots of the game, and `model-*.jpg`: copies of Blender previews (`node tools/preview-images.mjs`) |
 | `tutor/` | the Teacher: an AI tutor in a side panel (see below) |
 | `../tools/learn.mjs` | the check / `--stamp` / `--defer` tool |
 

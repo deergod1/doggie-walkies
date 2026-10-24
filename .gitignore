@@ -4,3 +4,4 @@ worktrees/
 .DS_Store
 *.blend1
 .pi/blender_mcp/
+blender/previews/

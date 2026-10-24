@@ -395,11 +395,11 @@ weapon's `interval`. Each kind has its timing in `core/combat.js` (`KINDS`: `BOW
   (`--mounts`): the bow upright at the loose, the crossbow level at the shot, the staff upright
   in the hold.
 
-![The bow's Shoot clip, from the hold to the loose](../blender/previews/loadout-bow-front.png)
+![The bow's Shoot clip, from the hold to the loose](img/loadout-bow.jpg)
 
-The other kinds: [sword](../blender/previews/loadout-sword-front.png),
-[crossbow](../blender/previews/loadout-crossbow-front.png),
-[staff](../blender/previews/loadout-staff-front.png).
+The other kinds: [sword](img/loadout-sword.jpg),
+[crossbow](img/loadout-crossbow.jpg),
+[staff](img/loadout-staff.jpg).
 
 ## Fluids and falls
 
@@ -458,7 +458,7 @@ vertical speed advances its phase, descent reverses it, and stopping holds
 the grip. Regenerate via the Blender commands in
 `character.py`, `spider.py`, `stunder.py`, `snake.py`, `octonaut.py`, `fireface.py`,
 `triangle.py`, `firecat.py`, `shraps.py`, `spicy.py`, `wolla.py`, `wolk.py`, `mecked.py`, `tornado.py` and `sword.py` (the SDF creatures share `blender/creature.py`
-and can also be rebuilt from a Blender MCP session; previews land in `blender/previews/`). Tests check balance, hit timing,
+and can also be rebuilt from a Blender MCP session; previews land in `blender/previews/`, not committed; the pictures here are copies in `docs/img/`, `node tools/preview-images.mjs`). Tests check balance, hit timing,
 direction / reach / height, cancellations, deterministic spawns, clearance,
 navigation and the exported asset/clip contract.
 

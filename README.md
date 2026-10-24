@@ -80,7 +80,9 @@ docs that explain how the game works, from the big ideas down to the real code:
 - `music/`: hand-written Scrimshaw scores the game plays (`docs/music.md`). Before writing
   or changing a song, read `music/README.md` for the style, the layers and the format.
 - `blender/`: authoring sources: Blender scripts and `.blend` files that export
-  into `assets/`, Blender test scripts in `blender/tests/`, renders in `blender/previews/`.
+  into `assets/`, Blender test scripts in `blender/tests/`. Their preview renders go to
+  `blender/previews/`, which is not committed (see `AGENTS.md`); the few the guide and the docs show
+  are JPEG copies in `learn/img/` and `docs/img/` (`node tools/preview-images.mjs`).
 - `tests/`: `node --test` unit tests; `tests/browser/` holds integration checks
   that run from the game's devtools console (in English, `?lang=en`: some read what it says).
 - `tools/`: dev server, the prop metadata generator, the GLB compressor (`compress-assets.mjs`;

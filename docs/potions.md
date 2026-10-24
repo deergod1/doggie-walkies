@@ -1,6 +1,6 @@
 # Potions, flasks and the alchemist
 
-![The potions and flasks, with the rest of the items](../blender/previews/items-preview.png)
+![The potions and flasks, with the rest of the items](../learn/img/model-items.jpg)
 
 Potions are stackable items (`core/items.js POTIONS`, category `potion`) in two families:
 drinks put a timed effect on you, flasks are thrown. They drop from enemies, lie in chests and

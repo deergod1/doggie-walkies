@@ -1,6 +1,6 @@
 # Loot, equipment, worn things and quest items
 
-![115-asset overview](../../blender/previews/items-preview.png)
+![115-asset overview](../../learn/img/model-items.jpg)
 
 Built and inspected through Blender MCP. Matches the existing flat-faceted,
 texture-free clay style: warm timber, leather wraps, muted brass and steel,
@@ -60,7 +60,8 @@ The game never puts tools on the floor: the portal scrolls' models only show the
   (the kids' guide uses a few of the PNGs as room pictures; the game and the guide's demos draw
   every item from its model, `src/render/itempictures.js`).
 - `assets/items/manifest.json`: names, triangles, authoring bounds, sizes and unit/scale contract.
-- `blender/previews/items-preview.png`: overview render.
+- `blender/previews/items-preview.png`: overview render (local, not committed; the picture above
+  is a copy in `learn/img/`, `node tools/preview-images.mjs`).
 - `blender/tests/test_items.py`: geometry, repeatability and actual binary GLB validation.
 
 Every asset is one flat-shaded Blender mesh (the chest: two, body and lid; bows: two, with

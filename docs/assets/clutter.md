@@ -1,6 +1,6 @@
 # Clutter library (second scatter set)
 
-![All 13 sets](../../blender/previews/clutter-preview.png)
+![All 13 sets](../img/clutter.jpg)
 
 120 prop types × 2 variants = **240 meshes, 44,584 triangles**, built and inspected
 through Blender MCP. Same low-poly, flat-shaded, vertex-coloured style and contract
@@ -19,7 +19,7 @@ Signature props are reserved for deliberate destination arrangements.
 - `blender/clutter.blend`: an editable showroom with one block per set (ground props in columns,
   variant `a` in front; a cliff with wall/lip props; a pool with water props; a floating
   slab with ceiling props). The preview geometry is in `ClutterPreview_NOT_EXPORTED`.
-- `blender/previews/clutter/<set>.png`: per-set preview renders; `blender/previews/clutter-preview.png`: all of them stacked.
+- `blender/previews/clutter/<set>.png`: per-set preview renders; `blender/previews/clutter-preview.png`: all of them stacked (local, not committed; the picture above is a copy in `docs/img/`, `node tools/preview-images.mjs`).
 - `assets/clutter/manifest.json`: per-prop set, attach, flags, triangles, sizes and Blender bounds.
 - `blender/tests/test_clutter.py`: determinism, validation and actual binary-GLB checks.
 

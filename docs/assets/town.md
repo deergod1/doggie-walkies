@@ -1,6 +1,6 @@
 # Town service models
 
-![All seven models](../../blender/previews/town-preview.png)
+![All seven models](../../learn/img/model-town.jpg)
 
 Seven texture-free, flat-shaded models using the existing `props.py` mesh builder,
 vertex-colour material, neutral masonry, warm timber and muted meadow colours.
@@ -23,7 +23,8 @@ Large pitched roofs and raised pictogram signs keep services readable at game sc
 - `assets/town.glb`: combined asset library; each named root is at the origin. With
   `town_trees.glb` it is the `town` prop set (loaded when a cube shows it).
 - `assets/town/<asset>.glb`: standalone model; `blender/previews/town/<asset>.png`: individual preview.
-- `blender/previews/town-preview.png`: overview render.
+- `blender/previews/town-preview.png`: overview render (previews are local, not committed; the
+  picture above is a copy in `learn/img/`, `node tools/preview-images.mjs`).
 - `assets/town/manifest.json`: triangle counts, dimensions, authoring bounds and service hints.
 
 ## Game contract

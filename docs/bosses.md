@@ -31,7 +31,7 @@ dies.
 
 ## Gusto
 
-![Gusto's clips](../blender/previews/gusto-preview.png)
+![Gusto's clips](img/model-gusto.jpg)
 
 From the kids' whiteboard sketch (`blender/gusto.py`, `assets/gusto.glb`): a big round,
 white-grey head with a V of angry brows, glowing red eyes and a wide grin of jagged teeth
@@ -127,7 +127,7 @@ and no weapons, and drops a minor health potion 8% of the time (`drops`,
 
 ## Totnar
 
-![Totnar's clips](../blender/previews/totnar-preview.png)
+![Totnar's clips](img/model-totnar.jpg)
 
 From the kids' whiteboard sketch (`blender/totnar.py`, `assets/totnar.glb`): a tumbleweed, a
 ball of tangled sticks and clumps of dry leaves, about 2.4 cells tall with his skulls. In the
@@ -231,7 +231,7 @@ and then (`drops`); they turn up and go in a puff of dust and leaves, the skulls
 
 ## Squarlo
 
-![Squarlo's clips](../blender/previews/squarlo-preview.png)
+![Squarlo's clips](img/model-squarlo.jpg)
 
 From the kids' whiteboard sketch (`blender/squarlo.py`, `assets/squarlo.glb`): a tiny teal
 fellow, about 0.7 cells tall, smaller than the player. A tall, boxy body splits at the bottom
@@ -371,7 +371,7 @@ His death drains the water and takes his Squirtles along.
 
 ## Squirtle
 
-![The Squirtle's clips](../blender/previews/squirtle-preview.png)
+![The Squirtle's clips](../learn/img/model-squirtle.jpg)
 
 From the kids' sketch (`blender/squirtle.py`, `assets/squirtle.glb`): a little blue water serpent
 with a beak. Its body pokes out of the floor and rises in a curve, leaning back, into a round head
@@ -414,7 +414,7 @@ round their legs.
 
 ## Flip
 
-![Flip's clips](../blender/previews/flip-preview.png)
+![Flip's clips](img/model-flip.jpg)
 
 From the kids' sketch (`blender/flip.py`, `assets/flip.glb`): three rings of smaller rings. Each
 big ring is a wreath of little oval loops lying in its plane, long side outward; the rings overlap
@@ -560,7 +560,7 @@ once. A little XP once, no coins and no weapons, a minor health potion 6% of the
 
 ## Foggery
 
-![Foggery's clips](../blender/previews/foggery-preview.png)
+![Foggery's clips](img/model-foggery.jpg)
 
 From the kids' whiteboard sketches (`blender/foggery.py`, `assets/foggery.glb`): a frog, orange
 red, a little taller than the player (1.75 cells). Two big round yellow eyes sit on top of his
