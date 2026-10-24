@@ -44,6 +44,16 @@ export function emit(target, x, y, z, { v = [0, 0, 0], spread = 0, life = 1, siz
     age: 0, life, size: size * SIZE, grow, r: col.r, g: col.g, b: col.b, alpha, gravity, drag });
 }
 
+// Portal travel slides the cubes past the camera (game/travel.js): what is in the air goes along
+// with them (by how far they moved this frame), so it stays where it was in the world
+export function shiftParticles(dx, dy, dz) {
+  for (const L of [glow, soft]) for (const p of L.list) { p.x += dx; p.y += dy; p.z += dz; }
+}
+// a cut to another cube (game/flow.js enterCube): what was in the air belongs to the old one
+export function clearParticles() {
+  for (const L of [glow, soft]) { L.list.length = 0; L.points.geometry.setDrawRange(0, 0); L.points.visible = false; }
+}
+
 export const rand = (a, b) => a + Math.random() * (b - a);
 export const ring = (r = .35) => { const a = Math.random() * Math.PI * 2, d = Math.sqrt(Math.random()) * r; return [Math.cos(a) * d, Math.sin(a) * d]; };
 

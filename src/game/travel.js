@@ -17,6 +17,8 @@ import { detachNeighbors, buildNeighbors, showsNeighbor } from '../render/neighb
 import { showPortalCloud, hidePortalCloud, CLOUD_DELAY } from '../render/portalcloud.js';
 import { setFade } from '../render/fade.js';
 import { setCut } from '../render/section.js';
+import { shiftParticles } from '../render/particles.js';
+import { shiftFloatText } from '../render/floattext.js';
 import { player, state, setStatus } from './state.js';
 import { sfx } from '../audio/sfx.js';
 import { whenReady } from './hud.js';
@@ -92,7 +94,8 @@ function slide(p, c, cloud) {
   }
   const D = new THREE.Vector3(D6[p.dir][0] * N, D6[p.dir][1] * GAP, D6[p.dir][2] * N);
   trip = { t: 0, s: 0, D, kind: p.kind, k, oldKey, old: { world: oldWorld, enemies: detachEnemies(), ghosts: detachNeighbors() },
-    S: new THREE.Vector3(player.x, player.y, player.z).sub(D), A: new THREE.Vector3(A.x, A.y, A.z), last: null, motion };
+    S: new THREE.Vector3(player.x, player.y, player.z).sub(D), A: new THREE.Vector3(A.x, A.y, A.z), last: null, motion,
+    drawn: D.clone() };   // the new cube's offset as last drawn (the old one's is that minus D)
   // T: the walk and slide. Into a cube not drawn yet the new cube fades in CLOUD_DELAY later
   // (game/travelfx.js), so the travel lasts that much longer: you wait on the cloud.
   trip.T = p.kind === 'side' ? THREE.MathUtils.clamp(trip.S.distanceTo(trip.A) / 2.2, 0.9, 1.4) : 1.3;
@@ -129,6 +132,9 @@ export function updateTravel(dt) {
   trip.t = Math.min(1, trip.s / trip.T);
   const t = trip.t, e = ease(t), p = player;
   off.copy(trip.D).multiplyScalar(1 - e); oldOff.copy(off).sub(trip.D);
+  // what is in the air (sparks, embers, fireflies, numbers) slides with both cubes
+  const dx = off.x - trip.drawn.x, dy = off.y - trip.drawn.y, dz = off.z - trip.drawn.z;
+  if (dx || dy || dz) { shiftParticles(dx, dy, dz); shiftFloatText(dx, dy, dz); trip.drawn.copy(off); }
   // the path in the new cube's coordinates: walk straight through, fall, or rise
   const u = trip.kind === 'side' ? t : trip.kind === 'up' ? 1 - (1 - t) ** 2 : t * t;
   const x = trip.S.x + (trip.A.x - trip.S.x) * t, z = trip.S.z + (trip.A.z - trip.S.z) * t, y = trip.S.y + (trip.A.y - trip.S.y) * u;

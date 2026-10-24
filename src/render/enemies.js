@@ -256,22 +256,28 @@ function flail(v, e, life) {
   if (!v.tentacles.length || life <= 0) return;
   shakeTentacles(v.tentacles, clock + v.seed, (e.profile.flail ?? 1) * life * (e.mode === 'split' ? 1.8 : 1));
 }
+// Particles at a point of the cube (e.x, ...) are emitted where the cube is drawn: while a portal's
+// travel slides it (game/travel.js) that is `shift` (animateEnemies' off) away. (Those at a
+// bone or the view's group, already where they are drawn, use emit.)
+const ZERO = { x: 0, y: 0, z: 0 };
+let shift = ZERO;
+const here = (layer, x, y, z, o) => emit(layer, x + shift.x, y + shift.y, z + shift.z, o);
 // a puff of cloud where e is (a proxy felled, a body gone or come back)
 const PUFF = { colors: ['#ffffff', '#e8edf5', '#cdd3de'], size: 1 }, MINION_PUFF = { colors: ['#e0f6ff', '#9fdcff', '#ffffff'], size: 0.5 };
 const puffOf = e => e.profile.puff ?? (e.summoned ? MINION_PUFF : PUFF);
 function poof(e, look = PUFF, x = e.x, z = e.z) {
   const s = look.size, h = e.profile.height * 0.5, y = e.y + h, c = look.colors;
   if (Math.hypot(x - player.x, z - player.z) > 18) return;
-  emit(glow, x, y, z, { life: 0.25, size: 1.4 * s, grow: 1.5, color: '#ffffff', alpha: 0.6 });
+  here(glow, x, y, z, { life: 0.25, size: 1.4 * s, grow: 1.5, color: '#ffffff', alpha: 0.6 });
   for (let i = 0; i < 26 * s + 6; i++) {
     const a = rand(0, Math.PI * 2), r = rand(0.3, 1) * s, up = rand(-0.4, 1);
-    emit(soft, x + Math.cos(a) * r * 0.4, y + up * h * 0.6, z + Math.sin(a) * r * 0.4, { v: [Math.cos(a) * rand(1, 2.6) * s, rand(0.2, 1.6), Math.sin(a) * rand(1, 2.6) * s],
+    here(soft, x + Math.cos(a) * r * 0.4, y + up * h * 0.6, z + Math.sin(a) * r * 0.4, { v: [Math.cos(a) * rand(1, 2.6) * s, rand(0.2, 1.6), Math.sin(a) * rand(1, 2.6) * s],
       life: rand(0.5, 0.9), size: rand(0.25, 0.45) * s, grow: 1.4, color: c[i % c.length], alpha: 0.75, drag: 2.2 });
   }
   for (let i = 0; i < 10 * s + 4; i++)
-    emit(glow, x, y, z, { v: [rand(-2.5, 2.5) * s, rand(-0.5, 2.5), rand(-2.5, 2.5) * s], life: rand(0.25, 0.5), size: rand(0.05, 0.09),
+    here(glow, x, y, z, { v: [rand(-2.5, 2.5) * s, rand(-0.5, 2.5), rand(-2.5, 2.5) * s], life: rand(0.25, 0.5), size: rand(0.05, 0.09),
       color: i % 2 ? '#ffffff' : c[1], gravity: 3, drag: 2 });
-  sfx('poof', { at: { x, y, z }, pitch: s < 1 ? 1.5 : 1 });
+  sfx('poof', { at: { x: x + shift.x, y: y + shift.y, z: z + shift.z }, pitch: s < 1 ? 1.5 : 1 });
 }
 // what changed since the last frame that shows as a cloud: gone, back, or a jump (not a cube's slide:
 // positions are the cube's own)
@@ -296,7 +302,7 @@ function burrowLook(v, e, dt) {
       sfx(want ? 'dig' : 'pop', { at: e });
       for (let i = 0; i < 16; i++) {
         const a = rand(0, Math.PI * 2), s = rand(0.6, 1.8);
-        emit(soft, e.x, e.y + 0.05, e.z, { v: [Math.cos(a) * s, rand(1, 2.6), Math.sin(a) * s], life: rand(0.4, 0.7),
+        here(soft, e.x, e.y + 0.05, e.z, { v: [Math.cos(a) * s, rand(1, 2.6), Math.sin(a) * s], life: rand(0.4, 0.7),
           size: rand(0.05, 0.1), color: colors[i % 3], alpha: 0.95, gravity: 9, drag: 1 });
       }
     }
@@ -306,7 +312,7 @@ function burrowLook(v, e, dt) {
   v.ghost.opacity = v.sink > 0.02 ? 0 : GHOST_OPACITY;
   if (v.sink > 0.5) { v.bar.visible = false; v.label.visible = false; v.mark.visible = false; }
   if (v.sink > 0.9 && e.speed > 0.3 && near && Math.random() < dt * 22)
-    emit(soft, e.x + rand(-0.12, 0.12), e.y + 0.04, e.z + rand(-0.12, 0.12), { v: [rand(-0.5, 0.5), rand(0.6, 1.4), rand(-0.5, 0.5)],
+    here(soft, e.x + rand(-0.12, 0.12), e.y + 0.04, e.z + rand(-0.12, 0.12), { v: [rand(-0.5, 0.5), rand(0.6, 1.4), rand(-0.5, 0.5)],
       life: rand(0.35, 0.6), size: rand(0.05, 0.11), color: colors[Math.floor(Math.random() * 3)], alpha: 0.9, gravity: 7, drag: 1 });
 }
 // A boss whose stages are profiles of their own (Squarlo, core/enemies.js STAGE_PROFILES): while
@@ -337,7 +343,7 @@ function growLook(v, e, dt) {
   const r = 0.6 + 3.2 * ease(e.t / SQUARLO_FIGHT.morphTime), h = Math.max(1, v.size * 0.6);
   for (let i = Math.floor(70 * dt + Math.random()); i > 0; i--) {
     const a = rand(0, Math.PI * 2), d = rand(0.3, 1) * r;
-    emit(soft, e.x + Math.cos(a) * d, e.y + rand(0, h), e.z + Math.sin(a) * d, { v: [Math.cos(a) * rand(0.2, 0.8), rand(0, 0.4), Math.sin(a) * rand(0.2, 0.8)],
+    here(soft, e.x + Math.cos(a) * d, e.y + rand(0, h), e.z + Math.sin(a) * d, { v: [Math.cos(a) * rand(0.2, 0.8), rand(0, 0.4), Math.sin(a) * rand(0.2, 0.8)],
       life: rand(1.2, 2.2), size: rand(0.6, 1.2), grow: 1.2, color: FOG[i % 3], alpha: 0.3, drag: 0.4 });
   }
 }
@@ -347,7 +353,7 @@ function ripples(v, e, dt) {
   if (!v.swim || Math.hypot(e.x - player.x, e.z - player.z) > 14 || e.under) return;
   const y = surfaceY(WATER, standingAt(e.x, e.z).y, WIND.value) + 0.02, n = (e.speed > 0.3 ? 14 : 3) * dt;
   if (Math.random() < n)
-    emit(soft, e.x + rand(-0.1, 0.1), y, e.z + rand(-0.1, 0.1), { v: [rand(-0.3, 0.3), 0.05, rand(-0.3, 0.3)], life: rand(0.6, 1),
+    here(soft, e.x + rand(-0.1, 0.1), y, e.z + rand(-0.1, 0.1), { v: [rand(-0.3, 0.3), 0.05, rand(-0.3, 0.3)], life: rand(0.6, 1),
       size: rand(0.12, 0.2) * Math.sqrt(v.size), grow: 2.2, color: '#f2fcff', alpha: 0.5, drag: 1 });
 }
 // Warded (Squarlo calling the tide: nothing hurts him, core/enemies.js wardedNow): water spirals
@@ -358,10 +364,10 @@ function wardLook(v, e, dt) {
   const s = Math.sqrt(v.size), r = 0.42 * s, h = 1.1 * s, spin = clock * 7;
   for (let i = Math.floor(110 * dt + Math.random()); i > 0; i--) {
     const k = Math.random(), ang = spin + k * 9 + (i % 3) * 2.09;
-    emit(soft, e.x + Math.cos(ang) * r, e.y + k * h, e.z + Math.sin(ang) * r, { v: [-Math.sin(ang) * 2 * s, 0.8, Math.cos(ang) * 2 * s],
+    here(soft, e.x + Math.cos(ang) * r, e.y + k * h, e.z + Math.sin(ang) * r, { v: [-Math.sin(ang) * 2 * s, 0.8, Math.cos(ang) * 2 * s],
       life: rand(0.2, 0.35), size: rand(0.05, 0.09) * s, color: SPRAY[i % 3], alpha: 0.9 });
   }
-  if (Math.random() < dt * 8) emit(glow, e.x, e.y + h * 0.5, e.z, { life: 0.3, size: 0.9 * s, grow: 0.6, color: '#9feaff', alpha: 0.35 });
+  if (Math.random() < dt * 8) here(glow, e.x, e.y + h * 0.5, e.z, { life: 0.3, size: 0.9 * s, grow: 0.6, color: '#9feaff', alpha: 0.35 });
 }
 // A giant striding (Squarlo grown: the gait `stride`, whose feet come down at phases 0 and 0.5,
 // blender/squarlo.py): each footfall thuds and jolts the ground a little
@@ -372,14 +378,14 @@ function footfalls(v, e, gait) {
   for (const [h, side] of [[0.5, -1], [1, 1]]) {   // (the right foot, the left: phase 1 is the next loop's 0)
     if (!(was < h && (v.phase >= h || v.phase < was))) continue;
     const s = Math.sin(e.yaw), c = Math.cos(e.yaw), x = 0.06 * side * v.size;
-    footfallFx(e.x + x * c, e.y, e.z - x * s, v.size);
+    footfallFx(e.x + x * c + shift.x, e.y + shift.y, e.z - x * s + shift.z, v.size);
   }
 }
 // splitting: shaking, steaming
 function shudder(v, e, dt) {
   const k = 0.06 * v.size;
   v.group.position.x += rand(-k, k); v.group.position.z += rand(-k, k);
-  if (Math.random() < dt * 30) emit(soft, e.x + rand(-0.6, 0.6), e.y + rand(0.8, 2.2), e.z + rand(-0.6, 0.6),
+  if (Math.random() < dt * 30) here(soft, e.x + rand(-0.6, 0.6), e.y + rand(0.8, 2.2), e.z + rand(-0.6, 0.6),
     { v: [rand(-0.4, 0.4), rand(0.4, 1.2), rand(-0.4, 0.4)], life: rand(0.5, 0.8), size: rand(0.2, 0.35), grow: 1.4, color: '#eef2f8', alpha: 0.5, drag: 1 });
 }
 
@@ -432,7 +438,7 @@ function tumble(v, e, dt) {
     sfx('thud', { at: e, pitch: 0.6 }); sfx('rustle', { at: e });
     for (let i = 0; i < 16; i++) {
       const ang = rand(0, Math.PI * 2), s = rand(1, 2.6);
-      emit(soft, e.x, e.y + 0.2, e.z, { v: [Math.cos(ang) * s, rand(0.3, 1.2), Math.sin(ang) * s], life: rand(0.5, 0.9),
+      here(soft, e.x, e.y + 0.2, e.z, { v: [Math.cos(ang) * s, rand(0.3, 1.2), Math.sin(ang) * s], life: rand(0.5, 0.9),
         size: rand(0.25, 0.4), grow: 1.2, color: '#c9c0ae', alpha: 0.45, drag: 2.5 });
     }
     if (Math.hypot(e.x - player.x, e.z - player.z) < 7) cameraKick(0, 0, 0, 0.07);
@@ -441,12 +447,12 @@ function tumble(v, e, dt) {
   const litter = e.profile.litter, fast = Math.abs(v.tumble) * radius;
   if (litter && near && fast > 2) for (let i = Math.floor(fast * 3 * dt + Math.random()); i > 0; i--) {
     const ang = rand(0, Math.PI * 2);
-    emit(soft, e.x + Math.cos(ang) * radius * 0.8, e.y + rand(0.2, 1.4), e.z + Math.sin(ang) * radius * 0.8,
+    here(soft, e.x + Math.cos(ang) * radius * 0.8, e.y + rand(0.2, 1.4), e.z + Math.sin(ang) * radius * 0.8,
       { v: [rand(-0.6, 0.6), rand(0.4, 1.4), rand(-0.6, 0.6)], life: rand(0.6, 1.1), size: rand(0.05, 0.09), color: litter[i % litter.length],
         alpha: 0.95, gravity: 3, drag: 1.2 });
   }
   if (rolling && near && Math.random() < dt * 20)   // dust kicked up
-    emit(soft, e.x + rand(-0.4, 0.4), e.y + 0.1, e.z + rand(-0.4, 0.4), { v: [rand(-0.5, 0.5), rand(0.2, 0.7), rand(-0.5, 0.5)],
+    here(soft, e.x + rand(-0.4, 0.4), e.y + 0.1, e.z + rand(-0.4, 0.4), { v: [rand(-0.5, 0.5), rand(0.2, 0.7), rand(-0.5, 0.5)],
       life: rand(0.5, 0.8), size: rand(0.25, 0.4), grow: 1.2, color: '#c9c0ae', alpha: 0.35, drag: 1.5 });
 }
 // his `dark` changing (game/totnar.js): his heart flares, the darkness sucked into him or the
@@ -459,11 +465,11 @@ function lightTurns(v, e, dt) {
   if (Math.hypot(e.x - player.x, e.z - player.z) > 24) return;
   sfx(dark ? 'gloom' : 'dawn', { at: e });
   const y = e.y + 1.1 * v.size;
-  emit(glow, e.x, y, e.z, { life: 0.4, size: 2.4, grow: dark ? -0.8 : 2, color: dark ? '#ff4018' : '#fff0c0', alpha: 0.7 });
+  here(glow, e.x, y, e.z, { life: 0.4, size: 2.4, grow: dark ? -0.8 : 2, color: dark ? '#ff4018' : '#fff0c0', alpha: 0.7 });
   for (let i = 0; i < 40; i++) {
     const a = rand(0, Math.PI * 2), u = rand(-0.3, 1), r = rand(2, 4), life = rand(0.5, 0.8);
     const x = e.x + Math.cos(a) * r, z = e.z + Math.sin(a) * r, yy = y + u * 1.5;
-    emit(soft, dark ? x : e.x, dark ? yy : y, dark ? z : e.z, { v: dark ? [(e.x - x) / life, (y - yy) / life, (e.z - z) / life]
+    here(soft, dark ? x : e.x, dark ? yy : y, dark ? z : e.z, { v: dark ? [(e.x - x) / life, (y - yy) / life, (e.z - z) / life]
       : [Math.cos(a) * r / life, u * 2, Math.sin(a) * r / life], life, size: rand(0.25, 0.45), grow: dark ? -0.5 : 1,
       color: dark ? '#14101c' : '#fff4d8', alpha: dark ? 0.6 : 0.4, drag: dark ? 0 : 1.5 });
   }
@@ -604,8 +610,9 @@ function dying(v, e, dt, off) {
   flail(v, e, Math.max(0, 1 - e.deadT / (e.profile.deathTime * 0.5)));
   glowFx(v, e, 0, Math.max(0, 1 - e.deadT / e.profile.deathTime) * fade);   // the glow dies with it
 }
-export function animateEnemies(list, dt, off = { x: 0, y: 0, z: 0 }) {
+export function animateEnemies(list, dt, off = ZERO) {
   clock += dt;
+  shift = off;
   for (const e of list) {
     if (isFigure(e)) { animateFigures([e], dt, off); continue; }   // (Renew: a figure, render/renewview.js)
     const prefab = prefabs[e.profile.species];

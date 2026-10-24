@@ -16,6 +16,8 @@ import { showStats, flash, fadeOut, fadeIn, whenReady } from './hud.js';
 import { resetCut } from './cut.js';
 import { resetEnemies, mirroring, detachEnemies } from './enemies.js';
 import { removeEnemyViews } from '../render/enemies.js';
+import { clearParticles } from '../render/particles.js';
+import { clearFloatText } from '../render/floattext.js';
 import { cancelSword } from './sword.js';
 import { onPropSet } from '../render/props.js';
 import { cubeAssets, warmCube } from '../render/cubeassets.js';
@@ -258,6 +260,8 @@ export function enterCube(c, from = null, back = null, at = null) {
   if (c.map.town && state.cubeKey && !isTown(state.cubeKey) && !isInterior(state.cubeKey)) state.run.smith = { visit: state.run.smith.visit + 1, sold: [] };
   devShores(c.map);
   if (!back) discover(c);
+  // (a cut, behind the curtain: what was in the air was in the old cube's place)
+  clearParticles(); clearFloatText();
   state.cubeKey = k; state.map = c.map; state.lookDepth = c.map.depth;
   questWorld(c.map);   // the people living here, and what the quests put here (game/questworld.js)
   warnTrials(c.map);   // the portals into trial rooms not resolved yet warn of them (game/trials.js)

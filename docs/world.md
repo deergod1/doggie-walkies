@@ -1045,6 +1045,13 @@ The new cube is active from the first frame. The player moves in its coordinates
 slide offset, so when the slide ends the offset is zero and nothing jumps. The section cut
 is off during the slide.
 
+What is in the air slides along: the shared particles (fireflies, embers, sparks:
+`render/particles.js shiftParticles`) and text standing at a point (damage numbers:
+`render/floattext.js shiftFloatText`) move by as much as the cubes each frame, and the
+enemies' effects at a point of their cube are emitted where the cube is drawn
+(`render/enemies.js here`). A cut to another cube behind the curtain (doors, the town
+portal, `game/flow.js enterCube`) drops both instead: they were in the old cube's place.
+
 A side portal into a cube that is not drawn yet (no low-detail proxy on screen) would have
 the character walk over nothing until the new cube fades in. Instead a dark blue cloud
 spills out of the gate as the travel starts (also covering a cube still generating). The

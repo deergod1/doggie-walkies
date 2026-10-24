@@ -218,9 +218,9 @@ function animate(e, dt, off) {
     if (o.isMesh) for (const m of [].concat(o.material)) { m.transparent = seen < 1; m.opacity = seen; m.depthWrite = !ghost; }
   });
   v.ghost.opacity = ghost ? 0 : GHOST_OPACITY * fade;
-  if (dead && e.deadT > e.profile.deathTime - 1 && fade > 0 && Math.random() < dt * 60) sparkle(e, 1);
-  if (e.rising) { if (Math.random() < dt * 50 * rise) sparkle(e, 1.4); }
-  else if (e.mode === 'split') clocks(v, e, dt);
+  if (dead && e.deadT > e.profile.deathTime - 1 && fade > 0 && Math.random() < dt * 60) sparkle(e, 1, off);
+  if (e.rising) { if (Math.random() < dt * 50 * rise) sparkle(e, 1.4, off); }
+  else if (e.mode === 'split') clocks(v, e, dt, off);
   v.light.intensity = (e.mode === 'split' ? 2.6 : 1.1) * seen;
   v.bar.visible = v.label.visible = !dead && !ghost && e.mode !== 'gone';
   v.bar.quaternion.copy(INV.setFromAxisAngle(UP, -v.yaw)).multiply(camera.quaternion);
@@ -230,22 +230,23 @@ function animate(e, dt, off) {
 }
 const WHITE = new THREE.Color(0xffffff), ECHO = new THREE.Color(ECHO_TINT), INV = new THREE.Quaternion(), UP = new THREE.Vector3(0, 1, 0);
 const TIME = ['#ffffff', '#bdf3ff', '#ffe9a8'];
-function sparkle(e, s) {
-  emit(glow, e.x + rand(-0.25, 0.25) * s, e.y + rand(0.1, 1.1), e.z + rand(-0.25, 0.25) * s, { v: [rand(-0.2, 0.2), rand(0.4, 1.2), rand(-0.2, 0.2)],
+// (off: where the cube is drawn, while a portal's travel slides it: game/travel.js)
+function sparkle(e, s, off) {
+  emit(glow, e.x + off.x + rand(-0.25, 0.25) * s, e.y + off.y + rand(0.1, 1.1), e.z + off.z + rand(-0.25, 0.25) * s, { v: [rand(-0.2, 0.2), rand(0.4, 1.2), rand(-0.2, 0.2)],
     life: rand(0.5, 0.9), size: rand(0.05, 0.1), color: TIME[Math.floor(Math.random() * 3)], drag: 1 });
 }
 // gathering time: two clock faces of light circle him, their hands racing back
-function clocks(v, e, dt) {
+function clocks(v, e, dt, off) {
   if (Math.hypot(e.x - player.x, e.z - player.z) > 20) return;
   const t = e.t, r = 0.75;
   for (let i = Math.floor(90 * dt + Math.random()); i > 0; i--) {
     const k = Math.random(), ring = i % 2, a = (ring ? -1 : 1) * t * 5 + k * Math.PI * 2, y = e.y + (ring ? 0.35 : 0.95);
-    emit(glow, e.x + Math.cos(a) * r, y, e.z + Math.sin(a) * r, { life: rand(0.15, 0.3), size: rand(0.05, 0.08), color: TIME[i % 3], alpha: 0.9 });
+    emit(glow, e.x + off.x + Math.cos(a) * r, y + off.y, e.z + off.z + Math.sin(a) * r, { life: rand(0.15, 0.3), size: rand(0.05, 0.08), color: TIME[i % 3], alpha: 0.9 });
   }
   // the hands: from the middle out, turning back
   for (const [len, speed, y] of [[0.6, -3, 0.95], [0.4, -0.6, 0.95]]) {
     const a = t * speed + v.seed, u = Math.random();
-    emit(glow, e.x + Math.cos(a) * len * u, e.y + y, e.z + Math.sin(a) * len * u, { life: 0.12, size: 0.05, color: '#ffffff', alpha: 0.9 });
+    emit(glow, e.x + off.x + Math.cos(a) * len * u, e.y + off.y + y, e.z + off.z + Math.sin(a) * len * u, { life: 0.12, size: 0.05, color: '#ffffff', alpha: 0.9 });
   }
 }
 function dispose(e) {
