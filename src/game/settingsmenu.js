@@ -1,5 +1,5 @@
 // The settings menu, from the Esc menu (game/escmenu.js) and the main menu (game/menu.js): the
-// language, the frame rate cap and the anti-aliasing, the camera (overview or close view), the UI scale (game/uiscale.js:
+// language, the frame rate cap and the anti-aliasing, the lighting (full or simple, game/quality.js), the camera (overview or close view), the UI scale (game/uiscale.js:
 // taken when the slider is let go, as the panel itself grows or shrinks with it), the mouse look's speed
 // and inverting it up and down, the music on or off, the music's and the sounds' volume, and the keys: each control's primary and
 // secondary key (core/keybinds.js). Everything is kept as it changes (game/settings.js).
@@ -10,7 +10,7 @@
 // or Delete leaves the place empty. While the settings are open the game gets no keys.
 import { ACTIONS, ACTION, GROUPS, UNBINDABLE } from '../core/keybinds.js';
 import {
-  FRAME_RATES, frameRate, setFrameRate, antialias, setAntialias, cameraMode, setCameraMode, uiScale, setUiScale,
+  FRAME_RATES, frameRate, setFrameRate, antialias, setAntialias, cameraMode, setCameraMode, uiScale, setUiScale, graphics, setGraphics,
   lookSpeed, setLookSpeed, invertLook, setInvertLook,
   musicOn, setMusic, musicVolume, setMusicVolume, soundVolume, setSoundVolume,
   keysOf, bindKey, unbindKey, resetKeys, nameOf, onSettingsChange, languageNow, chooseLanguage,
@@ -62,6 +62,7 @@ function renderGraphics() {
   choice($('settings-fps'), FRAME_RATES.map(f => [f, f ? String(f) : tr('Unlimited')]), frameRate());
   // the levels this GPU can do; one asked for beyond them shows as the one used
   choice($('settings-msaa'), MSAA_LEVELS.map(n => [n, n ? `${n}x` : tc('toggle', 'Off')]), msaaLevel(antialias()));
+  choice($('settings-graphics'), [['full', tc('lighting', 'Full')], ['simple', tc('lighting', 'Simple')]], graphics());
   choice($('settings-camera'), [['overview', tr('Overview')], ['close', tc('camera', 'Close')]], cameraMode());
   const scale = Math.round(uiScale() * 100);
   $('settings-ui-scale').value = String(scale);
@@ -188,6 +189,10 @@ $('settings-fps').addEventListener('click', e => {
 $('settings-camera').addEventListener('click', e => {
   const b = e.target.closest('[data-value]');
   if (b) setCameraMode(b.dataset.value);
+});
+$('settings-graphics').addEventListener('click', e => {
+  const b = e.target.closest('[data-value]');
+  if (b) setGraphics(b.dataset.value);
 });
 $('settings-msaa').addEventListener('click', e => {
   const b = e.target.closest('[data-value]');

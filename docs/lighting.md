@@ -76,8 +76,13 @@ every shader, so no program changes its cache key.
 - **The moving lights:** a table (a float texture, two texels a light: where it is in the world,
   at most 64) every lit shader walks, without shadows (`render/lightpool.js updateLightPool` fills
   it each frame).
-- **The fixed lights:** the cube's table (at most 128), walked after the moving ones; each light's
-  visibility comes from its channel. Both through three.js's own BRDF (`RE_Direct`): the same look
+- **The fixed lights:** the cube's table (at most 128), walked after the moving ones: not all of
+  it, only the lights of the point's **cell** (`core/lightcells.js`: the cube's ground in cells of
+  a unit, each with the lights whose reach comes into it, the strongest there first, 16 at most).
+  A dark forest's cube has 40-50 lights, a point is reached by about a dozen: on a software
+  renderer (a stand-in for a weak GPU) a cube of the spider nests (46 lights) went from about 4 to
+  7 frames a second. Each light keeps its row in the table (a dark or hidden one reaches
+  nothing); each light's visibility comes from its channel. Both through three.js's own BRDF (`RE_Direct`): the same look
   as a point light. (Tables, not uniform arrays: some GPUs take no more than 224 vectors of
   uniforms in a shader.)
 - **On the lightmapped solids** (`BAKED_LM`, `render/bake.js bakedSurface`): the distance from the
@@ -116,6 +121,17 @@ From depth 13 down no theme has a room without lights of its own, about 15–30 
   plankton round the character, and in the darkest themes a few **wisps**, glowing orbs that
   wander about with moving lights of their own (no shadows, like shots).
 
+## The simple look (`game/quality.js`)
+
+The settings' **Lighting: Full / Simple** (`game/settings.js graphics`; at first Simple where the
+screen is touched): Simple is for weak devices. No cube is baked (nothing to wait for on
+entering, none of the bakes' memory, no shadow lookups in the shaders); every fixed light shines
+without a shadow, a point takes the six strongest of its cell; the hero's lamp casts no shadows;
+the cube's fixed parts go into three.js's shadow map of the sun (1024 instead of 2048) like
+everything else; half the motes drift in the air. On the software renderer it is about a fifth
+faster than Full, and enters a cube at once (Full baked its 46 lights for 10-20 s there).
+Changing it recompiles the lit shaders once.
+
 ## Not yet
 
 - Baking takes the GPU's time while a portal's travel goes on: two lights a frame are a few
@@ -124,7 +140,5 @@ From depth 13 down no theme has a room without lights of its own, about 15–30 
 - More than eleven overlapping lights: some shine without shadows (a dark forest cube: one of 40).
 - The moving lights (but the hero's lamp) cast no shadows: one inside what carries it (an enemy's
   glow) would be shut in by it.
-- The hero's lamp draws its six shadow maps of everything near every frame: on a phone a setting
-  could turn it down.
-- Every lit shader walks every light in range test: a cube with many more lights would want them
-  sorted into cells.
+- The cells are a grid on the ground: lights of a floor far above or below share a point's list
+  (what they cannot reach is cheap: a distance test).

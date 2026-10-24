@@ -75,6 +75,7 @@ import { beams } from './game/beams.js';
 import { tickBurning } from './render/burning.js';
 import { tickFlames } from './render/flames.js';
 import { tickMotes } from './render/motes.js';
+import './game/quality.js';   // (the look the settings ask for: full or simple)
 import { tickChill } from './render/chilled.js';
 import { tickShock, tickDaze } from './render/shocked.js';
 import { tickStatuses } from './render/statuses.js';

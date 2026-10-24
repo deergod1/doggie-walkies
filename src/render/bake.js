@@ -19,7 +19,8 @@
 // a prop set come late) takes the bake it had at once (CACHE).
 import * as THREE from 'three';
 import { renderer, sun } from './scene.js';
-import { BAKE, MAX_BAKED, SETS, NO_SUN, lightTable } from './lighthook.js';
+import { BAKE, MAX_BAKED, SETS, NO_SUN, lightTable, CELLS, CELL0, CELL_MAX } from './lighthook.js';
+import { lightCells as cellsOf } from '../core/lightcells.js';
 
 const SUN_MAP = 2048;           // texels a side of the sun's shadow map of the fixed parts
 const CUBE_MAP = 1024;          // texels a side of each light's cube of shadow maps (while baking)
@@ -36,8 +37,15 @@ const live = new Set();
 // geometry of a cube (render/cubegeo.js, the same for a cube built again) -> its bake when it went
 const kept = new Map();
 
+// a cube's cells and the lights each takes (lightCells): CELL_MAX / 4 texels a cell, four indices each
+const cellTable = () => {
+  const t = new THREE.DataTexture(new Float32Array(CELL_MAX * CELLS * CELLS).fill(-1), CELL_MAX / 4, CELLS * CELLS, THREE.RGBAFormat, THREE.FloatType);
+  t.minFilter = t.magFilter = THREE.NearestFilter;
+  t.needsUpdate = true;
+  return t;
+};
 const uniformsOf = () => ({
-  uBakeR: { value: 0 }, uBakeN: { value: 0 }, uBakeT: { value: lightTable(MAX_BAKED) }, uBakeO: { value: new THREE.Vector3() },
+  uBakeR: { value: 0 }, uBakeN: { value: 0 }, uBakeT: { value: lightTable(MAX_BAKED) }, uBakeC: { value: cellTable() }, uBakeO: { value: new THREE.Vector3() },
   ...Object.fromEntries(Array.from({ length: SETS }, (_, i) => [['uBakeLm' + i, { value: null }], ['uBakeVol' + i, { value: null }]]).flat()),
   uBakeV0: { value: new THREE.Vector3() }, uBakeVS: { value: new THREE.Vector3(1, 1, 1) },
   uBakeSun: { value: NO_SUN }, uBakeSunM: { value: new THREE.Matrix4() },
@@ -46,7 +54,7 @@ const uniformsOf = () => ({
 // A new cube's bake: its uniforms exist before it is baked (its lights dark until then).
 // group: the cube's (render/world.js); flip: Flip's turning box, not baked (its lights are moving ones)
 export function newBake(geo, group, flip = false) {
-  const bake = { geo, group, flip, lights: [], ready: false, failed: false, job: null, readyAt: 0, owned: null, u: uniformsOf() };
+  const bake = { geo, group, flip, lights: [], cells: -1, ready: false, failed: false, job: null, readyAt: 0, owned: null, u: uniformsOf() };
   live.add(bake);
   return bake;
 }
@@ -60,8 +68,26 @@ export function addBakedLight(bake, light, group, holder = group) {
   const at = light.getWorldPosition(new THREE.Vector3());
   group.worldToLocal(at);
   bake.lights.push({ light, at, holder, channel: -1, twin: null });
+  bake.cells = -1;   // (its cells are laid out again: lightCells)
   return true;
 }
+
+// which fixed lights each cell of the cube takes (core/lightcells.js), in its table by their place
+// in the cube's list (the row each has in uBakeT)
+function lightCells(bake) {
+  const t = bake.u.uBakeC.value;
+  t.image.data.set(cellsOf(bake.lights.map(s => ({ x: s.at.x, z: s.at.z, reach: s.light.distance || 6, intensity: s.light.intensity })),
+    { cells: CELLS, from: CELL0, max: CELL_MAX }));
+  t.needsUpdate = true;
+  bake.cells = bake.lights.length;
+}
+
+// Whether the fixed lights' shadows are baked (render/quality.js: not in the simple look, where
+// no cube is baked and every light shines without a shadow, the cube's fixed parts in three's
+// shadow map of the sun like everything else)
+let shadows = true;
+export const shadowsBaked = () => shadows;
+export function setShadowsBaked(on) { shadows = on; }
 // whether a fixed light's holder shows (all the way up to its cube)
 const shows = (s, group) => { for (let o = s.holder; o && o !== group; o = o.parent) if (!o.visible) return false; return s.light.visible; };
 
@@ -97,7 +123,7 @@ export function bakeMaterials(group, bake) {
 // the fixed parts stay out of three's shadow map of the sun: their shadows are baked
 function outOfSun(mesh) {
   const own = Object.getPrototypeOf(mesh).intersectsFrustum;
-  mesh.intersectsFrustum = function (f) { return f !== sun.shadow._frustum && own.call(this, f); };
+  mesh.intersectsFrustum = function (f) { return (f !== sun.shadow._frustum || !shadows) && own.call(this, f); };
 }
 // what casts the baked shadows: the solids and the props that cast shadows (render/fade.js turns
 // a faded cube's off: cast0 is what they do)
@@ -123,19 +149,21 @@ const smooth = t => t * t * (3 - 2 * t);
 function updateBake(bake, now) {
   const group = bake.group;
   group.getWorldPosition(bake.u.uBakeO.value);
-  // (not baked: its lights shine without shadows, a failed bake or none at all for Flip's box)
+  // (not baked: its lights shine without shadows, a failed bake, none at all for Flip's box, or
+  // none in the simple look)
   const on = bake.ready ? smooth(Math.min(1, (now - bake.readyAt) / FADE_IN)) : 0;
-  const lit = bake.failed ? 1 : on;
-  bake.u.uBakeR.value = bake.failed ? 0 : on;
-  const table = bake.u.uBakeT.value, L = table.image.data, fade = (group.userData.fade ?? 1) * lit;
-  let n = 0;
-  if (group.visible && fade > 0) for (const s of bake.lights) {
-    const l = s.light, o = n * 8, k = l.intensity * fade;
-    if (k <= 0 || !shows(s, group)) continue;
-    L[o] = s.at.x; L[o + 1] = s.at.y; L[o + 2] = s.at.z; L[o + 3] = l.distance || 1e3;
-    L[o + 4] = l.color.r * k; L[o + 5] = l.color.g * k; L[o + 6] = l.color.b * k; L[o + 7] = bake.ready ? s.channel : -1;
-    n++;
-  }
+  const plain = bake.failed || !shadows, lit = plain ? 1 : on;
+  bake.u.uBakeR.value = plain ? 0 : on;
+  if (bake.cells !== bake.lights.length) lightCells(bake);
+  // every light keeps its row (the cells point at it); one dark, hidden or the cube faded out
+  // reaches nothing
+  const table = bake.u.uBakeT.value, L = table.image.data, fade = group.visible ? (group.userData.fade ?? 1) * lit : 0;
+  bake.lights.forEach((s, i) => {
+    const l = s.light, o = i * 8, k = l.intensity * fade, on = k > 0 && shows(s, group);
+    L[o] = s.at.x; L[o + 1] = s.at.y; L[o + 2] = s.at.z; L[o + 3] = on ? l.distance || 1e3 : 0;
+    L[o + 4] = l.color.r * k; L[o + 5] = l.color.g * k; L[o + 6] = l.color.b * k; L[o + 7] = bake.ready && !plain ? s.channel : -1;
+  });
+  const n = fade > 0 ? bake.lights.length : 0;
   if (n || bake.u.uBakeN.value) table.needsUpdate = true;
   bake.u.uBakeN.value = n;
 }
@@ -157,7 +185,7 @@ export function disposeBake(bake) {
     kept.set(bake.geo, { sig: bake.sig, owned: bake.owned, channels: bake.lights.map(s => s.channel), u: bake.u });
     while (kept.size > CACHE) { const [g, k] = kept.entries().next().value; kept.delete(g); release(k.owned); }
   } else if (bake.owned) release(bake.owned);
-  bake.u.uBakeT.value.dispose();
+  bake.u.uBakeT.value.dispose(); bake.u.uBakeC.value.dispose();
   bake.owned = null;
   bake.ready = false;
 }
@@ -169,12 +197,13 @@ function release(owned) {
 // ---- baking ----
 
 // whether a cube's lights are baked (or never will be)
-export const baked = world => !world?.bake || world.bake.ready || world.bake.failed || world.bake.flip;
+export const baked = world => !shadows || !world?.bake || world.bake.ready || world.bake.failed || world.bake.flip;
 
 // Bake what is shown a little each frame: the cube played in first, then the others (a cube
 // travelled into is the one played in from the start). Before drawing (main.js), after anything
 // that builds the cube again. hidden: nothing shows (game/hud.js curtained): all at once.
 export function tickBakes(current, hidden = false) {
+  if (!shadows) return;
   const start = performance.now();
   const order = [current?.bake, ...live].filter((b, i, a) => b && a.indexOf(b) === i && !b.ready && !b.failed && !b.flip && b.group.parent);
   for (const bake of order) {
@@ -211,7 +240,7 @@ function takeKept(bake) {
   kept.delete(bake.geo);
   bake.owned = k.owned;
   bake.lights.forEach((s, i) => { s.channel = k.channels[i]; });
-  for (const key in bake.u) if (key !== 'uBakeR' && key !== 'uBakeN' && key !== 'uBakeT' && key !== 'uBakeO') bake.u[key].value = k.u[key].value;
+  for (const key in bake.u) if (!['uBakeR', 'uBakeN', 'uBakeT', 'uBakeC', 'uBakeO'].includes(key)) bake.u[key].value = k.u[key].value;
   bake.ready = true; bake.readyAt = -Infinity;
   return true;
 }

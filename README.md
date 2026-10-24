@@ -55,7 +55,7 @@ docs that explain how the game works, from the big ideas down to the real code:
     on the hero; Cancel leaves it unchanged. Playing together the others see it (sent once, in
     pieces). See `docs/skins.md`.
   - Settings (`src/game/settings.js`, the menu in `src/game/settingsmenu.js`, from the Esc menu
-    and the main menu): the language (English or German; at first the browser's), the frame rate cap (30, 60 or unlimited, `src/main.js`), the anti-aliasing (MSAA off to
+    and the main menu): the language (English or German; at first the browser's), the frame rate cap (30, 60 or unlimited, `src/main.js`), the lighting (full, or simple for weak devices: `src/game/quality.js`, `docs/lighting.md`), the anti-aliasing (MSAA off to
     8x, `src/render/msaa.js`), the camera (the overview or the close view behind the hero; Tab or C
     taps between them: `src/game/camera.js`, `docs/camera.md`), the close view's mouse look
     (speed, invert up / down: `src/game/mouselook.js`), music on / off,

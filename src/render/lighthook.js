@@ -24,6 +24,11 @@ import * as THREE from 'three';
 export const MAX_BAKED = 128;  // fixed lights a cube gives off at most
 export const MAX_MOVING = 64;  // moving lights shining at once at most (render/lightpool.js)
 export const SETS = 3;         // the lightmap's (and volume's) textures, four channels each: the sun's and eleven for lights
+// The fixed lights a point walks are its cell's (render/bake.js lightCells): the cube's ground in
+// cells of a unit (CELLS a side from CELL0, a little round the cube), each with the lights that
+// reach it, the strongest first, CELL_MAX at most (uBakeK: how many of them a point takes, fewer
+// in the simple look). A dark forest's cube has 40-50 lights, a point is reached by a dozen.
+export const CELLS = 20, CELL0 = -2, CELL_MAX = 16;
 
 // a table of lights: two texels a light (x, y, z, reach; r, g, b, channel)
 export function lightTable(n) {
@@ -47,6 +52,8 @@ export const BAKE = {
   uBakeR: { value: 0 },                        // how far its baked shadows are trusted (0 before they are baked, fading to 1)
   uBakeN: { value: 0 },                        // how many fixed lights
   uBakeT: { value: null },                     // their table (x, y, z in the cube)
+  uBakeC: { value: null },                     // the lights each cell of the cube takes (render/bake.js lightCells)
+  uBakeK: { value: CELL_MAX },                 // how many of them a point walks at most (render/quality.js)
   uBakeO: { value: new THREE.Vector3() },      // the cube's origin in the world
   ...Object.fromEntries(Array.from({ length: SETS }, (_, i) => [['uBakeLm' + i, { value: null }], ['uBakeVol' + i, { value: null }]]).flat()),
   uBakeV0: { value: new THREE.Vector3() }, uBakeVS: { value: new THREE.Vector3(1, 1, 1) },   // the volume's corner and size (in the cube)
@@ -68,8 +75,8 @@ const sets = f => Array.from({ length: SETS }, (_, i) => f(i)).join('');
 const HEAD = `
 #ifndef NO_BAKE
 uniform float uBakeOn, uBakeR, uBakeDbg;
-uniform int uBakeN, uMoveN;
-uniform highp sampler2D uBakeT, uMoveT;
+uniform int uBakeN, uMoveN, uBakeK;
+uniform highp sampler2D uBakeT, uMoveT, uBakeC;
 uniform vec3 uBakeO;
 #ifdef BAKED_LM
   varying vec2 vBakeLm;
@@ -97,8 +104,9 @@ const VIS = `
   #ifdef BAKED_LM
     {
       // signed distances to the shadows' edges, 0.5 on the edge: one pixel wide whatever the zoom
-      ${sets(i => `vec4 s${i} = texture(uBakeLm${i}, vBakeLm), v${i} = clamp((s${i} - 0.5) / max(fwidth(s${i}), vec4(1e-4)) + 0.5, 0.0, 1.0);\n`)}
-      if (uBakeOn > 0.5) {
+      // (none while there are no baked shadows: not yet baked, or the simple look)
+      if (uBakeOn > 0.5 && uBakeR > 0.0) {
+        ${sets(i => `vec4 s${i} = texture(uBakeLm${i}, vBakeLm), v${i} = clamp((s${i} - 0.5) / max(fwidth(s${i}), vec4(1e-4)) + 0.5, 0.0, 1.0);\n`)}
         ${sets(i => `bake${i} = mix(vec4(1.0), v${i}, uBakeR);\n`)}
         bakeSun = bake0.r;
       }
@@ -138,21 +146,34 @@ const LOOP = `
       directLight.visible = true;
       RE_Direct( directLight, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, reflectedLight );
     }
-    for (int i = 0; i < ${MAX_BAKED}; i++) {
-      if (i >= uBakeN) break;
-      vec4 la = texelFetch(uBakeT, ivec2(0, i), 0);
-      vec3 lw = la.xyz - bakeP;
-      float d2 = dot(lw, lw);
-      if (d2 >= la.w * la.w) continue;
-      vec4 lb = texelFetch(uBakeT, ivec2(1, i), 0);
-      float d = sqrt(d2);
-      int ch = int(floor(lb.w + 0.5));
-      float vis = ch < 0 ? 1.0 : ${Array.from({ length: SETS - 1 }, (_, i) => `ch < ${4 * (i + 1)} ? bake${i}[ch - ${4 * i}] : `).join('')}bake${SETS - 1}[ch - ${4 * (SETS - 1)}];
-      directLight.direction = normalize((viewMatrix * vec4(lw, 0.0)).xyz);
-      directLight.color = lb.rgb * (bakeFalloff(d, la.w) * vis);
-      directLight.visible = true;
-      bakeDbgL += directLight.color * saturate(dot(geometryNormal, directLight.direction));
-      RE_Direct( directLight, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, reflectedLight );
+    // the fixed lights of the point's cell (four indices a texel, -1: no more)
+    ivec2 bakeCell = clamp(ivec2(floor(bakeP.xz)) - ${CELL0}, ivec2(0), ivec2(${CELLS - 1}));
+    int bakeRow = bakeCell.y * ${CELLS} + bakeCell.x;
+    bool bakeDone = uBakeN == 0;
+    for (int j = 0; j < ${CELL_MAX / 4}; j++) {
+      if (bakeDone || j * 4 >= uBakeK) break;
+      vec4 ids = texelFetch(uBakeC, ivec2(j, bakeRow), 0);
+      ${['x', 'y', 'z', 'w'].map(c => `{
+        int i = int(ids.${c});
+        if (i < 0) bakeDone = true;
+        else {
+          vec4 la = texelFetch(uBakeT, ivec2(0, i), 0);
+          vec3 lw = la.xyz - bakeP;
+          float d2 = dot(lw, lw);
+          if (d2 < la.w * la.w) {
+            vec4 lb = texelFetch(uBakeT, ivec2(1, i), 0);
+            float d = sqrt(d2);
+            int ch = int(floor(lb.w + 0.5));
+            float vis = ch < 0 ? 1.0 : ${Array.from({ length: SETS - 1 }, (_, i) => `ch < ${4 * (i + 1)} ? bake${i}[ch - ${4 * i}] : `).join('')}bake${SETS - 1}[ch - ${4 * (SETS - 1)}];
+            directLight.direction = normalize((viewMatrix * vec4(lw, 0.0)).xyz);
+            directLight.color = lb.rgb * (bakeFalloff(d, la.w) * vis);
+            directLight.visible = true;
+            bakeDbgL += directLight.color * saturate(dot(geometryNormal, directLight.direction));
+            RE_Direct( directLight, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, reflectedLight );
+          }
+        }
+        if (bakeDone) break;
+      }`).join('\n      ')}
     }
   }
 #endif
