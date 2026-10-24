@@ -1,39 +1,84 @@
-// The look the settings ask for (game/settings.js graphics), for the whole game:
-//   full    every fixed light with its baked shadow (render/bake.js), up to CELL_MAX lights a
-//           point (render/lighthook.js), the hero's lamp casting shadows (render/character.js),
-//           the sun's shadow map at 2048
-//   simple  for weak devices (phones, old laptops): no cube is baked (no bake on entering, none of
-//           its memory, no shadow lookups in the shaders), every light shining without a shadow,
-//           the six strongest a point at most, a lamp without shadows, the cube in three's shadow
-//           map of the sun (1024) like everything else, half the motes in the air
-// Changing it recompiles the lit shaders once (the lamp's shadow comes or goes).
+// The lighting's quality level (the settings, game/settings.js graphics): one pinned, or Auto,
+// which follows the frame rate (render/resolution.js, core/resolution.js: down after the
+// anti-aliasing and before the resolution, up again after a calm spell). The level Auto
+// reached is kept for the next visit (KEY); it starts low where the screen is touched and at
+// medium elsewhere.
+//
+// Every level looks the same in kind: every fixed light with its baked shadow (render/bake.js),
+// the hero's lamp and the sun casting shadows. What changes is how much is drawn for that, and
+// nothing compiles a shader again (render/shadows.js); every change fades or eases in:
+//   lamp    its shadows' reach, which enemies cast into it, how often its six maps are drawn,
+//           how strong they are (the lowest level fades them out and stops drawing them)
+//   sun     the size of its map of what moves, which enemies cast into it, how often it is drawn
+//   cells   the fixed lights a point walks at most (render/lighthook.js uBakeK, eased: the last
+//           light fades)
+//   fluid   the fluids' patterns: texels a side, drawn how often a second (render/watercells.js)
+//   motes   what drifts in the air
 import { graphics, onSettingsChange } from './settings.js';
-import { setShadowsBaked } from '../render/bake.js';
-import { BAKE, CELL_MAX } from '../render/lighthook.js';
-import { setLampShadow } from '../render/character.js';
+import { BAKE } from '../render/lighthook.js';
+import { setShadowLook, tickShadows, snapShadows } from '../render/shadows.js';
 import { sun } from '../render/scene.js';
 import { setMoteRate } from '../render/motes.js';
+import { setCellDetail } from '../render/watercells.js';
+import { setAutoQuality, autoQuality } from '../render/resolution.js';
 
+export const LEVELS = ['lowest', 'low', 'medium', 'high'];
 // learn: light.html#looks #looks-code (see learn/README.md)
 export const LOOKS = {
-  full: { baked: true, cells: CELL_MAX, lamp: true, sunMap: 2048, motes: 1 },
-  simple: { baked: false, cells: 6, lamp: false, sunMap: 1024, motes: 0.5 },
+  high: { lamp: { range: Infinity, figures: Infinity, every: 1, strength: 1 }, sun: { map: 2048, figures: Infinity, every: 1 },
+    cells: 16, fluid: [512, 0], motes: 1 },
+  medium: { lamp: { range: 5, figures: 5, every: 1, strength: 1 }, sun: { map: 1024, figures: Infinity, every: 1 },
+    cells: 12, fluid: [512, 30], motes: 1 },
+  low: { lamp: { range: 5, figures: 0, every: 2, strength: 1 }, sun: { map: 1024, figures: 8, every: 2 },
+    cells: 8, fluid: [256, 30], motes: 0.5 },
+  lowest: { lamp: { range: 5, figures: 0, every: 2, strength: 0 }, sun: { map: 512, figures: 0, every: 2 },
+    cells: 6, fluid: [256, 20], motes: 0.5 },
 };
-let current = null;
+const KEY = 'crawler.quality';    // the level Auto reached last
+const CELL_EASE = 8;              // lights a second: how fast uBakeK follows
+
+const touch = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
+const saved = () => { try { return LEVELS.indexOf(localStorage.getItem(KEY)); } catch { return -1; } };
+let level = -1, cells = BAKE.uBakeK.value;
+
+// the level asked for now: the pinned one, or Auto's
+const asked = () => graphics() === 'auto' ? autoQuality() : LEVELS.indexOf(graphics());
+function settings() {
+  if (graphics() === 'auto') {
+    const start = level >= 0 ? level : saved() >= 0 ? saved() : touch ? 1 : 2;
+    setAutoQuality(LEVELS.length - 1, start);
+  } else setAutoQuality(0, LEVELS.indexOf(graphics()));
+}
+
 // learn: light.html#looks-code (see learn/README.md)
-function apply() {
-  const g = graphics();
-  if (g === current) return;
-  current = g;
-  const L = LOOKS[g];
-  setShadowsBaked(L.baked);
-  BAKE.uBakeK.value = L.cells;
-  setLampShadow(L.lamp);
-  if (sun.shadow.mapSize.x !== L.sunMap) {
-    sun.shadow.mapSize.set(L.sunMap, L.sunMap);
+function apply(n) {
+  const L = LOOKS[LEVELS[n]];
+  setShadowLook({ lamp: L.lamp, sun: { figures: L.sun.figures, every: L.sun.every, strength: 1 } });
+  if (sun.shadow.mapSize.x !== L.sun.map) {
+    sun.shadow.mapSize.set(L.sun.map, L.sun.map);
     sun.shadow.map?.dispose(); sun.shadow.map = null;   // (three makes it anew at the new size)
   }
+  setCellDetail(...L.fluid);
   setMoteRate(L.motes);
 }
-apply();
-onSettingsChange(apply);
+
+// every frame (main.js; dt: real seconds, the fades go on while the game is paused)
+export function tickQuality(dt) {
+  const n = asked();
+  if (n !== level) {
+    const first = level < 0;
+    level = n;
+    apply(n);
+    if (first) { cells = LOOKS[LEVELS[n]].cells; snapShadows(); }   // (no fading in at the start)
+    if (graphics() === 'auto') try { localStorage.setItem(KEY, LEVELS[n]); } catch { /* private mode */ }
+  }
+  const want = LOOKS[LEVELS[level]].cells;
+  cells += Math.sign(want - cells) * Math.min(Math.abs(want - cells), dt * CELL_EASE);
+  BAKE.uBakeK.value = cells;
+  tickShadows(dt);
+}
+export const qualityLevel = () => LEVELS[level] ?? null;
+
+settings();
+tickQuality(0);
+onSettingsChange(settings);

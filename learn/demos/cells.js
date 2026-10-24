@@ -1,7 +1,7 @@
 // Ask only the lamps that reach, with the game's own lightCells (src/core/lightcells.js): the
 // cube's ground in cells of one unit (a little round the cube, like src/render/lighthook.js CELLS,
 // CELL0), each cell with the list of the lamps whose light comes into it, the strongest there
-// first, at most `max` (16, or 6 in the simple look: src/game/quality.js). While drawing, a spot
+// first, at most `max` (16 on the high level, 6 on the lowest: src/game/quality.js). While drawing, a spot
 // asks only the lamps on its cell's list, not all of the cube's.
 import { lightCells } from '../../src/core/lightcells.js';
 import { mulberry32 } from '../../src/core/util.js';
@@ -13,7 +13,7 @@ export default function mount(el) {
   const { c, g, at } = canvas(el, W, H);
   const row = html(el, `<div class="row"><label>${tr('lamps', 'Lampen')} <input type="range" class="n" min="4" max="90" value="46"> <b class="nv"></b></label>
     <label>${tr('at most a cell', 'höchstens pro Zelle')} <input type="range" class="max" min="1" max="16" value="16"> <b class="mv"></b></label>
-    <button class="full">${tr('Full (16)', 'Voll (16)')}</button><button class="simple">${tr('Simple (6)', 'Einfach (6)')}</button></div>`);
+    <button class="full">${tr('High (16)', 'Hoch (16)')}</button><button class="simple">${tr('Lowest (6)', 'Minimal (6)')}</button></div>`);
   const out = html(el, '<div class="out"></div>');
   html(el, `<p class="small muted" style="margin:6px 0 0">${tr('Point at a cell of the ground.', 'Zeig auf eine Zelle des Bodens.')}</p>`);
   const $ = s => row.querySelector(s);

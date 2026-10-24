@@ -1,6 +1,6 @@
 // The settings (the settings menu, game/settingsmenu.js, changes them): the language (once
 // chosen; before that the browser's, src/i18n/i18n.js startLanguage), the frame rate cap
-// (main.js) and the anti-aliasing (render/msaa.js), the lighting (full or simple: game/quality.js), the UI scale (game/uiscale.js), the camera (the overview or the close view,
+// (main.js) and the anti-aliasing (render/msaa.js), the lighting's quality level (game/quality.js), the UI scale (game/uiscale.js), the camera (the overview or the close view,
 // game/camera.js; the camera key switches it too, game/camerakey.js), the mouse look's speed and
 // whether up and down are inverted (game/mouselook.js), the music on or off, the music's and the sounds' volume, and the keys
 // (core/keybinds.js). Kept in localStorage
@@ -26,14 +26,18 @@ const volume = v => (Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : 1);
 export const FRAME_RATES = [30, 60, 0];       // frames a second at most; 0: as many as the screen shows
 export const ANTIALIAS = [0, 2, 4, 8];        // MSAA samples; 0: off (the GPU may offer fewer, render/msaa.js)
 // 2x MSAA by default: on a high-DPI screen it looks like 4x for less of the GPU's work (and when
-// the GPU cannot keep up, render/resolution.js drops it further before the resolution)
-const DEFAULT_FPS = 60, DEFAULT_MSAA = 2;
+// the GPU cannot keep up, render/resolution.js drops it further before the resolution). Where
+// the screen is touched (phones, tablets) 30 frames a second at first: they stay cooler and last
+// longer, and the GPU has twice the time for a frame.
+const touch = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
+const DEFAULT_FPS = touch ? 30 : 60, DEFAULT_MSAA = 2;
 export const CAMERAS = ['overview', 'close'];
-// the look (render/quality.js): 'full' (every light with its baked shadow, the hero's lamp casting
-// shadows) or 'simple' (for weak devices: no baked shadows, fewer lights a point, a plain lamp);
-// at first simple where the screen is touched (phones, tablets)
-export const GRAPHICS = ['full', 'simple'];
-const DEFAULT_GRAPHICS = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches ? 'simple' : 'full';
+// the lighting's quality level (game/quality.js): 'auto' (it follows the frame rate,
+// render/resolution.js) or one of them pinned, the best first
+export const GRAPHICS = ['auto', 'high', 'medium', 'low', 'lowest'];
+const DEFAULT_GRAPHICS = 'auto';
+// (what the settings said before the levels: Full is Auto now, Simple the low level)
+const OLD_GRAPHICS = { full: 'auto', simple: 'low' };
 // the UI scale: the HUD and the menus 90% to 200% of their size (100%: as they were made)
 export const UI_SCALE_MIN = 0.9, UI_SCALE_MAX = 2;
 export const clampUiScale = s => (Number.isFinite(s) ? Math.round(Math.min(UI_SCALE_MAX, Math.max(UI_SCALE_MIN, s)) * 100) / 100 : 1);
@@ -42,7 +46,7 @@ const stored = read();
 const settings = {
   language: isLanguage(stored.language) ? stored.language : null,   // null: the browser's
   fps: oneOf(FRAME_RATES, stored.fps, DEFAULT_FPS), msaa: oneOf(ANTIALIAS, stored.msaa, DEFAULT_MSAA),
-  graphics: oneOf(GRAPHICS, stored.graphics, DEFAULT_GRAPHICS),
+  graphics: oneOf(GRAPHICS, OLD_GRAPHICS[stored.graphics] ?? stored.graphics, DEFAULT_GRAPHICS),
   camera: oneOf(CAMERAS, stored.camera, CAMERAS[0]), uiScale: clampUiScale(stored.uiScale),
   lookSpeed: clampLookSpeed(stored.lookSpeed), invertLook: stored.invertLook === true,
   music: stored.music === true,

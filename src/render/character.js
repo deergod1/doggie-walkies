@@ -31,14 +31,14 @@ export const character = { ready: false };
 // shines), so walls, trees and the hero itself stand dark against it; it stays out of ceilings
 // and walls all the same, where it would light their far side.
 const light = new THREE.PointLight(0xffd9a0, 1.2, 3.5, 2);
-light.castShadow = true;   // (but in the simple look, game/quality.js: one coming or going recompiles every lit shader)
+light.castShadow = true;   // (always: one coming or going recompiles every lit shader; how much it casts: render/shadows.js)
 light.shadow.mapSize.set(512, 512);
 light.shadow.camera.near = 0.15;
 light.shadow.bias = -0.002;
 light.shadow.radius = 1.5;
 scene.add(light);
-// whether the lamp casts shadows (game/quality.js: not in the simple look)
-export function setLampShadow(on) { light.castShadow = on; }
+// (its shadow maps as the quality level asks: render/shadows.js)
+export const lamp = light;
 const LIFT = 2.3;          // over the feet (the hero is ~1.1 tall; closer, the head is blown out)
 const LEAD = 0.55;         // towards the camera, level
 const UNDER_CEILING = 0.2; // this far under a ceiling at most

@@ -17,7 +17,7 @@
 import * as THREE from 'three';
 import { renderer } from './scene.js';
 
-const SIZE = 512;   // texels
+const SIZE = 512;   // texels (the quality level may ask for fewer: setCellDetail)
 
 const COMMON = `
     precision highp float;
@@ -143,11 +143,12 @@ bakeScene.add(quad);
 
 // per look: { tex (uniform), tile, perUnit, used (the frame it was last shown in) }
 export const CELLS = {};
+const cellTarget = size => new THREE.WebGLRenderTarget(size, size, {
+  depthBuffer: false, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping,
+  magFilter: THREE.LinearFilter, minFilter: THREE.LinearMipmapLinearFilter, generateMipmaps: true,
+});
 for (const [name, s] of Object.entries(STYLES)) {
-  const target = new THREE.WebGLRenderTarget(SIZE, SIZE, {
-    depthBuffer: false, wrapS: THREE.RepeatWrapping, wrapT: THREE.RepeatWrapping,
-    magFilter: THREE.LinearFilter, minFilter: THREE.LinearMipmapLinearFilter, generateMipmaps: true,
-  });
+  const target = cellTarget(SIZE);
   const material = new THREE.ShaderMaterial({
     uniforms: { uTime: { value: 0 } }, depthTest: false, depthWrite: false,
     vertexShader: 'varying vec2 vUv;\nvoid main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
@@ -166,14 +167,33 @@ export function useCells(mat, style) {
   return mat;
 }
 
+// How detailed the patterns are (game/quality.js): texels a side and how often a second they
+// are drawn (two 512² patterns every frame were a third of a frame on a software renderer).
+let size = SIZE, every = 0, drawnAt = -Infinity;
+export function setCellDetail(texels, hz) {
+  every = hz > 0 ? 1 / hz : 0;
+  if (texels === size) return;
+  size = texels;
+  for (const c of Object.values(CELLS)) {
+    const old = c.target;
+    c.target = cellTarget(size);
+    c.tex.value = c.target.texture;   // (every material holds the uniform, not the texture)
+    old.dispose();
+    c.used = frame;   // (drawn anew at once)
+  }
+  drawnAt = -Infinity;
+}
+
 // draw the patterns at `time` (once a frame, before the scene): those shown lately, and all of
-// them the first time
+// them the first time; no more often than the quality level asks
 let last = null;
 export function bakeCells(time) {
   if (time === last) return;
   const first = last === null;
   last = time;
   frame++;
+  if (!first && time - drawnAt < every && time >= drawnAt) return;
+  drawnAt = time;
   const prev = renderer.getRenderTarget();
   for (const c of Object.values(CELLS)) {
     if (!first && frame - c.used > 2) continue;

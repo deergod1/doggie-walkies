@@ -10,7 +10,7 @@ anti-aliasing (MSAA) and every material's own look stay what they were.
 |---|---|---|
 | the sun (and the moon of the night themes) | `render/scene.js` `sun` | of the fixed parts: baked; of what moves: three.js's shadow map |
 | the fixed lights | what a cube's glowing things give off, every one of them (`render/props.js`): lanterns, fires, lava, portals, crystals, a trial's braziers (`render/lightpool.js adoptLights` takes those not on a villager; at most 128 a cube) | baked when the cube is shown (`render/bake.js`) |
-| the moving lights | the hero's lamp (`render/character.js`, a three.js light); shots, enemies, loot, villagers' lamps, a partner (`trackLight`, `render/lightpool.js`) | the hero's lamp: a cube of shadow maps every frame; the others: none |
+| the moving lights | the hero's lamp (`render/character.js`, a three.js light); shots, enemies, loot, villagers' lamps, a partner (`trackLight`, `render/lightpool.js`) | the hero's lamp: a cube of shadow maps, as the quality level asks (`render/shadows.js`); the others: none |
 
 **Where a prop's light is:** where it glows (`core/glowspots.js`): its glowing triangles in
 pieces (a big piece in parts 0.8 across), the pieces nearer than 0.5 one spot, at most six a prop
@@ -122,16 +122,46 @@ From depth 13 down no theme has a room without lights of its own, about 15–30 
   plankton round the character, and in the darkest themes a few **wisps**, glowing orbs that
   wander about with moving lights of their own (no shadows, like shots).
 
-## The simple look (`game/quality.js`)
+## Quality levels (`game/quality.js`)
 
-The settings' **Lighting: Full / Simple** (`game/settings.js graphics`; at first Simple where the
-screen is touched): Simple is for weak devices. No cube is baked (nothing to wait for on
-entering, none of the bakes' memory, no shadow lookups in the shaders); every fixed light shines
-without a shadow, a point takes the six strongest of its cell; the hero's lamp casts no shadows;
-the cube's fixed parts go into three.js's shadow map of the sun (1024 instead of 2048) like
-everything else; half the motes drift in the air. On the software renderer it is about a fifth
-faster than Full, and enters a cube at once (Full baked its 46 lights for 10-20 s there).
-Changing it recompiles the lit shaders once.
+The settings' **Lighting: Auto / High / Medium / Low / Lowest** (`game/settings.js graphics`;
+Auto at first; a stored Full is Auto, a stored Simple is Low). Every level looks the same in kind:
+every fixed light with its baked shadow, the hero's lamp and the sun casting shadows. What
+changes is how much is drawn for that:
+
+| | High | Medium | Low | Lowest |
+|---|---|---|---|---|
+| lamp's shadows reach | its light's reach | 5 | 5, every 2nd frame | faded out, not drawn |
+| enemies in the lamp's shadows | all | within 5 | none | none |
+| sun's map of what moves | 2048 | 1024 | 1024, every 2nd frame, enemies within 8 | 512, the hero only |
+| fixed lights a point takes | 16 | 12 | 8 | 6 |
+| fluids' patterns | 512², every frame | 512², 30 Hz | 256², 30 Hz | 256², 20 Hz |
+| motes | all | all | half | half |
+
+- **Why these:** drawing the realtime shadow maps is most of what shadows cost, and every enemy is
+  drawn again in each of the lamp's six maps and the sun's. On a software renderer (1280×720, a
+  nests cube of 17 lights): the lamp's maps ~9 ms of a 79 ms frame, its lookups ~3, the sun's ~7;
+  in a fight with 24 enemies the lamp's 16 ms and the sun's 23 of 136, the enemies' share ~20. A
+  smaller lamp map does not help (it is geometry, not pixels); the lamp's reach (up to 10 in the
+  deep) does: its six maps cover twice that.
+- **Never a shader compiled again** (`render/shadows.js`): a light that stops casting shadows
+  recompiles every lit shader (3.5 s on a fast machine the first time). The lamp casts shadows on
+  every level; how far (its shadow camera's far plane, not its light's reach: past it its light
+  goes through walls, faintly), which enemies cast into which map (each map drawn in a call of its
+  own, the others' meshes not casting meanwhile), how often (every n-th frame) and how strong
+  (`shadow.intensity`) are what change.
+- **Every change fades:** the shadows' strength over half a second, the reaches eased (8 units a
+  second: enemies' shadows drop out and come back one by one at the edge), the fixed lights a
+  point takes eased (`uBakeK`, a float: the last light fades); the fluids' patterns and the sun's
+  map size simply switch.
+- **Auto** (`core/resolution.js`, with the resolution and the anti-aliasing): too slow, a step
+  down: the MSAA samples first, then the level, then the resolution; CPU-bound slow frames take
+  only the level down. A level's step is judged a second later than the others (its fades). Up
+  after a calm spell: the resolution, then the level, then the samples. The level reached is kept
+  for the next visit (`crawler.quality`); a first visit starts at Low where the screen is touched,
+  at Medium elsewhere.
+
+Where the screen is touched the frame rate cap is 30 at first (a setting like any other).
 
 ## Not yet
 

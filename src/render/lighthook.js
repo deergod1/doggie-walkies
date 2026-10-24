@@ -30,7 +30,7 @@ export const SETS = 3;         // the lightmap's (and volume's) textures, four c
 // The fixed lights a point walks are its cell's (render/bake.js lightCells): the cube's ground in
 // cells of a unit (CELLS a side from CELL0, a little round the cube), each with the lights that
 // reach it, the strongest first, CELL_MAX at most (uBakeK: how many of them a point takes, fewer
-// in the simple look). A dark forest's cube has 40-50 lights, a point is reached by a dozen.
+// on the lower quality levels, eased between them). A dark forest's cube has 40-50 lights, a point is reached by a dozen.
 // learn: light.html#cells (see learn/README.md)
 export const CELLS = 20, CELL0 = -2, CELL_MAX = 16;
 
@@ -57,7 +57,7 @@ export const BAKE = {
   uBakeN: { value: 0 },                        // how many fixed lights
   uBakeT: { value: null },                     // their table (x, y, z in the cube)
   uBakeC: { value: null },                     // the lights each cell of the cube takes (render/bake.js lightCells)
-  uBakeK: { value: CELL_MAX },                 // how many of them a point walks at most (render/quality.js)
+  uBakeK: { value: CELL_MAX },                 // how many of them a point walks at most, eased (game/quality.js)
   uBakeO: { value: new THREE.Vector3() },      // the cube's origin in the world
   ...Object.fromEntries(Array.from({ length: SETS }, (_, i) => [['uBakeLm' + i, { value: null }], ['uBakeVol' + i, { value: null }]]).flat()),
   uBakeV0: { value: new THREE.Vector3() }, uBakeVS: { value: new THREE.Vector3(1, 1, 1) },   // the volume's corner and size (in the cube)
@@ -78,8 +78,8 @@ export function bakeScene(scene) {
 const sets = f => Array.from({ length: SETS }, (_, i) => f(i)).join('');
 const HEAD = `
 #ifndef NO_BAKE
-uniform float uBakeOn, uBakeR, uBakeDbg;
-uniform int uBakeN, uMoveN, uBakeK;
+uniform float uBakeOn, uBakeR, uBakeDbg, uBakeK;
+uniform int uBakeN, uMoveN;
 uniform highp sampler2D uBakeT, uMoveT, uBakeC;
 uniform vec3 uBakeO;
 #ifdef BAKED_LM
@@ -109,7 +109,7 @@ const VIS = `
   #ifdef BAKED_LM
     {
       // signed distances to the shadows' edges, 0.5 on the edge: one pixel wide whatever the zoom
-      // (none while there are no baked shadows: not yet baked, or the simple look)
+      // (none while there are no baked shadows: not yet baked, or the bake failed)
       if (uBakeOn > 0.5 && uBakeR > 0.0) {
         ${sets(i => `vec4 s${i} = texture(uBakeLm${i}, vBakeLm), v${i} = clamp((s${i} - 0.5) / max(fwidth(s${i}), vec4(1e-4)) + 0.5, 0.0, 1.0);\n`)}
         ${sets(i => `bake${i} = mix(vec4(1.0), v${i}, uBakeR);\n`)}
@@ -156,11 +156,13 @@ const LOOP = `
     int bakeRow = bakeCell.y * ${CELLS} + bakeCell.x;
     bool bakeDone = uBakeN == 0;
     for (int j = 0; j < ${CELL_MAX / 4}; j++) {
-      if (bakeDone || j * 4 >= uBakeK) break;
+      if (bakeDone || float(j * 4) >= uBakeK) break;
       vec4 ids = texelFetch(uBakeC, ivec2(j, bakeRow), 0);
-      ${['x', 'y', 'z', 'w'].map(c => `{
+      ${['x', 'y', 'z', 'w'].map((c, k) => `{
         int i = int(ids.${c});
-        if (i < 0) bakeDone = true;
+        // (the last light a point takes fades in and out as uBakeK eases between levels)
+        float kw = clamp(uBakeK - float(j * 4 + ${k}), 0.0, 1.0);
+        if (i < 0 || kw <= 0.0) bakeDone = true;
         else {
           vec4 la = texelFetch(uBakeT, ivec2(0, i), 0);
           vec3 lw = la.xyz - bakeP;
@@ -171,7 +173,7 @@ const LOOP = `
             int ch = int(floor(lb.w + 0.5));
             float vis = ch < 0 ? 1.0 : ${Array.from({ length: SETS - 1 }, (_, i) => `ch < ${4 * (i + 1)} ? bake${i}[ch - ${4 * i}] : `).join('')}bake${SETS - 1}[ch - ${4 * (SETS - 1)}];
             directLight.direction = normalize((viewMatrix * vec4(lw, 0.0)).xyz);
-            directLight.color = lb.rgb * (bakeFalloff(d, la.w) * vis);
+            directLight.color = lb.rgb * (bakeFalloff(d, la.w) * vis * kw);
             directLight.visible = true;
             bakeDbgL += directLight.color * saturate(dot(geometryNormal, directLight.direction));
             RE_Direct( directLight, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, reflectedLight );

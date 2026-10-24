@@ -143,3 +143,57 @@ test('fewer levels to drop (a lower setting) shrink what is dropped', () => {
   c.tick(16.7, 4, 0, 0);    // MSAA turned off in the settings
   assert.equal(c.drop, 0);
 });
+
+// the same with quality levels (the lighting on Auto): [ratio, drop, level] after each change
+function leveled(c, ms, interval, spent, steps = 0) {
+  const seen = [];
+  for (let t = 0; t < ms; t += interval) {
+    const before = `${c.ratio},${c.drop},${c.level}`;
+    c.tick(interval, spent, 0, steps);
+    if (`${c.ratio},${c.drop},${c.level}` !== before) seen.push([c.ratio, c.drop, c.level]);
+  }
+  return seen;
+}
+
+test('on Auto the quality level goes down after the anti-aliasing, before the resolution', () => {
+  const c = resolutionController(2, undefined, { levels: 3, level: 2 });
+  assert.deepEqual(leveled(c, 1000, 30, 5, 1), [[2, 1, 2]]);
+  assert.deepEqual(leveled(c, 1000, 26, 5, 1), [[2, 1, 1]]);     // it helped: the level next
+  assert.deepEqual(leveled(c, 2100, 23, 5, 1), [[2, 1, 0]]);     // judged a second later: helped, next
+  assert.deepEqual(leveled(c, 2100, 20.5, 5, 1), [[1.7, 1, 0]]); // none left: the resolution
+});
+
+test('CPU-bound slow frames take only the quality level down', () => {
+  const c = resolutionController(2, undefined, { levels: 3, level: 3 });
+  assert.deepEqual(leveled(c, 1000, 30, 25, 2), [[2, 0, 2]]);
+  assert.deepEqual(leveled(c, 2100, 26, 22, 2), [[2, 0, 1]]);
+  assert.equal(c.ratio, 2);
+  assert.equal(c.drop, 0);
+});
+
+test('a quality step that does not help is taken back after its settling second', () => {
+  const c = resolutionController(2, undefined, { levels: 3, level: 2 });
+  assert.deepEqual(leveled(c, 1000, 30, 25), [[2, 0, 1]]);
+  assert.deepEqual(leveled(c, 1000, 30, 25), []);                // settling
+  assert.deepEqual(leveled(c, 1000, 30, 25), [[2, 0, 2]]);       // no faster: back
+  assert.deepEqual(leveled(c, 20000, 30, 25), []);               // and it rests
+});
+
+test('smooth frames raise the resolution first, then the quality level, then the samples', () => {
+  const c = resolutionController(2, undefined, { levels: 3, level: 1 });
+  leveled(c, 1000, 30, 5, 1);                                    // 2,1,1
+  leveled(c, 2000, 26, 5, 1);                                    // 2,1,0
+  leveled(c, 1000, 23, 5, 1);                                    // 1.7,1,0
+  leveled(c, 1000, 16.7, 4, 1);                                  // proves itself
+  const up = leveled(c, 60000, 16.7, 4, 1).map(([r, d, l]) => `${r.toFixed(2)},${d},${l}`);
+  assert.deepEqual(up, ['1.87,1,0', '2.00,1,0', '2.00,1,1', '2.00,1,2', '2.00,1,3', '2.00,0,3']);
+});
+
+test('without Auto the level stays where it was set', () => {
+  const c = resolutionController(2, undefined, { levels: 3, level: 3 });
+  c.setQuality(0);
+  assert.deepEqual(leveled(c, 3000, 30, 25), []);
+  assert.equal(c.level, 0);
+  c.setQuality(3, 1);
+  assert.equal(c.level, 1);
+});

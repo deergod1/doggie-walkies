@@ -82,12 +82,6 @@ function lightCells(bake) {
   bake.cells = bake.lights.length;
 }
 
-// Whether the fixed lights' shadows are baked (render/quality.js: not in the simple look, where
-// no cube is baked and every light shines without a shadow, the cube's fixed parts in three's
-// shadow map of the sun like everything else)
-let shadows = true;
-export const shadowsBaked = () => shadows;
-export function setShadowsBaked(on) { shadows = on; }
 // whether a fixed light's holder shows (all the way up to its cube)
 const shows = (s, group) => { for (let o = s.holder; o && o !== group; o = o.parent) if (!o.visible) return false; return s.light.visible; };
 
@@ -123,7 +117,7 @@ export function bakeMaterials(group, bake) {
 // the fixed parts stay out of three's shadow map of the sun: their shadows are baked
 function outOfSun(mesh) {
   const own = Object.getPrototypeOf(mesh).intersectsFrustum;
-  mesh.intersectsFrustum = function (f) { return (f !== sun.shadow._frustum || !shadows) && own.call(this, f); };
+  mesh.intersectsFrustum = function (f) { return f !== sun.shadow._frustum && own.call(this, f); };
 }
 // what casts the baked shadows: the solids and the props that cast shadows (render/fade.js turns
 // a faded cube's off: cast0 is what they do)
@@ -149,10 +143,9 @@ const smooth = t => t * t * (3 - 2 * t);
 function updateBake(bake, now) {
   const group = bake.group;
   group.getWorldPosition(bake.u.uBakeO.value);
-  // (not baked: its lights shine without shadows, a failed bake, none at all for Flip's box, or
-  // none in the simple look)
+  // (not baked: its lights shine without shadows, a failed bake, none at all for Flip's box)
   const on = bake.ready ? smooth(Math.min(1, (now - bake.readyAt) / FADE_IN)) : 0;
-  const plain = bake.failed || !shadows, lit = plain ? 1 : on;
+  const plain = bake.failed, lit = plain ? 1 : on;
   bake.u.uBakeR.value = plain ? 0 : on;
   if (bake.cells !== bake.lights.length) lightCells(bake);
   // every light keeps its row (the cells point at it); one dark, hidden or the cube faded out
@@ -197,14 +190,13 @@ function release(owned) {
 // ---- baking ----
 
 // whether a cube's lights are baked (or never will be)
-export const baked = world => !shadows || !world?.bake || world.bake.ready || world.bake.failed || world.bake.flip;
+export const baked = world => !world?.bake || world.bake.ready || world.bake.failed || world.bake.flip;
 
 // Bake what is shown a little each frame: the cube played in first, then the others (a cube
 // travelled into is the one played in from the start). Before drawing (main.js), after anything
 // that builds the cube again. hidden: nothing shows (game/hud.js curtained): all at once.
 // learn: light.html#bake (see learn/README.md)
 export function tickBakes(current, hidden = false) {
-  if (!shadows) return;
   const start = performance.now();
   const order = [current?.bake, ...live].filter((b, i, a) => b && a.indexOf(b) === i && !b.ready && !b.failed && !b.flip && b.group.parent);
   for (const bake of order) {

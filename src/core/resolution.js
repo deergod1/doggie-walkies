@@ -15,6 +15,12 @@
 //     back right away, so the resolution does not see-saw.
 //   - Under a frame rate cap (the settings, game/settings.js) frames are judged against the cap:
 //     30 frames a second that were asked for are not slow.
+//   - With the lighting on Auto (game/quality.js) the quality level is a step too (`levels` above
+//     the lowest, `level` the one now). Down: the samples first, then the level, then the
+//     resolution; slow frames that are CPU-bound take only the level down (fewer shadow maps
+//     drawn is less work for the CPU too). Up: the resolution first, then the level, then the
+//     samples. A level's step is judged a second later than the others (QUALITY_SETTLE): what
+//     it changes fades in over half a second.
 
 export const SLOW = 1000 / 50;       // ms between frames: slower than 50 fps is too slow
 const SMOOTH = 1000 / 57;            // ms between frames: faster than ~57 fps (vsync at 60 or more)
@@ -26,8 +32,10 @@ const DOWN = 0.85, UP = 1.1;         // a step's factor
 const PROOF = 0.9;                   // a step down must make frames at least this much shorter
 const CALM = 4000, CALM_MAX = 64000; // ms of smooth frames before a step up
 const REST = 30000;                  // ms without stepping down after a step down that did not help
+const QUALITY_SETTLE = 1;           // windows a quality step waits before it is judged
 
-export function resolutionController(max, min = Math.min(max, Math.max(0.6, max / 2))) {
+export function resolutionController(max, min = Math.min(max, Math.max(0.6, max / 2)), quality = {}) {
+  let levels = quality.levels ?? 0, level = quality.level ?? levels;
   let ratio = max, drop = 0, sum = 0, work = 0, n = 0, span = 0;
   let smooth = 0, calm = CALM, rest = 0, trial = null, raised = -Infinity, clock = 0;
   const clamp = r => Math.min(max, Math.max(min, r));
@@ -44,27 +52,31 @@ export function resolutionController(max, min = Math.min(max, Math.max(0.6, max 
     const slow = Math.max(SLOW, target * CAP_SLOW), fast = Math.max(SMOOTH, target * CAP_SMOOTH);
     sum = work = n = span = 0;
     if (trial) {   // the second after a step down: did it help?
+      if (trial.wait > 0) { trial.wait--; return null; }
       const t = trial; trial = null;
-      if (avg > t.before * PROOF) { rest = REST; drop = t.drop; return set(t.from); }
+      if (avg > t.before * PROOF) { rest = REST; drop = t.drop; level = t.level; return set(t.from); }
     }
     if (avg > slow) {
       smooth = 0;
       if (clock - raised < 3000) calm = Math.min(CALM_MAX, calm * 2);   // the step up was too much
-      if (busy < CPU_BOUND && rest === 0 && (drop < steps || ratio > min)) {
-        trial = { from: ratio, drop, before: avg };
-        if (drop < steps) { drop++; return null; }
-        return set(clamp(ratio * DOWN));
-      }
+      if (rest > 0) return null;
+      const gpu = busy < CPU_BOUND;
+      if (gpu && drop < steps) { trial = { from: ratio, drop, level, before: avg }; drop++; return null; }
+      if (level > 0) { trial = { from: ratio, drop, level, before: avg, wait: QUALITY_SETTLE }; level--; return null; }
+      if (gpu && ratio > min) { trial = { from: ratio, drop, level, before: avg }; return set(clamp(ratio * DOWN)); }
       return null;
     }
     smooth = avg < fast ? smooth + WINDOW : 0;
-    if (smooth >= calm && (ratio < max || drop > 0)) {
+    if (smooth >= calm && (ratio < max || level < levels || drop > 0)) {
       smooth = 0; raised = clock;
       if (ratio < max) return set(clamp(ratio * UP));
-      drop--;
+      if (level < levels) level++;
+      else drop--;
     }
     return null;
   }
   function set(r) { if (r === ratio) return null; ratio = r; return r; }
-  return { tick, get ratio() { return ratio; }, get drop() { return drop; }, min, max };
+  // the quality levels to step through (0: none, the lighting is not on Auto), the level now
+  function setQuality(n, now = n) { levels = n; level = Math.max(0, Math.min(n, now)); if (trial) trial.level = level; }
+  return { tick, setQuality, get ratio() { return ratio; }, get drop() { return drop; }, get level() { return level; }, get levels() { return levels; }, min, max };
 }

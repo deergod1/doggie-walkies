@@ -14,7 +14,7 @@ import { trackLight, untrackLight } from './lightpool.js';
 
 const WISP = { light: 1.8, reach: 3.5, life: [9, 15], fade: 1.5, speed: 0.45, near: [2, 6.5], high: [0.9, 2.3] };
 let due = 0, rate = 1;
-// a factor on how many motes come (game/quality.js: half in the simple look)
+// a factor on how many motes come (game/quality.js: half on the lower quality levels)
 export function setMoteRate(k) { rate = k; }
 const wisps = [];
 const holder = new THREE.Object3D();   // (what the wisps' lights hang on: the world itself)

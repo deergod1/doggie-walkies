@@ -1,5 +1,6 @@
 // The render resolution follows the frame rate (core/resolution.js): main.js hands over when each
-// frame began, after it rendered. The anti-aliasing goes down first (render/msaa.js).
+// frame began, after it rendered. The anti-aliasing goes down first (render/msaa.js), and with
+// the lighting on Auto the quality level (game/quality.js) before the resolution.
 // ?res=<pixel ratio> pins both (1: CSS pixels, MSAA as set), e.g. to compare.
 import { requestFit } from './scene.js';
 import { msaaSteps, setMsaaDrop } from './msaa.js';
@@ -24,3 +25,11 @@ export function tickResolution(start, fps = 0) {
   if (ratio) apply(ratio);
   setMsaaDrop(control.drop);
 }
+
+// the quality levels Auto steps through (levels above the lowest; 0: not on Auto) and the one
+// to start from; the level it chose (game/quality.js follows it)
+let fixed = 0;
+export function setAutoQuality(levels, level) { fixed = level; control?.setQuality(levels, level); }
+export const autoQuality = () => control ? control.level : fixed;
+// the pixel ratio and the MSAA levels dropped now (the perf overlay, game/perf.js)
+export const resolutionState = () => ({ ratio: control?.ratio ?? pinned, drop: control?.drop ?? 0 });

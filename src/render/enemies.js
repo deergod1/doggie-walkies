@@ -493,6 +493,7 @@ function makeView(e, prefab) {
   const group = new THREE.Group(), { model, mesh, material, parts } = dressEnemy(prefab, e.profile), size = e.profile.size ?? 1;
   model.scale.multiplyScalar(size);
   group.add(model); scene.add(group);
+  group.userData.figure = true;   // (casts into the realtime shadow maps as the quality level asks: render/shadows.js)
   material.transparent = true;   // fades out once dead
   const gloom = e.profile.gloom;
   const named = roles => new Set((roles ?? []).flatMap(role => e.profile.parts?.[role] ?? [role]));

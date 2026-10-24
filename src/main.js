@@ -75,7 +75,7 @@ import { beams } from './game/beams.js';
 import { tickBurning } from './render/burning.js';
 import { tickFlames } from './render/flames.js';
 import { tickMotes } from './render/motes.js';
-import './game/quality.js';   // (the look the settings ask for: full or simple)
+import { tickQuality } from './game/quality.js';   // the lighting's quality level (the settings: Auto or pinned)
 import { tickChill } from './render/chilled.js';
 import { tickShock, tickDaze } from './render/shocked.js';
 import { tickStatuses } from './render/statuses.js';
@@ -205,6 +205,7 @@ function frame(now = performance.now()) {
   updateDefense(dt, questEvent);   // a raid on an outpost's cart (game/defense.js), in game time
   updateSaves();   // the hero and world being played, as they change (game/save.js)
   tickSky(performance.now() / 1000);   // real time: the stars shimmer on while paused
+  tickQuality(elapsed);   // what the lighting's level draws, its changes fading in (game/quality.js)
   // the cube's fixed lights: baked a little each frame, and where they shine now (render/bake.js;
   // last before drawing: anything above may have built the cube again)
   tickBakes(state.world, curtained()); updateBakes(); setCurrentBake(state.world?.bake);
@@ -244,6 +245,7 @@ function menuFrame(dt, start) {
   followHero();   // (off: the hero is not in the world here)
   updateLightPool(menuFocus);
   tickSky(performance.now() / 1000);
+  tickQuality(dt);
   tickBakes(state.world, curtained()); updateBakes(); setCurrentBake(state.world?.bake);
   fitView();
   beginFrame();
