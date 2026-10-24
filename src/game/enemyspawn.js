@@ -22,9 +22,20 @@ export function pickKind(kinds, r) {
   return ENEMY_KINDS[list.at(-1)?.[0]];
 }
 
+// An arena's and a horde's spots are placed for all species at once: each species asks for
+// its own (every reset* of game/enemies.js), so they are placed once a map (55-100 ms on a fast
+// machine for an arena, ~15 times over on entering) and each asker gets copies.
+const placed = new WeakMap();
+const placedOnce = (map, kind, place) => {
+  let m = placed.get(map);
+  if (!m) placed.set(map, m = {});
+  return m[kind] ??= place(map);
+};
+const ofSpecies = (spots, profile) => spots.filter(s => s.kind.species === profile.species).map(s => ({ ...s }));
+
 export function enemySpots(map, profile) {
-  if (map.guardian) return guardianSpots(map).filter(s => s.kind.species === profile.species);
-  if (map.horde) return hordeSpots(map).filter(s => s.kind.species === profile.species);
+  if (map.guardian) return ofSpecies(placedOnce(map, 'guardian', guardianSpots), profile);
+  if (map.horde) return ofSpecies(placedOnce(map, 'horde', hordeSpots), profile);
   const spec = population(map).get(profile.type);
   if (!spec?.count) return [];
   const R = mulberry32(hash32(map.seed ^ profile.seedSalt)), { count, pack } = spec;

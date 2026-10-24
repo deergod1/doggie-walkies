@@ -32,6 +32,7 @@ import { fallPoint } from './fall.js';
 import { townPadIn } from '../core/townportal.js';
 import { cancelCast } from './townportal.js';
 import { tr } from '../i18n/i18n.js';
+import { questWorld } from './questworld.js';
 
 const GAP = CUBE_H + BASE;   // vertical distance between strata while sliding
 let trip = null;
@@ -107,6 +108,9 @@ function slide(p, c, cloud) {
   state.portalLock = fall || p.kind === 'side' ? 0 : arr.id;
   state.boundaryLock = p.kind === 'side' ? OPP6[p.dir] : -1;
   trip.A0 = A;
+  // the people living here and what the quests put here, before it is built (else the quests
+  // found it changed once the slide ended and built the whole cube again: game/quests.js)
+  questWorld(m);
   warnTrials(m);   // (the portals into trial rooms warn of them)
   devShores(m);
   state.world = buildWorld(m, state.showPath, portalSeen(k, m), c.geo, openedSides(state.openedFaces, k), gateLocked(m, state.run), townPadIn(m, state.run), state.run.chests);

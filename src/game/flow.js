@@ -8,6 +8,7 @@ import { discoveredCubes } from '../core/viewdistance.js';
 import { WorldClient } from '../world/client.js';
 import { step } from '../world/coords.js';
 import { buildWorld, disposeWorld, setWorldOpenFaces } from '../render/world.js';
+import { baked } from '../render/bake.js';
 import { groundAt } from '../physics/collide.js';
 import { respawnPoint } from '../physics/respawn.js';
 import { player, state, setStatus } from './state.js';
@@ -308,7 +309,15 @@ const beyond = (c, take) => (c.map.portals || []).filter(take).map(p => step(c.k
 // Get the cubes behind our portals (and doors) ready in the background, shaders and all
 // (world/client.js). One step further, what the cubes behind the ways down (and up) from those
 // show is loaded too: a new depth's models are in by the time you stand at its well.
-function prefetchAround(c) {
+// Only once the cube we are in is baked and no travel goes on (at most AHEAD_WAIT ms): warming
+// the next cubes compiles their shaders and builds each once, and that work landing on the
+// arrival held its first frames up.
+const AHEAD_WAIT = 4000;
+function prefetchAround(c, since = performance.now()) {
+  if ((state.transitioning || !baked(state.world)) && performance.now() - since < AHEAD_WAIT) {
+    setTimeout(() => { if (state.cubeKey === c.key) prefetchAround(c, since); }, 100);
+    return;
+  }
   const cubes = state.cubes, near = [...beyond(c, p => p.kind !== 'spawn'), ...(c.map.doors || []).map(d => d.to)];
   cubes.prefetch(near);
   for (const k of near) cubes.map(k).then(n => {

@@ -610,14 +610,24 @@ function dying(v, e, dt, off) {
   flail(v, e, Math.max(0, 1 - e.deadT / (e.profile.deathTime * 0.5)));
   glowFx(v, e, 0, Math.max(0, 1 - e.deadT / e.profile.deathTime) * fade);   // the glow dies with it
 }
+// Enemy views are made a few a frame: a cube's whole lineup at once (a horde's two dozen) held
+// its first frame up. An enemy without one yet is not drawn; entering, they are all made while
+// the new cube still fades in (game/travelfx.js) or behind the curtain.
+const VIEW_BUDGET = 4;   // ms of a call making views (at least one)
 export function animateEnemies(list, dt, off = ZERO) {
   clock += dt;
   shift = off;
+  const t0 = performance.now();
+  let made = 0;
   for (const e of list) {
     if (isFigure(e)) { animateFigures([e], dt, off); continue; }   // (Renew: a figure, render/renewview.js)
     const prefab = prefabs[e.profile.species];
     if (!prefab?.ready) { prefab?.load(); continue; }   // not loaded before (a friend's, a dev spawn): shown once it is
-    const v = e.view || (e.view = makeView(e, prefab)), A = v.actions;
+    if (!e.view) {
+      if (made && performance.now() - t0 > VIEW_BUDGET) continue;
+      e.view = makeView(e, prefab); made++;
+    }
+    const v = e.view, A = v.actions;
     unflicker(v);
     // A ram commits to its direction before contact; visuals must match the hit cone.
     v.yaw = e.mode === 'attack' ? e.yaw : angleTo(v.yaw, e.yaw, Math.min(1, dt * 14));
