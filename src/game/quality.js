@@ -30,7 +30,7 @@ export const LEVELS = ['lowest', 'low', 'medium', 'high'];
 export const LOOKS = {
   high: { lamp: { range: Infinity, figures: Infinity, every: 1, strength: 1 }, sun: { map: 2048, figures: Infinity, every: 1 },
     cells: 16, fluid: [512, 0], motes: 1, bake: 'full' },
-  medium: { lamp: { range: 5, figures: 5, every: 1, strength: 1 }, sun: { map: 1024, figures: Infinity, every: 1 },
+  medium: { lamp: { range: 5, figures: 5, every: 1, strength: 1 }, sun: { map: 1024, figures: 12, every: 1 },
     cells: 12, fluid: [512, 30], motes: 1, bake: 'full' },
   low: { lamp: { range: 5, figures: 0, every: 2, strength: 1 }, sun: { map: 1024, figures: 8, every: 2 },
     cells: 8, fluid: [256, 30], motes: 0.5, bake: 'light' },

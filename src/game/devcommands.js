@@ -34,6 +34,7 @@ import { quitToMenu } from './menu.js';
 import { setFluidPalettes, paletteOf } from '../render/fluidpal.js';
 import { rowSlot } from '../themes/fluids.js';
 import { LIGHT_VIEWS, lightview } from './teach.js';
+import { showPerf, runBench } from './perf.js';
 
 const dev = cmd => addCommand(commands, { ...cmd, dev: true });
 const ahead = (d = 2.5) => ({ x: player.x + Math.sin(player.yaw) * d, y: player.y, z: player.z + Math.cos(player.yaw) * d });
@@ -330,6 +331,14 @@ dev({
   args: [{ name: 'view', type: 'lightview' }],
   run({ view }) { lightview(view); return `Light view: ${view}`; },
 });
+
+// what the frames cost (game/perf.js)
+dev({
+  name: 'perf', help: 'show what the frames cost: frame rate, the lighting\'s level and what it draws, the bake, shaders compiled while drawing',
+  args: [{ name: 'on|off', type: 'toggle', optional: true }],
+  run({ 'on|off': on }) { return showPerf(on ? on === 'on' : undefined) ? 'Perf overlay on' : 'Perf overlay off'; },
+});
+dev({ name: 'bench', help: 'time the frame with a part of it off at a time (shadow maps, enemies\' shadows, fixed lights, fluid patterns)', run: () => runBench() });
 
 dev({
   name: 'music', help: 'hold one mood of the music (auto: let go)', args: [{ name: 'mood', type: 'mood' }],

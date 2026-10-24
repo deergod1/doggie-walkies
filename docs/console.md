@@ -109,6 +109,8 @@ Developer (`?dev=1`):
 | `/gold <amount>`, `/heal`, `/level <n>` | the hero |
 | `/music <mood\|auto>` | hold one mood of the music |
 | `/lightview <off\|sun\|lights\|lightmap>` | what the cube's fixed lights' baked shadows look like: the sun's baked shadow alone, the fixed lights' light alone, the lightmap's texels on the solids; `off`: the picture (`docs/lighting.md`) |
+| `/perf [on\|off]` | the perf overlay (also `?perf=1`, without the dev tools): frame rate and the worst frames, the lighting's quality level and what it draws, the resolution, the bake's pace, shaders compiled while drawing, draw calls (`game/perf.js`, `docs/lighting.md`) |
+| `/bench` | the game held, the frame timed to the end of the GPU's work with a part of it off at a time: the lamp's maps, the sun's map, the enemies' shadows, the fixed lights, plus the fluids' patterns; the table in the console, the costs in the chat box |
 | `/saves` | the saved heroes and worlds, and what is being saved now |
 | `/save <hero>` | save as this hero (overwritten, or a new one) in this world (a new saved world unless it is saved already, now the hero's world); from then on it saves itself |
 | `/load <hero> [world\|new]` | play a saved hero in a saved world (no world: the hero's own one, else a new one) |

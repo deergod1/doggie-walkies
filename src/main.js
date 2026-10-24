@@ -76,6 +76,7 @@ import { tickBurning } from './render/burning.js';
 import { tickFlames } from './render/flames.js';
 import { tickMotes } from './render/motes.js';
 import { tickQuality } from './game/quality.js';   // the lighting's quality level (the settings: Auto or pinned)
+import './game/perf.js';   // ?perf=1: what the frames cost, on any device
 import { tickChill } from './render/chilled.js';
 import { tickShock, tickDaze } from './render/shocked.js';
 import { tickStatuses } from './render/statuses.js';

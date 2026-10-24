@@ -120,6 +120,26 @@ every shader, so no program changes its cache key.
 fixed lights' light alone, the lightmap's texels. The Teacher (learn/tutor/) switches the same views with
 `teach.lightview(view)` (`game/teach.js`).
 
+What the frames cost (`game/perf.js`), on any device: **`?perf=1`** (or `/perf`) shows the frame
+rate and the worst frames, the quality level and what it draws (`render/shadows.js shadowState`),
+the pixel ratio and the MSAA dropped, the bake's steps and waits (`bakeStats`), shaders compiled
+while drawing (`render/programs.js programStats`; with `?dev=1` each named in the console), draw
+calls. **`/bench`** holds the game and times the frame to the end of the GPU's work (a pixel read
+back from the screen: Safari has no GPU timers) with a part off at a time. On the software
+renderer (1280×720, a nests cube, a horde of 24): High 129 ms a frame (the lamp's maps 15, the
+sun's 16, the enemies' shadows 20, the fixed lights 6; the fluids' patterns would add 34), Medium
+126, Low and Lowest 95.
+
+**iOS Safari** (`tools/sim-probe.py`): the game in an Xcode simulator's Safari with a probe in the
+page, which reports WebGL's features there and (`--full`) a deep cube entered, portal trips and a
+level switch, with their long frames. Safari 26 has WebGL2 with `KHR_parallel_shader_compile`
+(a program ready ~0.3-0.4 s after compiling, the page not held up) and fences that signal without
+blocking, no GPU timers, MSAA up to 4×; a 3× screen draws at 2× (780×1398 on an iPhone 16e). Its
+compiling happens in another process: a frame waiting for it comes late with almost nothing of the
+page's own time in it, so `/perf`'s count of shaders compiled while drawing misses it. The first
+visit's frames into a deep cube still stall (0.5-1 s in the simulator), later ones less (Safari
+keeps what it compiled). The simulator draws with the Mac's GPU and enforces no memory limits.
+
 ## Light in the deep
 
 From depth 13 down no theme has a room without lights of its own, about 15–30 a room
@@ -149,7 +169,7 @@ changes is how much is drawn for that:
 |---|---|---|---|---|
 | lamp's shadows reach | its light's reach | 5 | 5, every 2nd frame | faded out, not drawn |
 | enemies in the lamp's shadows | all | within 5 | none | none |
-| sun's map of what moves | 2048 | 1024 | 1024, every 2nd frame, enemies within 8 | 512, the hero only |
+| sun's map of what moves | 2048 | 1024, enemies within 12 | 1024, every 2nd frame, enemies within 8 | 512, the hero only |
 | fixed lights a point takes | 16 | 12 | 8 | 6 |
 | fluids' patterns | 512², every frame | 512², 30 Hz | 256², 30 Hz | 256², 20 Hz |
 | motes | all | all | half | half |

@@ -167,7 +167,7 @@
     "src/game/party.js#chooseTarget": "06dc8852",
     "src/game/pointer.js#pickFloor": "e7c1622f",
     "src/game/quality.js#apply": "5539575b",
-    "src/game/quality.js#LOOKS": "429a1e31",
+    "src/game/quality.js#LOOKS": "20f0eca4",
     "src/game/state.js#player": "6f8258c5",
     "src/game/state.js#state": "66724766",
     "src/game/sword.js#hitEnemy": "47cd9246",

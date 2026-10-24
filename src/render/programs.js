@@ -24,7 +24,7 @@ export function keepPrograms(drawn = false) {
     kept.add(p); p.usedTimes++;
     if (drawn) {
       programStats.compiledWhileDrawing++;
-      programStats.last = p.name || p.cacheKey.slice(-40);
+      programStats.last = p.name || p.cacheKey.split(',')[0];
       if (dev) console.warn('shader compiled while drawing (not warmed ahead):', p.name || '(unnamed)', drawnBy(p), p.cacheKey.slice(0, 60) + ' … ' + p.cacheKey.slice(-60));
     }
   }
