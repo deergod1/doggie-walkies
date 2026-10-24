@@ -9,12 +9,16 @@
 // chart of its own. Each chart keeps PAD texels round it (the shadows are interpolated between
 // texels: render/bake.js fills the pad from the chart's edge).
 //
-// The atlas's texels are DENSITY a world unit, fewer if the cube would not fit in MAX texels
+// The atlas's texels are DENSITY a world unit (or what the world asks for), fewer if the cube would not fit in MAX texels
 // square; its width a power of two that holds the charts about square.
 // learn: light.html#unfold (see learn/README.md)
 export const DENSITY = 16;           // texels a world unit
 const PAD = 2;                       // texels round a chart
 const MAX = 4096;                    // the largest atlas side
+// what the world asks for (render/bake.js bakeDensity: fewer on the lower quality levels, a
+// quarter of the memory; world/worker.js sets it when the world starts)
+let density0 = DENSITY;
+export function setLightmapDensity(d) { density0 = d > 0 ? d : DENSITY; }
 
 // arrays: triangle soups ({ pos }: xyz per corner, three corners a triangle). Sets a.lm (uv per
 // corner, 0..1 in the atlas) on each; -> { w, h, density } (the atlas's size in texels)
@@ -25,9 +29,9 @@ export function layoutLightmap(arrays) {
     a.lm = new Float32Array(a.pos.length / 3 * 2);
     for (let i = 0; i < a.pos.length / 9; i++) tris.push({ a, i });
   }
-  if (!tris.length) return { w: 1, h: 1, density: DENSITY };
+  if (!tris.length) return { w: 1, h: 1, density: density0 };
   const charts = chartsOf(tris);
-  for (let density = DENSITY; ; density *= 0.8) {
+  for (let density = density0; ; density *= 0.8) {
     const atlas = pack(charts, density);
     if (atlas) { place(charts, atlas, density); return { w: atlas.w, h: atlas.h, density }; }
   }

@@ -25,7 +25,7 @@ export function keepPrograms(drawn = false) {
     if (drawn) {
       programStats.compiledWhileDrawing++;
       programStats.last = p.name || p.cacheKey.slice(-40);
-      if (dev) console.warn('shader compiled while drawing (not warmed ahead):', p.name || '(unnamed)', drawnBy(p), p.cacheKey.slice(-80));
+      if (dev) console.warn('shader compiled while drawing (not warmed ahead):', p.name || '(unnamed)', drawnBy(p), p.cacheKey.slice(0, 60) + ' … ' + p.cacheKey.slice(-60));
     }
   }
   known = programs.length;

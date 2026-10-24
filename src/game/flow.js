@@ -8,7 +8,7 @@ import { discoveredCubes } from '../core/viewdistance.js';
 import { WorldClient } from '../world/client.js';
 import { step } from '../world/coords.js';
 import { buildWorld, disposeWorld, setWorldOpenFaces } from '../render/world.js';
-import { baked } from '../render/bake.js';
+import { baked, bakeDensity } from '../render/bake.js';
 import { groundAt } from '../physics/collide.js';
 import { respawnPoint } from '../physics/respawn.js';
 import { player, state, setStatus } from './state.js';
@@ -369,7 +369,7 @@ export function newWorld(seed = (Math.random() * 1e9) >>> 0, { keepPlayer = stat
   const params = new URLSearchParams(location.search);
   // dev: ?arche=<archetype> everywhere, ?theme=clouds,forge picks those themes for their depths,
   // ?bridge=chain / ?ladder=vine one bridge / ladder style wherever it fits, ?trial=flood a trial on every depth
-  state.cubes = new WorldClient(seed, { load: cubeAssets, warm: warmCube, arche: state.dev && params.get('arche'),
+  state.cubes = new WorldClient(seed, { load: cubeAssets, warm: warmCube, lightmap: bakeDensity(), arche: state.dev && params.get('arche'),
     themes: state.dev && params.get('theme') ? params.get('theme').split(',') : [],
     bridge: state.dev && params.get('bridge'), ladder: state.dev && params.get('ladder'),
     trial: state.dev && params.get('trial') || null });   // ?trial=flood: every depth gets one (world/trials.js)

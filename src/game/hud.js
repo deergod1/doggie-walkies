@@ -53,8 +53,8 @@ export function flash() {
 }
 
 export const fadeOut = () => { $('fade').style.opacity = 1; };
-// (the curtain lifts once the cube's lights are baked, render/bake.js: they bake all at once
-// behind it; no longer than FADE_WAIT)
+// (the curtain lifts once the cube's lights are baked, render/bake.js: behind it they bake as
+// fast as the GPU goes, nothing else drawn meanwhile, main.js; no longer than FADE_WAIT)
 const FADE_WAIT = 2000;
 export function fadeIn() {
   const start = performance.now();

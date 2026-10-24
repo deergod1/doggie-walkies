@@ -16,11 +16,12 @@ const apply = ratio => requestFit(ratio);
 if (pinned > 0) apply(pinned);
 
 // start: performance.now() when the frame began (it has rendered by now); fps: the frame rate
-// cap (0: none), frames are not too slow for coming at the rate asked for
-export function tickResolution(start, fps = 0) {
+// cap (0: none), frames are not too slow for coming at the rate asked for; drawn: whether it drew
+// the world (behind the curtain a frame may not: not counted)
+export function tickResolution(start, fps = 0, drawn = true) {
   const interval = last ? start - last : 0;
   last = start;
-  if (!control) return;
+  if (!control || !drawn) return;
   const ratio = control.tick(interval, performance.now() - start, fps ? 1000 / fps : 0, msaaSteps());
   if (ratio) apply(ratio);
   setMsaaDrop(control.drop);

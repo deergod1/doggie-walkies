@@ -50,6 +50,11 @@ export const NO_SUN = new THREE.DepthTexture(1, 1);
 NO_SUN.compareFunction = THREE.LessEqualCompare;
 NO_SUN.needsUpdate = true;
 
+// the volume where there is none (not baked yet, or baked without one: render/bake.js): every
+// light reaches everywhere. (A 2D atlas of slices: render/bake.js; uBakeVD says how it is laid out.)
+export const NO_VOL = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1);
+NO_VOL.needsUpdate = true;
+
 // the shared uniforms: the bake of the cube being played in (render/bake.js setCurrentBake)
 export const BAKE = {
   uBakeOn: { value: 0 },                       // 1 while the world's scene is drawn
@@ -59,8 +64,9 @@ export const BAKE = {
   uBakeC: { value: null },                     // the lights each cell of the cube takes (render/bake.js lightCells)
   uBakeK: { value: CELL_MAX },                 // how many of them a point walks at most, eased (game/quality.js)
   uBakeO: { value: new THREE.Vector3() },      // the cube's origin in the world
-  ...Object.fromEntries(Array.from({ length: SETS }, (_, i) => [['uBakeLm' + i, { value: null }], ['uBakeVol' + i, { value: null }]]).flat()),
+  ...Object.fromEntries(Array.from({ length: SETS }, (_, i) => [['uBakeLm' + i, { value: null }], ['uBakeVol' + i, { value: NO_VOL }]]).flat()),
   uBakeV0: { value: new THREE.Vector3() }, uBakeVS: { value: new THREE.Vector3(1, 1, 1) },   // the volume's corner and size (in the cube)
+  uBakeVD: { value: new THREE.Vector4(1, 1, 1, 1) },   // its samples across, up (slices), deep, and slices a row of its atlas
   uBakeSun: { value: NO_SUN },                 // the sun's shadow map of the cube's fixed parts
   uBakeSunM: { value: new THREE.Matrix4() },   // from the cube's coordinates into it
   uMoveN: { value: 0 },                        // how many moving lights
@@ -86,8 +92,9 @@ uniform vec3 uBakeO;
   varying vec2 vBakeLm;
   ${sets(i => `uniform sampler2D uBakeLm${i};\n`)}
 #else
-  ${sets(i => `uniform highp sampler3D uBakeVol${i};\n`)}
+  ${sets(i => `uniform sampler2D uBakeVol${i};\n`)}
   uniform vec3 uBakeV0, uBakeVS;
+  uniform vec4 uBakeVD;
   uniform highp sampler2DShadow uBakeSun;
   uniform mat4 uBakeSunM;
 #endif
@@ -121,8 +128,14 @@ const VIS = `
       vec3 bakeN = inverseTransformDirection(normal, viewMatrix);
       vec3 vc = (bakeP + bakeN * 0.15 - uBakeV0) / uBakeVS;
       bool inside = all(greaterThanEqual(vc, vec3(0.0))) && all(lessThanEqual(vc, vec3(1.0)));
-      // (its slices go up)
-      ${sets(i => `bake${i} = mix(vec4(1.0), inside ? texture(uBakeVol${i}, vc.xzy) : vec4(0.0), uBakeR);\n`)}
+      // (its slices go up, side by side in the atlas: the two round the point, each read off
+      // its tile's edge, then blended)
+      float vz = clamp(vc.y * uBakeVD.y - 0.5, 0.0, uBakeVD.y - 1.0), vz0 = floor(vz), vz1 = min(vz0 + 1.0, uBakeVD.y - 1.0);
+      vec2 vtile = clamp(vc.xz * uBakeVD.xz, vec2(0.5), uBakeVD.xz - 0.5);
+      vec2 vatlas = vec2(uBakeVD.w, ceil(uBakeVD.y / uBakeVD.w)) * uBakeVD.xz;
+      vec2 vt0 = (vec2(mod(vz0, uBakeVD.w), floor(vz0 / uBakeVD.w)) * uBakeVD.xz + vtile) / vatlas;
+      vec2 vt1 = (vec2(mod(vz1, uBakeVD.w), floor(vz1 / uBakeVD.w)) * uBakeVD.xz + vtile) / vatlas;
+      ${sets(i => `bake${i} = mix(vec4(1.0), inside ? mix(texture(uBakeVol${i}, vt0), texture(uBakeVol${i}, vt1), vz - vz0) : vec4(0.0), uBakeR);\n`)}
       vec4 sc = uBakeSunM * vec4(bakeP + bakeN * 0.03, 1.0);
       sc.xyz /= sc.w;
       if (all(greaterThan(sc.xyz, vec3(0.0))) && all(lessThan(sc.xyz, vec3(1.0)))) bakeSun = mix(1.0, texture(uBakeSun, vec3(sc.xy, sc.z - 0.0004)), uBakeR);

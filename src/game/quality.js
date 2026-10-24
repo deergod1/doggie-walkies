@@ -14,6 +14,8 @@
 //           light fades)
 //   fluid   the fluids' patterns: texels a side, drawn how often a second (render/watercells.js)
 //   motes   what drifts in the air
+//   bake    how finely a cube is baked (render/bake.js BAKE_DETAIL: for the next cube baked; the
+//           lightmap's texels a unit when a world starts)
 import { graphics, onSettingsChange } from './settings.js';
 import { BAKE } from '../render/lighthook.js';
 import { setShadowLook, tickShadows, snapShadows } from '../render/shadows.js';
@@ -21,18 +23,19 @@ import { sun } from '../render/scene.js';
 import { setMoteRate } from '../render/motes.js';
 import { setCellDetail } from '../render/watercells.js';
 import { setAutoQuality, autoQuality } from '../render/resolution.js';
+import { setBakeDetail } from '../render/bake.js';
 
 export const LEVELS = ['lowest', 'low', 'medium', 'high'];
 // learn: light.html#looks #looks-code (see learn/README.md)
 export const LOOKS = {
   high: { lamp: { range: Infinity, figures: Infinity, every: 1, strength: 1 }, sun: { map: 2048, figures: Infinity, every: 1 },
-    cells: 16, fluid: [512, 0], motes: 1 },
+    cells: 16, fluid: [512, 0], motes: 1, bake: 'full' },
   medium: { lamp: { range: 5, figures: 5, every: 1, strength: 1 }, sun: { map: 1024, figures: Infinity, every: 1 },
-    cells: 12, fluid: [512, 30], motes: 1 },
+    cells: 12, fluid: [512, 30], motes: 1, bake: 'full' },
   low: { lamp: { range: 5, figures: 0, every: 2, strength: 1 }, sun: { map: 1024, figures: 8, every: 2 },
-    cells: 8, fluid: [256, 30], motes: 0.5 },
+    cells: 8, fluid: [256, 30], motes: 0.5, bake: 'light' },
   lowest: { lamp: { range: 5, figures: 0, every: 2, strength: 0 }, sun: { map: 512, figures: 0, every: 2 },
-    cells: 6, fluid: [256, 20], motes: 0.5 },
+    cells: 6, fluid: [256, 20], motes: 0.5, bake: 'lighter' },
 };
 const KEY = 'crawler.quality';    // the level Auto reached last
 const CELL_EASE = 8;              // lights a second: how fast uBakeK follows
@@ -60,6 +63,7 @@ function apply(n) {
   }
   setCellDetail(...L.fluid);
   setMoteRate(L.motes);
+  setBakeDetail(L.bake);
 }
 
 // every frame (main.js; dt: real seconds, the fades go on while the game is paused)

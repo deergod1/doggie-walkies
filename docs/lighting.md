@@ -27,19 +27,31 @@ keepFixedOutOfSun`), which then only holds what moves.
 
 ## Baking (`render/bake.js tickBakes`)
 
-Never in one go while the cube shows: a few steps a frame (`STEPS`, 2: the sun, then a light a
-step; a step is the light's six shadow maps, its lightmap and its volume), the cube played in
+Never in one go: a few steps a frame (the sun, then a light a step; a step is the light's six
+shadow maps, its lightmap and its volume), as many as the GPU keeps up with: a fence goes in after
+a frame's steps, and while two frames' steps are not done no more are given (on the CPU's clock
+the budget never saw the GPU's work: a step is a few ms on a desktop, tens on a weak GPU). Each
+frame with none waiting one step more, up to `STEPS` (4, and no more than 3 ms of the frame); one
+that waits, back to one. The cube played in
 first (`main.js`, last before drawing: whatever builds the cube again during the frame, like the
 quests, has done so). A cube's lights stay dark until it is baked and then come on over 0.35 s,
 its baked shadows with them (`uBakeR`); a bake that fails leaves them on, without shadows.
 
 - **Through a portal** the new cube is faded out for its first moments (`game/travelfx.js`):
-  it is baked by then (about 20 frames for the dark forest's 40 lights).
-- **Behind the curtain** (`game/hud.js fadeOut`: dying, doors, the town portal, loading) it is
-  baked all at once, and the curtain lifts once it is (`fadeIn` waits, at most 2 s).
-- **A cube built again** as it was (the quests' changes right after entering, a prop set that came
-  late: `game/flow.js rebuildWorld`) takes its bake at once: the last three cubes' bakes are kept,
-  by geometry, and taken if the lights and props are where they were (`signature`).
+  it is baked by then on a desktop (about 10 frames for the dark forest's 40 lights).
+- **Behind the curtain** (`game/hud.js fadeOut`: dying, doors, the town portal, loading) up to
+  `HIDDEN_STEPS` (16) a frame and 12 ms, and nothing else is drawn meanwhile (`main.js`); the
+  curtain lifts once it is baked (`fadeIn` waits, at most 2 s). (All at once in one frame was 5 s
+  of GPU work on a software renderer: a weak GPU's driver gives up on less, and the context is
+  lost.)
+- **A cube built again** as it was (a prop set that came late, a quest's change: `game/flow.js
+  rebuildWorld`) takes its bake at once: the last three cubes' bakes are kept (one where the
+  screen is touched), by geometry, and taken if the lights and props are where they were
+  (`signature`).
+- **How finely** (`BAKE_DETAIL`, by the quality level, `game/quality.js`): High and Medium as
+  below; Low 1024² for the sun, 512² cube maps, 2 volume samples a unit, 8 lightmap texels a unit
+  (a quarter of the memory); Lowest the same without a volume. The lightmap's texels are the world
+  worker's, chosen when the world starts (`bakeDensity`); the rest is for the next cube baked.
 - The baking's shaders are compiled ahead with the cube's (`render/cubeassets.js warmCube`).
 
 What it does:
@@ -55,8 +67,12 @@ What it does:
    lamp's own frame casts none), a 2048² one of the cube for the sun. Where a coarse look round
    finds the light everywhere or nowhere, the texel is ±1.5 at once. The charts' edges are filled
    outwards.
-3. **The volume** (three RGBA8 3D textures, 4 samples a unit, round the cube): how much of each
-   light reaches each point (four points in each voxel), for what is not lightmapped.
+3. **The volume** (three RGBA8 textures, 4 samples a unit, round the cube): how much of each
+   light reaches each point (four points in each voxel), for what is not lightmapped. Its slices
+   (one a sample up) lie side by side in one 2D atlas, so a light's slices are one draw (with a 3D
+   texture a draw each, about 35 a light: a render pass each, costly on phones' tiled GPUs); a
+   shader reads the two slices round a point and blends them. Without it (Lowest) props, figures
+   and fluids take every fixed light unshadowed (in the overview 0.3% of the pixels differ).
 4. The sun's shadow map of the fixed parts (16-bit) is kept, for what is not lightmapped.
 
 **The lightmap's layout** (`render/lightmap.js`, in the world worker with the rest of the
@@ -165,8 +181,11 @@ Where the screen is touched the frame rate cap is 30 at first (a setting like an
 
 ## Not yet
 
-- Baking takes the GPU's time while a portal's travel goes on: two lights a frame are a few
-  milliseconds on a desktop, more on a phone (`STEPS`).
+- Baking takes the GPU's time while a portal's travel goes on. A GPU that cannot keep up with
+  the frames themselves runs behind, so its fences come late and it bakes about a light a frame
+  (on a software renderer a 37-light cube took ~16 s, frames being ~180 ms there).
+- How much memory iOS Safari allows a page's WebGL before it reloads it is unmeasured (the
+  simulator does not enforce it); a bake is ~28 MB on High, ~10 MB on Low.
 - The lightmap is laid out for every cube the worker builds (10-25 ms), proxies too.
 - More than eleven overlapping lights: some shine without shadows (a dark forest cube: one of 40).
 - The moving lights (but the hero's lamp) cast no shadows: one inside what carries it (an enemy's

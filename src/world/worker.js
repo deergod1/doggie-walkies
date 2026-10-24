@@ -11,6 +11,7 @@ import { isInterior } from './town.js';
 import { isTestRoom } from './testrooms.js';
 import { buildCubeParts } from '../render/cubegeo.js';
 import { partBuffers } from '../render/parts.js';
+import { setLightmapDensity } from '../render/lightmap.js';
 
 let world = null;
 const queue = [];   // keys still to make, the next first
@@ -49,7 +50,7 @@ function schedule() {
 }
 
 onmessage = ({ data }) => {
-  if (data.type === 'init') { world = new World(data.seed, data.opts); return; }
+  if (data.type === 'init') { setLightmapDensity(data.opts?.lightmap); world = new World(data.seed, data.opts); return; }
   if (data.type === 'cube') {
     const i = queue.indexOf(data.key);
     if (i >= 0 && !data.urgent) return;

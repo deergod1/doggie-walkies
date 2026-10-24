@@ -2,7 +2,7 @@
 import './render/lighthook.js';   // (first: every lit material takes the fixed lights, render/lighthook.js)
 import * as THREE from 'three';
 import { renderer, scene, camera, fitView } from './render/scene.js';
-import { tickBakes, updateBakes, setCurrentBake } from './render/bake.js';
+import { tickBakes, updateBakes, setCurrentBake, baked } from './render/bake.js';
 import { animateWorld } from './render/world.js';
 import { animateCharacter } from './render/animator.js';
 import { generate } from './cubegen/index.js';
@@ -209,12 +209,16 @@ function frame(now = performance.now()) {
   // the cube's fixed lights: baked a little each frame, and where they shine now (render/bake.js;
   // last before drawing: anything above may have built the cube again)
   tickBakes(state.world, curtained()); updateBakes(); setCurrentBake(state.world?.bake);
+  // behind the curtain (game/hud.js) while the cube bakes nothing is drawn: the GPU bakes instead
+  const draw = !(curtained() && !baked(state.world));
   fitView();      // a new size or resolution only now, right before drawing (render/scene.js)
-  beginFrame();   // anti-aliasing: draw into the multisampled buffer (render/msaa.js)
-  renderer.render(scene, camera);
-  endFrame();     // and onto the screen
+  if (draw) {
+    beginFrame();   // anti-aliasing: draw into the multisampled buffer (render/msaa.js)
+    renderer.render(scene, camera);
+    endFrame();     // and onto the screen
+  }
   keepPrograms(true);   // compiled shaders stay (render/programs.js); any new one was compiled while drawing
-  tickResolution(start, frameRate());   // fewer pixels while the GPU cannot keep up (render/resolution.js)
+  tickResolution(start, frameRate(), draw);   // fewer pixels while the GPU cannot keep up (render/resolution.js)
   requestAnimationFrame(frame);
 }
 

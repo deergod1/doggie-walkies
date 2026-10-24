@@ -4,7 +4,8 @@
 // render/cubeassets.js) and opts.warm(cube) too (its shaders are compiled); `map` when only its
 // map is. Asking for cubes early (prefetch) makes walking through a portal instant. The worker
 // makes the cubes in the order they were asked for, except that one asked for urgently (`get`:
-// someone waits for it) goes first.
+// someone waits for it) goes first. opts.lightmap: the lightmap's texels a unit (render/bake.js
+// bakeDensity), for every cube of this world.
 import { key } from './coords.js';
 import { makeLayouts } from './layout.js';
 import { worldThemes } from '../themes/depth.js';
