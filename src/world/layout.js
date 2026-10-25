@@ -5,7 +5,7 @@
 import { mulberry32, hash32 } from '../core/util.js';
 import { bossAt } from '../core/bosses.js';
 import { key, faceKey } from './coords.js';
-import { MAX_DEPTH, themeAt, worldThemes } from '../themes/depth.js';
+import { MAX_DEPTH, themeAt, themesAt, worldThemes } from '../themes/depth.js';
 import { planSites } from './sites.js';
 import { planSpots } from './spots.js';
 import { planHordes } from './hordes.js';
@@ -123,8 +123,11 @@ function build(seed, d, above, theme, opts = {}) {
   const desired = min + Math.floor(R() * (max - min + 1));
   const lengthAt = i => min + (desired - min + i) % (max - min + 1);
   // the depth's large area (areas.js) is built into the route, on a stream of its own (a depth
-  // without one keeps its route); where it does not fit the depth may get a tableland instead
-  const slots = planSlots(seed, d, theme);
+  // without one keeps its route); where it does not fit the depth may get a tableland instead.
+  // Which one is the depth's, whatever theme the world picked there: its first theme's weights (a
+  // theme that also appears a depth further down, the slime marsh at 5 beside the canyon, would
+  // otherwise move the route)
+  const slots = planSlots(seed, d, themesAt(d)[0]);
   let spine = null, area = null;
   if (AREA_SIZE[slots.big]) {
     const TR = mulberry32(hash32(seed ^ Math.imul(d + 1, 0x7f4a7c15) ^ 0xa4ea)), size = AREA_SIZE[slots.big];

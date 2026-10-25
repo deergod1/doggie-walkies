@@ -12,7 +12,7 @@ const LANDMARKS = PROP_METADATA.filter(p => p.landmark);
 
 test('every theme has landmarks, each with a role and boxes derived from its mesh', () => {
   for (const t of THEMES) assert.ok(landmarksOf(t.props).length >= 2, t.props);
-  assert.equal(LANDMARKS.length, 50);
+  assert.equal(LANDMARKS.length, 52);
   for (const p of LANDMARKS) {
     assert.ok(['shrine', 'gate', 'camp', 'monument'].includes(p.role), p.name);
     assert.ok(p.colliders.length && p.occluders.length, p.name);

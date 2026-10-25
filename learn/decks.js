@@ -89,7 +89,7 @@ export const THEME_NAMES = {
   abyss: 'Obsidian abyss', core: 'The core',
   clouds: 'Cloud kingdom', lagoon: 'Lagoon isles', karst: 'Karst terraces', highlands: 'Prayer highlands',
   saltflats: 'Salt flats', grotto: 'Sunken grotto', hive: 'Honey hive', ossuary: 'Ossuary', forge: 'Dwarven forge',
-  cenote: 'Jungle cenote', canyon: 'Deep canyon', darkforest: 'Dark forest',
+  cenote: 'Jungle cenote', canyon: 'Deep canyon', darkforest: 'Dark forest', slime: 'Slime marsh',
 };
 // the German of the names only the guide has: the game's themes are said in the game's words
 // (src/i18n/, learn/deck.js themeName), so the guide and the game call a depth the same

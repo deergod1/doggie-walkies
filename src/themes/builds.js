@@ -40,6 +40,8 @@ export const BUILDS = {
     bridges: { flags: 3, rope: 1, stone: 1, log: 1 }, ladders: { wood: 2, rope: 1, footholds: 1 } },
   saltflats: { stone: '#e4dcd0', wood: '#9a8068', rope: '#d0c0a0', iron: '#6a6460',
     bridges: { plank: 2, stone: 1, rockarch: 1, rope: 1 }, ladders: { wood: 2, footholds: 1 } },
+  slime: { stone: '#7a826a', wood: '#4a4a34', rope: '#8a9a5a', iron: '#3e4440', vine: '#4a7a2a',
+    bridges: { log: 3, plank: 2, rope: 1, stone: 1 }, ladders: { vine: 2, wood: 1, rope: 1 } },
   canyon: { stone: '#d8a47a', wood: '#7a5638', rope: '#c8a878', iron: '#5a5c64',
     bridges: { rope: 2, plank: 1, rockarch: 2 }, ladders: { rope: 2, footholds: 2, wood: 1 } },
   grotto: { stone: '#8aaaa8', wood: '#6a7468', rope: '#a8c0b0', iron: '#4a5a60', vine: '#3a7a5a',

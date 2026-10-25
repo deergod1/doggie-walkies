@@ -33,7 +33,8 @@ export const ANCHORS = {
     sky: '#2c9ad8', royal: '#2a60d6', cobalt: '#1f47a8', glacier: '#5ab4d8', lagoon: '#2fb6c9', turquoise: '#1fa3a8',
     teal: '#1f8a8a', murk: '#2f5452', slate: '#183651', navy: '#163254', greyteal: '#2a3939', deepteal: '#19292e',
   },
-  [ACID]: { lime: '#7dff3a', green: '#52e04a', chartreuse: '#b0f03c', emerald: '#4fd25a', sickly: '#9ad84a', toxic: '#78f05a' },
+  [ACID]: { lime: '#7dff3a', green: '#52e04a', chartreuse: '#b0f03c', emerald: '#4fd25a', sickly: '#9ad84a', toxic: '#78f05a',
+    goo: '#a8e030', ooze: '#94e83c', bog: '#6ec83a' },
   [LAVA]: { magma: '#ff6a00', ember: '#ff4a14', crimson: '#e6301a', amber: '#ff8c1a', gold: '#ffa828' },
 };
 // how far a fluid's hue may go (OKLCH degrees): water stays teal to blue, acid green (well apart,
@@ -55,6 +56,7 @@ export const FAMILY = {
   highlands: { water: ['sky', 'slate', 'royal', 'turquoise'] },
   badlands: { water: ['teal', 'turquoise', 'greyteal'], lava: ['magma', 'ember', 'amber'] },
   saltflats: { water: ['turquoise', 'glacier', 'lagoon'] },
+  slime: { water: ['murk', 'greyteal', 'deepteal'], acid: ['goo', 'ooze', 'bog', 'chartreuse'], spread: 0.6 },   // slime pools
   canyon: { water: ['teal', 'turquoise', 'lagoon', 'slate'] },
   roots: { water: ['murk', 'deepteal', 'greyteal', 'teal'], acid: ['sickly', 'green'] },
   frozen: { water: ['glacier', 'slate', 'navy'], spread: 0.35 },

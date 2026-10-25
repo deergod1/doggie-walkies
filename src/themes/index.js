@@ -39,7 +39,7 @@
 //     the trees with a lantern hanging from a branch; strings: the most strings of lanterns
 //   waylights: lamps beside the way (render/propplace.js waylights): { props, share (of the
 //     floors beside it), back (from the floor's middle, 0.36), foot (its collider, 0.06) }
-import { WATER } from '../core/constants.js';
+import { WATER, ACID } from '../core/constants.js';
 import { CAVE_THEMES } from './caves.js';
 
 const T = (name, o) => ({ name, tiles: {}, cave: false, spans: null, ...o });
@@ -144,6 +144,21 @@ const SALTFLATS = T('Salt flats', {
   tiles: { lake: 2, meadow: 1.5, highland: 0.6, gorge: 0.5 },
   light: { sky: ['#40283a', '#120a12', '#7a5266', '#5a3a5a'], stars: 0.6, hemi: ['#ffe0e4', '#4a3a38', 0.8], sun: ['#ffc8a8', 1.6], fog: 0.25 },
 });
+// the slime marsh: green moss and pools of toxic slime (acid: falling in is the end), drooping
+// slime trees, mounds of goo with things stuck in them, bubbling vents and the craters the slime
+// meteorites left; low and wet, few holes, more lakes and rivers than anywhere under the sky
+const SLIME = T('Slime marsh', {
+  music: 'swamp',
+  props: 'slime', propDensity: 0.3,
+  depths: [4, 5], spans: { chance: 0.7, max: 2, route: 0.8, island: 0.3, sky: 0 },
+  void: 0.1, relief: 0.55,
+  arche: { plain: 3, crater: 2, archipelago: 2, mesa: 1 },
+  top: [[0, '#3e5a2a'], [4, '#4f6e30'], [8, '#628236'], [12, '#76903e'], [16, '#86985a'], [20, '#a4ac86']],
+  side: [[0, '#2e3424'], [6, '#3e4630'], [11, '#545a44'], [20, '#6e705e']],
+  soft: '#7ac040', lip: '#5a8a2a', under: '#1e2214', bed: ['#181c12', '#13160e'], fluids: [0.08, 0, 0.92], river: ACID,
+  tiles: { lake: 2, river: 1.5, highland: 0.8 },
+  light: { sky: ['#24503e', '#0a1a12', '#5e8a58', '#44603a'], stars: 0.3, hemi: ['#e6f4d2', '#3a4020', 1.05], sun: ['#f2ffd6', 2.0], fog: 0.15 },
+});
 // the deep canyon: the last of the sky, far down between sheer sandstone walls (red, salmon and
 // cream strata), a green river floor with cottonwoods, hanging gardens at the springs
 const CANYON = T('Deep canyon', {
@@ -182,7 +197,7 @@ const DARKFOREST = T('Dark forest', {
 });
 
 // every theme, the town's first
-export const THEMES = [MEADOW, CLOUDS, LAGOON, KARST, DARKFOREST, PEAKS, HIGHLANDS, BADLANDS, SALTFLATS, CANYON, ...CAVE_THEMES];
+export const THEMES = [MEADOW, CLOUDS, LAGOON, KARST, DARKFOREST, PEAKS, HIGHLANDS, BADLANDS, SALTFLATS, CANYON, SLIME, ...CAVE_THEMES];
 // the town and its road (depth 0)
 export const TOWN = MEADOW;
 

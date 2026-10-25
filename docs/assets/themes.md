@@ -8,8 +8,8 @@
 
 ![Dark forest vignettes and landmarks](../img/themes-darkforest-landmarks.jpg)
 
-Artwork for twelve alternative themes, and landmarks for the eleven classic ones: **215 prop
-types, 374 meshes, 107,733 triangles**. These were built and checked through Blender MCP. The
+Artwork for thirteen alternative themes, and landmarks for the eleven classic ones: **228 prop
+types, 398 meshes, 116,907 triangles**. These were built and checked through Blender MCP. The
 style and contract are the same as `blender/clutter.py` (low-poly, flat-shaded,
 vertex-coloured, one mesh per prop). **Hooked up to the game** as themes a world may pick for
 their depths alongside the classic ones, and every depth builds its major reward site around one of its
@@ -22,7 +22,7 @@ theme's landmarks (see "Integration"); flag lines and the honey fluid are not bu
 - `blender/themes_geo.py`: shared helpers (cloth sheets, ribbons, lettering, lofts,
   wobble/streaks for rock) and the palette (`LUNGTA`, `WHITEWASH`, `MAROON`, `GOLD`, ...).
 - `blender/themes_highlands.py`, `blender/themes_surface.py`, `blender/themes_caves.py`,
-  `blender/themes_canyon.py`, `blender/themes_darkforest.py`: the builders; `blender/themes_classic.py`: the classic themes' landmarks.
+  `blender/themes_canyon.py`, `blender/themes_darkforest.py`, `blender/themes_slime.py`: the builders; `blender/themes_classic.py`: the classic themes' landmarks.
 - `assets/themes/<set>.glb`: the library, one file per set, every prop a named root at the origin
   (the game loads a set when a cube shows it).
 - `assets/themes/manifest.json`: per-prop set, attach, flags, triangles, sizes, bounds,
@@ -48,6 +48,7 @@ theme's landmarks (see "Integration"); flag lines and the honey fluid are not bu
 | lagoon | Lagoon isles (1–2: Meadow islands) | Palms, sand, rowboats, a shipwreck, stilt huts |
 | canyon | Deep canyon (5–6: alone) | Sandstone strata, cottonwoods by the river, hoodoos, petroglyphs, cliff dwellings |
 | darkforest | Dark forest (1–2: Meadow islands) | Wooded hills at night: tall firs, lanterns, glowing mushrooms, old stones, abandoned sheds |
+| slime | Slime marsh (4–5: Badlands, Salt flats, Deep canyon) | Moss and pools of toxic slime: drooping slime trees, goo mounds with bones in them, bubbling vents, meteorite craters |
 | hive | Honey hive (11–12: Fungal swamp) | Honey hive: wax, comb, honey fluid (slows rather than hurts) |
 | cenote | Jungle cenote (13: alone) | Sunlit jungle temple: jade, glyphs, vines, a step shrine |
 | grotto | Sunken grotto (9–10: Frozen caves) | Sunken grotto: kelp, clams, glowing jellies, a sunken bell |
@@ -83,6 +84,8 @@ theme's landmarks (see "Integration"); flag lines and the honey fluid are not bu
 | darkforest | `leaf_litter` (ground; cover), `glowcap_patch` (ground; cover; light #7af0ff; pulse), `moss_mound` (ground; cover), `dark_fir_tree` (ground; blocking; sway 0.06; anchor on the trunk), `gnarled_tree` (ground; blocking; sway 0.08; 4 anchors at its branch ends), `bare_tree` (ground; blocking; sway 0.05; 4 anchors), `glow_mushrooms` (ground; light #5affc8; pulse), `giant_glowshroom` (ground; blocking; light #c890ff; pulse), `mossy_stump` (ground; blocking; light #5affc8; pulse), `lantern_post` (ground; blocking; light #ffb85a; flame), `standing_stone` (ground; blocking; light #8ab8ff; pulse), `rotten_log` (ground; blocking; light #7af0ff; pulse), `twig_charm` (ground; sway 0.25), `dark_fern` (ground; sway 0.3), `bramble` (ground; sway 0.1), `shelf_fungus` (wall; light #5affc8; pulse), `root_drape` (lip; sway 0.3), `hanging_lantern` (ceiling; light #ffb85a; flame; sway 0.15), `black_lilies` (water; light #c8fff0; pulse), `lantern_string` (line; light #ffc070; flame) |
 | darkforest vignettes | `abandoned_shed` (light #ffb85a; flame), `collapsed_cabin` (light #5affc8; pulse), `woodcutter_camp` (light #ffb85a; flame), `wayside_shrine` (light #ffc070; flame), `stone_circle` (light #8ab8ff; pulse), `overgrown_wagon` (light #ffb85a; flame) |
 | darkforest landmarks | `lantern_tree` (light #ffb85a; flame), `mossy_arch` (light #7af0ff; pulse), `forest_chapel` (light #ffc070; flame) |
+| slime | `slime_moss` (ground; cover), `goo_puddle` (ground; cover; light #b8ff5a; pulse), `slime_tree` (ground; blocking; sway 0.05; light #b8ff5a; pulse; anchor on the trunk), `slime_mushrooms` (ground; light #b8ff5a; pulse), `goo_mound` (ground; blocking; light #b8ff5a; pulse), `slimed_rock` (ground; blocking; light #b8ff5a; pulse), `bubble_vent` (ground; light #d8ff9a; pulse), `slime_reeds` (ground; sway 0.3), `slime_seep` (wall; light #b8ff5a; pulse), `slime_drip` (lip; light #b8ff5a; pulse), `goo_pads` (water; acid; light #b8ff5a; pulse) |
+| slime landmarks | `meteor_crater` (light #b8ff5a; pulse), `giant_slime_tree` (light #b8ff5a; pulse) |
 
 ### Landmarks
 
@@ -91,10 +94,10 @@ around them (`cubegen/sites.js`):
 
 | Role | Site | Landmarks |
 |---|---|---|
-| shrine | the chest stands in front of it | `chorten_great`, `royal_cell`, `step_shrine`, `giant_shell`, `furnace`, `crypt_shrine`, `forest_chapel`, `wishing_well`, `hollow_stump`, `ice_throne`, `giant_geode`, `fire_shrine`, `void_throne` |
+| shrine | the chest stands in front of it | `meteor_crater`, `chorten_great`, `royal_cell`, `step_shrine`, `giant_shell`, `furnace`, `crypt_shrine`, `forest_chapel`, `wishing_well`, `hollow_stump`, `ice_throne`, `giant_geode`, `fire_shrine`, `void_throne` |
 | gate | you walk through it to the chest behind it | `salt_arch`, `canyon_arch`, `bone_arch`, `mossy_arch`, `ice_arch`, `root_gate`, `web_gate`, `headframe`, `temple_gate` |
 | camp | the chest stands beside it, with small things of the theme around | `nomad_tent`, `hermitage`, `pavilion`, `cliff_dwelling`, `salt_harvest`, `shipwreck`, `stilt_hut`, `expedition_camp`, `covered_wagon`, `witch_hut` |
-| monument | it stands beside the chest, reaching back | `mani_wall`, `karst_tower`, `balanced_rock`, `sky_gate`, `wind_harp`, `comb_tower`, `ceiba_roots`, `sunken_bell`, `great_gear`, `lantern_tree`, `windmill`, `windpump`, `frozen_falls`, `giant_toadstool`, `brood_cluster`, `colossus_head`, `fumarole`, `chained_obelisk` |
+| monument | it stands beside the chest, reaching back | `mani_wall`, `karst_tower`, `balanced_rock`, `sky_gate`, `wind_harp`, `comb_tower`, `ceiba_roots`, `sunken_bell`, `great_gear`, `lantern_tree`, `giant_slime_tree`, `windmill`, `windpump`, `frozen_falls`, `giant_toadstool`, `brood_cluster`, `colossus_head`, `fumarole`, `chained_obelisk` |
 
 The classic themes' landmarks (`themes_classic.py`): meadow `windmill`, `wishing_well`; peaks
 `expedition_camp`, `ice_arch`; badlands `covered_wagon`, `windpump`; roots `root_gate`,

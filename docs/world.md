@@ -616,8 +616,9 @@ The town's meadows (depth 0) do not carry over. The picks are kept as stretches
 | 0 | Meadow islands (the town and its road, always: `TOWN`) |
 | 1–2 | Meadow islands, Cloud kingdom, Lagoon isles, Karst terraces, Dark forest (a night theme) |
 | 3 | Snowy peaks, Prayer highlands |
-| 4 | Badlands, Salt flats |
-| 5–6 | Deep canyon (walled in like a cave, under the sky) |
+| 4 | Badlands, Salt flats, Slime marsh |
+| 5 | Deep canyon (walled in like a cave, under the sky), Slime marsh |
+| 6 | Deep canyon |
 | 7–8 | Root caves |
 | 9–10 | Frozen caves, Sunken grotto |
 | 11–12 | Fungal swamp, Honey hive |
@@ -643,7 +644,9 @@ The town's meadows (depth 0) do not carry over. The picks are kept as stretches
   blue moon, fog, the character's full lamp, and its own lights.
 - **What the theme changes:** the themes of a depth agree on `cave`. The route, its guardians
   and hordes depend on the seed alone; the gorge spans (and with them where the branches go)
-  are the theme's.
+  are the theme's. Which large area a depth gets (`planSlots`) is the depth's: its first theme's
+  weights, whichever theme the world picked (the slime marsh at 5 is not walled in like the
+  canyon, whose weights it takes there).
 - **Same per depth:** the enemy rosters (`DEPTH_SPAWNS`) go by depth, and the themes added later
   play the song of the first theme of their depths for now.
 
@@ -675,6 +678,19 @@ long gone. What makes it so, all in its theme entry:
   drift round the character (`motes`, `render/motes.js`).
 - **Enemies:** Gloom spiders and Lantern-faces of its own (`core/spawns.js`, `where`; the
   ordinary spiders of depth 2 keep out of it, `'!darkforest'`), see [depths.md](depths.md).
+
+### The slime marsh (`slime`)
+
+Green moss and pools of toxic slime (depths 4–5, next to the badlands and the salt flats, and
+the canyon): drooping slime trees, mounds of goo with bones or a sword stuck in them, bubbling
+vents, reeds, and the craters the slime meteorites left. What makes it so, in its theme entry:
+
+- **Ground:** low and wet, few holes (`void` 0.1), more lakes and rivers
+  (`tiles`). Its fluid is acid (`fluids`, `river`: falling in is the end), in slime greens of
+  its own (`FAMILY.slime` in `themes/fluids.js`: the `goo`, `ooze` and `bog` anchors). Logs and
+  planks cross it (`BUILDS.slime`). Its spans keep to what the route depends on.
+- **Props** (`assets/themes/slime.glb`, `blender/themes_slime.py`): the slime glows a little,
+  more so where it is fresh; landmarks: a meteorite's crater and a giant slime tree.
 
 ### Vignettes (`cubegen/vignettes.js`)
 

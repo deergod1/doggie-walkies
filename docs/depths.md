@@ -23,8 +23,8 @@ lamp at full). `tests/themes.test.js` checks every theme against its band.
 | 1 | Meadow islands / Cloud kingdom / Lagoon isles / Karst terraces | surface, sky islands | light | arc, r=3 | water | 1 (always 1) |
 | 2 | Meadow islands / Cloud kingdom / Lagoon isles / Karst terraces | surface, sky islands | light | arc, r=3 | water | 2 (1–3) |
 | 3 | Snowy peaks / Prayer highlands | surface, sky islands | light | arc, r=3 | water | 3 (2–4) |
-| 4 | Badlands / Salt flats | surface | light | arc, r=3 | water (some lava / acid) | 4 (3–5) |
-| 5 | Deep canyon | surface, rock walls | light | arc, r=3 | water | 5 (4–6) |
+| 4 | Badlands / Salt flats / Slime marsh | surface | light | arc, r=3 | water (some lava / acid) | 4 (3–5) |
+| 5 | Deep canyon / Slime marsh | surface, rock walls (the canyon) | light | arc, r=3 | water | 5 (4–6) |
 | 6 | Deep canyon | surface, rock walls | light | arc, r=2 | water | 6 (5–7) |
 | 7 | Root caves | cave | medium | arc, r=2 | water | 7 (6–8) |
 | 8 | Root caves | cave | medium | arc, r=2 | water | 8 (7–9) |

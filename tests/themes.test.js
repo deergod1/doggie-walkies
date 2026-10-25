@@ -34,8 +34,22 @@ test('every world picks one theme per depth from its seed, each about as often, 
       if (above && n > 1 && themesAt(d).includes(above)) { could++; kept += t === above; expect += STICK + (1 - STICK) / n; }
     }
   }
+  // how often each theme should come up: each as often as the others of its depth where they may
+  // all appear above it too; one that may also appear above where another starts (the slime marsh
+  // at 4 and 5, the canyon from 5 on) is kept from above (STICK) besides its share of the picks
+  const share = DEPTHS.map(() => new Map());
+  let above = new Map([[TOWN, 1]]);
+  for (const d of DEPTHS) {
+    const options = themesAt(d), add = (t, p) => share[d].set(t, (share[d].get(t) || 0) + p);
+    for (const [t, p] of above) {
+      const stays = d > 1 && options.includes(t);
+      for (const o of options) add(o, p * (stays ? 1 - STICK : 1) / options.length);
+      if (stays) add(t, p * STICK);
+    }
+    above = share[d];
+  }
   for (const d of DEPTHS) for (const t of themesAt(d))
-    assert.ok(Math.abs(counts[d].get(t.props) / 800 - 1 / themesAt(d).length) < 0.08, `${d}: ${t.props} ${counts[d].get(t.props)}`);
+    assert.ok(Math.abs(counts[d].get(t.props) / 800 - share[d].get(t)) < 0.08, `${d}: ${t.props} ${counts[d].get(t.props)}`);
   assert.ok(could > 1000 && Math.abs(kept - expect) / could < 0.05, JSON.stringify({ kept, could, expect }));
   // every theme comes up (all their assets are used), the town is always in the meadows
   assert.deepEqual([...seen].sort(), [...ids].sort());
@@ -110,7 +124,7 @@ test('the route, its guardians and hordes never depend on the themes a world pic
   });
   for (const seed of [1, 2, 3, 4]) {
     const own = shape(makeLayouts(seed, worldThemes(seed)));
-    for (const force of [['clouds', 'highlands', 'saltflats', 'grotto', 'hive', 'ossuary', 'forge', 'cenote'], ['lagoon'], ['karst', 'nests'], ['darkforest']])
+    for (const force of [['clouds', 'highlands', 'saltflats', 'grotto', 'hive', 'ossuary', 'forge', 'cenote'], ['lagoon'], ['karst', 'nests'], ['darkforest'], ['slime']])
       assert.deepEqual(shape(makeLayouts(seed, worldThemes(seed, force))), own, `seed ${seed}: ${force}`);
   }
 });

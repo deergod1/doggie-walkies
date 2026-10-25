@@ -17,11 +17,11 @@ function terrain(seed) {
     siteReservations: [], sitePlacements: [] };
 }
 
-test('checked-in metadata matches all 800 exported models, including the 240 clutter roots, the 374 theme roots, the chest, the town and the 42 trial pieces', () => {
+test('checked-in metadata matches all 824 exported models, including the 240 clutter roots, the 398 theme roots, the chest, the town and the 42 trial pieces', () => {
   const { metadata, files } = propCatalog(assets);
   assert.deepEqual(PROP_METADATA, metadata);
   assert.deepEqual(PROP_FILES, files);
-  assert.equal(new Set(PROP_METADATA.map(p => p.name)).size, 800);
+  assert.equal(new Set(PROP_METADATA.map(p => p.name)).size, 824);
   assert.equal(PROP_METADATA.filter(p => p.set === 'town').length, 10);
   // the trials' parts (blender/trials.py): one library, never scattered
   assert.deepEqual(PROP_FILES.trial, ['trials.glb']);
@@ -36,9 +36,9 @@ test('checked-in metadata matches all 800 exported models, including the 240 clu
   assert.equal(new Set(clutter.map(p => p.set)).size, 13);
   for (const mode of ['ground', 'wall', 'ceiling', 'lip', 'water']) assert.ok(clutter.some(p => p.attach === mode));
   const themes = PROP_METADATA.filter(p => p.cube_crawler_themes);
-  assert.equal(themes.length, 374);
-  // the twelve new sets, and landmarks for the eleven classic ones
-  assert.equal(new Set(themes.map(p => p.set)).size, 23);
+  assert.equal(themes.length, 398);
+  // the thirteen new sets, and landmarks for the eleven classic ones
+  assert.equal(new Set(themes.map(p => p.set)).size, 24);
   for (const mode of ['ground', 'wall', 'ceiling', 'lip', 'water', 'line']) assert.ok(themes.some(p => p.attach === mode));
   // landmarks, vignettes and string segments are never scattered
   for (const p of themes.filter(p => p.landmark || p.vignette || p.attach === 'line')) assert.ok(p.attach === 'line' || signatureProp(p), p.name);

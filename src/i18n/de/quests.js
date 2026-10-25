@@ -62,6 +62,7 @@ export default {
   'Prayer highlands': { text: 'Gebetsfahnen-Hochland', g: 'n' },
   Badlands: { text: 'Ödland', g: 'n' },
   'Salt flats': { text: 'Salzebene', g: 'f' },
+  'Slime marsh': { text: 'Schleimsumpf', g: 'm' },
   'Deep canyon': { text: 'Tiefe Schlucht', adj: 'Tief', g: 'f' },
   'Root caves': { text: 'Wurzelhöhlen', g: 'pl' },
   'Frozen caves': { text: 'Eishöhlen', g: 'pl' },
@@ -128,6 +129,8 @@ export default {
   'lantern tree': { text: 'Laternenbaum', g: 'm' },
   'mossy arch': { text: 'Moosbogen', g: 'm' },
   'forest chapel': { text: 'Waldkapelle', g: 'f' },
+  'meteor crater': { text: 'Meteoritenkrater', g: 'm' },
+  'giant slime tree': { text: 'Riesiger Schleimbaum', adj: 'Riesig', g: 'm' },
 
   // where a hiding place is (core/questplan.js clueOf)
   'up on the needle of rock': 'oben auf der Felsnadel',

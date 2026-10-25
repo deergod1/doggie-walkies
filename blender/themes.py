@@ -27,8 +27,8 @@ library adds:
                       candles) or "pulse" (it breathes slowly: glowing mushrooms, runes).
     fluid "honey"     a new fluid for the honey hive.
 
-Builders live in themes_highlands.py, themes_surface.py, themes_caves.py, themes_canyon.py and
-themes_darkforest.py; the classic
+Builders live in themes_highlands.py, themes_surface.py, themes_caves.py, themes_canyon.py,
+themes_darkforest.py and themes_slime.py; the classic
 themes' landmarks (the sets of props.py and clutter.py) in themes_classic.py.
 
 Landmarks also get a role (how a reward site is built around them) and two lists of boxes
@@ -67,6 +67,7 @@ import themes_caves  # noqa: E402
 import themes_classic  # noqa: E402
 import themes_canyon  # noqa: E402
 import themes_darkforest  # noqa: E402
+import themes_slime  # noqa: E402
 
 SEED = 9137
 COLLECTION = "CubeCrawlerThemes"
@@ -80,7 +81,7 @@ LINE_TRIANGLES = 400
 EXTRA_KEYS = clutter.EXTRA_KEYS + ("drop", "landmark", "role", "footprint", "height", "anchors", "colliders",
                                    "occluders", "vignette", "flicker")
 FLICKERS = ("flame", "pulse")
-BUILDERS = (themes_highlands, themes_surface, themes_caves, themes_classic, themes_canyon, themes_darkforest)
+BUILDERS = (themes_highlands, themes_surface, themes_caves, themes_classic, themes_canyon, themes_darkforest, themes_slime)
 
 
 def spec(theme, prop, priority=1, variants=2, attach="ground", **hints):
@@ -323,6 +324,20 @@ SPECS = [
     landmark("darkforest", "lantern_tree", "monument", light="#ffb85a", intensity=1.6, flicker="flame"),
     landmark("darkforest", "mossy_arch", "gate", light="#7af0ff", intensity=1, flicker="pulse"),
     landmark("darkforest", "forest_chapel", "shrine", light="#ffc070", intensity=1.3, flicker="flame"),
+    # --- Slime marsh: moss and pools of toxic slime, slime trees, where the meteorites came down ---
+    cover("slime", "slime_moss"),
+    cover("slime", "goo_puddle", light="#b8ff5a", intensity=0.4, flicker="pulse"),
+    spec("slime", "slime_tree", blocking=True, sway=0.05, light="#b8ff5a", intensity=0.8, flicker="pulse"),
+    spec("slime", "slime_mushrooms", light="#b8ff5a", intensity=0.8, flicker="pulse"),
+    spec("slime", "goo_mound", priority=2, blocking=True, light="#b8ff5a", intensity=0.4, flicker="pulse"),
+    spec("slime", "slimed_rock", priority=2, blocking=True, light="#b8ff5a", intensity=0.3, flicker="pulse"),
+    spec("slime", "bubble_vent", light="#d8ff9a", intensity=1, flicker="pulse"),
+    spec("slime", "slime_reeds", sway=0.3),
+    spec("slime", "slime_seep", attach="wall", light="#b8ff5a", intensity=0.5, flicker="pulse"),
+    spec("slime", "slime_drip", attach="lip", light="#b8ff5a", intensity=0.4, flicker="pulse"),
+    spec("slime", "goo_pads", attach="water", fluid="acid", light="#b8ff5a", intensity=0.5, flicker="pulse"),
+    landmark("slime", "meteor_crater", "shrine", light="#b8ff5a", intensity=1.6, flicker="pulse"),
+    landmark("slime", "giant_slime_tree", "monument", light="#b8ff5a", intensity=1.4, flicker="pulse"),
     # --- the classic themes' landmarks (themes_classic.py) ---
     landmark("meadow", "windmill", "monument"),
     landmark("meadow", "wishing_well", "shrine"),

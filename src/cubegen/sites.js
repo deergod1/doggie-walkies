@@ -21,7 +21,7 @@ export const RECIPES = {
   badlands: ['rib_cage', 'agave', 'broken_wagon_wheel'],
   clouds: ['rainbow_crystal', 'sky_nest', 'storm_jar'], lagoon: ['buried_chest', 'tiki_torch', 'driftwood'],
   karst: ['rice_sheaves', 'stone_lantern', 'banana_plant'], highlands: ['butter_lamps', 'mani_stones', 'chorten_small'],
-  darkforest: ['glow_mushrooms', 'lantern_post', 'mossy_stump'],
+  darkforest: ['glow_mushrooms', 'lantern_post', 'mossy_stump'], slime: ['slime_mushrooms', 'goo_mound', 'bubble_vent'],
   saltflats: ['pink_halite', 'salt_cones', 'salt_bricks'], canyon: ['cairn', 'clay_pots', 'luminaria'], grotto: ['giant_clam', 'jelly_lantern', 'sunken_anchor'],
   hive: ['wax_candles', 'honey_pot', 'comb_mound'], ossuary: ['candelabra', 'funeral_urn', 'sarcophagus'],
   forge: ['crucible', 'ingot_stack', 'anvil_block'], cenote: ['copal_bowl', 'orchid_rock', 'jade_idol'],

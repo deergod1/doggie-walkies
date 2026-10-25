@@ -10,7 +10,7 @@ import { setAmbience, setDrone, drip, pop } from '../audio/loops.js';
 import { sfx } from '../audio/sfx.js';
 
 const WIND = { meadow: 0.3, peaks: 0.7, badlands: 0.45, clouds: 0.65, lagoon: 0.4, karst: 0.3,
-  highlands: 0.75, saltflats: 0.5, darkforest: 0.12 };   // under an open sky; others 0.3 (the forest: still)
+  highlands: 0.75, saltflats: 0.5, darkforest: 0.12, slime: 0.2 };   // under an open sky; others 0.3 (the forest: still)
 const DRIPS = { roots: 0.6, frozen: 0.9, swamp: 0.8, nests: 0.3, mines: 0.4, ruins: 0.5, volcanic: 0.1, abyss: 0.25,
   grotto: 0.9, hive: 0.4, ossuary: 0.3, forge: 0.15, cenote: 0.7 };   // per second
 const KIND = { [WATER]: 'water', [LAVA]: 'lava', [ACID]: 'acid' };
