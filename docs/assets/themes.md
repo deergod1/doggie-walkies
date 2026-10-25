@@ -43,21 +43,21 @@ theme's landmarks (see "Integration"); flag lines and the honey fluid are not bu
 
 ## Sets
 
-| Set | Theme (depths: alongside) | Mood |
+| Set | Theme (act) | Mood |
 |---|---|---|
-| highlands | Prayer highlands (3: Snowy peaks) | Tibetan prayer-flag hills: whitewash, maroon, gold, the five flag colours, turquoise lakes |
-| karst | Karst terraces (1–2: Meadow islands) | Guilin limestone needles, rice terraces, bamboo, red pavilions |
-| clouds | Cloud kingdom (1–2: Meadow islands) | Cloud kingdom: puffs, wind chimes, storm jars, sky gates |
-| saltflats | Salt flats (4: Badlands) | White salt crust, pink halite, flamingos, brine pools |
-| lagoon | Lagoon isles (1–2: Meadow islands) | Palms, sand, rowboats, a shipwreck, stilt huts |
-| canyon | Deep canyon (5–6: alone) | Sandstone strata, cottonwoods by the river, hoodoos, petroglyphs, cliff dwellings |
-| darkforest | Dark forest (1–2: Meadow islands) | Wooded hills at night: tall firs, lanterns, glowing mushrooms, old stones, abandoned sheds |
-| slime | Slime marsh (4–5: Badlands, Salt flats, Deep canyon) | Moss and pools of toxic slime: drooping slime trees, goo mounds with bones in them, bubbling vents, meteorite craters |
-| hive | Honey hive (11–12: Fungal swamp) | Honey hive: wax, comb, honey fluid (slows rather than hurts) |
-| cenote | Jungle cenote (13: alone) | Sunlit jungle temple: jade, glyphs, vines, a step shrine |
-| grotto | Sunken grotto (9–10: Frozen caves) | Sunken grotto: kelp, clams, glowing jellies, a sunken bell |
-| forge | Dwarven forge (16: Crystal mines) | Dwarven forge: pipes, gears, anvils, slag, steam vents |
-| ossuary | Ossuary (14–15: Spider nests) | Candlelit catacombs: bone walls, urns, candelabra (spooky but friendly) |
+| highlands | Prayer highlands (I) | Tibetan prayer-flag hills: whitewash, maroon, gold, the five flag colours, turquoise lakes |
+| karst | Karst terraces (I) | Guilin limestone needles, rice terraces, bamboo, red pavilions |
+| clouds | Cloud kingdom (I) | Cloud kingdom: puffs, wind chimes, storm jars, sky gates |
+| saltflats | Salt flats (I) | White salt crust, pink halite, flamingos, brine pools |
+| lagoon | Lagoon isles (I) | Palms, sand, rowboats, a shipwreck, stilt huts |
+| canyon | Deep canyon (I) | Sandstone strata, cottonwoods by the river, hoodoos, petroglyphs, cliff dwellings |
+| darkforest | Dark forest (I) | Wooded hills at night: tall firs, lanterns, glowing mushrooms, old stones, abandoned sheds |
+| slime | Slime marsh (II, open) | Moss and pools of toxic slime: drooping slime trees, goo mounds with bones in them, bubbling vents, meteorite craters |
+| hive | Honey hive (II) | Honey hive: wax, comb, honey fluid (slows rather than hurts) |
+| cenote | Jungle cenote (II, open) | Sunlit jungle temple: jade, glyphs, vines, a step shrine |
+| grotto | Sunken grotto (II) | Sunken grotto: kelp, clams, glowing jellies, a sunken bell |
+| forge | Dwarven forge (II, open: a works yard) | Dwarven forge: pipes, gears, anvils, slag, steam vents |
+| ossuary | Ossuary (III) | Candlelit catacombs: bone walls, urns, candelabra (spooky but friendly) |
 
 ## Props
 

@@ -603,31 +603,25 @@ under plank bridges never stand where another structure passes underneath.
 
 ## Themes per world (`themes/index.js`, `themes/caves.js`, `themes/depth.js`)
 
-Every theme names the depths it may appear at (`depths`: first and last). Every world picks
-one theme per depth from its seed (`worldThemes(seed)`, its own random stream per depth): with
-`STICK` (0.55) a depth keeps the theme of the depth above if that one may appear there too,
-otherwise it picks again, each of the depth's themes equally likely. So themes come in
-stretches of a few depths, and a world may go from the meadows to the lagoons halfway down.
-The town's meadows (depth 0) do not carry over. The picks are kept as stretches
-(`[{ at, theme }]`, each lasting until the next).
+Every theme belongs to one of the story's three acts (`act`; `ACTS`: the depths of each, see
+[story.md](story.md)) and may appear at any depth of it (`depths` follows from the act). Every
+world draws its themes from its seed (`worldThemes(seed)`, its own random stream per act): an
+act shows `SHARE` (half) of its themes, rounded up or down at random so the share comes out
+right, each equally likely, so every theme is as likely to be in a world as any other, whichever
+act it belongs to and however many themes its act has. They come down the act in their story
+order (the order of `THEMES`), the act's depths dealt out among them, a depth each and the rest
+at random, no theme for more than `LONGEST` (3) depths. The town (0) is always in the meadows
+(`TOWN`), the core (20) in the obsidian abyss (`CORE`). The picks are kept as stretches
+(`[{ at, theme }]`, each lasting until the next). Forced themes (`?theme=`, the tests) win every
+depth they may appear at: an act with any of them shows them alone.
 
-| Depths | Themes |
-|---|---|
-| 0 | Meadow islands (the town and its road, always: `TOWN`) |
-| 1–2 | Meadow islands, Cloud kingdom, Lagoon isles, Karst terraces, Dark forest (a night theme) |
-| 3 | Snowy peaks, Prayer highlands |
-| 4 | Badlands, Salt flats, Slime marsh |
-| 5 | Deep canyon (walled in like a cave, under the sky), Slime marsh |
-| 6 | Deep canyon |
-| 7–8 | Root caves |
-| 9–10 | Frozen caves, Sunken grotto |
-| 11–12 | Fungal swamp, Honey hive |
-| 13 | Jungle cenote |
-| 14–15 | Spider nests, Ossuary |
-| 16 | Crystal mines, Dwarven forge |
-| 17 | Buried ruins |
-| 18 | Volcanic depths |
-| 19–20 | Obsidian abyss |
+| Act | Depths | Themes, in story order |
+|---|---|---|
+| | 0 | Meadow islands (the town and its road, always: `TOWN`) |
+| I | 1–6 | Meadow islands, Cloud kingdom, Lagoon isles, Karst terraces, Dark forest (a night theme), Snowy peaks, Prayer highlands, Salt flats, Badlands, Deep canyon (walled in like a cave, under the sky) |
+| II | 7–13 | Root caves, Sunken grotto, Dwarven forge (open), Honey hive, Fungal swamp (open), Jungle cenote (open), Frozen caves, Slime marsh (open, days and nights) |
+| III | 14–19 | Crystal mines, Spider nests, Ossuary, Buried ruins, Volcanic depths, Obsidian abyss |
+| | 20 | Obsidian abyss (the core, always: `CORE`) |
 
 - **Where it is read:** the picks live on the layouts (`world.layout.themes`, each depth's
   `layout.theme`). The layout reads a depth's gorge spans from it; the worker reads the rest
@@ -637,22 +631,23 @@ The town's meadows (depth 0) do not carry over. The picks are kept as stretches
   music, names). A map without a theme is a bug: `themeOf` throws. The light follows the
   world's picks (`lightAt(depth, themes)`, blended between the starts of the stretches); with no
   world yet (the menu before its first cube) it is the town's.
-- **Light in three bands:** light under the sky (0–6), medium in the sunlit caves (7–13), dark
-  in the deep (14–20). Each theme's `light` belongs to its band; its `lamp` (0, about a half, 1)
+- **Light in three bands, one per act:** light under the sky (0–6), medium in the sunlit
+  hollows (7–13: caves lit through cracks, and open themes under a hazy sky, dim stars at
+  most), dark in the deep (14–20). Each theme's `light` belongs to its band; its `lamp` (0, about a half, 1)
   sets how bright the character's own light is (`render/look.js`). A **night** theme (`night`:
   the dark forest) is under the sky in the light band but lit like the deep: a few stars, a dim
   blue moon, fog, the character's full lamp, and its own lights.
-- **What the theme changes:** the themes of a depth agree on `cave`. The route, its guardians
-  and hordes depend on the seed alone; the gorge spans (and with them where the branches go)
-  are the theme's. Which large area a depth gets (`planSlots`) is the depth's: its first theme's
-  weights, whichever theme the world picked (the slime marsh at 5 is not walled in like the
-  canyon, whose weights it takes there).
-- **Same per depth:** the enemy rosters (`DEPTH_SPAWNS`) go by depth, and the themes added later
-  play the song of the first theme of their depths for now.
+- **What the theme changes:** acts I and II mix open themes and walled ones (`cave`, `walls`);
+  every theme of act III is walled in. The route, its guardians and hordes depend on the seed
+  alone; the gorge spans (and with them where the branches go) are the theme's. Which large
+  area a depth gets (`planSlots`) is the depth's: the weights of the first theme of its act,
+  whichever theme the world picked there.
+- **Same per depth:** the enemy rosters (`DEPTH_SPAWNS`) go by depth; the species that keep to
+  one theme (`where`) are in every row of its act ([depths.md](depths.md#enemies-per-depth)).
 
 ### The dark forest (`darkforest`)
 
-Wooded hills at night (depths 1–2, next to the meadows): tall firs and gnarled trees, lanterns
+Wooded hills at night (act I, among the meadows and the sky islands): tall firs and gnarled trees, lanterns
 on posts and in the branches, glowing mushrooms, old stones, and the abandoned places of people
 long gone. What makes it so, all in its theme entry:
 
@@ -681,8 +676,8 @@ long gone. What makes it so, all in its theme entry:
 
 ### The slime marsh (`slime`)
 
-Green moss and pools of toxic slime (depths 4–5, next to the badlands and the salt flats, and
-the canyon): drooping slime trees, mounds of goo with bones or a sword stuck in them, bubbling
+Green moss and pools of toxic slime (act II, the last of its themes: an open marsh in a hollow
+under the act's hazy sky, no rock walls, lit like the sunlit hollows by day): drooping slime trees, mounds of goo with bones or a sword stuck in them, bubbling
 vents, reeds, and the craters the slime meteorites left. What makes it so, in its theme entry:
 
 - **Ground:** low and wet, few holes (`void` 0.1), more lakes and rivers
@@ -748,12 +743,13 @@ placements (with a few small things of the theme's around them), colliders and o
 their cells are kept free of ambient props. Optional: one that finds no room is left out. In the
 dark forest a room gets about 1.2 of them. Checks: `tests/vignettes.test.js`.
 - **Dev:** `?theme=clouds,forge` (with `?dev=1`) makes those themes win every depth they may
-  appear at. `new World(seed, { themes: ['mines'] })` does the same in tests.
-- **Checks:** `tests/themes.test.js`: the picks (stable, even per depth, in stretches as often as
-  `STICK` says, every theme coming up, the town always in the meadows), every depth's themes
-  agreeing on `cave`, every theme complete (depths, structures, arenas, site recipes, spans,
-  its own props), the same route whatever the picks, and every theme generating its depths
-  dressed from its own set.
+  appear at (their acts show them alone). `new World(seed, { themes: ['mines'] })` does the same
+  in tests.
+- **Checks:** `tests/themes.test.js`: the picks (stable, each act in story order, no stretch
+  longer than `LONGEST`, every theme in about `SHARE` of the worlds, the town always in the
+  meadows and the core in the abyss), act III walled in, every theme complete (act, structures,
+  arenas, site recipes, spans, its own props), the same route whatever the picks, and every
+  theme generating its depths dressed from its own set.
 
 ### The fluids' colours (`themes/fluids.js`, `cubegen/fluidbodies.js`, `render/fluidpal.js`)
 

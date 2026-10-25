@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { THEMES, TOWN } from '../src/themes/index.js';
-import { worldThemes, themesAt, themeAt, themeOf, themeById, lightAt, STICK, MAX_DEPTH } from '../src/themes/depth.js';
+import { THEMES, TOWN, CORE, ACTS } from '../src/themes/index.js';
+import { worldThemes, themesAt, themeAt, themeOf, themeById, lightAt, actAt, SHARE, LONGEST, MAX_DEPTH } from '../src/themes/depth.js';
 import { BUILDS } from '../src/themes/builds.js';
 import { PALETTES } from '../src/cubegen/arenaprops.js';
 import { RECIPES } from '../src/cubegen/sites.js';
@@ -15,53 +15,47 @@ import { World } from '../src/world/world.js';
 const ids = THEMES.map(t => t.props);
 const DEPTHS = Array.from({ length: MAX_DEPTH + 1 }, (_, d) => d);
 
-test('every world picks one theme per depth from its seed, each about as often, in stretches', () => {
-  const counts = DEPTHS.map(() => new Map()), seen = new Set();
-  let kept = 0, could = 0, expect = 0;
-  for (let seed = 0; seed < 800; seed++) {
+test('every world shows half of each act\'s themes, in story order, each about as often as any other', () => {
+  const seen = new Map(), N = 2000;
+  for (let seed = 0; seed < N; seed++) {
     // (forcing a theme that is no theme computes them afresh, past the cache)
     const picks = worldThemes(seed), again = worldThemes(seed, ['none']);
     assert.deepEqual(picks.map(p => [p.at, p.theme.props]), again.map(p => [p.at, p.theme.props]));
     assert.equal(picks[0].at, 0);
     picks.forEach((p, i) => i && assert.ok(p.at > picks[i - 1].at && p.theme !== picks[i - 1].theme, 'stretches'));
-    for (const d of DEPTHS) {
-      const t = themeAt(d, picks);
-      assert.ok(themesAt(d).includes(t), `${seed}/${d}: ${t.props}`);
-      counts[d].set(t.props, (counts[d].get(t.props) || 0) + 1);
-      seen.add(t.props);
-      // a depth keeps the theme above it as often as STICK says (plus the times it picks it again)
-      const above = d > 1 && themeAt(d - 1, picks), n = themesAt(d).length;
-      if (above && n > 1 && themesAt(d).includes(above)) { could++; kept += t === above; expect += STICK + (1 - STICK) / n; }
+    for (const d of DEPTHS) assert.ok(themesAt(d).includes(themeAt(d, picks)), `${seed}/${d}: ${themeAt(d, picks).props}`);
+    // every act in its story order, no theme for more than LONGEST depths (but the abyss, which
+    // goes on into the core)
+    for (let a = 1; a < ACTS.length; a++) {
+      const [from, to] = ACTS[a], pool = themesAt(from), here = picks.filter(p => p.at >= from && p.at <= to);
+      here.forEach((p, i) => i && assert.ok(pool.indexOf(p.theme) > pool.indexOf(here[i - 1].theme), `${seed}: act ${a} in order`));
+      for (const t of new Set(DEPTHS.filter(d => d >= from && d <= to).map(d => themeAt(d, picks)))) seen.set(t, (seen.get(t) || 0) + 1);
+      for (const p of here) {
+        const end = Math.min(to + 1, picks[picks.indexOf(p) + 1]?.at ?? MAX_DEPTH + 1);
+        assert.ok(end - p.at <= LONGEST, `${seed}: ${p.theme.props} for ${end - p.at} depths`);
+      }
     }
   }
-  // how often each theme should come up: each as often as the others of its depth where they may
-  // all appear above it too; one that may also appear above where another starts (the slime marsh
-  // at 4 and 5, the canyon from 5 on) is kept from above (STICK) besides its share of the picks
-  const share = DEPTHS.map(() => new Map());
-  let above = new Map([[TOWN, 1]]);
-  for (const d of DEPTHS) {
-    const options = themesAt(d), add = (t, p) => share[d].set(t, (share[d].get(t) || 0) + p);
-    for (const [t, p] of above) {
-      const stays = d > 1 && options.includes(t);
-      for (const o of options) add(o, p * (stays ? 1 - STICK : 1) / options.length);
-      if (stays) add(t, p * STICK);
-    }
-    above = share[d];
-  }
-  for (const d of DEPTHS) for (const t of themesAt(d))
-    assert.ok(Math.abs(counts[d].get(t.props) / 800 - share[d].get(t)) < 0.08, `${d}: ${t.props} ${counts[d].get(t.props)}`);
-  assert.ok(could > 1000 && Math.abs(kept - expect) / could < 0.05, JSON.stringify({ kept, could, expect }));
-  // every theme comes up (all their assets are used), the town is always in the meadows
-  assert.deepEqual([...seen].sort(), [...ids].sort());
+  // every theme comes up about as often as every other, whatever its act
+  for (const t of THEMES) assert.ok(Math.abs(seen.get(t) / N - SHARE) < 0.04, `${t.props}: ${seen.get(t) / N}`);
+  // the town is always in the meadows, the core in the abyss
   assert.deepEqual(themesAt(0), [TOWN]);
-  for (let seed = 0; seed < 50; seed++) assert.equal(themeAt(0, worldThemes(seed)), TOWN);
+  assert.deepEqual(themesAt(MAX_DEPTH), [CORE]);
+  for (let seed = 0; seed < 50; seed++) {
+    assert.equal(themeAt(0, worldThemes(seed)), TOWN);
+    assert.equal(themeAt(MAX_DEPTH, worldThemes(seed)), CORE);
+  }
 });
 
 test('forced themes win every depth they may appear at; the light blends between stretches', () => {
   const picks = worldThemes(7, ['clouds', 'forge', 'ossuary']);
   assert.equal(themeAt(0, picks), TOWN);
-  for (const [d, id] of [[1, 'clouds'], [2, 'clouds'], [14, 'ossuary'], [15, 'ossuary'], [16, 'forge']])
+  for (const [d, id] of [[1, 'clouds'], [6, 'clouds'], [7, 'forge'], [13, 'forge'], [14, 'ossuary'], [19, 'ossuary']])
     assert.equal(themeAt(d, picks).props, id);
+  // two in one act share it, in story order; the acts without any as they would be
+  const two = worldThemes(7, ['canyon', 'meadow']);
+  assert.deepEqual([1, 3, 4, 6].map(d => themeAt(d, two).props), ['meadow', 'meadow', 'canyon', 'canyon']);
+  for (let d = 7; d <= MAX_DEPTH; d++) assert.equal(themeAt(d, two), themeAt(d, worldThemes(7)));
   // the meadows from the town down to the peaks are one stretch of light
   const meadow = themeById('meadow'), peaks = themeById('peaks'), flats = themeById('saltflats');
   const world = [{ at: 0, theme: meadow }, { at: 3, theme: peaks }, { at: 4, theme: flats }];
@@ -75,15 +69,14 @@ test('forced themes win every depth they may appear at; the light blends between
 });
 
 test('every theme is complete: depths of its kind, structures, footing props, arenas, sites and spans', () => {
-  for (const d of DEPTHS) {
-    assert.ok(themesAt(d).length, `no theme at depth ${d}`);
-    assert.ok(themesAt(d).every(t => t.cave === themesAt(d)[0].cave), `depth ${d} mixes caves and sky`);
-  }
+  for (const d of DEPTHS) assert.ok(themesAt(d).length, `no theme at depth ${d}`);
+  // the acts follow on from the town to the core
+  assert.deepEqual(ACTS.slice(1).flatMap(([a, b]) => [a, b]), [1, 6, 7, 13, 14, MAX_DEPTH - 1]);
   assert.equal(new Set(ids).size, ids.length, 'theme ids (prop sets) are unique');
   for (const t of THEMES) {
-    const [a, b] = t.depths;
-    assert.ok(Number.isInteger(a) && Number.isInteger(b) && a <= b && a >= 0 && b <= MAX_DEPTH, `${t.props}: depths`);
-    assert.ok(t === TOWN || a > 0, `${t.props}: only the town's theme at the town`);
+    assert.ok([1, 2, 3].includes(t.act) && t.depths === ACTS[t.act], `${t.props}: act`);
+    // act III is walled in, every theme of it; acts I and II have open ones and walled ones
+    if (t.act === 3) assert.ok(t.cave || t.walls, `${t.props}: walled in`);
     assert.ok(BUILDS[t.props], `${t.props}: structures`);
     assert.ok(PALETTES[t.props], `${t.props}: arena palette`);
     assert.ok(RECIPES[t.props], `${t.props}: site recipe`);
@@ -101,7 +94,7 @@ test('every theme is complete: depths of its kind, structures, footing props, ar
 
 // a third of the depths each: light (the sky down to the canyons), medium (the sunlit caves), dark;
 // a night theme (the dark forest) is under the sky in the light band, but lit like the deep
-const band = d => d <= 6 ? 'light' : d <= 13 ? 'medium' : 'dark';
+const band = d => d === 0 ? 'light' : d === MAX_DEPTH ? 'dark' : [null, 'light', 'medium', 'dark'][actAt(d)];
 test('the light comes in three bands of depths: light, medium and dark (and night under the sky)', () => {
   const look = t => {
     const { sun, hemi, lamp = 0 } = t.light;
@@ -113,14 +106,16 @@ test('the light comes in three bands of depths: light, medium and dark (and nigh
   for (const t of THEMES.filter(t => t.night)) assert.ok(!t.cave && band(t.depths[1]) === 'light' && t.light.stars > 0, `${t.props}: a night sky`);
   // a theme with days and nights: its day in its band, its night lit like the deep, under the sky
   for (const t of THEMES.filter(t => t.cycle)) {
-    assert.ok(!t.cave && band(t.depths[1]) === 'light' && t.cycle.dark.stars > 0, `${t.props}: a night sky`);
+    assert.ok(!t.cave && !t.walls && t.cycle.dark.stars > 0, `${t.props}: a night sky`);
     assert.equal(look({ light: t.cycle.dark }), 'dark', `${t.props}: its night`);
   }
   assert.ok(THEMES.some(t => t.cycle), 'the slime marsh has days and nights');
   assert.ok(THEMES.some(t => t.night), 'the dark forest is a night theme');
   assert.deepEqual(['light', 'medium', 'dark'].map(b => DEPTHS.filter(d => band(d) === b).length), [7, 7, 7]);
-  // under the sky in the light band, below the ground in the others
-  for (const d of DEPTHS) assert.equal(themesAt(d)[0].cave, band(d) !== 'light', `depth ${d}`);
+  // open themes under the sky in the light band; in the medium band too, under its haze (dimmer
+  // stars, if any); walled in in the dark one
+  for (const t of THEMES) if (!t.cave && t.act === 2) assert.ok((t.light.stars ?? 0) <= 0.3, `${t.props}: hazy stars`);
+  assert.ok(THEMES.some(t => t.act === 2 && !t.cave) && THEMES.some(t => t.act === 2 && t.cave), 'act II: open and walled');
 });
 
 test('the route, its guardians and hordes never depend on the themes a world picked', () => {
@@ -130,7 +125,7 @@ test('the route, its guardians and hordes never depend on the themes a world pic
   });
   for (const seed of [1, 2, 3, 4]) {
     const own = shape(makeLayouts(seed, worldThemes(seed)));
-    for (const force of [['clouds', 'highlands', 'saltflats', 'grotto', 'hive', 'ossuary', 'forge', 'cenote'], ['lagoon'], ['karst', 'nests'], ['darkforest'], ['slime']])
+    for (const force of [['clouds', 'highlands', 'saltflats', 'grotto', 'hive', 'ossuary', 'forge', 'cenote'], ['lagoon'], ['karst', 'nests'], ['darkforest'], ['slime', 'canyon']])
       assert.deepEqual(shape(makeLayouts(seed, worldThemes(seed, force))), own, `seed ${seed}: ${force}`);
   }
 });

@@ -1,6 +1,6 @@
 // Every depth's look, read straight from the game's theme tables (src/themes/index.js and
 // caves.js): the depths it may appear at, the sky, the colours of the ground by height, the
-// river, the song. Each world picks one of the themes of every depth.
+// river, the song. Each world shows half of each act's themes, in this order.
 import { THEMES } from '../../src/themes/index.js';
 import { html, t as tr, themeLabel } from '../deck.js';
 

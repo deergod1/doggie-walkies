@@ -124,9 +124,8 @@ function build(seed, d, above, theme, opts = {}) {
   const lengthAt = i => min + (desired - min + i) % (max - min + 1);
   // the depth's large area (areas.js) is built into the route, on a stream of its own (a depth
   // without one keeps its route); where it does not fit the depth may get a tableland instead.
-  // Which one is the depth's, whatever theme the world picked there: its first theme's weights (a
-  // theme that also appears a depth further down, the slime marsh at 5 beside the canyon, would
-  // otherwise move the route)
+  // Which one is the depth's, whatever theme the world picked there: the weights of the first
+  // theme of its act (themes/depth.js themesAt; the world's own theme would move the route)
   const slots = planSlots(seed, d, themesAt(d)[0]);
   let spine = null, area = null;
   if (AREA_SIZE[slots.big]) {

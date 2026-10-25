@@ -30,12 +30,12 @@ above, and every puzzle you solve drains it one stage further.
 | `flood` | event | yes | yes | press the button on the summit | drowning (the fluid) | 1–19, any (the depth's fluid) |
 | `sunken` | event + puzzles | no | no | solve 2–3 puzzles, each drains a stage | (ordinary death) | 2–19, any |
 | `collapse` | event | yes | yes | reach the exit apron | falling in | 1–19, any |
-| `cold` | event | yes | meter | light the great fire | freezing | peaks, frozen caves (3, 9–10) |
+| `cold` | event | yes | meter | light the great fire | freezing | peaks, frozen caves (1–13) |
 | `storm` | event | yes | gusts | pull the lightning rod on top of the hill | (blown off: a fall) | sky and surface themes (1–6) |
 | `siege` | event | yes | yes | hold the beacon long enough | death | 2–19, any |
 | `chase` | event | yes | yes | take the relic, run, drop the portcullis on its warden | death | 4–19, any |
-| `miasma` | event | yes | yes | open the vent valve at the bottom | the fog (damage) | walled: canyon 5–6, caves 7–19 |
-| `slide` | puzzle | no | no | slide across the ice to the goal | – | ice only: peaks, frozen caves (3, 9–10) |
+| `miasma` | event | yes | yes | open the vent valve at the bottom | the fog (damage) | walled: canyon, caves 5–19 |
+| `slide` | puzzle | no | no | slide across the ice to the goal | – | ice only: peaks, frozen caves |
 | `mirror` | puzzle | no | no | the beam through every lens into the receiver | – | mines, forge, ruins, abyss, highlands |
 | `braziers` | puzzle | no | no | every brazier lit | – | any |
 | `crates` | puzzle | no | no | a crate on every plate | – | any |

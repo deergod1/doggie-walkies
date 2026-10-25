@@ -391,8 +391,8 @@ looking forward; a little curl sticks out of its front, its belly is pale. Profi
 
 | Kind | Where | Health, damage | Notes |
 |---|---|---|---|
-| Squirtle | the lagoon isles (depth 2), the sunken grotto (9–10) | 42, 13 | blue |
-| Coral squirtle | the sunken grotto (9–10), the jungle cenote (13) | ×1.5, ×1.4 | coral red, ×1.1 speed |
+| Squirtle | the lagoon isles (act I), the sunken grotto and the jungle cenote (act II, early) | 42, 13 | blue |
+| Coral squirtle | the sunken grotto and the jungle cenote (act II, from 9) | ×1.5, ×1.4 | coral red, ×1.1 speed |
 | Tide squirtle | Squarlo's (`minion`) | ×0.7, ×0.6 | teal; pops out of the floor round him, a little XP once, now and then a minor health potion |
 
 A roster entry may keep to some themes (`where` in `core/spawns.js`: the biome, the theme's prop

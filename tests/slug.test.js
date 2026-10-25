@@ -4,6 +4,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { SLUG, SPOTTED_SLUG, BLACK_SLUG, ENEMY_KINDS, blowOf } from '../src/core/enemies.js';
 import { DEPTH_SPAWNS } from '../src/core/spawns.js';
+import { themeById } from '../src/themes/depth.js';
 import { enemyMire } from '../src/core/footing.js';
 
 test('the Slug crawls slowly, leaves a trail and spits slime that slows only the body', () => {
@@ -20,10 +21,11 @@ test('the Slug crawls slowly, leaves a trail and spits slime that slows only the
   assert.equal(enemyMire({ profile: SLUG, f: { top: 2, link: [] }, x: 0, z: 0 }, null, { props: 'slime', mire: 0.88 }), 1);
 });
 
-test('Slugs live only in the slime marsh', () => {
+test('Slugs live only in the slime marsh, at every depth it may appear at', () => {
   const rows = DEPTH_SPAWNS.flatMap((d, depth) => d.roster.map(r => ({ ...r, depth })));
   const slugs = rows.filter(r => r.type === 'slug');
-  assert.deepEqual(slugs.map(r => r.depth), [4, 5]);
+  const [a, b] = themeById('slime').depths;
+  assert.deepEqual(slugs.map(r => r.depth), Array.from({ length: b - a + 1 }, (_, i) => a + i));
   for (const r of slugs) {
     assert.deepEqual(r.where, ['slime']);
     for (const k of Object.keys(r.kinds)) assert.equal(ENEMY_KINDS[k].species, 'slug');

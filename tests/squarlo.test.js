@@ -248,8 +248,9 @@ test('Squirtles burrow (nothing touches one under the floor) and live in the wat
   assert.ok(ball.push.speed * ball.push.time < 0.5, 'a tiny, tiny push');
   assert.ok(TIDE_SQUIRTLE.minion && TIDE_SQUIRTLE.coins[1] === 0);
   assert.ok(CORAL_SQUIRTLE.hp > SQUIRTLE.hp);
+  // at every depth the lagoons, the sunken grotto and the cenote may appear at (themes/index.js acts)
   const where = DEPTH_SPAWNS.flatMap((r, d) => r.roster.filter(e => e.type === 'squirtle').map(e => [d, e.where]));
-  assert.deepEqual(where, [[1, ['lagoon']], [2, ['lagoon']], [9, ['grotto']], [10, ['grotto']], [13, ['cenote']]]);
+  assert.deepEqual(where, [1, 2, 3, 4, 5, 6].map(d => [d, ['lagoon']]).concat([7, 8, 9, 10, 11, 12, 13].map(d => [d, ['grotto', 'cenote']])));
   for (let seed = 0; seed < 60; seed++) {
     assert.ok(!population({ seed, depth: 2, biome: 'meadow' }).has('squirtle'));
   }

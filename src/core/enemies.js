@@ -1025,7 +1025,7 @@ export const BLAZE_FACE = enemyKind(FIREFACE, {
   colors: paints({ flame: 'ochre.glow', eyes: 'eyes.bone' }), light: '#ffc23a', sparks: ['#fff3b0', '#ffd84a', '#ffa82a'],
   ichor: ['#fff0a0', '#d08a1a'], mods: { hp: 1.25, damage: 1.2 },
 });
-// the dark forest's (depths 1-2): a little teal lantern of a face, weak, far from the fires below
+// the dark forest's (act I): a little teal lantern of a face, weak, far from the fires below
 export const LANTERN_FACE = enemyKind(FIREFACE, {
   type: 'lanternface', label: 'Lantern-face', reason: 'Scorched by a Lantern-face!',
   colors: paints({ flame: 'jade.glow', eyes: 'eyes.bone' }), light: '#5affc8', sparks: ['#d8fff0', '#7af0d8', '#3ac8a0'],

@@ -50,7 +50,7 @@ test('the dark forest is a forest: trees, lantern posts, lanterns in the branche
 });
 
 test('the slime marsh has its slime trees in thickets and glowing stalks by the way', () => {
-  const count = {}, maps = rooms(3, 'slime', 4);
+  const count = {}, maps = rooms(3, 'slime', 7);
   for (const m of maps) for (const q of placeProps(m, themeOf(m)).out) {
     const b = q.name.replace(/_[ab]$/, '');
     count[b] = (count[b] ?? 0) + 1;

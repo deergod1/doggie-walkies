@@ -1,6 +1,6 @@
 // How dark it is: sky, hemisphere light, sun, fog and the character's own light follow the
 // (fractional) depth, blended between the starts of the world's theme stretches. Below the
-// ground the character's light grows with the theme's `lamp` (about half in the sunlit caves,
+// ground the character's light grows with the theme's `lamp` (about half in the sunlit hollows,
 // full in the dark deep), since local lights are all there is. A boss can make it night
 // (`dark`), and a theme with days and nights (`cycle`: the slime marsh) has its own.
 import * as THREE from 'three';

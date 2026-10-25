@@ -18,7 +18,7 @@ export const TRIALS = {
     population: 0.3 },
   collapse: { name: msg('Crumbling floor'), family: 'event', sealed: true, timed: true, depths: [1, 19], themes: null, weight: 1, color: '#e0a050', built: true,
     population: 0.3 },
-  cold: { name: msg('Cold snap'), family: 'event', sealed: true, timed: true, depths: [3, 10], themes: ['peaks', 'frozen'], weight: 1.5, color: '#9fe8ff', built: true,
+  cold: { name: msg('Cold snap'), family: 'event', sealed: true, timed: true, depths: [1, 13], themes: ['peaks', 'frozen'], weight: 1.5, color: '#9fe8ff', built: true,
     population: 0.5 },
   storm: { name: msg('The storm'), family: 'event', sealed: true, timed: true, depths: [1, 6],
     themes: ['meadow', 'clouds', 'lagoon', 'karst', 'peaks', 'highlands', 'badlands', 'saltflats', 'canyon'], weight: 1, color: '#b0b8ff', built: true,

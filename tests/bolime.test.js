@@ -5,6 +5,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { BOLIME, TOXIC_BOLIME, GLOW_BOLIME, ENEMY_KINDS, fireAt, airborne } from '../src/core/enemies.js';
 import { DEPTH_SPAWNS, population } from '../src/core/spawns.js';
+import { themeById } from '../src/themes/depth.js';
 
 test('the Bolime pounces: its shadow, a leap, down at the hit frame, holding, then spitting out', () => {
   const [a] = BOLIME.attacks, g = a.engulf;
@@ -28,9 +29,10 @@ test('the Bolime pounces: its shadow, a leap, down at the hit frame, holding, th
   assert.ok(TOXIC_BOLIME.toxin && GLOW_BOLIME.hp > TOXIC_BOLIME.hp);
 });
 
-test('Bolimes live only in the slime marsh', () => {
+const MARSH = (([a, b]) => Array.from({ length: b - a + 1 }, (_, i) => a + i))(themeById('slime').depths);
+test('Bolimes live only in the slime marsh, at every depth it may appear at', () => {
   const rows = DEPTH_SPAWNS.flatMap((d, depth) => d.roster.map(r => ({ ...r, depth }))).filter(r => r.type === 'bolime');
-  assert.deepEqual(rows.map(r => r.depth), [4, 5]);
+  assert.deepEqual(rows.map(r => r.depth), MARSH);
   for (const r of rows) {
     assert.deepEqual(r.where, ['slime']);
     for (const k of Object.keys(r.kinds)) assert.equal(ENEMY_KINDS[k].species, 'bolime');
@@ -40,10 +42,10 @@ test('Bolimes live only in the slime marsh', () => {
 test('a slime marsh cube mostly has Slugs or Bolimes, a cube anywhere else never', () => {
   const cube = (seed, depth, biome) => population({ seed, depth, key: `${seed},-${depth},0`, biome });
   let slimy = 0;
-  for (let seed = 0; seed < 200; seed++) for (const depth of [4, 5]) {
-    const marsh = cube(seed, depth, 'slime'), flats = cube(seed, depth, depth === 4 ? 'saltflats' : 'canyon');
+  for (let seed = 0; seed < 200; seed++) for (const depth of MARSH) {
+    const marsh = cube(seed, depth, 'slime'), flats = cube(seed, depth, depth % 2 ? 'swamp' : 'roots');
     if (marsh.has('slug') || marsh.has('bolime')) slimy++;
     assert.ok(!flats.has('slug') && !flats.has('bolime'));
   }
-  assert.ok(slimy > 300, `${slimy} of 400`);
+  assert.ok(slimy > 150 * MARSH.length, `${slimy} of ${200 * MARSH.length}`);
 });

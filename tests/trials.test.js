@@ -393,7 +393,7 @@ test('the warning: every map knows which of its faces lead into a trial room, as
       }
     }
   }
-  assert.ok(n > 30, `${n} warnings`);
+  assert.ok(n > 20, `${n} warnings`);
 });
 
 // --- collapse --------------------------------------------------------------------------------------

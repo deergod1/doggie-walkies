@@ -1,15 +1,18 @@
-// What each depth looks like. Every theme names the depths it may appear at (`depths`: [first,
-// last]); each world picks one theme per depth from its seed (themes/depth.js worldThemes), so two
-// worlds can have cloud islands or meadows under the town, and one may go from the meadows to the
-// lagoons halfway down. Palettes, generator settings and the shape of the layout are per theme;
-// the lighting (`light`) is blended between the starts of the stretches of depths sharing a
-// theme, so every step down is a little darker.
-// The light comes in three bands of depths: light on the surface and in the canyons (0-6),
-// medium in the sunlit caves (7-13: light falls in through cracks, glowing things), dark down
-// in the deep (14-20, only local lights). A night theme (`night`: the dark forest) is under the
-// sky in the light band but lit like the deep. A theme's id is its prop set (`props`). The themes
-// that may appear at a depth agree on `cave`.
-//   depths: the first and last depth the theme may appear at (the town's depth, 0, is always TOWN's)
+// What each depth looks like. Every theme belongs to one of the story's three acts (`act`, ACTS:
+// their depths) and may appear at any depth of it; each world shows half of each act's themes,
+// in their story order down the act (themes/depth.js worldThemes), so two worlds can have cloud
+// islands or lagoons under the town, and every theme is as likely to be in a world as any other.
+// Palettes, generator settings and the shape of the layout are per theme; the lighting (`light`)
+// is blended between the starts of the stretches of depths sharing a theme, so every step down
+// is a little darker.
+// The light comes in three bands of depths, one per act: light under the sky (0-6), medium in the
+// sunlit hollows (7-13: open marshes and works yards under a hazy sky, caves where light falls in
+// through cracks, glowing things), dark down in the deep (14-20, only local lights). A night theme
+// (`night`: the dark forest) is under the sky in the light band but lit like the deep. Acts I
+// and II mix open themes and walled ones (`cave`, `walls`); every theme of act III is walled in.
+// A theme's id is its prop set (`props`).
+//   act: 1, 2 or 3 (the town's depth, 0, is always TOWN's, the core's, 20, CORE's); `depths`, the
+//     first and last depth it may appear at, follows from it
 //   top / side: colour stops by height in levels (grass tops, cliff strata)
 //   fluids: weights [water, lava, acid] for pools and falls; river: fluid of the rivers
 //   soft: the colour of a plunge's soft landing (world/heights.js: hay, sand, snow, moss, web, ash)
@@ -45,14 +48,14 @@
 //   waylights: lamps beside the way (render/propplace.js waylights): { props, share (of the
 //     floors beside it), back (from the floor's middle, 0.36), foot (its collider, 0.06) }
 import { WATER, ACID } from '../core/constants.js';
-import { CAVE_THEMES } from './caves.js';
+import { SUNLIT_THEMES, DEEP_THEMES, CORE } from './caves.js';
 
 const T = (name, o) => ({ name, tiles: {}, cave: false, spans: null, ...o });
 
 const MEADOW = T('Meadow islands', {
   music: 'overworld',
   props: 'meadow', propDensity: 0.15,
-  depths: [0, 2], spans: { chance: 0.9, max: 2, route: 0.8, island: 0.6, sky: 0.5 },
+  act: 1, spans: { chance: 0.9, max: 2, route: 0.8, island: 0.6, sky: 0.5 },
   void: 0.5, relief: 0.5,
   arche: { plain: 3, archipelago: 3, spire: 1, mesa: 1, chasm: 1 },
   top: [[0, '#3b6532'], [4, '#4c8a3c'], [8, '#76ad50'], [12, '#a3b26a'], [16, '#b7a888'], [20, '#d9d3c5']],
@@ -64,7 +67,7 @@ const MEADOW = T('Meadow islands', {
 const CLOUDS = T('Cloud kingdom', {
   music: 'overworld',
   props: 'clouds', propDensity: 0.18,
-  depths: [1, 2], spans: { chance: 0.9, max: 2, route: 0.8, island: 0.6, sky: 0.7 },
+  act: 1, spans: { chance: 0.9, max: 2, route: 0.8, island: 0.6, sky: 0.7 },
   void: 0.62, relief: 0.6,
   arche: { archipelago: 4, plain: 2, spire: 1, mesa: 1 },
   top: [[0, '#b9bfd4'], [4, '#cfd4e4'], [8, '#e0e3ee'], [12, '#ebe6ef'], [16, '#f1edf3'], [20, '#f6f6fa']],
@@ -77,7 +80,7 @@ const CLOUDS = T('Cloud kingdom', {
 const LAGOON = T('Lagoon isles', {
   music: 'overworld',
   props: 'lagoon', propDensity: 0.16,
-  depths: [1, 2], spans: { chance: 0.9, max: 2, route: 0.8, island: 0.7, sky: 0.3 },
+  act: 1, spans: { chance: 0.9, max: 2, route: 0.8, island: 0.7, sky: 0.3 },
   void: 0.3, relief: 0.35,
   arche: { archipelago: 4, crater: 2, plain: 2, mesa: 1 },
   top: [[0, '#d2bd86'], [3, '#e0cf9c'], [6, '#82a852'], [10, '#5e9440'], [16, '#8a9a6a'], [20, '#c8c0a8']],
@@ -90,7 +93,7 @@ const LAGOON = T('Lagoon isles', {
 const KARST = T('Karst terraces', {
   music: 'overworld',
   props: 'karst', propDensity: 0.18,
-  depths: [1, 2], spans: { chance: 0.9, max: 2, route: 0.8, island: 0.6, sky: 0.5 },
+  act: 1, spans: { chance: 0.9, max: 2, route: 0.8, island: 0.6, sky: 0.5 },
   void: 0.4, relief: 0.9,
   arche: { spire: 4, mesa: 2, plain: 2, archipelago: 1 },
   top: [[0, '#5a8a3a'], [4, '#6ea444'], [8, '#86b858'], [12, '#7a9a5a'], [16, '#a8b09a'], [20, '#d0d2c8']],
@@ -102,7 +105,7 @@ const KARST = T('Karst terraces', {
 const PEAKS = T('Snowy peaks', {
   music: 'peaks',
   props: 'peaks',
-  depths: [3, 3], spans: { chance: 0.8, max: 2, route: 0.8, island: 0.5, sky: 0.5 },
+  act: 1, spans: { chance: 0.8, max: 2, route: 0.8, island: 0.5, sky: 0.5 },
   void: 0.42, relief: 1.0,
   arche: { spire: 3, chasm: 2, mesa: 2, plain: 1 },
   top: [[0, '#8fa4ab'], [6, '#c3d3d8'], [12, '#e6eef1'], [20, '#ffffff']],
@@ -115,7 +118,7 @@ const PEAKS = T('Snowy peaks', {
 const HIGHLANDS = T('Prayer highlands', {
   music: 'peaks',
   props: 'highlands',
-  depths: [3, 3], spans: { chance: 0.7, max: 2, route: 0.8, island: 0.5, sky: 0.4 },
+  act: 1, spans: { chance: 0.7, max: 2, route: 0.8, island: 0.5, sky: 0.4 },
   void: 0.35, relief: 0.85,
   arche: { mesa: 3, plain: 2, spire: 1, chasm: 1 },
   top: [[0, '#7a8a4a'], [5, '#9a9a58'], [9, '#b4a868'], [13, '#a89a80'], [17, '#d8dce0'], [20, '#ffffff']],
@@ -127,7 +130,7 @@ const HIGHLANDS = T('Prayer highlands', {
 const BADLANDS = T('Badlands', {
   music: 'badlands',
   props: 'badlands',
-  depths: [4, 4], spans: { chance: 0.7, max: 2, route: 0.8, island: 0.4, sky: 0 },
+  act: 1, spans: { chance: 0.7, max: 2, route: 0.8, island: 0.4, sky: 0 },
   void: 0.12, relief: 0.8,
   arche: { chasm: 3, mesa: 3, spire: 1, plain: 1 },
   top: [[0, '#9a6a3c'], [6, '#b9864f'], [12, '#d3a466'], [20, '#e8cf9a']],
@@ -140,7 +143,7 @@ const BADLANDS = T('Badlands', {
 const SALTFLATS = T('Salt flats', {
   music: 'badlands',
   props: 'saltflats',
-  depths: [4, 4], spans: { chance: 0.4, max: 1, route: 0.8, island: 0.4, sky: 0 },
+  act: 1, spans: { chance: 0.4, max: 1, route: 0.8, island: 0.4, sky: 0 },
   void: 0.08, relief: 0.4,
   arche: { plain: 3, crater: 2, mesa: 2, archipelago: 1 },
   top: [[0, '#cfc6bd'], [4, '#ddd6cd'], [8, '#e6dfd8'], [12, '#e2d0cb'], [20, '#ece4e0']],
@@ -151,21 +154,22 @@ const SALTFLATS = T('Salt flats', {
 });
 // the slime marsh: green moss and pools of toxic slime (acid: falling in is the end), drooping
 // slime trees, mounds of goo with things stuck in them, bubbling vents and the craters the slime
-// meteorites left; low and wet, few holes, more lakes and rivers than anywhere under the sky
+// meteorites left; low and wet, few holes, lakes and rivers everywhere. Act II's open marsh: no
+// rock walls, under the act's hazy sky, the sun dim through the veils by day
 const SLIME = T('Slime marsh', {
   music: 'swamp',
   props: 'slime', propDensity: 0.3, mire: 0.88, meteors: true,
   vignettes: [0, 1],
   grove: { trees: ['slime_tree', 'slime_tree', 'bulb_tree', 'dead_slimed_tree'], density: 0.3, scale: [0.95, 1.25] },
   waylights: { props: ['slime_glow_stalk'], share: 0.12 },
-  depths: [4, 5], spans: { chance: 0.7, max: 2, route: 0.8, island: 0.3, sky: 0 },
+  act: 2, spans: { chance: 0.7, max: 2, route: 0.8, island: 0.3, sky: 0 },
   void: 0.1, relief: 0.55,
   arche: { plain: 3, crater: 2, archipelago: 2, mesa: 1 },
   top: [[0, '#3e5a2a'], [4, '#4f6e30'], [8, '#628236'], [12, '#76903e'], [16, '#86985a'], [20, '#a4ac86']],
   side: [[0, '#2e3424'], [6, '#3e4630'], [11, '#545a44'], [20, '#6e705e']],
   soft: '#7ac040', lip: '#5a8a2a', under: '#1e2214', bed: ['#181c12', '#13160e'], fluids: [0.08, 0, 0.92], river: ACID,
   tiles: { lake: 2, river: 1.5, highland: 0.8 },
-  light: { sky: ['#24503e', '#0a1a12', '#5e8a58', '#44603a'], stars: 0.3, hemi: ['#e6f4d2', '#3a4020', 1.05], sun: ['#f2ffd6', 2.0], fog: 0.15 },
+  light: { sky: ['#1c3a30', '#08140e', '#4a6a50', '#34482e'], stars: 0.2, hemi: ['#d4e6c0', '#2e3418', 1.0], sun: ['#e6f6c8', 1.4], fog: 0.22, lamp: 0.45 },
   // 45 s of day, 45 s of night: a green moonlight, the slime glowing, spores drifting
   cycle: { day: 45, night: 45, fade: 4,
     dark: { sky: ['#04100a', '#010503', '#0c2416', '#0e2a1a'], stars: 1, hemi: ['#6a9a80', '#060a06', 0.5], sun: ['#a8f0b4', 0.5], fog: 0.4, lamp: 1 },
@@ -177,7 +181,7 @@ const SLIME = T('Slime marsh', {
 const CANYON = T('Deep canyon', {
   music: 'badlands',
   props: 'canyon', propDensity: 0.3,
-  depths: [5, 6], spans: { chance: 0.85, max: 2, route: 0.8, island: 0.5, sky: 0, deck: 15 },
+  act: 1, spans: { chance: 0.85, max: 2, route: 0.8, island: 0.5, sky: 0, deck: 15 },
   void: 0.1, relief: 1.1, walls: true, heights: { tableland: 0.8, tunnel: 0.45 },
   arche: { chasm: 3, mesa: 2, spire: 2, plain: 1 },
   top: [[0, '#5e7a3a'], [4, '#7a8a46'], [7, '#c27a48'], [11, '#d49466'], [15, '#e2b48a'], [20, '#f0dcc0']],
@@ -194,7 +198,7 @@ const CANYON = T('Deep canyon', {
 const DARKFOREST = T('Dark forest', {
   music: 'overworld',
   props: 'darkforest', propDensity: 0.34,
-  depths: [1, 2], night: true, spans: { chance: 0.9, max: 2, route: 0.8, island: 0.15, sky: 0.05 },
+  act: 1, night: true, spans: { chance: 0.9, max: 2, route: 0.8, island: 0.15, sky: 0.05 },
   void: 0.1, relief: 0.95, layers: 0.3, hills: { count: [2, 4], roll: 1.8 }, heights: { tunnel: 0.5 },
   vignettes: [1, 2],
   motes: { colors: ['#d8ff6a', '#d8ff6a', '#b8ff8a', '#9affd8'], rate: 7, drift: 0.3, rise: [-0.06, 0.14], life: [2.5, 5.5], size: [0.035, 0.065] },
@@ -209,10 +213,19 @@ const DARKFOREST = T('Dark forest', {
   light: { sky: ['#060a12', '#020406', '#0e1822', '#120e22'], stars: 0.4, hemi: ['#7084b4', '#0a0e0a', 0.55], sun: ['#9ab0e8', 0.55], fog: 0.45, lamp: 1 },
 });
 
-// every theme, the town's first
-export const THEMES = [MEADOW, CLOUDS, LAGOON, KARST, DARKFOREST, PEAKS, HIGHLANDS, BADLANDS, SALTFLATS, CANYON, SLIME, ...CAVE_THEMES];
-// the town and its road (depth 0)
+// the depths of the three acts (docs/story.md): I under the sky (childhood), II the sunlit
+// hollows (growing up), III the deep (the sealed memories); the town (0) before them, the core
+// (20) after
+export const ACTS = [null, [1, 6], [7, 13], [14, 19]];
+// every theme, the town's first; each act's in its story order: a world shows them in this order
+// down the act (themes/depth.js worldThemes)
+export const THEMES = [MEADOW, CLOUDS, LAGOON, KARST, DARKFOREST, PEAKS, HIGHLANDS, SALTFLATS, BADLANDS, CANYON,
+  ...SUNLIT_THEMES, SLIME, ...DEEP_THEMES];
+// the depths a theme may appear at: its act's
+for (const t of THEMES) t.depths = ACTS[t.act];
+// the town and its road (depth 0), the core (depth 20)
 export const TOWN = MEADOW;
+export { CORE };
 
 // every song the game plays: the main menu's, the town (and the merchant camp), one per theme, and
 // the core (depth 20)

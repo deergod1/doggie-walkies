@@ -92,7 +92,8 @@ the meadows, the clouds, the canyon. She and the little one, inseparable; she he
 hand in the dark. She made the glass bird. The bosses are their shared childhood nightmares. Only
 hints of loss: she says "we" and stops; a cube stays hazy longer than it should.
 
-**Act II: growing up (depths 7 to 13, the sunlit caves).** Warm. The workshop, adventures
+**Act II: growing up (depths 7 to 13, the sunlit hollows: caves, and open places under a hazy
+sky).** Warm. The workshop (the forge's works yard), adventures
 together, the people she knew; this is the happiest stretch. Then it goes wrong: a fight about
 something small (the glass bird, broken by accident), and words she never took back. They grew
 apart. More things go missing in her telling here: she mixes up names, stops in the middle of a
@@ -157,8 +158,10 @@ things happen. Four layers, from fixed to loose:
    entering a place, memorizing one, a glass face opening, a fall, a new theme, a puzzle or a trial
    starting and solved, low health, a death, back in town, a horde waking, a friend joining or leaving, standing still for a while.
 3. **The themes** (4 to 6 lines each): each theme is a part of her life: the meadows are picnics,
-   the salt flats a trip with her father, the forge her first job. A world picks its themes from
-   its seed, so each world tells a slightly different life.
+   the salt flats a trip with her father, the forge her first job. Every theme belongs to one act
+   (`act` in `src/themes/`), and a world shows half of each act's themes, picked from its seed,
+   in the act's story order ([world.md](world.md#themes-per-world-themesindexjs-themescavesjs-themesdepthjs)),
+   so each world tells a slightly different life, and every theme is as likely as any other.
 4. **Memory shards** at landmarks: short scenes (three lines or so) from a pool for each act, so
    different worlds show different ones. The spine is whole in every world; the shards are what
    playing again adds.

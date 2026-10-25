@@ -1,47 +1,78 @@
 # Depths
 
 Quick reference for every depth (`Y = 0` to `Y = -20`, `depth = -Y`). Themes come from
-`src/themes/index.js` and `src/themes/caves.js`. Every theme names the depths it may appear at;
-each world picks one theme per depth, often keeping the one above (see
-[world.md](world.md#themes-per-world-themesindexjs-themescavesjs-themesdepthjs)). The fluids
-column is the first theme's. The layout comes from `src/world/layout.js`, the enemy roster per depth from
-`DEPTH_SPAWNS` in `src/core/spawns.js`, and enemy levels from `enemyRoll` in
-`src/core/enemies.js`. Enemy kinds (recoloured, stronger versions of a species) are described
-in `docs/enemy-kinds.md`.
+`src/themes/index.js` and `src/themes/caves.js`. Every theme belongs to one of the story's three
+acts and may appear at any depth of it; each world shows half of each act's themes, in story
+order (see [world.md](world.md#themes-per-world-themesindexjs-themescavesjs-themesdepthjs)). The
+layout comes from `src/world/layout.js`, the enemy roster per depth from `DEPTH_SPAWNS` in
+`src/core/spawns.js`, and enemy levels from `enemyRoll` in `src/core/enemies.js`. Enemy kinds
+(recoloured, stronger versions of a species) are described in `docs/enemy-kinds.md`.
 
 ## Overview
 
-The light comes in three bands of seven depths (`light` in the themes, `render/look.js`):
-**light** from the town down to the canyons (0–6, under the open sky), **medium** in the
-sunlit caves (7–13: light falls in through cracks, and glowing things; the character's lamp at
-about half) and **dark** in the deep (14–20: only the deep's own fires and crystals, and the
-lamp at full). `tests/themes.test.js` checks every theme against its band.
+The depths come in three acts of light, one per act of the story ([story.md](story.md)), each
+seven depths with the town before them and the core after (`light` in the themes,
+`render/look.js`): **light** under the open sky (act I, 1–6, after the town), **medium** in the
+sunlit hollows (act II, 7–13: open marshes, a works yard and a jungle under a hazy sky, and caves
+where light falls in through cracks, and glowing things; the character's lamp at about half) and
+**dark** in the deep (act III, 14–19 and the core: only the deep's own fires and crystals, and
+the lamp at full; every theme walled in). `tests/themes.test.js` checks every theme against its
+band.
 
-| Depth | Theme | Kind | Light | Layout (ring radius) | Fluids / river | Enemy level (base, range) |
-|---:|---|---|---|---|---|---|
-| 0 | Meadow islands | surface | light | town + road to the first well | water | 1 (always 1) |
-| 1 | Meadow islands / Cloud kingdom / Lagoon isles / Karst terraces | surface, sky islands | light | arc, r=3 | water | 1 (always 1) |
-| 2 | Meadow islands / Cloud kingdom / Lagoon isles / Karst terraces | surface, sky islands | light | arc, r=3 | water | 2 (1–3) |
-| 3 | Snowy peaks / Prayer highlands | surface, sky islands | light | arc, r=3 | water | 3 (2–4) |
-| 4 | Badlands / Salt flats / Slime marsh | surface | light | arc, r=3 | water (some lava / acid) | 4 (3–5) |
-| 5 | Deep canyon / Slime marsh | surface, rock walls (the canyon) | light | arc, r=3 | water | 5 (4–6) |
-| 6 | Deep canyon | surface, rock walls | light | arc, r=2 | water | 6 (5–7) |
-| 7 | Root caves | cave | medium | arc, r=2 | water | 7 (6–8) |
-| 8 | Root caves | cave | medium | arc, r=2 | water | 8 (7–9) |
-| 9 | Frozen caves / Sunken grotto | cave | medium | arc, r=2 | water | 9 (8–10) |
-| 10 | Frozen caves / Sunken grotto | cave | medium | arc, r=2 | water | 10 (9–11) |
-| 11 | Fungal swamp / Honey hive | cave | medium | arc, r=2 | acid river | 11 (10–12) |
-| 12 | Fungal swamp / Honey hive | cave | medium | arc, r=2 | acid river | 12 (11–13) |
-| 13 | Jungle cenote | cave | medium | arc, r=1 | water (some lava) | 13 (12–14) |
-| 14 | Spider nests / Ossuary | cave | dark | arc, r=1 | acid river | 14 (13–15) |
-| 15 | Spider nests / Ossuary | cave | dark | arc, r=1 | acid river | 15 (14–16) |
-| 16 | Crystal mines / Dwarven forge | cave | dark | arc, r=1 | water (some lava) | 16 (15–17) |
-| 17 | Buried ruins | cave | dark | arc, r=1 | acid river, lava | 17 (16–18) |
-| 18 | Volcanic depths | cave | dark | arc, r=1 | lava river | 18 (17–19) |
-| 19 | Obsidian abyss | cave, large voids | dark | arc, r=1 | lava only | 19 (18–20) |
-| 20 | Obsidian abyss | cave, the core | dark | 3×3 core around the axis | lava only | 20 (19–21) |
+| Depth | Act | Light | Layout (ring radius) | Enemy level (base, range) |
+|---:|---|---|---|---|
+| 0 | the town (Meadow islands) | light | town + road to the first well | 1 (always 1) |
+| 1 | I | light | arc, r=3 | 1 (always 1) |
+| 2 | I | light | arc, r=3 | 2 (1–3) |
+| 3 | I | light | arc, r=3 | 3 (2–4) |
+| 4 | I | light | arc, r=3 | 4 (3–5) |
+| 5 | I | light | arc, r=3 | 5 (4–6) |
+| 6 | I | light | arc, r=2 | 6 (5–7) |
+| 7 | II | medium | arc, r=2 | 7 (6–8) |
+| 8 | II | medium | arc, r=2 | 8 (7–9) |
+| 9 | II | medium | arc, r=2 | 9 (8–10) |
+| 10 | II | medium | arc, r=2 | 10 (9–11) |
+| 11 | II | medium | arc, r=2 | 11 (10–12) |
+| 12 | II | medium | arc, r=2 | 12 (11–13) |
+| 13 | II | medium | arc, r=1 | 13 (12–14) |
+| 14 | III | dark | arc, r=1 | 14 (13–15) |
+| 15 | III | dark | arc, r=1 | 15 (14–16) |
+| 16 | III | dark | arc, r=1 | 16 (15–17) |
+| 17 | III | dark | arc, r=1 | 17 (16–18) |
+| 18 | III | dark | arc, r=1 | 18 (17–19) |
+| 19 | III | dark | arc, r=1 | 19 (18–20) |
+| 20 | the core (Obsidian abyss) | dark | 3×3 core around the axis | 20 (19–21) |
 
-The canyon (5–6) is the last of the sky: like a cave its cubes are walled in by rock (17–23
+The themes of each act, in their story order (a world shows them in this order down the act):
+
+| Act | Theme | Kind | Fluids / river |
+|---|---|---|---|
+| I | Meadow islands | open, sky islands | water |
+| I | Cloud kingdom | open, sky islands | water |
+| I | Lagoon isles | open, sky islands | water |
+| I | Karst terraces | open, sky islands | water |
+| I | Dark forest | open, at night | water |
+| I | Snowy peaks | open, sky islands | water |
+| I | Prayer highlands | open, sky islands | water |
+| I | Salt flats | open | water |
+| I | Badlands | open | water (some lava / acid) |
+| I | Deep canyon | open, rock walls | water |
+| II | Root caves | cave | water |
+| II | Sunken grotto | cave | water |
+| II | Dwarven forge | open (a works yard) | water (some lava) |
+| II | Honey hive | cave | water |
+| II | Fungal swamp | open | acid river |
+| II | Jungle cenote | open | water (some lava) |
+| II | Frozen caves | cave | water |
+| II | Slime marsh | open, days and nights | acid river |
+| III | Crystal mines | cave | water (some lava) |
+| III | Spider nests | cave | acid river |
+| III | Ossuary | cave | acid river |
+| III | Buried ruins | cave | acid river, lava |
+| III | Volcanic depths | cave | lava river |
+| III | Obsidian abyss | cave, large voids (and the core) | lava only |
+
+The canyon (the last of act I's themes) is the last of the sky: like a cave its cubes are walled in by rock (17–23
 levels high, open at the portals and rivers; `walls` in the theme), so the route winds through
 a gorge of red, salmon and cream sandstone, but the sun still shines in.
 
@@ -79,8 +110,10 @@ A roster entry is `species chance count (packs) [kinds]`:
   pack is all Redbacks or all plain spiders. No value means the species' base kind.
 - **(... only)**: the species keeps to some of the depth's themes (`where`: the Squirtles to the
   waters of the Lagoon isles, the Sunken grotto and the Jungle cenote; the Dark forest's Gloom
-  spiders and Lantern-faces to the forest; the Slugs and the Bolimes to the Slime marsh). **(not ...)**: everywhere but there (`'!theme'`: the
-  ordinary spiders of depth 2 leave the forest to its own).
+  spiders and Lantern-faces to the forest; the Slugs and the Bolimes to the Slime marsh), at
+  every depth of the theme's act, since a theme may appear anywhere in its act. **(not ...)**:
+  everywhere but there (`'!theme'`: the ordinary spiders of depths 2 to 6 leave the forest to its
+  own).
 
 `mix` is the most species a single cube can hold.
 
@@ -89,17 +122,17 @@ A roster entry is `species chance count (packs) [kinds]`:
 | 0 | 1 | snakes 1–2 |
 | 1 | 2 | snakes 2–4, Stunders 20% 1, Wolks 25% 1, Squirtles 60% 1–2 (Lagoon isles only), spiders 70% 2–4 (packs ≤2) [Gloom spider] (Dark forest only), Fire-faces 30% 1 [Lantern-face] (Dark forest only) |
 | 2 | 3 | snakes 2–5 [75% Grass snake, 25% Sand viper], spiders 60% 2–4 (packs ≤2) (not the Dark forest), Stunders 25% 1, Wolks 35% 1–2, Tornados 30% 1, Squirtles 60% 1–3 (Lagoon isles only), spiders 80% 3–5 (packs ≤2) [75% Gloom spider, 25% Spider] (Dark forest only), Fire-faces 40% 1–2 [Lantern-face] (Dark forest only) |
-| 3 | 3 | spiders 8–14 (packs ≤3) [Frost spider], Stunders 70% 1–2 [Frost stunder], Shraps 30% 1, Wolks 50% 1–2 [67% Storm wolk, 33% Wolk], snakes 70% 2–4 (packs ≤2) [Frost adder], Triangles 20% 1, Tornados 35% 1–2 [67% Frost tornado, 33% Tornado] |
-| 4 | 3 | snakes 3–6 (packs ≤2) [Sand viper], spiders 80% 4–8 (packs ≤3) [80% Spider, 20% Redback], Stunders 60% 1–2 [50% Stone stunder, 50% Stunder], Wolks 50% 1–2 [Dust wolk], Tornados 40% 1–2 [67% Dust tornado, 33% Tornado], Slugs 80% 1–2 [67% Slug, 33% Spotted slug] (Slime marsh only), Bolimes 85% 1–3 (packs ≤2) [67% Bolime, 33% Toxic bolime] (Slime marsh only) |
-| 5 | 3 | snakes 4–7 (packs ≤2) [Sand viper], spiders 80% 5–9 (packs ≤3) [80% Spider, 20% Redback], Stunders 60% 1–2 [50% Stone stunder, 50% Stunder], Wolks 40% 1–2 [50% Dust wolk, 50% Storm wolk], Wollas 30% 1–2, Tornados 35% 1–2 [50% Dust tornado, 50% Tornado], Slugs 85% 1–3 [40% Spotted slug, 40% Black slug, 20% Slug] (Slime marsh only), Bolimes 90% 2–3 (packs ≤2) [40% Toxic bolime, 40% Glow bolime, 20% Bolime] (Slime marsh only) |
-| 6 | 3 | snakes 5–8 (packs ≤2) [50% Sand viper, 50% Blood viper], spiders 80% 6–10 (packs ≤3) [67% Spider, 33% Redback], Stunders 60% 1–3 [50% Stone stunder, 50% Stunder], Wolks 40% 1–2 [50% Dust wolk, 50% Storm wolk], Wollas 35% 1–2, Octonauts 15% 1, Meckeds 15% 1, Tornados 30% 1–2 [Dust tornado] |
-| 7 | 3 | spiders 7–12 (packs ≤3) [67% Spider, 33% Bog spider], snakes 80% 4–7 (packs ≤2) [50% Grass snake, 50% Blood viper], Stunders 60% 1–2, Meckeds 50% 1–2, Wollas 40% 1–2, Octonauts 20% 1 |
-| 8 | 3 | spiders 8–13 (packs ≤3) [57% Spider, 29% Bog spider, 14% Redback], snakes 80% 4–8 (packs ≤2) [Blood viper], Stunders 60% 1–3 [50% Stunder, 50% Stone stunder], Meckeds 60% 1–3 (packs ≤2), Wollas 45% 1–2, Octonauts 25% 1–2 |
-| 9 | 3 | Octonauts 3–4, Shraps 80% 1–3, spiders 80% 6–10 (packs ≤3) [Frost spider], Stunders 70% 1–2 [Frost stunder], snakes 80% 3–5 (packs ≤2) [Frost adder], Meckeds 60% 1–2 [Frost mecked], Tornados 25% 1 [Frost tornado], Squirtles 80% 2–4 (packs ≤2) [50% Moss squirtle, 50% Coral squirtle] (Sunken grotto only) |
-| 10 | 3 | Octonauts 3–5 (packs ≤2) [75% Octonaut, 25% Coral octonaut], Shraps 90% 2–3, spiders 80% 7–12 (packs ≤4) [Frost spider], Stunders 70% 1–2 [Frost stunder], snakes 70% 3–5 (packs ≤2) [Frost adder], Triangles 15% 1, Meckeds 65% 1–2 [Frost mecked], Tornados 30% 1–2 [Frost tornado], Squirtles 80% 2–4 (packs ≤2) [50% Coral squirtle, 50% Squirtle] (Sunken grotto only) |
-| 11 | 3 | snakes 6–10 (packs ≤3) [Venom adder], Octonauts 80% 2–4 (packs ≤2) [75% Bog octonaut, 25% Octonaut], Spicies 60% 1–2 [50% Spicy, 50% Habanero], Wollas 40% 1–2 [Bog wolla], spiders 60% 6–10 (packs ≤4) [Bog spider], Meckeds 50% 1–2 [Bog mecked], Stunders 25% 1–2, Fire-faces 30% 1 [Blaze-face] |
-| 12 | 3 | snakes 7–12 (packs ≤3) [67% Venom adder, 33% Blood viper], Octonauts 80% 3–5 (packs ≤2) [75% Bog octonaut, 25% Octonaut], Spicies 80% 1–3 [50% Spicy, 50% Habanero], Wollas 50% 1–2 [Bog wolla], spiders 60% 8–12 (packs ≤4) [Bog spider], Meckeds 55% 1–3 (packs ≤2) [Bog mecked], Fire-faces 30% 1 [Blaze-face] |
-| 13 | 3 | snakes 8–12 (packs ≤3) [50% Venom adder, 50% Blood viper], Octonauts 80% 3–5 (packs ≤2) [67% Coral octonaut, 33% Bog octonaut], Spicies 60% 1–2 [50% Habanero, 50% Spicy], Triangles 40% 1–2 [Emerald triangle], Wollas 30% 1–2 [50% Bog wolla, 50% Storm wolla], spiders 30% 10–14 (packs ≤4) [50% Bog spider, 50% Redback], Meckeds 50% 1–2 [Bog mecked], Squirtles 60% 2–3 (packs ≤2) [50% Moss squirtle, 50% Coral squirtle] (Jungle cenote only) |
+| 3 | 3 | spiders 8–14 (packs ≤3) [Frost spider] (not the Dark forest), Stunders 70% 1–2 [Frost stunder], Shraps 30% 1, Wolks 50% 1–2 [67% Storm wolk, 33% Wolk], snakes 70% 2–4 (packs ≤2) [Frost adder], Triangles 20% 1, Tornados 35% 1–2 [67% Frost tornado, 33% Tornado], Squirtles 60% 1–3 (Lagoon isles only), spiders 80% 4–6 (packs ≤2) [67% Gloom spider, 33% Spider] (Dark forest only), Fire-faces 40% 1–2 [Lantern-face] (Dark forest only) |
+| 4 | 3 | snakes 3–6 (packs ≤2) [Sand viper], spiders 80% 4–8 (packs ≤3) [80% Spider, 20% Redback] (not the Dark forest), Stunders 60% 1–2 [50% Stone stunder, 50% Stunder], Wolks 50% 1–2 [Dust wolk], Tornados 40% 1–2 [67% Dust tornado, 33% Tornado], Squirtles 60% 2–3 (packs ≤2) (Lagoon isles only), spiders 80% 4–7 (packs ≤3) [67% Gloom spider, 33% Spider] (Dark forest only), Fire-faces 45% 1–2 [Lantern-face] (Dark forest only) |
+| 5 | 3 | snakes 4–7 (packs ≤2) [Sand viper], spiders 80% 5–9 (packs ≤3) [80% Spider, 20% Redback] (not the Dark forest), Stunders 60% 1–2 [50% Stone stunder, 50% Stunder], Wolks 40% 1–2 [50% Dust wolk, 50% Storm wolk], Wollas 30% 1–2, Tornados 35% 1–2 [50% Dust tornado, 50% Tornado], Squirtles 60% 2–3 (packs ≤2) (Lagoon isles only), spiders 80% 5–8 (packs ≤3) [67% Gloom spider, 33% Spider] (Dark forest only), Fire-faces 50% 1–2 [Lantern-face] (Dark forest only) |
+| 6 | 3 | snakes 5–8 (packs ≤2) [50% Sand viper, 50% Blood viper], spiders 80% 6–10 (packs ≤3) [67% Spider, 33% Redback] (not the Dark forest), Stunders 60% 1–3 [50% Stone stunder, 50% Stunder], Wolks 40% 1–2 [50% Dust wolk, 50% Storm wolk], Wollas 35% 1–2, Octonauts 15% 1, Meckeds 15% 1, Tornados 30% 1–2 [Dust tornado], Squirtles 60% 2–4 (packs ≤2) (Lagoon isles only), spiders 80% 5–9 (packs ≤3) [67% Gloom spider, 33% Spider] (Dark forest only), Fire-faces 50% 1–2 [Lantern-face] (Dark forest only) |
+| 7 | 3 | spiders 7–12 (packs ≤3) [67% Spider, 33% Bog spider], snakes 80% 4–7 (packs ≤2) [50% Grass snake, 50% Blood viper], Stunders 60% 1–2, Meckeds 50% 1–2, Wollas 40% 1–2, Octonauts 20% 1, Squirtles 70% 2–3 (packs ≤2) [50% Moss squirtle, 50% Squirtle] (Sunken grotto, Jungle cenote only), Slugs 90% 1–3 [40% Spotted slug, 40% Black slug, 20% Slug] (Slime marsh only), Bolimes 95% 2–3 (packs ≤2) [40% Toxic bolime, 40% Glow bolime, 20% Bolime] (Slime marsh only) |
+| 8 | 3 | spiders 8–13 (packs ≤3) [57% Spider, 29% Bog spider, 14% Redback], snakes 80% 4–8 (packs ≤2) [Blood viper], Stunders 60% 1–3 [50% Stunder, 50% Stone stunder], Meckeds 60% 1–3 (packs ≤2), Wollas 45% 1–2, Octonauts 25% 1–2, Squirtles 70% 2–3 (packs ≤2) [50% Moss squirtle, 50% Squirtle] (Sunken grotto, Jungle cenote only), Slugs 90% 1–3 [40% Spotted slug, 40% Black slug, 20% Slug] (Slime marsh only), Bolimes 95% 2–3 (packs ≤2) [40% Toxic bolime, 40% Glow bolime, 20% Bolime] (Slime marsh only) |
+| 9 | 3 | Octonauts 3–4, Shraps 80% 1–3, spiders 80% 6–10 (packs ≤3) [Frost spider], Stunders 70% 1–2 [Frost stunder], snakes 80% 3–5 (packs ≤2) [Frost adder], Meckeds 60% 1–2 [Frost mecked], Tornados 25% 1 [Frost tornado], Squirtles 80% 2–4 (packs ≤2) [50% Moss squirtle, 50% Coral squirtle] (Sunken grotto, Jungle cenote only), Slugs 90% 1–3 [40% Spotted slug, 40% Black slug, 20% Slug] (Slime marsh only), Bolimes 95% 2–3 (packs ≤2) [40% Toxic bolime, 40% Glow bolime, 20% Bolime] (Slime marsh only) |
+| 10 | 3 | Octonauts 3–5 (packs ≤2) [75% Octonaut, 25% Coral octonaut], Shraps 90% 2–3, spiders 80% 7–12 (packs ≤4) [Frost spider], Stunders 70% 1–2 [Frost stunder], snakes 70% 3–5 (packs ≤2) [Frost adder], Triangles 15% 1, Meckeds 65% 1–2 [Frost mecked], Tornados 30% 1–2 [Frost tornado], Squirtles 80% 2–4 (packs ≤2) [50% Coral squirtle, 50% Squirtle] (Sunken grotto, Jungle cenote only), Slugs 90% 2–3 [67% Black slug, 33% Spotted slug] (Slime marsh only), Bolimes 95% 2–4 (packs ≤2) [67% Glow bolime, 33% Toxic bolime] (Slime marsh only) |
+| 11 | 3 | snakes 6–10 (packs ≤3) [Venom adder], Octonauts 80% 2–4 (packs ≤2) [75% Bog octonaut, 25% Octonaut], Spicies 60% 1–2 [50% Spicy, 50% Habanero], Wollas 40% 1–2 [Bog wolla], spiders 60% 6–10 (packs ≤4) [Bog spider], Meckeds 50% 1–2 [Bog mecked], Stunders 25% 1–2, Fire-faces 30% 1 [Blaze-face], Squirtles 80% 2–4 (packs ≤2) [50% Coral squirtle, 50% Moss squirtle] (Sunken grotto, Jungle cenote only), Slugs 90% 2–3 [67% Black slug, 33% Spotted slug] (Slime marsh only), Bolimes 95% 2–4 (packs ≤2) [67% Glow bolime, 33% Toxic bolime] (Slime marsh only) |
+| 12 | 3 | snakes 7–12 (packs ≤3) [67% Venom adder, 33% Blood viper], Octonauts 80% 3–5 (packs ≤2) [75% Bog octonaut, 25% Octonaut], Spicies 80% 1–3 [50% Spicy, 50% Habanero], Wollas 50% 1–2 [Bog wolla], spiders 60% 8–12 (packs ≤4) [Bog spider], Meckeds 55% 1–3 (packs ≤2) [Bog mecked], Fire-faces 30% 1 [Blaze-face], Squirtles 80% 2–4 (packs ≤2) [50% Coral squirtle, 50% Moss squirtle] (Sunken grotto, Jungle cenote only), Slugs 90% 2–3 [67% Black slug, 33% Spotted slug] (Slime marsh only), Bolimes 95% 2–4 (packs ≤2) [67% Glow bolime, 33% Toxic bolime] (Slime marsh only) |
+| 13 | 3 | snakes 8–12 (packs ≤3) [50% Venom adder, 50% Blood viper], Octonauts 80% 3–5 (packs ≤2) [67% Coral octonaut, 33% Bog octonaut], Spicies 60% 1–2 [50% Habanero, 50% Spicy], Triangles 40% 1–2 [Emerald triangle], Wollas 30% 1–2 [50% Bog wolla, 50% Storm wolla], spiders 30% 10–14 (packs ≤4) [50% Bog spider, 50% Redback], Meckeds 50% 1–2 [Bog mecked], Squirtles 80% 2–4 (packs ≤2) [50% Moss squirtle, 50% Coral squirtle] (Sunken grotto, Jungle cenote only), Slugs 90% 2–3 [67% Black slug, 33% Spotted slug] (Slime marsh only), Bolimes 95% 2–4 (packs ≤2) [67% Glow bolime, 33% Toxic bolime] (Slime marsh only) |
 | 14 | 3 | spiders 18–26 (packs ≤6) [50% Redback, 50% Bog spider], Stunders 50% 1–2 [Stone stunder], Octonauts 30% 1–2 [50% Octonaut, 50% Coral octonaut], snakes 40% 4–6 (packs ≤3) [50% Venom adder, 50% Shadow mamba], Spicies 50% 1–2 [Nightshade], Meckeds 45% 1–2 [Bone mecked], Wollas 30% 1–2 [Storm wolla] |
 | 15 | 3 | spiders 20–28 (packs ≤7) [50% Redback, 50% Spider], Stunders 60% 1–3 [Stone stunder], Octonauts 40% 1–2 [Coral octonaut], Spicies 60% 1–2 [Nightshade], snakes 60% 4–6 (packs ≤3) [Shadow mamba], Meckeds 50% 1–3 (packs ≤2) [Bone mecked], Triangles 15% 1 |
 | 16 | 3 | Triangles 2–3 [67% Triangle, 33% Emerald triangle], Stunders 70% 1–3 [Stone stunder], Octonauts 70% 2–5 (packs ≤2) [50% Octonaut, 50% Coral octonaut], Wollas 50% 1–3 [Storm wolla], spiders 50% 10–14 (packs ≤4) [50% Frost spider, 50% Redback], Shraps 70% 1–2 [Amethyst shraps], Fire-cats 40% 1–2 [Ash cat] |
@@ -132,6 +165,11 @@ The design rules behind the table:
   hotter the deeper they live (orange, yellow, blue). Within a species the stronger kinds take
   over deeper down. The snakes go from Grass snakes to Sand vipers (badlands), then Blood vipers,
   then Shadow mambas (nests, ruins and volcanic depths). Spiders go from plain spiders to Redbacks.
+- **Still by depth, not yet by theme.** The rows were made when every depth had its own few
+  themes. Now that a theme may appear anywhere in its act, the kinds picked for the themes that
+  used to live at a depth (the Frost kinds at 3 and at 9–10, the Bog kinds at 11–12) turn up in
+  whatever theme a world has there; only the `where` species follow their themes through the
+  act. Giving the other kinds to their themes is still to do.
 - **A species' kinds turn up about as often as each other.** Each takes its own stretch of
   depths rather than a sliver of another's: summed over the depths, no kind is seen more than
   about three times as often as its rarest sibling (`/tools/palette.html` measures it).

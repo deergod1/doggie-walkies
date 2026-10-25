@@ -28,8 +28,9 @@ docs that explain how the game works, from the big ideas down to the real code:
     run by `src/game/trials.js` (rules in `src/core/trials.js`).
   - `src/cubegen/`: builds one cube's map from the spec `world/` hands it. Files named like
     a `world/` file (`cascades`, `spouts`, `sites`, `town`) carve that shared decision into the cube.
-  - `src/themes/`: per-depth data: palettes, lighting, generator settings, structure materials;
-    each world picks one theme per depth from its seed (`themes/depth.js`).
+  - `src/themes/`: per-theme data: palettes, lighting, generator settings, structure materials;
+    each theme belongs to one of the story's three acts, and each world shows half of each act's
+    themes, picked from its seed (`themes/depth.js`).
   - `src/physics/`, `src/render/`, `src/game/`: movement, drawing and game state/flow.
     Click to move (`src/game/orders.js`, `docs/clickmove.md`) finds its way over stairs, up and down
     ladders and over the jumps the hero can make (`src/physics/playernav.js`, `src/physics/leaps.js`),

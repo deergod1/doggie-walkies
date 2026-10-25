@@ -1,5 +1,5 @@
-// The lights of the deep: every theme from depth 13 down has light sources in every room, its
-// glowing props flicker or breathe, its lamps by the way leave the way walkable.
+// The lights of the deep: every theme of act III (depth 14 down) has light sources in every room,
+// its glowing props flicker or breathe, its lamps by the way leave the way walkable.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { N, LAVA, CHAR_R } from '../src/core/constants.js';
@@ -17,8 +17,8 @@ const rooms = (seed, theme, d) => {
   return out;
 };
 
-test('every room from depth 13 down has lights of its own, a fair number on the whole', () => {
-  for (let d = 13; d <= MAX_DEPTH; d++) for (const t of themesAt(d)) {
+test('every room from depth 14 down has lights of its own, a fair number on the whole', () => {
+  for (let d = 14; d <= MAX_DEPTH; d++) for (const t of themesAt(d)) {
     let sources = 0, n = 0;
     for (const m of rooms(1, t.props, d)) {
       const own = placeProps(m, themeOf(m)).out.filter(lit).length + m.floors.filter(f => f.fluid === LAVA).length;
