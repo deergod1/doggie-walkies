@@ -185,6 +185,10 @@ every shader, so no program changes its cache key.
   the normal), soft; the sun from the kept shadow maps of the fixed parts (the two places',
   blended).
 - Times three.js's shadow map of the sun for what moves, as before.
+- The hero's lamp: three.js's cube of shadow maps, its bias in world units along the ray
+  (`render/character.js` `POINT_BIAS`, 0.03): three.js's own is in the map's depth, which made
+  it grow with the square of the distance, and at the lamp's night reach the shadows of cliffs
+  and walls started most of a unit from their foot.
 - The proxies of the surroundings take none of it (`NO_BAKE`, `render/neighbors.js`).
 - What a cube is built of shows its own cube's lights and shadows (`render/bake.js
   bakeMaterials`), also while another is the one played in (travelling); everything else (the

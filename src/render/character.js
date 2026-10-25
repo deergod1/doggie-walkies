@@ -34,11 +34,24 @@ const light = new THREE.PointLight(0xffd9a0, 1.2, 3.5, 2);
 light.castShadow = true;   // (always: one coming or going recompiles every lit shader; how much it casts: render/shadows.js)
 light.shadow.mapSize.set(512, 512);
 light.shadow.camera.near = 0.15;
-light.shadow.bias = -0.002;
+light.shadow.bias = -0.03;   // (world units: POINT_BIAS below)
 light.shadow.radius = 1.5;
 scene.add(light);
 // (its shadow maps as the quality level asks: render/shadows.js)
 export const lamp = light;
+
+// A point light's shadow bias in world units along the light's ray, not in the shadow map's
+// depth. three.js adds it to the perspective depth, whose step per unit falls off with the
+// square of the distance: -0.002 was a few centimetres by the hero and most of a unit at the
+// lamp's night reach (10), so the shadows of cliffs and walls started that far from their foot.
+// (The map holds the casters' far sides: at the foot of a wall its depth is the ground's, and
+// any bias leaves that much lit there.) Only the lamp casts point shadows in the scene.
+const POINT_DP = /float dp = (\([^;]*\));\s*dp [+-]= shadowBias;/g;
+const POINT_BIAS = THREE.ShaderChunk.shadowmap_pars_fragment.replace(POINT_DP, (_, depth) =>
+  `float biasedZ = max( viewSpaceZ + shadowBias, shadowCameraNear );\n\t\t\tfloat dp = ${depth.replaceAll('viewSpaceZ', 'biasedZ')};`);
+if ((THREE.ShaderChunk.shadowmap_pars_fragment.match(POINT_DP) ?? []).length !== 3) throw Error('character: three.js point shadows changed');
+THREE.ShaderChunk.shadowmap_pars_fragment = POINT_BIAS;
+
 const LIFT = 2.3;          // over the feet (the hero is ~1.1 tall; closer, the head is blown out)
 const LEAD = 0.55;         // towards the camera, level
 const UNDER_CEILING = 0.2; // this far under a ceiling at most
