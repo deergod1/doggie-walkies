@@ -1,0 +1,25 @@
+# Before writing or changing music, read music/README.md (style, moods, format).
+# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim). A stinger for a level gained (now the sfx `levelUp`, game/enemies.js): short, over the music.
+# Not played by the game yet: only in tools/player.html, under Jingles.
+title    Level up
+composer Claude
+about    A level gained: a crystal sweep up and the bird's call, then its call again an octave higher, over a glass harmonica chord.
+tempo    100
+beats    2
+steps    6
+reverb   0.5
+
+# mood explore: bird sweep harm tap
+
+voice bird     crystal    vol=0.55 pan=0.3  rev=0.7
+voice sweep    crystal    vol=0.28 pan=-0.3 rev=0.6
+voice harm     glassharp  vol=0.22 pan=0    center=A4 att=0.1 rel=1
+voice tap      glasstap   vol=0.3  pan=0.35
+
+pattern up
+bird    | E6 A5+B5---- E7 A6+B6---- |
+sweep   | A4 E5 A5 B5 .- E6 A6 B6 E7 .- |
+harm    | [Aadd9]----------- |
+tap     | x..... X..... |
+
+loop up

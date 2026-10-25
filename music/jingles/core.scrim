@@ -1,0 +1,32 @@
+# Before writing or changing music, read music/README.md (style, moods, format).
+# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim). For reaching the core (depth 20; docs/story.md), when the story goes in.
+# Not played by the game yet: only in tools/player.html, under Jingles.
+title    The Core
+composer Claude
+about    The glass bird glued back together: the toy tune whole again on crystal (A B C, E D), its last notes mended (B where the crack was, then A), over the title's rocking ostinato, glass harmonica chords, a singing bowl, and the bird's wide call ringing as at the end of the title song.
+tempo    96
+beats    2
+steps    6
+reverb   0.55
+
+# mood explore: lead ost bird harm bass bowl chimes
+
+voice lead     crystal    vol=0.78 pan=-0.1
+voice ost      crystal    vol=0.38 pan=-0.3 oct=1
+voice bird     crystal    vol=0.55 pan=0.4  rev=0.75
+voice harm     glassharp  vol=0.26 pan=0.2  center=A4 att=0.2 rel=1.2
+voice bass     fretless   vol=0.6
+voice bowl     bowl       vol=0.4  pan=0.1  rev=0.6
+voice chimes   chimes     vol=0.36 pan=-0.35
+
+# Am F, E Am: the tune, mended
+pattern mended
+lead    | A4--- B4- C5----- | E5----- D5----- | B4----- A4----- |
+ost     | A2!- A2- B2- A2!- A2- B2- | F2!- F2- G2- F2!- F2- G2- | E2!- E2- F2- A2!----- |
+harm    | [Am]?----------- | [F]?----------- | [E]?----- [Am]----- |
+bass    | C2----------- | A1----------- | G#1----- C2----- |
+bowl    | A2----------- | _ | _ |
+bird    | _ | _ | .----- A6 A5+B5---- |
+chimes  | _ | _ | ...... x..x.. |
+
+loop mended

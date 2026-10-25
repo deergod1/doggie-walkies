@@ -1,0 +1,28 @@
+# Before writing or changing music, read music/README.md (style, moods, format).
+# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim). For a quest done (game/quests.js, nothing plays yet).
+# Not played by the game yet: only in tools/player.html, under Jingles.
+title    Quest
+composer Claude
+about    A villager thanked: the warmest of the jingles, the toy tune as a little waltz in F major on a music box (F G A, C Bb, A) with a crystal echo, an accordion on the off-beats and a fretless bass, ending on the bird's wide call.
+tempo    144
+beats    3
+steps    4
+reverb   0.45
+
+# mood explore: lead echo bird accordion bass
+
+voice lead      musicbox   vol=0.5  pan=-0.1 rev=0.5
+voice echo      crystal    vol=0.26 pan=0.4  rev=0.65
+voice bird      crystal    vol=0.5  pan=0.35 rev=0.75
+voice accordion accordion  vol=0.24 pan=0.3  center=F4 gate=0.6
+voice bass      fretless   vol=0.6
+
+# F | Bb C | F
+pattern thanks
+lead      | F5--- G5- A5----- | C6----- Bb5----- | A5----------- |
+echo      | . F6--- G6- A6---- | - C7----- Bb6---- | - A6---------- |
+bird      | _ | _ | .----- C7 F6+G6---- |
+accordion | .--- [F]--- [F]--- | .--- [Bb]--- [C]--- | [F]----------- |
+bass      | F2----------- | Bb1----- C2----- | F1----------- |
+
+loop thanks

@@ -1,3 +1,14 @@
 [
-  { "name": "victory", "title": "Victory (a boss beaten)", "file": "victory.scrim" }
+  { "name": "victory", "title": "Victory (a boss beaten)", "file": "victory.scrim" },
+  { "name": "death", "title": "Death", "file": "death.scrim" },
+  { "name": "trial", "title": "Trial (a trial room lived through)", "file": "trial.scrim" },
+  { "name": "quest", "title": "Quest (a quest done)", "file": "quest.scrim" },
+  { "name": "act1", "title": "Act I: Childhood (its first cube)", "file": "act1.scrim" },
+  { "name": "act2", "title": "Act II: Growing up (its first cube)", "file": "act2.scrim" },
+  { "name": "act3", "title": "Act III: The sealed memories (its first cube)", "file": "act3.scrim" },
+  { "name": "core", "title": "The Core (reaching it)", "file": "core.scrim" },
+  { "name": "levelup", "title": "Level up (stinger)", "file": "levelup.scrim" },
+  { "name": "chest", "title": "Treasure (stinger, a chest's glint)", "file": "chest.scrim" },
+  { "name": "legendary", "title": "Legendary (stinger, a legendary drop)", "file": "legendary.scrim" },
+  { "name": "memorized", "title": "Memorized (stinger, a cube got through)", "file": "memorized.scrim" }
 ]

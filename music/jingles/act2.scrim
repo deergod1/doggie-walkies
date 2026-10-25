@@ -1,0 +1,30 @@
+# Before writing or changing music, read music/README.md (style, moods, format).
+# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim). For the first cube of act II (growing up; docs/story.md), when the story goes in.
+# Not played by the game yet: only in tools/player.html, under Jingles.
+title    Act II: Growing up
+composer Claude
+about    The happiest stretch: the toy tune varied, turned around (E D C, A B, C), on crystal with a glass harmonica a third below it, two voices together, over F, G and A minor, a vibraphone, and the bird's wide call.
+tempo    84
+beats    2
+steps    6
+reverb   0.5
+
+# mood explore: lead glow bird vibes harm bass
+
+voice lead     crystal    vol=0.75 pan=-0.15
+voice glow     glassharp  vol=0.3  pan=0.25 att=0.06 rel=0.4
+voice bird     crystal    vol=0.5  pan=0.4  rev=0.75
+voice vibes    vibes      vol=0.34 pan=0.3
+voice harm     glassharp  vol=0.2  pan=-0.2 center=A4 att=0.2 rel=1
+voice bass     fretless   vol=0.6
+
+# F G Am: the tune turned around, two voices in thirds
+pattern varied
+lead    | E5--- D5- C5----- | A4----- B4----- | C5----------- |
+glow    | C5--- B4- A4----- | F4----- G4----- | A4----------- |
+vibes   | F3- C4- A4- C4- F4- C4- | G3- D4- B4- D4- G4- D4- | A3- E4- C5- E4- A4- E4- |
+harm    | [F]?----------- | [G]?----------- | [Am]----------- |
+bass    | A1----------- | B1----------- | C2----------- |
+bird    | _ | _ | .----- A6 A5+B5---- |
+
+loop varied

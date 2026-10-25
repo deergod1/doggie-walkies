@@ -1,0 +1,47 @@
+# Before writing or changing music, read music/README.md (style, moods, format).
+# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim). For a death (now the sfx `death`, game/flow.js).
+# Not played by the game yet: only in tools/player.html, under Jingles.
+# The ring of the victory jingle and the title's shatter, then the toy tune trying again.
+title    Death
+composer Claude
+about    "No... that's not how it went." A knock and the long thin glass ring while time stands still, then the shatter: glass falling, the bird's call narrowed to a half step, a low swell. Then the toy tune tries again (A B C), and the bird's wide call comes back with a shimmer: back at the entry.
+tempo    90
+beats    2
+steps    6
+reverb   0.55
+
+# mood explore: lead bird sweep harm swell ring bowl knock bass shatter chimes
+
+voice lead     crystal    vol=0.75 pan=-0.1
+voice bird     crystal    vol=0.5  pan=0.4  rev=0.75
+voice sweep    crystal    vol=0.26 pan=0.35 rev=0.65
+voice harm     glassharp  vol=0.26 pan=-0.2 center=A4 att=0.2 rel=1.2
+voice swell    glassharp  vol=0.3  pan=-0.1 att=0.8 rel=1.4
+voice ring     glassharp  vol=0.2  pan=0.3  rev=0.8 att=0.1 rel=1
+voice bowl     bowl       vol=0.4  pan=-0.1
+voice knock    kick       vol=0.4
+voice bass     fretless   vol=0.6
+voice shatter  shatter    vol=0.5  pan=0.15
+voice chimes   chimes     vol=0.4  pan=-0.3
+
+# the blow and the ring; the shatter, glass falling, the narrowed call over a low swell
+pattern fall
+knock   | X..... ...... | _ |
+bass    | D1!- .--------- | D1----------- |
+ring    | G6----------- | -- .--------- |
+shatter | _ | X..... ...... |
+chimes  | _ | x..x.. ...... |
+lead    | _ | E7! B6? A6 F6? D6 Bb5? .----- |
+bird    | _ | .----- A6 A5+Bb5---- |
+swell   | _ | D2+A2+D3----------- |
+
+# the toy tune tries again, and the wide call comes back with a shimmer
+pattern back tempo=72
+lead    | A4- B4- C5- .----- |
+bird    | .----- A6 A5+B5---- |
+sweep   | .----- A5 B5 E6 A6 B6- |
+harm    | [Am]?----------- |
+bowl    | A2----------- |
+bass    | A1----------- |
+
+loop fall back

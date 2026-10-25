@@ -100,7 +100,13 @@ Beating a boss (a real one or a Temp Boss) plays a fanfare (`src/audio/fanfare.j
 `music/jingles/victory.scrim`, `docs/sound.md`), and the music ducks under it (`duckMusic`); a
 boss with his own song is gone by then, and the place's song comes back after it. The jingle is
 a score in `music/jingles/` (with its `index.json`), which `tools/player.html` lists under
-Jingles; it is no song, so it is in no `SONGS`.
+Jingles; it is no song, so it is in no `SONGS`. The other jingles there, built on the title song
+too, are not played by the game yet: `death` (the victory's ring and the title's shatter, then the
+toy tune trying again), `trial` (a trial room lived through), `quest` (a quest done), `act1`,
+`act2`, `act3` and `core` (the first cube of each act and the core, the toy tune whole, varied,
+in pieces and mended, for when the story goes in: `docs/story.md`), all 3.5 to 4.5 s, and short
+stingers meant to play over the music: `levelup`, `chest` (a chest's glint), `legendary` and
+`memorized` (one soft ring for a cube got through).
 
 ## Scheduling
 

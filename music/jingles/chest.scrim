@@ -1,0 +1,26 @@
+# Before writing or changing music, read music/README.md (style, moods, format).
+# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim). A stinger for a treasure chest opened (now the sfx `chest`, game/chests.js): the glint, after the hinge and the lid.
+# Not played by the game yet: only in tools/player.html, under Jingles.
+# Meant to play over the chest sound, in place of its glint.
+title    Treasure
+composer Claude
+about    A chest's glint: a crystal run up into the bird's wide call, a glass harmonica shimmer and wind chimes.
+tempo    100
+beats    2
+steps    6
+reverb   0.55
+
+# mood explore: bird sweep harm chimes
+
+voice bird     crystal    vol=0.5  pan=0.35 rev=0.75
+voice sweep    crystal    vol=0.28 pan=-0.3 rev=0.6
+voice harm     glassharp  vol=0.2  pan=0    center=A5 att=0.15 rel=1
+voice chimes   chimes     vol=0.36 pan=-0.35
+
+pattern glint
+sweep   | A5 C6 E6 A6 .- .----- |
+bird    | .----- E7 A6+B6---- |
+harm    | .--- [Am]?------- |
+chimes  | ...... x..... |
+
+loop glint

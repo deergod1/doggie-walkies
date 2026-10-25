@@ -1,0 +1,32 @@
+# Before writing or changing music, read music/README.md (style, moods, format).
+# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim). For the first cube of act III (the sealed memories; docs/story.md), when the story goes in.
+# Not played by the game yet: only in tools/player.html, under Jingles.
+title    Act III: The sealed memories
+composer Claude
+about    What she sealed away: a thin glass ring over a singing bowl, then the toy tune only in pieces (A, then Bb, then E, single notes with silence between), a glass harmonica cluster A and Bb, and the bird's call narrowed to a half step, left unresolved.
+tempo    80
+beats    2
+steps    6
+reverb   0.6
+
+# mood explore: lead bird ring haze bowl bass tap
+
+voice lead     crystal    vol=0.72 pan=-0.1
+voice bird     crystal    vol=0.5  pan=0.4  rev=0.75
+voice ring     glassharp  vol=0.18 pan=0.3  rev=0.8 att=0.1 rel=1
+voice haze     glassharp  vol=0.16 pan=-0.2 att=0.8 rel=1.2
+voice bowl     bowl       vol=0.4  pan=0.1  rev=0.6
+voice bass     fretless   vol=0.6
+voice tap      glasstap   vol=0.25 pan=0.35
+
+# Am Bb Am: pieces
+pattern pieces
+ring    | G6----------- | -- .--------- | _ |
+bowl    | A2----------- | _ | Bb2----------- |
+lead    | .----- A4----- | .--- Bb4- .----- | E5----- .----- |
+haze    | _ | A4+Bb4----------- | = |
+bass    | A1----------- | Bb1----------- | A1----------- |
+bird    | _ | _ | .----- A6 A5+Bb5---- |
+tap     | ...... x..... | ..x... ...... | x..... ...... |
+
+loop pieces

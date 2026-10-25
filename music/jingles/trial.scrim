@@ -1,0 +1,32 @@
+# Before writing or changing music, read music/README.md (style, moods, format).
+# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim). For a trial room lived through (now the sfx `unlock` and `levelUp`, game/trials.js).
+# Not played by the game yet: only in tools/player.html, under Jingles.
+title    Trial
+composer Claude
+about    A memory lived through: the title's rocking crystal ostinato and its toy tune, whole (A B C, E D, C), quietly over glass harmonica chords and a fretless bass, a glass tap and a singing bowl, ending on the bird's wide call.
+tempo    100
+beats    2
+steps    6
+reverb   0.5
+
+# mood explore: lead ost bird harm bass bowl tap
+
+voice lead     crystal    vol=0.75 pan=-0.1
+voice ost      crystal    vol=0.4  pan=-0.3 oct=1
+voice bird     crystal    vol=0.5  pan=0.4  rev=0.75
+voice harm     glassharp  vol=0.24 pan=0.2  center=A4 att=0.2 rel=1
+voice bass     fretless   vol=0.6
+voice bowl     bowl       vol=0.35 pan=0.1  rev=0.6
+voice tap      glasstap   vol=0.3  pan=0.35
+
+# Am Am F: the toy tune whole, ending on the call
+pattern lived
+lead    | A4--- B4- C5----- | E5----- D5----- | C5----------- |
+ost     | A2!- A2- B2- A2!- A2- B2- | % | F2!- F2- G2- F2!----- |
+bird    | _ | _ | .----- A6 A5+B5---- |
+harm    | [Am]?----------- | % | [F]----------- |
+bass    | C2----- A1----- | C2----- B1----- | A1----------- |
+bowl    | _ | _ | F3----------- |
+tap     | x.o... ...... | x.o... ...... | X..... ...... |
+
+loop lived

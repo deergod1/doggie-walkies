@@ -1,0 +1,29 @@
+# Before writing or changing music, read music/README.md (style, moods, format).
+# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim). A stinger for a legendary drop (now the sfx `clink`, game/loot): short, over the music.
+# Not played by the game yet: only in tools/player.html, under Jingles.
+title    Legendary
+composer Claude
+about    Something rare falls: a glitter of crystal falling from very high, the bird's wide call ringing up high, wind chimes, a glass tap and a low singing bowl under it.
+tempo    90
+beats    2
+steps    6
+reverb   0.6
+
+# mood explore: bird sweep harm bowl chimes tap
+
+voice bird     crystal    vol=0.55 pan=0.3  rev=0.8
+voice sweep    crystal    vol=0.26 pan=-0.3 rev=0.65
+voice harm     glassharp  vol=0.22 pan=0    center=E5 att=0.15 rel=1.2
+voice bowl     bowl       vol=0.4  pan=-0.1 rev=0.6
+voice chimes   chimes     vol=0.4  pan=0.35
+voice tap      glasstap   vol=0.3  pan=0.2
+
+pattern rare
+sweep   | E7 B6 A6 E6 B5 A5 .----- | _ |
+bird    | .----- B7 E7+F#7---- | .----- E7 A6+B6---- |
+harm    | [Esus2]?----------- | [Aadd9]----------- |
+bowl    | A2----------- | _ |
+chimes  | x..... ...... | x..x.. ...... |
+tap     | ...... x..... | X..... ...... |
+
+loop rare
