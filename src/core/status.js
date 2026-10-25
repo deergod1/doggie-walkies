@@ -4,7 +4,7 @@
 // ignite makes: `{ time, damage, ticks }` dealt in equal ticks over `time`. Catching it again
 // restarts it, so lingering sources (a burning patch, a poison cloud) only catch what is not
 // already affected. While poisoned the player does not regenerate (core/progression.js).
-import { ignite, burnStep, burntOut, chillFactor } from './projectiles.js';
+import { ignite, burnStep, burntOut, chillFactor, chillStep } from './projectiles.js';
 
 export const STATUSES = ['burning', 'toxic'];
 // a status of `spec` ({ time, damage, ticks }); reason: what the player is told when it kills
@@ -34,3 +34,18 @@ export const ACID_TOXIN = { time: 4, ticks: 4, share: 0.12 };
 export const bigFoe = e => !!(e.guardian || e.boss);
 export const enemySlow = e => e.chilled?.time ? chillFactor(e.chilled) : 1;
 export const zappable = e => !e.boss && !e.profile?.steadfast;
+
+// Slowed: the general slowing, on the player and on enemies (a Slug's slime ball, a slime
+// meteorite and the splat it leaves, being inside a Bolime). `slowed` ({ time, slow, t, weapons,
+// source }) scales how fast the body moves by `slow` for `time` seconds, thawing back at the end
+// like a chill. By default only that: with `weapons` (only while a Bolime has you, game/engulf.js)
+// the player's swings, draws, reloads and throws go slower too. `source` says what it looks like
+// (render/slimed.js). The stronger of a chill and a slowing counts.
+export const slowFrom = (spec, source = spec.source ?? '') => ({ time: spec.time, slow: spec.slow, t: 0, weapons: !!spec.weapons, source });
+// what is slowing now: `next`, unless `old` slows more and lasts longer
+export const slower = (old, next) => old && chillFactor(old) < next.slow && old.time - old.t > next.time ? old : next;
+// advance a slowing by dt; false once it has worn off
+export const slowStep = chillStep;
+// how fast a body (the player, an enemy) moves now (1: free), and how fast its weapon works
+export const moveFactor = b => Math.min(chillFactor(b.chilled), chillFactor(b.slowed));
+export const weaponFactor = b => b.slowed?.weapons ? chillFactor(b.slowed) : 1;

@@ -122,6 +122,14 @@ The controls are the same for all.
   player: it moves at half speed for 1.6 s, thawing back over the last 0.4 s (frost on the
   body, `render/chilled.js`). While a throw recovers it keeps closing in, so it ends up at
   the claws. Fire puts a chill out and ice puts out a fire.
+- Slowed (`core/status.js`, the general slowing; slime: a Slug's slime ball, a slime meteorite
+  and its splat, being inside a Bolime): `slowed` ({ time, slow, weapons, source }) scales how
+  fast the body moves like a chill does, thawing over the last 0.4 s; the stronger of a chill and
+  a slowing counts (`moveFactor`), and a weaker slowing does not cut short a stronger one that
+  lasts longer (`slower`). By default only the body: the weapon is slowed too (`weaponFactor`,
+  `game/sword.js`: swings, draws, reloads and throws) only while a Bolime has you (`weapons`).
+  On enemies it only slows how fast they move (`game/enemyai.js`). Green goo drips off whoever
+  is slowed (`render/statuses.js`).
 - Fire shraps: a kind of the Shraps (`docs/enemy-kinds.md`), red, with a head of flames in
   place of the ice block, that throws the Fire-face's burning fireball. The one model carries
   both heads (and both balls in the claw); each kind hides the other's materials (`hide`).

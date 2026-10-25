@@ -15,6 +15,7 @@ import { relay } from '../net/online.js';
 import { absent, enemyName } from '../core/enemies.js';
 import { enchantHit } from './enchants.js';
 import { tr } from '../i18n/i18n.js';
+import { weaponFactor } from '../core/status.js';
 
 const BUFFER = 0.3;   // s a queued attack waits for the current swing to allow the next
 // the critical-hit roll of each blade hit, in 0..1 (browser checks pin it to keep numbers exact)
@@ -35,7 +36,8 @@ function aimYaw(target) {
 export function updateSword(dt) {
   if (state.inventoryOpen) return;
   if (state.transitioning) { cancelSwing(player); return; }
-  advanceSwing(player, dt);
+  // (inside a Bolime the weapon is slowed too: core/status.js weaponFactor; the buffer keeps real time)
+  advanceSwing(player, dt * weaponFactor(player));
   const s = player.sword;
   // a drawn shot follows its target until it goes, then flies
   if (s.active && s.stats?.ranged && !s.fired && s.target?.profile && !absent(s.target)) s.yaw = aimYaw(s.target);

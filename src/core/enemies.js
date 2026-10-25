@@ -1293,12 +1293,14 @@ export function lungeAt(lunge, t) {
 }
 
 // what a strike (or a projectile) does to the player; a gust's blow also pushes (`push`), a
-// bolt's stuns (`shock`, s), Squarlo landing on them squashes them and dazes them (`daze`, s)
+// bolt's stuns (`shock`, s), Squarlo landing on them squashes them and dazes them (`daze`, s), a
+// slime ball slows them (`slow`, core/status.js slowFrom)
 export function blowOf(profile, a = profile) {
   const damage = Math.round(profile.damage * (a.power ?? 1));
   return { damage, knock: a.knock ?? profile.knock,
     knockDown: !!a.knockDown, hop: a.hop, reason: a.reason, burn: a.projectile?.burn ?? a.burn ?? null,
     chill: a.projectile?.chill ?? a.chill ?? null, toxin: toxinOf(a.toxin ?? profile.toxin, damage),
+    ...((a.projectile?.slow ?? a.slow) && { slow: a.projectile?.slow ?? a.slow }),
     ...(a.gust && { push: { speed: a.gust.push, time: a.gust.pushTime } }),
     ...(a.projectile?.push && { push: { speed: a.projectile.push, time: a.projectile.pushTime } }),
     ...(a.beam?.shock && { shock: a.beam.shock }), ...(a.pop && { pop: a.pop }), ...(a.daze && { daze: a.daze }) };

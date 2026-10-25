@@ -101,7 +101,7 @@ function begin() {
   if (player.hp > 0 && tape.frames.length) {
     cancelSwing(player, true);
     Object.assign(player, { flipping: { kind: 'rewind' }, ragdoll: null, getUp: null, held: null, pull: null, gust: null,
-      burning: null, chilled: null, toxic: null, stun: 0, vx: 0, vy: 0, vz: 0 });
+      burning: null, chilled: null, slowed: null, toxic: null, stun: 0, vx: 0, vy: 0, vz: 0 });
   }
   pale(true); whirr = 0;
 }

@@ -258,7 +258,7 @@ dev({
   name: 'heal', help: 'full health, no poison, no fire, no chill',
   run() {
     if (player.hp <= 0 || player.down) return 'Too late for that';
-    player.hp = player.maxHp; player.burning = null; player.toxic = null; player.chilled = null;
+    player.hp = player.maxHp; player.burning = null; player.toxic = null; player.chilled = null; player.slowed = null;
     return 'Healed';
   },
 });

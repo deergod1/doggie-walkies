@@ -5,7 +5,7 @@
 import { ARM_TIME, TRIALS, SIEGE, holdTime, HUNTER } from '../core/trials.js';
 import { ENEMY_KINDS, isRanged, makeEnemy, coinRange, depthLevel, enemyKind } from '../core/enemies.js';
 import { RUN_SPEED, N } from '../core/constants.js';
-import { chillFactor } from '../core/projectiles.js';
+import { moveFactor } from '../core/status.js';
 import { effectMod } from '../core/potions.js';
 import { swarmKind } from '../core/hordes.js';
 import { DEPTH_SPAWNS } from '../core/spawns.js';
@@ -115,7 +115,7 @@ function dropWarden() {
 }
 const wardenOf = () => warden && allEnemies().find(e => e.id === warden);
 // how fast body b can run now (a chill slows it, a swiftness potion quickens it)
-const runSpeed = b => RUN_SPEED * (b === player ? chillFactor(player.chilled) * (1 + effectMod(player, 'moveSpeed')) : 1);
+const runSpeed = b => RUN_SPEED * (b === player ? moveFactor(player) * (1 + effectMod(player, 'moveSpeed')) : 1);
 export function stepChase(m, s, dt, resolve) {
   if (m.kind !== 'chase') return;
   const live = s.phase === 'armed' || s.phase === 'running';

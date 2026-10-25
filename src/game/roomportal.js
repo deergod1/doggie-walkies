@@ -95,7 +95,7 @@ function takeRoomPortal() {
   fadeOut();
   setTimeout(() => {
     if (state.cubes !== cubes || state.cubeKey !== key) return;   // a new world meanwhile
-    const p = player, keep = { hp: p.hp, burning: p.burning, chilled: p.chilled, toxic: p.toxic };
+    const p = player, keep = { hp: p.hp, burning: p.burning, chilled: p.chilled, slowed: p.slowed, toxic: p.toxic };
     const a = state.arrival = respawnPoint(state.arrival);
     spawnAt(a.x, a.y, a.z);
     Object.assign(p, keep);

@@ -527,9 +527,11 @@ const validState = s => s && typeof s.id === 'string' && [s.x, s.y, s.z, s.yaw, 
 const stateOf = e => ({ id: e.id, x: e.x, y: e.y, z: e.z, yaw: e.yaw, hp: e.hp, mode: e.mode });
 const finite = (...xs) => xs.every(Number.isFinite);
 // a status's spec from another's game, as afflictEnemy takes it (game/statuses.js): a burn or a
-// poison, a chill (an enchanted weapon slows by at most half) or a zap (a short stun)
+// poison, a chill (an enchanted weapon slows by at most half), a slowing (slime: by at most two
+// thirds) or a zap (a short stun)
 const validAffliction = (status, s) => !!s && typeof s === 'object' && finite(s.time) && s.time > 0 && s.time <= 30
   && (status === 'chilled' ? finite(s.slow) && s.slow >= 0.49 && s.slow <= 1
+    : status === 'slowed' ? finite(s.slow) && s.slow >= 0.33 && s.slow <= 1 && s.time <= 10
     : status === 'zapped' ? s.time <= 1 : finite(s.damage, s.ticks) && s.damage >= 0 && s.ticks >= 1);
 
 // a message from another player (not `me`; the host's own word was handled before)

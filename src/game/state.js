@@ -22,6 +22,7 @@ export const player = {
   airTime: 0, coyote: 0, jumpBuf: 0, stun: 0,
   burning: null,   // on fire (core/projectiles.js ignite)
   chilled: null,   // slowed by an ice ball (core/projectiles.js chillFrom)
+  slowed: null,    // slowed by slime (core/status.js slowFrom)
   gust: null,      // blown back by a Wolla's storm (core/gusts.js pushStep)
   pull: null,      // drawn in by Gusto breathing in (game/gusts.js, physics/move.js)
   shocked: 0,      // stunned by a Wolk's bolt: how long its sparks still crackle (render/shocked.js)

@@ -10,7 +10,7 @@ import { canMove } from '../physics/canmove.js';
 import { walkable, stepEnemy } from '../physics/enemynav.js';
 import { attackOf, blowOf, enemyWords } from '../core/enemies.js';
 import { ignite, burnStep, burntOut, chillFrom, chillStep } from '../core/projectiles.js';
-import { afflict, statusStep, statusOver } from '../core/status.js';
+import { afflict, statusStep, statusOver, slowFrom, slower, slowStep } from '../core/status.js';
 import { immuneTo } from '../core/potions.js';
 import { absent, airborne } from '../core/enemies.js';
 import { SIT_IMPACT } from '../core/constants.js';
@@ -19,7 +19,7 @@ import { twirlPlayer } from './twirl.js';
 import { guardBlow, wornDefense } from './armor.js';
 import { tr, msg } from '../i18n/i18n.js';
 
-export const resetEnemyCombat = () => { player.burning = null; player.chilled = null; player.toxic = null; player.gust = null; player.pull = null; player.shocked = 0; player.dazed = 0; player.flat = 0; player.held = null; };
+export const resetEnemyCombat = () => { player.burning = null; player.chilled = null; player.slowed = null; player.toxic = null; player.gust = null; player.pull = null; player.shocked = 0; player.dazed = 0; player.flat = 0; player.held = null; };
 // who struck a blow, for the chronicle when it kills us (game/log.js logDeath); it goes along
 // with the blow (core/enemies.js blowOf), over the network too
 export const attacker = e => ({ words: enemyWords(e.profile), level: e.level, guardian: !!e.guardian });
@@ -58,6 +58,7 @@ export function hitPlayer(blow, fx, fz, nx, nz) {
   const by = blow.by ?? null;
   if (blow.burn && p.hp > blow.damage) { p.burning = { ...ignite(blow.burn, blow.reason), by }; p.chilled = null; }
   if (blow.chill && p.hp > blow.damage) { p.chilled = chillFrom(blow.chill); p.burning = null; }
+  if (blow.slow && p.hp > blow.damage) slowPlayer(blow.slow);   // (a Slug's slime ball, a slime meteorite)
   if (blow.toxin && p.hp > blow.damage) poisonPlayer(blow.toxin, (blow.reason ?? msg('Bitten!')).replace(/^Bitten/, 'Poisoned'), by);   // (src/i18n/sources.js has these)
   // only a heavy blow or a deadly one knocks you over; the rest are a short flinch and a shove
   if (blow.knockDown || p.hp <= blow.damage) {
@@ -122,10 +123,18 @@ export function updateToxic(dt) {
   }
   if (statusOver(d)) p.toxic = null;
 }
-// Chilled: slowed (physics/move.js) until it wears off; dying or water ends it too.
+// Chilled or slowed: slower (physics/move.js; a slowing with `weapons` the weapon too, game/sword.js)
+// until it wears off; dying or water ends it too.
 export function updateChill(dt) {
   const p = player;
   if (p.chilled && (p.hp <= 0 || p.fluidDeath || !chillStep(p.chilled, dt))) p.chilled = null;
+  if (p.slowed && (p.hp <= 0 || p.fluidDeath || !slowStep(p.slowed, dt))) p.slowed = null;
+}
+// slow the player by `spec` ({ time, slow, weapons?, source? }, core/status.js slowFrom): the
+// stronger slowing counts
+export function slowPlayer(spec) {
+  if (!(spec?.time > 0 && spec.time <= 10 && spec.slow >= 0.2 && spec.slow <= 1)) return;   // (a friend's blow may say anything)
+  player.slowed = slower(player.slowed, slowFrom(spec));
 }
 function pushPlayer(dx, dz) {
   const p = player;

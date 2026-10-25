@@ -3,7 +3,7 @@ import { STEP, SWIM_STEP, GRAV, SNAP, STEEP, ACID, WALK_SPEED, RUN_SPEED, SWIM_S
 import { player, state } from '../game/state.js';
 import { groundAt, ceilingAt, slopeAt } from './collide.js';
 import { canMove } from './canmove.js';
-import { chillFactor } from '../core/projectiles.js';
+import { moveFactor } from '../core/status.js';
 import { effectMod } from '../core/potions.js';
 import { wornTotals } from '../core/gear/stats.js';
 import { pushStep, pushControl } from '../core/gusts.js';
@@ -26,10 +26,10 @@ export function mired(p) {
 // learn: physics.html#feel #walls (see learn/README.md)
 function horizontal(dt, dx, dz, run) {
   const p = player;
-  // an ice ball's chill slows every way of moving (core/projectiles.js), a swiftness potion
-  // quickens it (core/potions.js), and so do light boots (core/gear/stats.js), wading the more the
-  // deeper the water (physics/hazards.js), and slime holds the feet (mired)
-  const speed = (p.swimming ? (p.fluid === ACID ? 0.6 : SWIM_SPEED) : run ? RUN_SPEED : WALK_SPEED) * chillFactor(p.chilled) * mired(p)
+  // an ice ball's chill or a slowing slows every way of moving (core/status.js moveFactor), a
+  // swiftness potion quickens it (core/potions.js), and so do light boots (core/gear/stats.js),
+  // wading the more the deeper the water (physics/hazards.js), and slime holds the feet (mired)
+  const speed = (p.swimming ? (p.fluid === ACID ? 0.6 : SWIM_SPEED) : run ? RUN_SPEED : WALK_SPEED) * moveFactor(p) * mired(p)
     * (1 + effectMod(p, 'moveSpeed') + feet(p)) * (1 - WADE_SLOW * Math.min(1, (p.wade || 0) / HEAD_Y));
   let tx = dx * speed, tz = dz * speed;
   if (p.grounded && !p.swimming && p.support) {
@@ -63,10 +63,10 @@ function horizontal(dt, dx, dz, run) {
 const LEAP = 3.4;   // horizontal speed of a jump while moving
 
 // How fast p runs and leaps now, and how much higher than plain it jumps (potions, boots, a
-// chill): what the jumps click to move takes depend on (physics/leaps.js)
+// chill or a slowing, the slime): what the jumps click to move takes depend on (physics/leaps.js)
 export function jumpPowers(p) {
   const quick = 1 + effectMod(p, 'moveSpeed') + feet(p);
-  return { run: RUN_SPEED * chillFactor(p.chilled) * mired(p) * quick, leap: LEAP * quick, boost: Math.sqrt(1 + effectMod(p, 'jump')) };
+  return { run: RUN_SPEED * moveFactor(p) * mired(p) * quick, leap: LEAP * quick, boost: Math.sqrt(1 + effectMod(p, 'jump')) };
 }
 
 // jump with a little coyote time (just walked off a ledge) and a short input buffer

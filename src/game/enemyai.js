@@ -39,6 +39,7 @@ import { launchProjectile } from './projectiles.js';
 import { fireBeam } from './beams.js';
 import { tryHordeAttack } from './hordes.js';
 import { enemySlow } from '../core/status.js';
+import { chillFactor } from '../core/projectiles.js';
 import { enemyMire } from '../core/footing.js';
 import { themeById } from '../themes/depth.js';
 
@@ -73,8 +74,9 @@ const turn = (e, yaw, dt, rate = 8) => { e.yaw += Math.atan2(Math.sin(yaw - e.ya
 const foe = e => e.target && (e.target === player || e.target.here) ? e.target : player;
 const toPlayer = e => { const p = foe(e); return Math.atan2(p.x - e.x, p.z - e.z); };
 const side = () => Math.random() < 0.5 ? -1 : 1;
-// slime holds an enemy's feet as it holds the player's (core/footing.js enemyMire)
-const mired = e => enemyMire(e, state.map, state.map?.biome && themeById(state.map.biome));
+// slime holds an enemy's feet as it holds the player's (core/footing.js enemyMire), and a slowing
+// (slime thrown or fallen on it, core/status.js) slows how fast it moves, not what else it does
+const mired = e => enemyMire(e, state.map, state.map?.biome && themeById(state.map.biome)) * chillFactor(e.slowed);
 function steer(e, x, z, speed, dt) {
   if (e.under) speed *= e.profile.burrow.speed / e.profile.chase;   // (it moves fast under the floor)
   speed *= mired(e);
