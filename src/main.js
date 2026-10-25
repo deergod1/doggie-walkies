@@ -28,6 +28,7 @@ import { tickNeighbors, cullNeighbors, setNeighborVeil } from './render/neighbor
 import { tickProps } from './render/props.js';
 import { tickFluidDeath } from './render/fluiddeath.js';
 import { applyLook } from './render/look.js';
+import { updateDayCycle, lookCycle } from './game/daycycle.js';
 import { tickSky } from './render/sky.js';
 import { tickResolution } from './render/resolution.js';
 import { keepPrograms } from './render/programs.js';
@@ -163,7 +164,7 @@ function frame(now = performance.now()) {
   tickNeighbors(dt);
   tickProps(state.time);
   tickFlames(dt, state.time, focusPoint(player.x, player.visY, player.z));   // the fires: flames, embers, smoke (render/flames.js)
-  tickMotes(dt, state.map?.biome && themeById(state.map.biome), player.x, player.visY, player.z);   // what drifts in the air (render/motes.js)
+  tickMotes(dt, state.map?.biome && themeById(state.map.biome), player.x, player.visY, player.z, state.night);   // what drifts in the air (render/motes.js)
   if (state.world) animateWorld(state.world, dt, state.time);
   updateHud(player, state.map);
   updateConsole();   // the chat box: the chronicle and the game's last word (game/console.js)
@@ -192,7 +193,9 @@ function frame(now = performance.now()) {
   // and the dusk of Renew's fight falls slowly, and lifts as slowly once he is beaten (game/rewind.js)
   state.lookDusk += (state.dusk - state.lookDusk) * Math.min(1, dt * (state.dusk > state.lookDusk ? 0.8 : 0.4));
   if (state.lookDusk < 0.002) state.lookDusk = 0;
-  applyLook(state.lookDepth, camera.position.distanceTo(focusPoint(player.x, player.visY, player.z)), state.cubes?.layout.themes, state.lookDark, state.lookMist, state.lookVoid, state.lookDusk);
+  // and a theme's own night falls and lifts as its day goes round (game/daycycle.js)
+  updateDayCycle(dt);
+  applyLook(state.lookDepth, camera.position.distanceTo(focusPoint(player.x, player.visY, player.z)), state.cubes?.layout.themes, state.lookDark, state.lookMist, state.lookVoid, state.lookDusk, lookCycle());
   followHero(dt);   // the hero's light where it stands (render/character.js)
   updateLightPool(focusPoint(player.x, player.visY + 1, player.z));
   // (the close view's camera stays out of the solids: nothing of the neighbours is cut either)

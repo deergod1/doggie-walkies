@@ -37,6 +37,8 @@
 //   grove: a forest's own props (render/propplace.js grove): trees (bases of its set) in thickets
 //     and clearings, density (the most a floor gets one), scale [min, max]; lanterns: the share of
 //     the trees with a lantern hanging from a branch; strings: the most strings of lanterns
+//   cycle: days and nights (core/daycycle.js, game/daycycle.js): `day` s of its `light`, then `night`
+//     s of its `dark` (a light like the deep's), turning over `fade` s; `motes` drift at night
 //   waylights: lamps beside the way (render/propplace.js waylights): { props, share (of the
 //     floors beside it), back (from the floor's middle, 0.36), foot (its collider, 0.06) }
 import { WATER, ACID } from '../core/constants.js';
@@ -158,6 +160,11 @@ const SLIME = T('Slime marsh', {
   soft: '#7ac040', lip: '#5a8a2a', under: '#1e2214', bed: ['#181c12', '#13160e'], fluids: [0.08, 0, 0.92], river: ACID,
   tiles: { lake: 2, river: 1.5, highland: 0.8 },
   light: { sky: ['#24503e', '#0a1a12', '#5e8a58', '#44603a'], stars: 0.3, hemi: ['#e6f4d2', '#3a4020', 1.05], sun: ['#f2ffd6', 2.0], fog: 0.15 },
+  // 45 s of day, 45 s of night: a green moonlight, the slime glowing, spores drifting
+  cycle: { day: 45, night: 45, fade: 4,
+    dark: { sky: ['#04100a', '#010503', '#0c2416', '#0e2a1a'], stars: 1, hemi: ['#6a9a80', '#060a06', 0.5], sun: ['#a8f0b4', 0.5], fog: 0.4, lamp: 1 },
+    motes: { colors: ['#b8ff5a', '#d8ff9a', '#9aff7a'], rate: 6, drift: 0.25, rise: [0.02, 0.2], life: [2.5, 5], size: [0.03, 0.06],
+      wisps: 1, wisp: '#b8ff5a' } },
 });
 // the deep canyon: the last of the sky, far down between sheer sandstone walls (red, salmon and
 // cream strata), a green river floor with cottonwoods, hanging gardens at the springs

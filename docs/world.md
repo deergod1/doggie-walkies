@@ -691,6 +691,13 @@ vents, reeds, and the craters the slime meteorites left. What makes it so, in it
   planks cross it (`BUILDS.slime`). Its spans keep to what the route depends on.
 - **Props** (`assets/themes/slime.glb`, `blender/themes_slime.py`): the slime glows a little,
   more so where it is fresh; landmarks: a meteorite's crater and a giant slime tree.
+- **Day and night** (`cycle`, `core/daycycle.js`, `game/daycycle.js`): 45 s of its own light,
+  then 45 s of its `dark` (a green moonlight, lit like the deep: stars, fog, the character's full
+  lamp, the slime glowing), each turn over the last 4 s of the half it ends. It runs on the world's
+  play time (`state.run.clock`), so it goes on while you are elsewhere and friends see the same
+  sky. `state.night` is how far into the night the cube is, `state.lookNight` follows it (coming
+  into the marsh at night fades the dark in, `render/look.js`); a word says when it turns, and
+  at night glowing spores and a wisp drift (`cycle.motes`, `render/motes.js`).
 
 ### Vignettes (`cubegen/vignettes.js`)
 

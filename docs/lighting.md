@@ -8,7 +8,7 @@ anti-aliasing (MSAA) and every material's own look stay what they were.
 
 | light | what | its shadows |
 |---|---|---|
-| the sun (and the moon of the night themes) | `render/scene.js` `sun` | of the fixed parts: baked; of what moves: three.js's shadow map |
+| the sun (and the moon of the night themes, and of the slime marsh's nights) | `render/scene.js` `sun` | of the fixed parts: baked; of what moves: three.js's shadow map |
 | the fixed lights | what a cube's glowing things give off, every one of them (`render/props.js`): lanterns, fires, lava, portals, crystals, a trial's braziers (`render/lightpool.js adoptLights` takes those not on a villager; at most 128 a cube) | baked when the cube is shown (`render/bake.js`) |
 | the moving lights | the hero's lamp (`render/character.js`, a three.js light); shots, enemies, loot, villagers' lamps, a partner (`trackLight`, `render/lightpool.js`) | the hero's lamp: a cube of shadow maps, as the quality level asks (`render/shadows.js`); the others: none |
 

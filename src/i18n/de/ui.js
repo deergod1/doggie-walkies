@@ -464,6 +464,9 @@ export default {
   'You defeated {who:the}{level} on depth {depth}: its gate is open': 'Du hast {who:den}{level} auf Tiefe {depth} besiegt: Das Tor ist offen',
   '{name} defeated {who:the}{level} on depth {depth}: its gate is open': '{name} hat {who:den}{level} auf Tiefe {depth} besiegt: Das Tor ist offen',
   'You reached depth {depth}: {place}': 'Du hast Tiefe {depth} erreicht: {place}',
+  // a theme's own day and night (game/daycycle.js)
+  'Night falls': 'Die Nacht bricht herein',
+  'The sun comes up': 'Die Sonne geht auf',
   '{name} reached depth {depth}: {place}': '{name} hat Tiefe {depth} erreicht: {place}',
   'You found {item}': 'Du hast {item} gefunden',
   '{name} found {item}': '{name} hat {item} gefunden',
