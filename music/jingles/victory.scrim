@@ -1,47 +1,49 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
 # Not a song: the jingle a beaten boss gets (src/audio/fanfare.js plays it once, as a sound).
+# Built on the title song (music/title.scrim): its knock and the thin ring held while time stands
+# still (the end of its cracking), its shatter, and its toy tune, which lands this once on a major
+# third (C#), with the glass bird's wide call after it.
 title    Victory
 composer Claude
-about    A boss falls and his power breaks like glass: a shatter, wind chimes, a singing bowl and a timpani stroke, a crystal sweep rising. Then a crystal lead and its echo play the game's motif in C major (1 2 3 5, then 4 3 4 5) over glass harmonica chords, F and G, glass taps rolling in, and it lands on the high C, broadening, with chimes, the bowl and a last crystal sweep.
-tempo    144
-beats    4
-steps    4
+about    A boss falls, and the bad memory loses its grip, like the title's glass bird: a knock and a thin glass ring while time stands still, then the shatter, wind chimes, and out of it the toy tune on crystal (A B C E D) over F and G, landing on an A major chord instead of minor, a crystal sweep rising, a singing bowl, and the bird's wide call ringing over it.
+tempo    100
+beats    2
+steps    6
 reverb   0.55
 
-# mood explore: lead echo sweep harm bowl timpani shatter taps chimes
+# mood explore: lead echo bird sweep harm ring bowl knock bass shatter chimes
 
 voice lead     crystal    vol=0.8  pan=0.1
 voice echo     crystal    vol=0.28 pan=-0.4 rev=0.7
-voice sweep    crystal    vol=0.32 pan=0.35 rev=0.6
-voice harm     glassharp  vol=0.32 pan=-0.2 center=G4 att=0.15 rel=1.2
-voice bowl     bowl       vol=0.6  pan=-0.1
-voice timpani  timpani    vol=0.4
-voice shatter  shatter    vol=0.6  pan=0.15
-voice taps     glasstap   vol=0.5  pan=0.3
-voice chimes   chimes     vol=0.55 pan=-0.3
+voice bird     crystal    vol=0.5  pan=0.4  rev=0.75
+voice sweep    crystal    vol=0.28 pan=0.35 rev=0.6
+voice harm     glassharp  vol=0.3  pan=-0.2 center=A4 att=0.15 rel=1.2
+voice ring     glassharp  vol=0.2  pan=0.3  rev=0.8 att=0.1 rel=1
+voice bowl     bowl       vol=0.55 pan=-0.1
+voice knock    kick       vol=0.4
+voice bass     fretless   vol=0.6
+voice shatter  shatter    vol=0.5  pan=0.15
+voice chimes   chimes     vol=0.45 pan=-0.3
 
-# the fall and the motif: C | F G
-pattern rise
-lead    | .------- C5- D5- E5- G5- | F5!--- E5- F5- G5!------- |
-echo    | .-------- C5- D5- E5- G5 | - F5!--- E5- F5- G5!------ |
-sweep   | . C4 E4 G4 C5 E5 G5 C6 E6- .----- | F4 A4 C5 F5 .--- G4 B4 D5 G5 .--- |
-harm    | .--- [C]?----------- | [F]------- [G]------- |
-bowl    | C3!--------------- | _ |
-timpani | C2!--- .------- G1 G1 G1 G1 | C2!--- .--- G1!--- G1 G1 G1! G1! |
-shatter | X... .... .... .... | _ |
-taps    | .... .... x.x. x.x. | x.x. x.x. xoxo XXXX |
-chimes  | X... .... .... .... | _ |
+# the blow, a ring while time stands still, the shatter, and the toy tune rising out of it: (D) | F G
+pattern strike
+knock   | X..... ...... | _ |
+bass    | D1!- .--------- | F1----- G1----- |
+ring    | G6----------- | -- .--------- |
+shatter | _ | X..... ...... |
+chimes  | _ | x..x.. ...... |
+lead    | _ | A5- B5- C6- E6--- D6- |
+echo    | _ | . A5- B5- C6- E6--- D6 |
+harm    | _ | [F]----- [G]----- |
 
-# the octave lands, held and broadening
-pattern land tempo=112
-lead    | C6!----------- .--- |
-echo    | - C6!----------- .-- |
-sweep   | C5 E5 G5 C6 E6 G6 C7--------- |
-harm    | [C]!------------- .- |
-bowl    | C3!--------------- |
-timpani | C2!----------- .--- |
-shatter | _ |
-taps    | X... .... .... .... |
-chimes  | X... .... X... .... |
+# it lands on A major, broadening: the tune's C as C#, a sweep, the bowl and the bird's wide call
+pattern land tempo=80
+lead    | C#6!----------- |
+echo    | - C#6---------- |
+bird    | .--- E7 A6+B6------ |
+sweep   | A4 C#5 E5 A5 C#6 E6 A6----- |
+harm    | [A]!----------- |
+bowl    | A2!----------- |
+bass    | A1----------- |
 
-loop rise land
+loop strike land

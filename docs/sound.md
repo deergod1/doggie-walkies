@@ -52,11 +52,11 @@ A boss falling (a real one or a Temp Boss: a descent guardian) plays a fanfare i
 `unlock` (`game/enemies.js`): a jingle written as a score like the songs,
 `music/jingles/victory.scrim` (listen in `tools/player.html`, under Jingles), played once by a
 synth of its own into the sounds' bus (`src/audio/fanfare.js`). So it is a sound, heard with the
-music off too, and every boss gets it, whatever song plays. Glass, the game's own instruments: his
-power breaks with a shatter, wind chimes, a singing bowl and a timpani stroke, a crystal sweep
-rises, a crystal lead and its echo play the game's motif in C major (1 2 3 5, 4 3 4 5) over
-glass harmonica chords, glass taps roll in, and it lands on the high C, slowing, with chimes and
-the bowl. About 5.5 s; the music ducks under it (`duckMusic`, `audio/music.js`) and a level
+music off too, and every boss gets it, whatever song plays. It is built on the title song (The
+Glass Bird): a knock and a thin glass ring while time stands still (the end of the title's
+cracking), the shatter and wind chimes, then the toy tune on crystal and its echo (A B C E D)
+over glass harmonica chords, F and G, landing on an A major chord (the tune's C as C#), slowing,
+with a crystal sweep, a singing bowl and the glass bird's wide call. About 4 s; the music ducks under it (`duckMusic`, `audio/music.js`) and a level
 gained with the kill chimes after it.
 
 ## Continuous sounds
