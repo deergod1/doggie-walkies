@@ -1,6 +1,6 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
 # Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim).
-# Played by audio/jingles.js: game/travel.js, a cube left by its way down for the first time.
+# Not played by the game yet: for a cube got through (docs/story.md), when the story goes in.
 # Many cubes get it, so it has to stay small: one soft ring.
 title    Memorized
 composer Claude

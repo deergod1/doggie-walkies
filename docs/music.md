@@ -108,7 +108,7 @@ in pieces and mended), all 3.5 to 4.5 s, and short
 stingers meant to play over the music: `levelup`, `chest` (a chest's glint), `legendary` and
 `memorized` (one soft ring for a cube got through), `questtaken`, `questfailed`, `trialsealed` (the
 knock and the ring), `trialfailed`, `revived` (by a friend), `horde` (it wakes), `dawn`, `dusk`,
-`enchant` and `portal` (the first time through one).
+`enchant` and `portal` (a portal not gone through before).
 
 ## Scheduling
 

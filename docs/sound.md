@@ -55,7 +55,7 @@ whatever song plays. One plays at a time: one asked for while another plays wait
 unless that is more than 5 s away (then it is left out), and one already playing or waiting is
 not played twice (a level gained with a boss's kill comes after his jingle). The music is turned
 down under each, smoothly (a smoothstep down over 0.6 s and back up over 1.2 s, `duckMusic` in
-`audio/music.js`): to 55% under the big ones, to 80% under the stingers. Where each plays:
+`audio/music.js`): to 55% under the big ones, to 80% under the stingers. Where each plays (`memorized` plays nowhere yet: a cube got through, for the story, `docs/story.md`):
 
 | Jingle | When |
 |---|---|
@@ -70,8 +70,7 @@ down under each, smoothly (a smoothstep down over 0.6 s and back up over 1.2 s, 
 | `legendary` | a Fabled weapon or better landing (`game/loot.js`) |
 | `enchant` | the Enchanter enchanting, the Smith re-rolling (`game/inventory.js`) |
 | `dawn`, `dusk` | the sun coming up, night falling (`game/daycycle.js`) |
-| `portal` | the first side portal in a world (`game/travel.js`) |
-| `memorized` | a cube left by its way down for the first time (`game/travel.js`) |
+| `portal` | a portal not gone through before: a side portal, a way down or up into a cube not visited yet; not a portal gone through before, nor walking across an open face (`game/travel.js`) |
 | `act1`, `act2`, `act3`, `core` | the first time at the first depth of an act, or at the core, in a world (`game/flow.js settleIn`) |
 
 `victory`, the boss's, is built on the title song (The

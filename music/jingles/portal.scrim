@@ -1,10 +1,10 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
 # Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim).
-# Played by audio/jingles.js: game/travel.js, the first side portal in a world.
+# Played by audio/jingles.js: game/travel.js, a portal not gone through before (into a cube not visited yet).
 title    Portal
 composer Claude
-about    Through the glass for the first time: a crystal swirl up and back down, a glass harmonica chord swelling in, wind chimes, and the bird's wide call on the other side.
-tempo    90
+about    Through a new portal, briefly: a crystal swirl up, a glass harmonica chord, wind chimes, and the bird's wide call on the other side.
+tempo    100
 beats    2
 steps    6
 reverb   0.6
@@ -17,9 +17,9 @@ voice harm     glassharp  vol=0.24 pan=0    center=A4 att=0.4 rel=1.2
 voice chimes   chimes     vol=0.36 pan=-0.35
 
 pattern through
-sweep   | E5 A5 B5 E6 A6 B6 E7 B6 A6 E6 B5 A5 | _ |
-harm    | [Aadd9]?----------- | % |
-chimes  | x..... ...... | _ |
-bird    | _ | E6 A5+B5---------- |
+sweep   | E5 A5 B5 E6 A6 B6 .----- |
+harm    | [Aadd9]?----------- |
+chimes  | x..... ...... |
+bird    | .----- E6 A5+B5---- |
 
 loop through
