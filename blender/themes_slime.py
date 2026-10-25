@@ -18,7 +18,8 @@ from mathutils import Vector
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from props import TAU, polar, BONE  # noqa: E402
-from clutter_geo import lit, xform, blade, pebble, flatten_back, clamp_lip, clamp_ground, skull_lite, sword_lite, prism  # noqa: E402
+from clutter_geo import lit, xform, blade, pebble, flatten_back, clamp_lip, clamp_ground, skull_lite, sword_lite, prism, bone_lite  # noqa: E402
+from themes_darkforest import plate, planks, wheel  # noqa: E402
 from themes_geo import wobble  # noqa: E402
 
 # the slime: bright and wet, a darker green under it, the glow of the fresh stuff
@@ -33,6 +34,9 @@ ROCK_DARK = "#3e4238"
 BARK = "#3a3a2a"
 BARK_DARK = "#2a2c20"
 STALK = "#8a9a60"
+PLANK = ("#5a5a44", "#4e4e3c", "#64644c", "#46463a")
+PLANK_DARK = "#3a3a2e"
+THATCH = ("#6a6a3a", "#5e5e34", "#747442")
 METEOR = ("#3a3a34", "#2e302a", "#46463e")
 
 
@@ -67,8 +71,8 @@ def goo_sheet(m, center, r, h, color, n=9, jitter=0.18):
 def crown(m, center, r, h, colors=SLIME, n=8):
     """A drooping crown of slime: a soft dome whose rim hangs down, drips under it."""
     c = Vector(center)
-    m.lathe(c, [(-h * 0.55, r * 0.55), (-h * 0.35, r), (0, r * 0.98), (h * 0.45, r * 0.75), (h * 0.8, r * 0.38),
-                (h, 0)], colors[0], n=n, jitter=0.1, colors=[SLIME_DEEP, colors[1], colors[0], colors[2]],
+    m.lathe(c, [(-h * 0.6, r * 0.5), (-h * 0.38, r * 0.92), (-h * 0.05, r), (h * 0.4, r * 0.86), (h * 0.78, r * 0.5),
+                (h, 0)], colors[0], n=n, jitter=0.17, colors=[SLIME_DEEP, colors[1], colors[0], colors[2]],
             phase=m.rng.random())
 
 
@@ -124,6 +128,59 @@ def build_slime_tree(m, v):
     # the slime that ran down the trunk
     m.blob((0.0, -0.08, 0.04), (0.22, 0.2, 0.04), SLIME[1], n=6)
     m.anchors += [(0.0, 0.0, h * 0.6)]
+
+
+def build_bulb_tree(m, v):
+    """A tree of arching branches, each ending in a big glowing bulb of goo hanging off it."""
+    h = 2.2 + 0.3 * v
+    s = len(m.vertices)
+    m.tube([(0, 0, 0), (0.05, 0.02, h * 0.4), (-0.03, -0.02, h * 0.75), (0.0, 0.0, h)], [0.11, 0.085, 0.06, 0.03],
+           BARK, n=6)
+    wobble(m, s, 0.03, freq=3.5, phase=v * 2)
+    for i in range(3):
+        a = i * TAU / 3 + 0.4 * v
+        m.tube([polar(0.3, a, 0.0), polar(0.13, a + 0.2, 0.07), (0, 0, 0.25)], [0.022, 0.04, 0.06], BARK_DARK, n=4)
+    start = len(m.faces)
+    for i in range(4 + v):
+        a = i * TAU / (4 + v) + 0.3
+        z0 = h * (0.55 + 0.08 * (i % 3))
+        top = Vector(polar(0.22, a, z0 + 0.32))
+        end = Vector(polar(0.36, a + 0.15, z0 + 0.1))
+        m.tube([(0.0, 0.0, z0), top, end], [0.04, 0.025, 0.012], BARK, n=4)
+        bulb = end - Vector((0, 0, 0.12))
+        m.tube([end, bulb + Vector((0, 0, 0.06))], 0.008, SLIME_DEEP, n=3)
+        m.blob(bulb, (0.075, 0.075, 0.09), GOO, n=5)
+        m.anchors.append(tuple(end))
+    lit(m, start - 0)
+    # (only the bulbs glow: the branches drawn among them are put back unlit)
+    for f in range(start, len(m.faces)):
+        m.glows[f] = m.colors[f][1] > 0.5
+    m.blob((0, 0, h + 0.04), (0.14, 0.14, 0.1), SLIME[v], n=5)
+    drip(m, (0.06, 0.0, h - 0.02), 0.25, 0.025, SLIME[0])
+    m.blob((0.0, 0.0, 0.03), (0.2, 0.18, 0.035), SLIME[1], n=6)
+
+
+def build_dead_slimed_tree(m, v):
+    """A dead tree the slime came over: bare branches, slime hanging off them in strings."""
+    h = 2.7 + 0.3 * v
+    s = len(m.vertices)
+    m.tube([(0, 0, 0), (-0.05, 0.03, h * 0.35), (0.05, -0.02, h * 0.7), (0.0, 0.02, h)],
+           [0.1, 0.08, 0.05, 0.012], BARK_DARK, n=6)
+    wobble(m, s, 0.035, freq=3.0, phase=v * 3)
+    for i in range(3):
+        a = i * TAU / 3 + v
+        m.tube([polar(0.3, a, 0.0), polar(0.14, a + 0.2, 0.08), (0, 0, 0.24)], [0.022, 0.04, 0.065], BARK_DARK, n=4)
+    for i in range(5):
+        a = i * 2.4 + v * 0.5
+        z = h * (0.35 + 0.1 * i)
+        p = Vector(polar(0.17, a, z + 0.2))
+        end = Vector(polar(0.3, a + 0.3, z + 0.48 - 0.05 * i))
+        m.tube([(0, 0, z), p, end], [0.035, 0.022, 0.006], BARK_DARK, n=4)
+        drip(m, p.lerp(end, 0.5), 0.2 + 0.15 * (i % 3), 0.018, SLIME[i % 3])
+    # the slime run down the trunk and pooled at its foot
+    m.tube([(0.03, -0.09, h * 0.55), (0.06, -0.1, h * 0.3), (0.04, -0.11, 0.05)], [0.03, 0.04, 0.05], SLIME[v], n=4)
+    m.blob((0.0, -0.05, 0.02), (0.26, 0.22, 0.035), SLIME[1], n=6)
+    bubbles(m, (0.0, -0.05, 0.055), 0.15, 2, size=0.025)
 
 
 # =============================== ground =======================================
@@ -205,6 +262,41 @@ def build_slime_reeds(m, v):
             m.tube([base.lerp(tip, 0.7), tip + Vector((0, 0, 0.06))], [0.022, 0.016], SLIME_DEEP, n=4)
     m.blob((0, 0, 0.0), (0.2, 0.18, 0.03), SLIME_DARK, n=5)
     clamp_ground(m)
+
+
+def build_spore_pods(m, v):
+    """Pods on long stalks, swollen with glowing spores (they drift off them at night)."""
+    for i in range(3 + v):
+        a = i * 2.3 + v
+        base = Vector(polar(0.06 + 0.13 * (i > 0), a, 0))
+        h = 0.35 + 0.18 * ((i * 0.618) % 1)
+        top = base + Vector(polar(0.05, a, h))
+        m.tube([base, base.lerp(top, 0.5) + Vector((0.02, 0, 0)), top], [0.02, 0.016, 0.012], STALK, n=4)
+        start = len(m.faces)
+        m.lathe(top, [(0, 0.03), (0.04, 0.065), (0.11, 0.06), (0.16, 0)], GOO, n=6, jitter=0.06,
+                colors=[SLIME_DEEP, GOO, GOO_PALE])
+        lit(m, start)
+    m.blob((0, 0, 0.0), (0.2, 0.18, 0.04), MOSS[v], n=5)
+    clamp_ground(m)
+
+
+def build_glow_stalk(m, v):
+    """A tall bent stalk by the way, a glowing bulb of goo hanging off its end over the way
+    (what it holds out is along +X, like the forest's lantern posts)."""
+    h = 1.45 + 0.12 * v
+    s = len(m.vertices)
+    m.tube([(0, 0, 0), (0.02, 0.0, h * 0.5), (-0.02, 0.0, h * 0.85), (0.1, 0.0, h)], [0.05, 0.04, 0.032, 0.025],
+           STALK, n=5)
+    wobble(m, s, 0.012, freq=3.0, phase=v)
+    m.tube([(0.1, 0.0, h), (0.22, 0.0, h + 0.02), (0.28, 0.0, h - 0.06)], [0.022, 0.016, 0.012], STALK, n=4)
+    start = len(m.faces)
+    m.tube([(0.28, 0.0, h - 0.06), (0.28, 0.0, h - 0.16)], 0.008, GOO, n=3)
+    m.blob((0.28, 0.0, h - 0.26), (0.09, 0.09, 0.11), GOO, n=6)
+    m.blob((0.28, 0.0, h - 0.4), (0.025, 0.025, 0.035), GOO_PALE, n=4)
+    lit(m, start)
+    m.blob((0, 0, 0.02), (0.18, 0.16, 0.035), SLIME[v], n=5)
+    for k in range(3):
+        pebble(m, polar(0.13, k * 2.1 + v, 0.0), 0.05, ROCK[k % 3])
 
 
 # =============================== wall, lip, water =============================
@@ -326,3 +418,92 @@ def build_giant_slime_tree(m, v):
     # the goo pooled round its roots
     goo_sheet(m, (0, 0, 0), 1.1, 0.04, SLIME[1], n=12, jitter=0.1)
     bubbles(m, (0, 0, 0.045), 0.9, 6, size=0.05)
+
+
+# =============================== vignettes ====================================
+def build_slimed_cart(m, v):
+    """A handcart that got stuck in the slime: tipped over, its load of barrels spilled, slime
+    over all of it and a glowing puddle round it."""
+    goo_sheet(m, (0.05, 0.0, 0), 1.0, 0.04, SLIME[0], n=11, jitter=0.12)
+    s = len(m.vertices)
+    m.box((0, 0, 0.45), (1.2, 0.7, 0.06), PLANK[0])
+    for y in (-0.35, 0.35):
+        m.box((0, y, 0.6), (1.2, 0.04, 0.24), PLANK[1])
+    m.box((0.6, 0, 0.6), (0.04, 0.7, 0.24), PLANK[2])
+    wheel(m, (0.0, 0.42, 0.34), r=0.32, color=PLANK_DARK)
+    xform(m, s, rot=(0.25, 0.0, 0.0), pivot=(0, 0.42, 0.02))
+    s = len(m.vertices)
+    wheel(m, (0, 0, 0), r=0.32, color=PLANK_DARK, spokes=3)
+    xform(m, s, rot=(1.5, 0, 0.5), offset=(-0.2, -0.75, 0.05))
+    for y in (-0.22, 0.22):
+        m.tube([(-0.6, y, 0.42), (-1.2, y * 1.2, 0.04)], 0.03, PLANK_DARK, n=4)
+    # the barrels it carried, one on its side in the goo
+    for k, (x, y, rot) in enumerate(((0.75, -0.55, 1.5), (0.95, 0.2, 0.0), (0.25, -0.05, 0.0))):
+        s = len(m.vertices)
+        m.lathe((0, 0, 0), [(0, 0.15), (0.2, 0.18), (0.4, 0.15)], PLANK[(k + 1) % 4], n=7, jitter=0.03)
+        for z in (0.06, 0.34):
+            m.ring((0, 0, z), 0.165, 0.01, PLANK_DARK, n=7, section=3)
+        xform(m, s, rot=(rot, 0, k), offset=(x, y, 0.17 if rot else (0.5 if k == 2 else 0.0)))
+    # slime over the lot
+    m.blob((0.0, 0.0, 0.66), (0.5, 0.3, 0.06), SLIME[1], n=6)
+    for k in range(5):
+        x = -0.45 + 0.22 * k
+        drip(m, (x, -0.37, 0.6 - 0.05 * (k % 2)), 0.3 + 0.12 * (k % 3), 0.03, SLIME[k % 3])
+    bubbles(m, (0.05, 0.0, 0.045), 0.8, 6, size=0.04)
+
+
+def build_swallowed_hut(m, v):
+    """A small hut a giant blob of slime has half swallowed: its roof sticks out of the goo,
+    a lamp still glows in its window."""
+    w, d, wall = 0.75, 0.6, 0.95
+    planks(m, (-w, d), (w, d), 0.0, wall, colors=PLANK)
+    planks(m, (-w, -d), (-w, d), 0.0, wall, colors=PLANK)
+    planks(m, (w, -d), (w, d), 0.0, wall, colors=PLANK, skip=(1,))
+    planks(m, (-w, -d), (-0.2, -d), 0.0, wall, colors=PLANK)
+    planks(m, (0.25, -d), (w, -d), 0.0, wall, colors=PLANK)
+    for x, y in ((-w, -d), (w, -d), (-w, d), (w, d)):
+        m.box((x, y, wall / 2), (0.08, 0.08, wall), PLANK_DARK)
+    for k, side in enumerate((-1, 1)):
+        plate(m, [(-w - 0.15, 0, wall + 0.55), (w + 0.15, 0, wall + 0.55), (w + 0.15, side * (d + 0.2), wall - 0.05),
+                  (-w - 0.15, side * (d + 0.2), wall - 0.05)][::side], 0.06, THATCH[k])
+    start = len(m.faces)
+    m.box((0.02, -d - 0.01, 0.55), (0.24, 0.04, 0.2), "#ffd070")
+    lit(m, start)
+    # the blob: over its back half and up over the roof, bulging out of the far side
+    bx, by = 0.15, 0.45
+    m.lathe((bx, by, 0), [(0, 0.95), (0.45, 1.02), (1.05, 0.9), (1.55, 0.6), (1.9, 0)], SLIME[0], n=11, jitter=0.12,
+            colors=[SLIME_DEEP, SLIME[0], SLIME[1], SLIME[2]], phase=0.4)
+    for k in range(6):
+        a = -math.pi / 2 + (k - 2.5) * 0.3
+        drip(m, (bx + 0.95 * math.cos(a), by + 0.95 * math.sin(a), 0.85), 0.3 + 0.2 * (k % 2), 0.045, SLIME[k % 3])
+    bubbles(m, (bx, by + 0.2, 1.88), 0.22, 3, size=0.05)
+    goo_sheet(m, (0.0, 0.1, 0), 1.25, 0.04, SLIME[1], n=12, jitter=0.1)
+
+
+def build_fresh_meteor(m, v):
+    """A slime meteorite that came down not long ago: a small crater, the rock still glowing in
+    it, slime splashed all round and still steaming."""
+    for k in range(10):
+        a = k * TAU / 10 + 0.2 * v
+        p = Vector(polar(0.85 * (0.94 + 0.12 * ((k * 0.618) % 1)), a, 0.0))
+        s = len(m.vertices)
+        h = 0.2 + 0.14 * ((k * 0.37) % 1)
+        m.lathe((0, 0, 0), [(0, 0.18), (h * 0.5, 0.16), (h, 0.05)], ROCK[k % 3], n=5, jitter=0.2, colors=[ROCK[k % 3], ROCK_DARK])
+        xform(m, s, rot=(0.3 * math.cos(a), 0.3 * math.sin(a), m.rng.random()), offset=p)
+    goo_sheet(m, (0, 0, 0), 0.7, 0.04, SLIME[0], n=11, jitter=0.1)
+    c = Vector((0.02, 0.05, 0.2))
+    s = len(m.vertices)
+    m.lathe((0, 0, -0.2), [(0, 0.2), (0.12, 0.32), (0.34, 0.33), (0.52, 0.2), (0.62, 0)], METEOR[0], n=7, jitter=0.18,
+            colors=list(METEOR), phase=0.2)
+    xform(m, s, rot=(0.2, 0.3, 0.6 + v), offset=c)
+    start = len(m.faces)
+    for k in range(4):
+        a = k * TAU / 4 + 0.5
+        m.box(c + Vector(polar(0.31, a, 0.05 + 0.05 * k)), (0.04, 0.04, 0.2), GOO, tilt=a)
+    m.blob(c + Vector((0, 0, 0.4)), (0.08, 0.08, 0.04), GOO, n=5)
+    lit(m, start)
+    for k in range(6):
+        a = k * TAU / 6 + 0.4
+        m.blob(polar(1.1 + 0.25 * (k % 2), a, 0.0), (0.14, 0.1, 0.03), SLIME[k % 3], n=5)
+    bubbles(m, (0, 0, 0.045), 0.55, 5, size=0.04)
+    bone_lite(m, (0.65, -0.95, 0.03), (0.95, -1.1, 0.04))

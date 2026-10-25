@@ -336,6 +336,13 @@ SPECS = [
     spec("slime", "slime_seep", attach="wall", light="#b8ff5a", intensity=0.5, flicker="pulse"),
     spec("slime", "slime_drip", attach="lip", light="#b8ff5a", intensity=0.4, flicker="pulse"),
     spec("slime", "goo_pads", attach="water", fluid="acid", light="#b8ff5a", intensity=0.5, flicker="pulse"),
+    spec("slime", "bulb_tree", priority=2, blocking=True, sway=0.06, light="#b8ff5a", intensity=1, flicker="pulse"),
+    spec("slime", "dead_slimed_tree", priority=2, blocking=True, sway=0.04, light="#b8ff5a", intensity=0.4, flicker="pulse"),
+    spec("slime", "spore_pods", light="#b8ff5a", intensity=0.7, flicker="pulse", sway=0.15),
+    spec("slime", "glow_stalk", priority=2, blocking=True, light="#b8ff5a", intensity=1.3, flicker="pulse", sway=0.08),
+    vignette("slime", "slimed_cart", light="#b8ff5a", intensity=0.8, flicker="pulse"),
+    vignette("slime", "swallowed_hut", light="#ffd070", intensity=0.9, flicker="flame"),
+    vignette("slime", "fresh_meteor", light="#b8ff5a", intensity=1.2, flicker="pulse"),
     landmark("slime", "meteor_crater", "shrine", light="#b8ff5a", intensity=1.6, flicker="pulse"),
     landmark("slime", "giant_slime_tree", "monument", light="#b8ff5a", intensity=1.4, flicker="pulse"),
     # --- the classic themes' landmarks (themes_classic.py) ---

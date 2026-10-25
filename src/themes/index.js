@@ -154,6 +154,9 @@ const SALTFLATS = T('Salt flats', {
 const SLIME = T('Slime marsh', {
   music: 'swamp',
   props: 'slime', propDensity: 0.3, mire: 0.88,
+  vignettes: [0, 1],
+  grove: { trees: ['slime_tree', 'slime_tree', 'bulb_tree', 'dead_slimed_tree'], density: 0.3, scale: [0.95, 1.25] },
+  waylights: { props: ['slime_glow_stalk'], share: 0.12 },
   depths: [4, 5], spans: { chance: 0.7, max: 2, route: 0.8, island: 0.3, sky: 0 },
   void: 0.1, relief: 0.55,
   arche: { plain: 3, crater: 2, archipelago: 2, mesa: 1 },

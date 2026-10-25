@@ -47,6 +47,8 @@ export const IMAGES = {
   'themes/highlands-vignette.png': ['docs/img/themes-highlands-vignette.jpg'],
   'themes/darkforest.png': ['docs/img/themes-darkforest.jpg', 2400],
   'themes/darkforest-landmarks.png': ['docs/img/themes-darkforest-landmarks.jpg', 2400],
+  'themes/slime.png': ['docs/img/themes-slime.jpg', 2400],
+  'themes/slime-landmarks.png': ['docs/img/themes-slime-landmarks.jpg', 2400],
 };
 
 const sips = (...args) => execFileSync('sips', args, { encoding: 'utf8' });

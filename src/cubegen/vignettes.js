@@ -35,6 +35,7 @@ export const vignettesOf = set => BY_SET.get(set) || [];
 // the small things put round a vignette, by theme (bases of its set's props, none blocking)
 export const DRESSING = {
   darkforest: ['glow_mushrooms', 'glowcap_patch', 'twig_charm', 'dark_fern', 'leaf_litter', 'bramble'],
+  slime: ['slime_mushrooms', 'goo_puddle', 'spore_pods', 'slime_reeds', 'slime_moss'],
 };
 
 const TRIES = 120;   // footprints looked at per vignette

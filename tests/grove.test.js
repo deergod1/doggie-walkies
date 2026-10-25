@@ -7,9 +7,9 @@ import { themeOf } from '../src/themes/depth.js';
 import { propMetadata } from '../src/core/propcatalog.js';
 
 // the dark forest's own props (render/propplace.js grove): trees, lanterns, strings of lanterns
-const rooms = (seed, theme) => {
+const rooms = (seed, theme, depth = 1) => {
   const w = new World(seed, { themes: [theme] }), out = [];
-  for (const k of w.layout(1).exists) { const m = w.cube(k).map; if (m.biome === theme && !m.guardian) out.push(m); }
+  for (const k of w.layout(depth).exists) { const m = w.cube(k).map; if (m.biome === theme && !m.guardian) out.push(m); }
   return out;
 };
 // the highest ground (or fluid) at or under y at (x, z)
@@ -47,6 +47,18 @@ test('the dark forest is a forest: trees, lantern posts, lanterns in the branche
   const per = b => (count[`darkforest_${b}`] ?? 0) / maps.length;
   assert.ok(per('dark_fir_tree') + per('gnarled_tree') + per('bare_tree') > 20, 'trees');
   assert.ok(per('lantern_post') > 1 && per('hanging_lantern') > 2 && per('lantern_string') > 5, JSON.stringify(count));
+});
+
+test('the slime marsh has its slime trees in thickets and glowing stalks by the way', () => {
+  const count = {}, maps = rooms(3, 'slime', 4);
+  for (const m of maps) for (const q of placeProps(m, themeOf(m)).out) {
+    const b = q.name.replace(/_[ab]$/, '');
+    count[b] = (count[b] ?? 0) + 1;
+    assert.ok(!q.name.includes('hanging_lantern') && !q.matrix, `${m.key}: no lanterns in the marsh`);
+  }
+  const per = b => (count[`slime_${b}`] ?? 0) / maps.length;
+  assert.ok(per('slime_tree') + per('bulb_tree') + per('dead_slimed_tree') > 6, JSON.stringify(count));
+  assert.ok(per('glow_stalk') > 0.5, JSON.stringify(count));
 });
 
 test('only the forest has a grove', () => {

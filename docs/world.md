@@ -691,6 +691,11 @@ vents, reeds, and the craters the slime meteorites left. What makes it so, in it
   planks cross it (`BUILDS.slime`). Its spans keep to what the route depends on.
 - **Props** (`assets/themes/slime.glb`, `blender/themes_slime.py`): the slime glows a little,
   more so where it is fresh; landmarks: a meteorite's crater and a giant slime tree.
+- **Grove** (`grove`): slime trees, bulb trees and dead slimed trees in thickets (fewer than the
+  forest's, no lanterns or strings), and glowing stalks by the way (`waylights`), their bulbs
+  hanging over it.
+- **Vignettes**: a cart stuck in the slime, a hut a blob has half swallowed, a meteorite that
+  came down not long ago; in about every other room.
 - **The slime holds the feet** (`mire` 0.88, `core/footing.js mireOf`): on its slime ground
   (the `slime` surface: everything under the highest tops, which are bare rock; its own squelching
   steps, `audio/footsteps.js`) the player walks and runs a little slower (`physics/move.js

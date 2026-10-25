@@ -8,8 +8,12 @@
 
 ![Dark forest vignettes and landmarks](../img/themes-darkforest-landmarks.jpg)
 
-Artwork for thirteen alternative themes, and landmarks for the eleven classic ones: **228 prop
-types, 398 meshes, 116,907 triangles**. These were built and checked through Blender MCP. The
+![Slime marsh](../img/themes-slime.jpg)
+
+![Slime marsh vignettes and landmarks](../img/themes-slime-landmarks.jpg)
+
+Artwork for thirteen alternative themes, and landmarks for the eleven classic ones: **235 prop
+types, 409 meshes, 122,573 triangles**. These were built and checked through Blender MCP. The
 style and contract are the same as `blender/clutter.py` (low-poly, flat-shaded,
 vertex-coloured, one mesh per prop). **Hooked up to the game** as themes a world may pick for
 their depths alongside the classic ones, and every depth builds its major reward site around one of its
@@ -84,7 +88,8 @@ theme's landmarks (see "Integration"); flag lines and the honey fluid are not bu
 | darkforest | `leaf_litter` (ground; cover), `glowcap_patch` (ground; cover; light #7af0ff; pulse), `moss_mound` (ground; cover), `dark_fir_tree` (ground; blocking; sway 0.06; anchor on the trunk), `gnarled_tree` (ground; blocking; sway 0.08; 4 anchors at its branch ends), `bare_tree` (ground; blocking; sway 0.05; 4 anchors), `glow_mushrooms` (ground; light #5affc8; pulse), `giant_glowshroom` (ground; blocking; light #c890ff; pulse), `mossy_stump` (ground; blocking; light #5affc8; pulse), `lantern_post` (ground; blocking; light #ffb85a; flame), `standing_stone` (ground; blocking; light #8ab8ff; pulse), `rotten_log` (ground; blocking; light #7af0ff; pulse), `twig_charm` (ground; sway 0.25), `dark_fern` (ground; sway 0.3), `bramble` (ground; sway 0.1), `shelf_fungus` (wall; light #5affc8; pulse), `root_drape` (lip; sway 0.3), `hanging_lantern` (ceiling; light #ffb85a; flame; sway 0.15), `black_lilies` (water; light #c8fff0; pulse), `lantern_string` (line; light #ffc070; flame) |
 | darkforest vignettes | `abandoned_shed` (light #ffb85a; flame), `collapsed_cabin` (light #5affc8; pulse), `woodcutter_camp` (light #ffb85a; flame), `wayside_shrine` (light #ffc070; flame), `stone_circle` (light #8ab8ff; pulse), `overgrown_wagon` (light #ffb85a; flame) |
 | darkforest landmarks | `lantern_tree` (light #ffb85a; flame), `mossy_arch` (light #7af0ff; pulse), `forest_chapel` (light #ffc070; flame) |
-| slime | `slime_moss` (ground; cover), `goo_puddle` (ground; cover; light #b8ff5a; pulse), `slime_tree` (ground; blocking; sway 0.05; light #b8ff5a; pulse; anchor on the trunk), `slime_mushrooms` (ground; light #b8ff5a; pulse), `goo_mound` (ground; blocking; light #b8ff5a; pulse), `slimed_rock` (ground; blocking; light #b8ff5a; pulse), `bubble_vent` (ground; light #d8ff9a; pulse), `slime_reeds` (ground; sway 0.3), `slime_seep` (wall; light #b8ff5a; pulse), `slime_drip` (lip; light #b8ff5a; pulse), `goo_pads` (water; acid; light #b8ff5a; pulse) |
+| slime | `slime_moss` (ground; cover), `goo_puddle` (ground; cover; light #b8ff5a; pulse), `slime_tree` (ground; blocking; sway 0.05; light #b8ff5a; pulse; anchor on the trunk), `slime_mushrooms` (ground; light #b8ff5a; pulse), `goo_mound` (ground; blocking; light #b8ff5a; pulse), `slimed_rock` (ground; blocking; light #b8ff5a; pulse), `bubble_vent` (ground; light #d8ff9a; pulse), `slime_reeds` (ground; sway 0.3), `bulb_tree` (ground; blocking; sway 0.06; light #b8ff5a; pulse; anchors at its bulbs), `dead_slimed_tree` (ground; blocking; sway 0.04; light #b8ff5a; pulse), `spore_pods` (ground; light #b8ff5a; pulse; sway 0.15), `glow_stalk` (ground; blocking; light #b8ff5a; pulse; sway 0.08: the lamp by the way), `slime_seep` (wall; light #b8ff5a; pulse), `slime_drip` (lip; light #b8ff5a; pulse), `goo_pads` (water; acid; light #b8ff5a; pulse) |
+| slime vignettes | `slimed_cart` (light #b8ff5a; pulse), `swallowed_hut` (light #ffd070; flame), `fresh_meteor` (light #b8ff5a; pulse) |
 | slime landmarks | `meteor_crater` (light #b8ff5a; pulse), `giant_slime_tree` (light #b8ff5a; pulse) |
 
 ### Landmarks
