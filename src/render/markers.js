@@ -10,7 +10,9 @@ let STONE = null;   // one per cube (cubes fade on their own)
 // sealed: an annex's portal before a quest opens it (world/layout.js): grey, and nothing glows
 const COLORS = { new: [0xffc94a, 0xffa500], seen: [0x5fd3ff, 0x1f8fd0], locked: [0xff3547, 0xff1530], sealed: [0x7d838c, 0x3a3e44] };
 const glowMat = (c, o) => new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: o, side: THREE.DoubleSide, depthWrite: false, forceSinglePass: true });
-const box = (w, h, d, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), STONE); m.position.set(x, y, z); m.castShadow = true; return m; };
+// (the stone casts the sun's baked shadow, render/bake.js sunCast: it stands still, and only
+// shows or hides)
+const box = (w, h, d, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), STONE); m.position.set(x, y, z); m.castShadow = true; m.userData.sunCast = true; return m; };
 
 // The warning on a portal into a trial room (docs/trials.md "The warning"): a ring of the trial's
 // colour round the gate and its family's glyph over it, an hourglass for an event, a knot for a
@@ -96,7 +98,7 @@ function gate(p, [c, e], guardian, warn = null) {
 function well(p, [c, e], guardian) {
   const g = new THREE.Group();
   const rim = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.13, 8, 24), STONE);
-  rim.rotation.x = Math.PI / 2; rim.position.y = 0.08; rim.castShadow = true;
+  rim.rotation.x = Math.PI / 2; rim.position.y = 0.08; rim.castShadow = true; rim.userData.sunCast = true;
   const swirl = new THREE.Mesh(new THREE.CircleGeometry(0.56, 24), glowMat(c, 0.75));
   swirl.rotation.x = -Math.PI / 2; swirl.position.y = 0.03; swirl.renderOrder = 900;
   const inner = new THREE.Mesh(new THREE.RingGeometry(0.15, 0.32, 5), glowMat(0x2a1440, 0.8));

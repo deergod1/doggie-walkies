@@ -226,7 +226,7 @@
     "src/render/lighthook.js#MAX_BAKED": "1b2a65d9",
     "src/render/lighthook.js#MAX_MOVING": "962d13d7",
     "src/render/lighthook.js#SETS": "ed7ff38f",
-    "src/render/lighthook.js#VIS": "7bb51769",
+    "src/render/lighthook.js#VIS": "a4e36a89",
     "src/render/lightmap.js#DENSITY": "7c24d908",
     "src/render/lightmap.js#header": "72344822",
     "src/render/lightmap.js#layoutLightmap": "6e2554ca",

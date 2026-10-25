@@ -67,8 +67,8 @@ What it does:
    solids, the **signed distance** to the edge of the light's shadow, in texels (±1.5, 0.5 on the
    edge). Found by testing points a quarter texel apart round the texel (on its plane) against
    the light's shadow map: a cube of 1024² depth maps for a light (only out of 0.3 from it, so a
-   lamp's own frame casts none), a 2048² one of the cube for the sun (1024² where it moves; its
-   distances reach ±4 texels: The sun going round). Where a coarse look round
+   lamp's own frame casts none), a 2048² one of the cube for the sun (the sun has a lightmap of
+   its own: The sun going round). Where a coarse look round
    finds the light everywhere or nowhere, the texel is ±1.5 at once. The charts' edges are filled
    outwards.
 3. **The volume** (three RGBA8 textures, 4 samples a unit, round the cube): how much of each
@@ -91,13 +91,21 @@ place of each corner (`lm`, render/parts.js).
 
 Under an open sky the sun moves with the world's time of day (docs/world.md, Days and nights):
 along its path, `SUN_KEYS` + 1 places (keys) 1.5 s of the day apart, spaced so that the tips of
-the shadows move as far from one to the next (about 0.3 a key for something 10 high; 0.16 in the
+the shadows move as far from one to the next (about 0.15 a key for something 10 high; 0.08 in the
 canyon, whose sun stays higher). Each place has its own bake, kept with the cube's:
 
-- **A lightmap of the sun's own** (one channel, `RedFormat`, the lightmap's size) and its shadow
-  map of the fixed parts (1024² where it moves, else `sunMap`). Its signed distances reach
-  farther than a light's (`SUN_RANGE`: ±4 texels, searched in half texels, against ±1.5 in
-  quarters), so that blending two places' distances moves an edge from one to the other.
+- **A lightmap of the sun's own** (one channel, `RedFormat`; the same layout as the lights', on
+  High twice as fine, `sunLm`: a fence's rails, thinner than two texels, came out as blobs) and
+  its shadow map of the fixed parts (`sunMap`). Its signed distances reach farther than a
+  light's (`SUN_RANGE`: ±5 texels, searched in half texels, against ±1.5 in quarters), so that
+  blending two places' distances moves an edge from one to the other. Filled out round the
+  charts with a little Gaussian over the distances within each chart (`SUN_FILL_FRAG`, 5 × 5):
+  the edge stays as sharp, it only loses the steps the texels and the shadow map's pixels left,
+  which changed from one place to the next and made the edges crawl.
+- **What casts it:** the solids and fixed props, and things that stand still but may show or
+  hide (`sunCast`: the portals' gates and wells, `render/markers.js`). Those are out of the
+  realtime map too; when one shows or hides every place is baked again (`gen`), what showed
+  fading over once they are.
 - **What shows** is a blend of the two places the sun stands between (`uBakeSunT`): on the
   solids their lightmaps' distances blended (`uBakeSunA`, `uBakeSunB`), so an edge slides from
   one place to the next. On everything else their shadow maps (`uBakeSun`, `uBakeSun2`, read
@@ -106,7 +114,9 @@ canyon, whose sun stays higher). Each place has its own bake, kept with the cube
   far as such a shadow moves between the places), so the map is read at p + s × (sun now − the
   place's sun), compared by hand 2 × 2. Exact for a shade at one distance; read from the nearer
   place, from both in the middle, blended. The scene's sun (the realtime map of what moves, the
-  light's direction) stands at the same blend.
+  light's direction) stands at the nearer place (`step`): turning that map every frame made the
+  edges of what it holds crawl (its pixels landing differently on them each frame), so it turns
+  only from one place to the next.
 - **The sun's shadow maps hold the first surface the sun sees** (`sunPass`: both sides of
   everything drawn; three draws only the far sides, so where a wall met the ground its shaded
   side stood as far from the sun as the ground beside it, and the ground at its foot and round
@@ -118,7 +128,7 @@ canyon, whose sun stays higher). Each place has its own bake, kept with the cube
 - **Baked ahead:** each frame `updateSun` wants the place the sun is at, the next one and the one
   after; the first missing one is baked, a step a frame under the same fences and budget as the
   lights (`tickBakes`, only while no cube is baking): its shadow map, then its lightmap in
-  `STRIPS` (8) strips (a scissor over the atlas), then filled out round the charts. A desktop
+  `STRIPS` (8, four times as many on High) strips (a scissor over the atlas), then filled out round the charts. A desktop
   does one in a few frames; a key comes every 1.5 s. Places neither shown nor wanted are let go:
   about three are kept.
 - **The night:** the moon stands where the noon sun does (`NOON`, the place every other cube's
@@ -127,6 +137,15 @@ canyon, whose sun stays higher). Each place has its own bake, kept with the cube
 - **Not on the lowest level** (`movingSun`, `game/quality.js`): there the sun stays at noon and
   only the light turns. Nor under the hazy skies of act II, in a night theme, the caves, or a
   boss's arena (always noon).
+
+## One edge rule (`render/lighthook.js EDGE`)
+
+Every shadow's edge is as sharp as a pixel but never sharper than `EDGE` (0.025) world units,
+about what the realtime map of what moves shows (two of its texels): on the lightmapped solids
+the distances' ramp over at least that (`uBakeEdge`, the sun's and the lights'), on everything
+else the sun's shadow maps read with a 2 × 2 blend, four of them where a pixel or `EDGE` covers
+more than the map's texels (`bakeSunAt` `foot`). So the baked shadows, the objects' and the
+figures' look alike at any zoom.
 
 ## Drawing (`render/lighthook.js`)
 

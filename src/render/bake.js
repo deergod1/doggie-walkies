@@ -29,7 +29,7 @@
 // a prop set come late) takes the bake it had at once (CACHE).
 import * as THREE from 'three';
 import { renderer, sun } from './scene.js';
-import { BAKE, MAX_BAKED, SETS, NO_SUN, NO_VOL, lightTable, CELLS, CELL0, CELL_MAX } from './lighthook.js';
+import { BAKE, MAX_BAKED, SETS, NO_SUN, NO_VOL, lightTable, CELLS, CELL0, CELL_MAX, EDGE } from './lighthook.js';
 import { lightCells as cellsOf } from '../core/lightcells.js';
 import { NOON, NOON_KEY } from '../core/daycycle.js';
 
@@ -50,10 +50,13 @@ const CACHE = touch ? 1 : 3;    // bakes of cubes no longer shown, kept to be ta
 //   cubeMap texels a side of each light's cube of shadow maps (while baking)
 //   voxel   volume samples a world unit (0: none, what is not lightmapped takes no fixed light's shadow)
 //   density lightmap texels a world unit (render/lightmap.js)
+//   sunLm   the sun's own lightmap that many times as fine (the same layout, a bigger picture: a
+//           fence's rails, thinner than two of the lightmap's texels, kept their shape no better
+//           than blobs in the sun's distances)
 export const BAKE_DETAIL = {
-  full: { sunMap: 2048, cubeMap: 1024, voxel: 4, density: 16 },
-  light: { sunMap: 1024, cubeMap: 512, voxel: 2, density: 8 },
-  lighter: { sunMap: 1024, cubeMap: 512, voxel: 0, density: 8 },
+  full: { sunMap: 2048, cubeMap: 1024, voxel: 4, density: 16, sunLm: 2 },
+  light: { sunMap: 1024, cubeMap: 512, voxel: 2, density: 8, sunLm: 1 },
+  lighter: { sunMap: 1024, cubeMap: 512, voxel: 0, density: 8, sunLm: 1 },
 };
 let detail = BAKE_DETAIL.full;
 export function setBakeDetail(name) { detail = BAKE_DETAIL[name] ?? BAKE_DETAIL.full; }
@@ -72,6 +75,7 @@ const cellTable = () => {
   return t;
 };
 const uniformsOf = () => ({
+  uBakeEdge: { value: new THREE.Vector2(1e-4, 1e-4) },
   uBakeR: { value: 0 }, uBakeN: { value: 0 }, uBakeT: { value: lightTable(MAX_BAKED) }, uBakeC: { value: cellTable() }, uBakeO: { value: new THREE.Vector3() },
   ...Object.fromEntries(Array.from({ length: SETS }, (_, i) => [['uBakeLm' + i, { value: null }], ['uBakeVol' + i, { value: NO_VOL }]]).flat()),
   uBakeV0: { value: new THREE.Vector3() }, uBakeVS: { value: new THREE.Vector3(1, 1, 1) }, uBakeVD: { value: new THREE.Vector4(1, 1, 1, 1) },
@@ -86,6 +90,9 @@ const uniformsOf = () => ({
 // ones); map: the cube's (where its sun stands: setSunPlan)
 export function newBake(geo, group, flip = false, map = null) {
   const bake = { geo, group, flip, map, lights: [], cells: -1, ready: false, failed: false, job: null, readyAt: 0, owned: null, u: uniformsOf(), sun: newSun() };
+  // (its shadows' edges at least EDGE wide, in its distances: render/lighthook.js)
+  const density = geo?.lightmap?.density ?? 16;
+  bake.u.uBakeEdge.value.set(EDGE * density / (2 * SUN_RANGE), EDGE * density / (2 * RANGE));
   live.add(bake);
   return bake;
 }
@@ -151,18 +158,23 @@ function outOfSun(mesh) {
   mesh.intersectsFrustum = function (f) { return f !== sun.shadow._frustum && own.call(this, f); };
 }
 // what casts the baked shadows: the solids and the props that cast shadows (render/fade.js turns
-// a faded cube's off: cast0 is what they do)
+// a faded cube's off: cast0 is what they do); and the sun's only, things that stand still but may
+// show or hide (`sunCast`: the portals' gates, render/markers.js), baked again when they do
+// (updateSun)
 const isSolid = o => o.isMesh && !o.isInstancedMesh && (o.userData.part === 'terrain' || o.userData.part === 'stone' || o.userData.part === 'wood') && !o.userData.cap;
 const isProp = o => o.isInstancedMesh && (o.userData.cast0 ?? o.castShadow) && o.userData.sharedGeo;
+const isStill = o => o.isMesh && !o.isInstancedMesh && o.userData.sunCast && (o.userData.cast0 ?? o.castShadow);
 export function fixedParts(group) {
-  const solids = [], props = [];
-  group.traverse(o => { if (isSolid(o)) solids.push(o); else if (isProp(o)) props.push(o); });
-  return { solids, props };
+  const solids = [], props = [], still = [];
+  group.traverse(o => { if (isSolid(o)) solids.push(o); else if (isProp(o)) props.push(o); else if (isStill(o)) still.push(o); });
+  return { solids, props, still };
 }
 export function keepFixedOutOfSun(group) {
-  const { solids, props } = fixedParts(group);
-  for (const m of [...solids, ...props]) outOfSun(m);
+  const { solids, props, still } = fixedParts(group);
+  for (const m of [...solids, ...props, ...still]) outOfSun(m);
 }
+// whether o shows (all the way up to its cube)
+const showing = (o, group) => { for (; o && o !== group; o = o.parent) if (!o.visible) return false; return true; };
 
 // Per frame: the cubes' lights where the cubes are now, as bright as they shine now, and how far
 // their bakes have come on.
@@ -196,7 +208,7 @@ function updateBake(bake, now) {
 // scene's sun where its sun stands (what moves casts its shadows that way: render/scene.js)
 const noon = new THREE.Vector3(...NOON), toward = new THREE.Vector3();
 export function setCurrentBake(bake) {
-  const dir = !bake ? noon : bake.ready && bake.sun.A ? bake.sun.dir : toward.set(...planOf(bake).a.dir);
+  const dir = !bake ? noon : bake.ready && bake.sun.A ? bake.sun.step : toward.set(...planOf(bake).a.dir);
   sun.position.copy(sun.target.position).addScaledVector(dir, SUN_DIST);
   if (!bake) { BAKE.uBakeN.value = 0; BAKE.uBakeR.value = 0; return; }
   for (const k in bake.u) BAKE[k].value = bake.u[k].value;
@@ -413,6 +425,7 @@ float visibleAt(vec3 q, vec3 n, bool facing) {
 // as it moved less than that, and its tall things' shadows move up to about 5 texels from one
 // place to the next.
 const RANGE = 1.5, SUN_RANGE = 5;
+
 const frag = (range, coarse, n, step) => VISIBLE + `
 uniform vec4 uMask;
 uniform float uReach;
@@ -482,6 +495,37 @@ void main() {
   gl_FragColor = v;
 }`;
 
+// The sun's the same, smoothed: within its chart (the cover, never across into another), a little
+// Gaussian over its distances (5 x 5). The edge stays as sharp as before, it only loses the steps
+// the texels and the shadow map's pixels left in it, which changed from one of the sun's places
+// to the next and made the edges crawl as it went.
+const SUN_FILL_FRAG = `
+uniform sampler2D uMap, uCover;
+uniform vec2 uTexel;
+varying vec2 vUv;
+const float G[3] = float[3](6.0, 4.0, 1.0);
+void main() {
+  if (texture2D(uCover, vUv).r > 0.5) {
+    float sum = 0.0, weight = 0.0;
+    for (int j = -2; j <= 2; j++) for (int i = -2; i <= 2; i++) {
+      vec2 q = vUv + vec2(i, j) * uTexel;
+      if (texture2D(uCover, q).r < 0.5) continue;
+      float w = G[i < 0 ? -i : i] * G[j < 0 ? -j : j];
+      sum += texture2D(uMap, q).r * w; weight += w;
+    }
+    gl_FragColor = vec4(sum / weight);
+    return;
+  }
+  float best = 1e9;
+  vec4 v = vec4(0.0);
+  for (int j = -3; j <= 3; j++) for (int i = -3; i <= 3; i++) {
+    vec2 q = vUv + vec2(i, j) * uTexel;
+    float d = float(i * i + j * j);
+    if (d < best && texture2D(uCover, q).r > 0.5) { best = d; v = texture2D(uMap, q); }
+  }
+  gl_FragColor = v;
+}`;
+
 const MAX_BLEND = { blending: THREE.CustomBlending, blendEquation: THREE.MaxEquation, blendSrc: THREE.OneFactor, blendDst: THREE.OneFactor,
   depthTest: false, depthWrite: false, side: THREE.DoubleSide };
 const shared = {};
@@ -495,6 +539,8 @@ function materials() {
   shared.vol = new THREE.ShaderMaterial({ vertexShader: VOL_VERT, fragmentShader: VOL_FRAG,
     uniforms: { ...u(), uV0: { value: new THREE.Vector3() }, uVS: { value: new THREE.Vector3() }, uO: { value: new THREE.Vector3() }, uVD: { value: new THREE.Vector4() }, uStep: { value: 1 } }, ...MAX_BLEND });
   shared.fill = new THREE.ShaderMaterial({ vertexShader: VOL_VERT, fragmentShader: FILL_FRAG,
+    uniforms: { uMap: { value: null }, uCover: { value: null }, uTexel: { value: new THREE.Vector2() } }, depthTest: false, depthWrite: false });
+  shared.sunFill = new THREE.ShaderMaterial({ vertexShader: VOL_VERT, fragmentShader: SUN_FILL_FRAG,
     uniforms: { uMap: { value: null }, uCover: { value: null }, uTexel: { value: new THREE.Vector2() } }, depthTest: false, depthWrite: false });
   shared.quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), shared.vol);
   shared.quad.frustumCulled = false;
@@ -553,7 +599,7 @@ export function warmBake() {
     restoreState(saved);
     sunlight.shadow.dispose(); S.light.shadow.dispose(); box.dispose(); stuff.dispose();
   }
-  return [S.sun, S.point, S.cover, S.vol, S.fill].map(m => ({ object: new THREE.Mesh(g, m), material: m, scene: bare, offscreen: true }));
+  return [S.sun, S.point, S.cover, S.vol, S.fill, S.sunFill].map(m => ({ object: new THREE.Mesh(g, m), material: m, scene: bare, offscreen: true }));
 }
 
 // The bake's own scenes of a cube: what casts its shadows (its solids and fixed props), what is
@@ -562,12 +608,16 @@ function scenesOf(bake) {
   const group = bake.group;
   group.updateWorldMatrix(true, true);
   const origin = group.getWorldPosition(new THREE.Vector3());
-  const { solids, props } = fixedParts(group);
-  const casters = new THREE.Scene(), lit = new THREE.Scene();
-  for (const o of [...solids, ...props]) casters.add(standIn(o));
+  const { solids, props, still } = fixedParts(group);
+  const casters = new THREE.Scene(), sunCasters = new THREE.Scene(), lit = new THREE.Scene();
+  for (const o of [...solids, ...props]) { casters.add(standIn(o)); sunCasters.add(standIn(o)); }
+  for (const o of still) if (showing(o, group)) sunCasters.add(standIn(o));
   for (const o of solids) { const m = standIn(o); m.frustumCulled = false; lit.add(m); }
-  return { origin, casters, lit, solids };
+  bake.still = still;
+  return { origin, casters, sunCasters, lit, solids };
 }
+// which of the still casters show (updateSun: baked again when that changes)
+const stillShown = bake => (bake.still ??= fixedParts(bake.group).still).map(o => showing(o, bake.group) ? 1 : 0).join('');
 
 // The steps of a bake (tickBakes runs them a few a frame): the sun where it stands, then each light.
 function* bakeSteps(bake) {
@@ -586,13 +636,15 @@ function* bakeSteps(bake) {
   let done = false;
   try {
     const lm = Array.from({ length: SETS }, target), cover = target();
-    temp.push(...lm);
-    // (where the charts are: kept, the sun's places are baked as it goes)
-    owned.targets.push(cover);
-    bake.sun.cover = cover;
-    renderer.setRenderTarget(cover);
+    temp.push(...lm, cover);
+    // where the charts are, for the lights and (as fine as the sun's lightmap: kept, its places
+    // are baked as it goes) for the sun
+    const sunCover = sunTarget(w * D.sunLm, h * D.sunLm);
+    owned.targets.push(sunCover);
+    bake.sun.cover = sunCover;
+    bake.u.uBakeEdge.value.x = EDGE * geo.lightmap.density * D.sunLm / (2 * SUN_RANGE);
     lit.overrideMaterial = S.cover;
-    renderer.render(lit, S.camera);
+    for (const t of [cover, sunCover]) { renderer.setRenderTarget(t); renderer.render(lit, S.camera); }
     lit.overrideMaterial = null;
     // the volume round the cube
     const b = geo.bounds, v0 = bake.u.uBakeV0.value, vs = bake.u.uBakeVS.value;
@@ -612,9 +664,11 @@ function* bakeSteps(bake) {
 
     // the sun where it stands now (game/daycycle.js), in one go; where it moves, its next places
     // follow (updateSun)
-    const plan = planOf(bake), first = yield* sunSteps(bake, plan.a, sunMapSize(plan), 1, scenes);
     const sunNow = bake.sun;
-    sunNow.keys.set(first.id, first); sunNow.A = sunNow.B = first.id; sunNow.T = 0; sunNow.fade = false; sunNow.dir.copy(first.dir);
+    sunNow.shown = stillShown(bake);
+    const plan = planOf(bake), first = yield* sunSteps(bake, keyOf(sunNow, plan.a), sunMapSize(plan), scenes);
+    sunNow.keys.set(first.id, first); sunNow.A = sunNow.B = first.id; sunNow.T = 0; sunNow.fade = false;
+    sunNow.dir.copy(first.dir); sunNow.step.copy(first.dir);
 
     // the lights, one a step
     assignChannels(bake.lights);
@@ -647,7 +701,7 @@ function* bakeSteps(bake) {
     }
 
     // the charts' edges filled outwards, into the textures kept
-    const filled = lm.map(src => fill(src, cover, target()));
+    const filled = lm.map(src => fill(src, cover, target(), S.fill));
     owned.targets.push(...filled);
     filled.forEach((t, i) => { bake.u['uBakeLm' + i].value = t.texture; });
     vol.forEach((t, i) => { bake.u['uBakeVol' + i].value = t.texture; });
@@ -663,11 +717,11 @@ function* bakeSteps(bake) {
 }
 
 // a lightmap's charts filled out round their edges (the empty texels take the nearest charted
-// one's values), from src into dst
-function fill(src, cover, dst) {
+// one's values), from src into dst; how: S.fill, or S.sunFill (smoothing the sun's too)
+function fill(src, cover, dst, how) {
   const S = materials(), { width: w, height: h } = src;
-  S.fill.uniforms.uMap.value = src.texture; S.fill.uniforms.uCover.value = cover.texture; S.fill.uniforms.uTexel.value.set(1 / w, 1 / h);
-  S.quad.material = S.fill;
+  how.uniforms.uMap.value = src.texture; how.uniforms.uCover.value = cover.texture; how.uniforms.uTexel.value.set(1 / w, 1 / h);
+  S.quad.material = how;
   renderer.setRenderTarget(dst);
   renderer.render(S.quadScene, S.camera);
   return dst;
@@ -684,14 +738,19 @@ const planOf = bake => (!bake.flip && bake.map && sunPlan(bake)) || NOON_PLAN;
 const SUN_DIST = 38;      // how far the scene's sun stands from what it looks at (render/scene.js)
 const SUN_EASE = 2.5;     // a second: how fast the blend shown follows the time of day (and fades over after a jump)
 const STRIPS = 8;         // a sun's lightmap baked again in this many strips, a step each
-const MOVING_MAP = 1024;  // texels a side of the sun's shadow maps where it moves (at most: three are kept)
-const sunMapSize = plan => plan.next ? Math.min(detail.sunMap, MOVING_MAP) : detail.sunMap;
+const sunMapSize = () => detail.sunMap;   // (texels a side of its shadow maps: about three are kept where it moves)
 
 // A cube's sun: its places baked (keys: id -> { id, dir, lm, map, M }), the charts' cover (for
 // filling), the two shown and how far from A to B (T; fade: fading over after a jump), the one
-// being baked (job, jobId), and where the blend shown has the scene's sun stand (dir).
+// being baked (job, jobId), where the blend shown has it (dir: what the baked objects' shadows
+// follow) and the place nearer that (step: where the scene's sun stands, render/scene.js, so the
+// realtime map of what moves turns only from one place to the next and its edges do not crawl
+// as the sun goes), and which of the still casters showed when it was baked (shown, gen: its
+// places are baked again when that changes, keyOf).
 const newSun = () => ({ keys: new Map(), cover: null, A: null, B: null, T: 0, fade: false, job: null, jobId: null, broken: false, at: 0,
-  dir: new THREE.Vector3(...NOON) });
+  dir: new THREE.Vector3(...NOON), step: new THREE.Vector3(...NOON), shown: null, gen: 0 });
+// a place of the sun as this cube bakes it (with what of its still casters shows: gen)
+const keyOf = (S, k) => k && { id: `${k.id}#${S.gen}`, dir: k.dir };
 function stopSunJob(S) { S.job?.return(); S.job = null; S.jobId = null; }
 function dropSunKey(e) {
   e.lm?.dispose();
@@ -713,12 +772,14 @@ function sunTarget(w, h) {
 // shadow map of the fixed parts (size² 16-bit depth, its colour let go: kept for what is not
 // lightmapped), then its lightmap in `strips` strips (a step each), then filled out round the
 // charts. Returns it: { id, dir, lm, map, M (from the cube's coordinates into its shadow map) }.
-function* sunSteps(bake, key, size, strips = STRIPS, scenes = null) {
-  const S = materials(), geo = bake.geo, b = geo.bounds, { w, h } = geo.lightmap;
+function* sunSteps(bake, key, size, scenes = null) {
+  const S = materials(), geo = bake.geo, b = geo.bounds, { width: w, height: h } = bake.sun.cover;
+  // (as many more strips as the sun's lightmap has texels more than the lights')
+  const strips = STRIPS * Math.max(1, Math.round(w * h / (geo.lightmap.w * geo.lightmap.h)));
   const e = { id: key.id, dir: new THREE.Vector3(...key.dir), lm: null, map: null, M: new THREE.Matrix4(), size, span: 1, depth: 1 };
   let temp = null, done = false;
   try {
-    const { origin, casters, lit } = scenes ?? scenesOf(bake);
+    const { origin, sunCasters, lit } = scenes ?? scenesOf(bake);
     const centre = new THREE.Vector3((b[0] + b[3]) / 2, (b[1] + b[4]) / 2, (b[2] + b[5]) / 2).add(origin);
     const radius = Math.hypot(b[3] - b[0], b[4] - b[1], b[5] - b[2]) / 2 + 1;
     e.span = radius * 2; e.depth = radius * 2 + 9;   // (world units across its map, and deep)
@@ -734,7 +795,7 @@ function* sunSteps(bake, key, size, strips = STRIPS, scenes = null) {
     map.depthTexture = new THREE.DepthTexture(size, size, THREE.UnsignedShortType);
     // (read raw, compared by hand: render/lighthook.js bakeSunAt, VISIBLE here)
     Object.assign(map.depthTexture, { format: THREE.DepthFormat, minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter });
-    sunPass(light, casters);
+    sunPass(light, sunCasters);
     map.texture.dispose();
     const mapM = light.shadow.matrix.clone();
     // (the map's matrix takes world points; the shaders give points in the cube)
@@ -751,7 +812,7 @@ function* sunSteps(bake, key, size, strips = STRIPS, scenes = null) {
       try { renderer.render(lit, S.camera); } finally { lit.overrideMaterial = null; temp.scissorTest = false; }
       yield;
     }
-    e.lm = fill(temp, bake.sun.cover, sunTarget(w, h));
+    e.lm = fill(temp, bake.sun.cover, sunTarget(w, h), S.sunFill);
     done = true;
     return e;
   } finally {
@@ -768,7 +829,11 @@ function updateSun(bake, now) {
   if (!bake.ready || bake.failed || !S.A) return;
   const dt = S.at ? Math.min(0.1, Math.max(0, (now - S.at) / 1000)) : 0;
   S.at = now;
-  const plan = planOf(bake), want = [plan.a, plan.b, plan.next].filter(Boolean), has = k => S.keys.has(k.id);
+  // (a still caster showed or hid: every place again, what showed until they are)
+  const shown = stillShown(bake);
+  if (shown !== S.shown) { S.shown = shown; S.gen++; }
+  const p = planOf(bake), plan = { a: keyOf(S, p.a), b: keyOf(S, p.b), t: p.t, next: keyOf(S, p.next) };
+  const want = [plan.a, plan.b, plan.next].filter(Boolean), has = k => S.keys.has(k.id);
   if (S.job && !want.some(k => k.id === S.jobId)) stopSunJob(S);
   if (!S.job && !S.broken) {
     const k = want.find(k => !has(k));
@@ -778,6 +843,7 @@ function updateSun(bake, now) {
   for (const [id, e] of S.keys) if (id !== S.A && id !== S.B && !want.some(k => k.id === id)) { dropSunKey(e); S.keys.delete(id); }
   const eA = S.keys.get(S.A), eB = S.keys.get(S.B) ?? eA, u = bake.u;
   S.dir.copy(eA.dir).lerp(eB.dir, eA === eB ? 0 : S.T).normalize();
+  S.step.copy(eA === eB || S.T < 0.5 ? eA.dir : eB.dir);
   u.uBakeSunA.value = eA.lm.texture; u.uBakeSunB.value = eB.lm.texture; u.uBakeSunT.value = eA === eB ? 0 : S.T;
   u.uBakeSun.value = eA.map.depthTexture; u.uBakeSunM.value.copy(eA.M);
   u.uBakeSun2.value = eB.map.depthTexture; u.uBakeSunM2.value.copy(eB.M);

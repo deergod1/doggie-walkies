@@ -16,12 +16,12 @@
 // stands where the noon sun does; the sun gives way to it, and it to the sun, halfway through the
 // dusk and the dawn, when neither shines (sunAt `light`).
 
-export const DAY = { day: 140, dusk: 15, night: 40, dawn: 15 };
-DAY.length = DAY.day + DAY.dusk + DAY.night + DAY.dawn;   // 210 s: three and a half minutes
+export const DAY = { day: 280, dusk: 30, night: 80, dawn: 30 };
+DAY.length = DAY.day + DAY.dusk + DAY.night + DAY.dawn;   // 420 s: seven minutes
 export const BAKE_EVERY = 1.5;                             // s of the day from one of the sun's places to the next
 export const SUN_KEYS = Math.round(DAY.day / BAKE_EVERY);  // its places along the day: 0 .. SUN_KEYS
 export const SUN_LOW = 35;                                 // degrees: the lowest the sun goes (a theme's `sunLow`)
-const GLOW = 25;                                           // s into the day the morning's warm light lasts (and the evening's)
+const GLOW = 50;                                           // s into the day the morning's warm light lasts (and the evening's)
 
 const smooth = x => x * x * (3 - 2 * x);
 const unit = (x, y, z) => { const l = Math.hypot(x, y, z); return [x / l, y / l, z / l]; };

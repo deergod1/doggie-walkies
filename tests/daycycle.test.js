@@ -1,4 +1,4 @@
-// The world's days and nights (core/daycycle.js): one cycle of three and a half minutes on the
+// The world's days and nights (core/daycycle.js): one cycle of seven minutes on the
 // world's play time, a morning-to-evening sun along its path, the dusk, the night, the dawn; what
 // each theme's sky makes of it (themes/index.js `sky`, themes/skies.js).
 import { test } from 'node:test';
@@ -10,8 +10,8 @@ import { nightLight, dayLight } from '../src/themes/skies.js';
 
 const { day, dusk, night, dawn } = DAY;
 
-test('a day of the world: three and a half minutes, the sun up most of it', () => {
-  assert.equal(DAY.length, 210);
+test('a day of the world: seven minutes, the sun up most of it', () => {
+  assert.equal(DAY.length, 420);
   assert.equal(nightAt(0), 0, 'a world begins in the morning');
   assert.equal(nightAt(day / 2), 0);
   assert.equal(nightAt(day + dusk), 1);
@@ -52,9 +52,9 @@ test("the sun's path: high at noon, never under its lowest, shadows moving evenl
     }
     assert.ok(Math.abs(elev(keys[0].dir) - low) < 1e-6 && Math.abs(elev(keys.at(-1).dir) - low) < 1e-6, 'it rises and sets at its lowest');
     assert.ok(Math.abs(elev(keys[SUN_KEYS >> 1].dir) - elev(NOON)) < 2, 'high at noon');
-    // the tip of a 10-high thing's shadow moves as far from one key to the next, at most ~0.3
+    // the tip of a 10-high thing's shadow moves as far from one key to the next, at most ~0.15
     const tip = d => [-d[0] / d[1], -d[2] / d[1]], gaps = keys.slice(1).map((k, i) => Math.hypot(tip(k.dir)[0] - tip(keys[i].dir)[0], tip(k.dir)[1] - tip(keys[i].dir)[1]) * 10);
-    for (const g of gaps) assert.ok(Math.abs(g - travel * 10 / SUN_KEYS) < 0.01 && g < 0.31, `${g}`);
+    for (const g of gaps) assert.ok(Math.abs(g - travel * 10 / SUN_KEYS) < 0.01 && g < 0.16, `${g}`);
   }
   assert.ok(Math.abs(DAY.day / SUN_KEYS - BAKE_EVERY) < 0.02, 'a key every 1.5 s of the day');
 });

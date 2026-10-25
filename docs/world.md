@@ -638,10 +638,10 @@ depth they may appear at: an act with any of them shows them alone.
   the dark forest) is under the sky in the light band but lit like the deep: a few stars, a dim
   blue moon, fog, the character's full lamp, and its own lights.
 - **Days and nights** (`core/daycycle.js`, `game/daycycle.js`, `themes/skies.js`): the world
-  has one day of `DAY.length` (210) s on its play time (`state.run.clock`,
+  has one day of `DAY.length` (420) s on its play time (`state.run.clock`,
   `game/worldclock.js`), the same in every cube and for friends playing together (the host's
-  clock); it goes on while you are elsewhere. A world begins in the morning: 140 s of sun, 15
-  s of dusk, 40 s of night, 15 s of dawn. What a cube shows of it is its theme's `sky` (from the
+  clock); it goes on while you are elsewhere. A world begins in the morning: 280 s of sun, 30
+  s of dusk, 80 s of night, 30 s of dawn. What a cube shows of it is its theme's `sky` (from the
   rest unless given):
   - `open` (act I under the sky, the town): the sun goes along an arc through the noon sun
     (`NOON`, where it always stood), never lower than `sunLow` (35°; the canyon 50°, over its

@@ -11,7 +11,7 @@ const slime = themeById('slime'), period = DAY.length;
 test('they fall at night only, every few seconds, the same for the same night and cube', () => {
   assert.ok(slime.meteors && slime.sky === 'hazy');
   const list = nightMeteors(77, '3,-4,1', 2);
-  assert.ok(list.length >= 9 && list.length <= 20, `${list.length} a night`);
+  assert.ok(list.length >= 18 && list.length <= 40, `${list.length} a night`);
   for (const m of list) {
     assert.ok(nightAt(m.t) === 1 && nightAt(m.t - METEOR.warn) > 0.5, 'its shadow and its landing at night');
     assert.ok(m.u >= 0 && m.u < 1 && m.v >= 0 && m.v < 1);

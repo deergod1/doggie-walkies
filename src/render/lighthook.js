@@ -39,6 +39,11 @@ export const SETS = 3;         // the lightmap's (and volume's) textures, four c
 // on the lower quality levels, eased between them). A dark forest's cube has 40-50 lights, a point is reached by a dozen.
 // learn: light.html#cells (see learn/README.md)
 export const CELLS = 20, CELL0 = -2, CELL_MAX = 16;
+// The edge rule of every shadow: as sharp as a pixel, but never sharper than EDGE world units
+// (about what the realtime map of what moves shows: two of its texels), so the baked shadows on
+// the solids (uBakeEdge, in their distances), on everything else (bakeSunAt) and the figures'
+// look alike at any zoom.
+export const EDGE = 0.025;
 
 // a table of lights: two texels a light (x, y, z, reach; r, g, b, channel)
 export function lightTable(n) {
@@ -81,6 +86,7 @@ export const BAKE = {
   uBakeSunD: { value: new THREE.Vector3() },   // the way to the sun now
   uBakeSunX: { value: new THREE.Vector4(1, 1, 0, 0) },   // each map's texel (world units), how far round it to look for what shades a point (in the map; 0: right there)
   uBakeSunT: { value: 0 },                     // how far from the first to the second
+  uBakeEdge: { value: new THREE.Vector2(1e-4, 1e-4) },   // EDGE in the lightmap's distances: the sun's, the lights' (render/bake.js newBake)
   uMoveN: { value: 0 },                        // how many moving lights
   uMoveT: { value: lightTable(MAX_MOVING) },   // their table (x, y, z in the world; channel unused)
   uBakeDbg: { value: 0 },                      // dev (/lightview): 1 the sun's baked shadow, 2 the fixed lights' light, 3 the lightmap's texels
@@ -103,6 +109,7 @@ uniform int uBakeN, uMoveN;
 uniform highp sampler2D uBakeT, uMoveT, uBakeC;
 uniform vec3 uBakeO;
 uniform float uBakeSunT;
+uniform vec2 uBakeEdge;
 #ifdef BAKED_LM
   varying vec2 vBakeLm;
   ${sets(i => `uniform sampler2D uBakeLm${i};\n`)}
@@ -131,7 +138,8 @@ float bakeFalloff(float d, float reach) {
 // The map holds the first surface the sun sees (render/bake.js sunPass), so what is lit sees
 // itself in it: p keeps off its surface by a texel or two (texel: the map's, in world units)
 // along its normal n, more the more it turns from the sun, with as much leeway in depth.
-// Read raw, compared by hand (2 x 2, blended): 1 outside the map.
+// Read raw, compared by hand (2 x 2, blended; four of them where the edge is wider than the map's
+// texels: as wide as a pixel there, foot, but never sharper than EDGE): 1 outside the map.
 float bakeSunLit(highp sampler2D map, vec2 uv, float z) {
   vec2 ts = vec2(textureSize(map, 0)), f = uv * ts - 0.5, i = floor(f), w = f - i;
   vec2 t = (i + 0.5) / ts, d = 1.0 / ts;
@@ -139,22 +147,32 @@ float bakeSunLit(highp sampler2D map, vec2 uv, float z) {
   float c = step(z, texture(map, t + vec2(0.0, d.y)).r), e = step(z, texture(map, t + d).r);
   return mix(mix(a, b, w.x), mix(c, e, w.x), w.y);
 }
-float bakeSunAt(highp sampler2D map, mat4 m, vec4 at, float texel, float r, vec3 p, vec3 n) {
-  float nl = clamp(dot(n, at.xyz), 0.1, 1.0);
+float bakeSunAt(highp sampler2D map, mat4 m, vec4 at, float texel, float r, vec3 p, vec3 n, float foot) {
+  float nl = clamp(dot(n, at.xyz), 0.1, 1.0), slope = min(3.0, sqrt(1.0 - nl * nl) / nl);
   p += n * texel * (1.0 + 1.5 * (1.0 - nl));
-  float bias = texel * (0.5 + min(3.0, sqrt(1.0 - nl * nl) / nl)) / at.w;
+  float bias = texel * (0.5 + slope) / at.w;
   vec3 c = (m * vec4(p, 1.0)).xyz;
   if (any(lessThanEqual(c, vec3(0.0))) || any(greaterThanEqual(c, vec3(1.0)))) return 1.0;
-  if (r <= 0.0) return bakeSunLit(map, c.xy, c.z - bias);
-  float sum = 0.0, k = 0.0;
-  for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++) {
-    float zb = texture(map, c.xy + vec2(i, j) * r).r;
-    if (zb < c.z - bias) { sum += zb; k += 1.0; }
+  vec3 cq = c;
+  if (r > 0.0) {
+    float sum = 0.0, k = 0.0;
+    for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++) {
+      float zb = texture(map, c.xy + vec2(i, j) * r).r;
+      if (zb < c.z - bias) { sum += zb; k += 1.0; }
+    }
+    if (k == 0.0) return 1.0;
+    // (moved off p's surface: as much more leeway as it moved, for a surface sloping to the sun)
+    vec3 shift = (c.z - sum / k) * at.w * (uBakeSunD - at.xyz);
+    cq = (m * vec4(p + shift, 1.0)).xyz;
+    bias += length(shift) / at.w;
   }
-  if (k == 0.0) return 1.0;
-  // (moved off p's surface: as much more leeway as it moved, for a surface sloping to the sun)
-  vec3 shift = (c.z - sum / k) * at.w * (uBakeSunD - at.xyz), cq = (m * vec4(p + shift, 1.0)).xyz;
-  return bakeSunLit(map, cq.xy, cq.z - bias - length(shift) / at.w);
+  // the edge (hw: half its width, in the map's texels)
+  float hw = 0.5 * max(foot, ${EDGE.toFixed(3)}) / texel;
+  if (hw <= 1.0) return bakeSunLit(map, cq.xy, cq.z - bias);
+  vec2 o = vec2(0.5 * hw) / vec2(textureSize(map, 0));
+  float z = cq.z - bias - hw * texel * slope / at.w;
+  return 0.25 * (bakeSunLit(map, cq.xy - o, z) + bakeSunLit(map, cq.xy + o, z)
+    + bakeSunLit(map, cq.xy + vec2(o.x, -o.y), z) + bakeSunLit(map, cq.xy + vec2(-o.x, o.y), z));
 }
 #endif
 #endif
@@ -175,10 +193,10 @@ const VIS = `
       // signed distances to the shadows' edges, 0.5 on the edge: one pixel wide whatever the zoom
       // (none while there are no baked shadows: not yet baked, or the bake failed)
       if (uBakeOn > 0.5 && uBakeR > 0.0) {
-        ${sets(i => `vec4 s${i} = texture(uBakeLm${i}, vBakeLm), v${i} = clamp((s${i} - 0.5) / max(fwidth(s${i}), vec4(1e-4)) + 0.5, 0.0, 1.0);\n`)}
+        ${sets(i => `vec4 s${i} = texture(uBakeLm${i}, vBakeLm), v${i} = clamp((s${i} - 0.5) / max(fwidth(s${i}), vec4(uBakeEdge.y)) + 0.5, 0.0, 1.0);\n`)}
         ${sets(i => `bake${i} = mix(vec4(1.0), v${i}, uBakeR);\n`)}
         float ss = mix(texture(uBakeSunA, vBakeLm).r, texture(uBakeSunB, vBakeLm).r, uBakeSunT);
-        bakeSun = mix(1.0, clamp((ss - 0.5) / max(fwidth(ss), 1e-4) + 0.5, 0.0, 1.0), uBakeR);
+        bakeSun = mix(1.0, clamp((ss - 0.5) / max(fwidth(ss), uBakeEdge.x) + 0.5, 0.0, 1.0), uBakeR);
       }
     }
   #else
@@ -196,9 +214,10 @@ const VIS = `
       ${sets(i => `bake${i} = mix(vec4(1.0), inside ? mix(texture(uBakeVol${i}, vt0), texture(uBakeVol${i}, vt1), vz - vz0) : vec4(0.0), uBakeR);\n`)}
       // (the two places the sun stands between, each moved to where it stands now; read from
       // the nearer, from both in between, blended)
-      float sw = smoothstep(0.25, 0.75, uBakeSunT);
-      float sa = sw < 1.0 ? bakeSunAt(uBakeSun, uBakeSunM, uBakeSunPA, uBakeSunX.x, uBakeSunX.z, bakeP, bakeN) : 1.0;
-      float sb = sw > 0.0 ? bakeSunAt(uBakeSun2, uBakeSunM2, uBakeSunPB, uBakeSunX.y, uBakeSunX.w, bakeP, bakeN) : 1.0;
+      // (foot: what a pixel covers here, in world units)
+      float sw = smoothstep(0.25, 0.75, uBakeSunT), foot = length(fwidth(bakeP)) * 0.7;
+      float sa = sw < 1.0 ? bakeSunAt(uBakeSun, uBakeSunM, uBakeSunPA, uBakeSunX.x, uBakeSunX.z, bakeP, bakeN, foot) : 1.0;
+      float sb = sw > 0.0 ? bakeSunAt(uBakeSun2, uBakeSunM2, uBakeSunPB, uBakeSunX.y, uBakeSunX.w, bakeP, bakeN, foot) : 1.0;
       bakeSun = mix(1.0, mix(sa, sb, sw), uBakeR);
     }
   #endif
