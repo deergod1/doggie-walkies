@@ -156,6 +156,8 @@
         <li lang="de"><b>Zeit, wenn du ankommst.</b> Das Spiel backt ein paar Lampen pro Bild, so viele, wie die Grafikkarte schafft, während der neue Würfel noch eingeblendet wird. Die Lampen gehen an, wenn sie fertig sind.</li>
         <li lang="en"><b>Memory</b> for the pictures.</li>
         <li lang="de"><b>Speicher</b> für die Bilder.</li>
+        <li lang="en"><b>The sun keeps moving.</b> Under an open sky it goes round once every three and a half minutes. So its shadows get painted again every second and a half, a strip at a time, and the ground shows a blend of the last two, so the shadows glide instead of jumping.</li>
+        <li lang="de"><b>Die Sonne wandert.</b> Unter offenem Himmel zieht sie alle dreieinhalb Minuten einmal herum. Darum werden ihre Schatten alle anderthalb Sekunden neu gemalt, Streifen für Streifen, und der Boden zeigt eine Mischung der letzten beiden, damit die Schatten gleiten statt springen.</li>
         <li lang="en"><b>Only for what stays.</b> Shots, glowing monsters and loot move, so their light is worked out every frame, without shadows. Only your own lamp gets real shadows, worked out new every frame.</li>
         <li lang="de"><b>Nur für das, was bleibt.</b> Schüsse, leuchtende Monster und Beute bewegen sich, also wird ihr Licht in jedem Bild ausgerechnet, ohne Schatten. Nur deine eigene Lampe bekommt echte Schatten, in jedem Bild neu ausgerechnet.</li>
       </ul>
@@ -207,8 +209,8 @@
   <h2 lang="de">Probier es: die Farbtöpfe teilen</h2>
   <div class="cols wide-right">
     <div>
-      <p lang="en">A picture has four colour channels: red, green, blue, and see-through. The lightmap is <b>three</b> pictures, so it has twelve: one for the sun, eleven for lamps. Fifty lamps, eleven pots. How?</p>
-      <p lang="de">Ein Bild hat vier Farbkanäle: Rot, Grün, Blau und Durchsichtigkeit. Die Lichtkarte besteht aus <b>drei</b> Bildern, hat also zwölf: einen für die Sonne, elf für Lampen. Fünfzig Lampen, elf Töpfe. Wie geht das?</p>
+      <p lang="en">A picture has four colour channels: red, green, blue, and see-through. The lightmap is <b>three</b> pictures, so it has twelve. The sun has a picture of its own (it moves, so it's painted again and again), and eleven channels are for lamps. Fifty lamps, eleven pots. How?</p>
+      <p lang="de">Ein Bild hat vier Farbkanäle: Rot, Grün, Blau und Durchsichtigkeit. Die Lichtkarte besteht aus <b>drei</b> Bildern, hat also zwölf. Die Sonne hat ein eigenes Bild (sie wandert, darum wird es immer wieder neu gemalt), und elf Kanäle sind für Lampen. Fünfzig Lampen, elf Töpfe. Wie geht das?</p>
       <p lang="en">Lamps far apart can share a pot: their light never meets, so their shadows never mix up. Only lamps whose light overlaps need different pots.</p>
       <p lang="de">Lampen, die weit auseinander sind, können sich einen Topf teilen: Ihr Licht trifft sich nie, also kommen ihre Schatten nie durcheinander. Nur Lampen, deren Licht sich überlappt, brauchen verschiedene Töpfe.</p>
       <p lang="en">The brightest lamp goes first, and takes the first pot none of its neighbours has. That's the same puzzle as colouring a map so no two countries next to each other have the same colour.</p>
@@ -268,6 +270,7 @@
         <tr><td lang="en">lamps a pixel asks</td> <td lang="de">Lampen, die ein Pixel fragt</td><td>16</td><td>8</td><td>6</td></tr>
         <tr><td lang="en">your lamp's shadows</td> <td lang="de">Schatten deiner Lampe</td><td lang="en">every picture</td> <td lang="de">jedes Bild</td><td lang="en">every 2nd, close by</td> <td lang="de">jedes 2., nah dran</td><td lang="en">none</td> <td lang="de">keine</td></tr>
         <tr><td lang="en">monsters' shadows</td> <td lang="de">Schatten der Monster</td><td lang="en">all</td> <td lang="de">alle</td><td lang="en">only near you</td> <td lang="de">nur nah bei dir</td><td lang="en">none</td> <td lang="de">keine</td></tr>
+        <tr><td lang="en">the sun goes round</td> <td lang="de">die Sonne wandert</td><td lang="en">yes</td> <td lang="de">ja</td><td lang="en">yes</td> <td lang="de">ja</td><td lang="en">no, stays at noon</td> <td lang="de">nein, bleibt am Mittag</td></tr>
       </table>
     </div>
     <div>
@@ -331,8 +334,8 @@
     <pre data-code="src/game/quality.js#LOOKS,apply"></pre>
     <div>
       <ul class="small">
-        <li lang="en"><code>LOOKS</code> is a little table: one object for each level. <code>lamp</code> and <code>sun</code> say how much their shadows draw, <code>cells</code> how many lamps a pixel asks, <code>fluid</code> how big and how often the water's pattern is painted, <code>bake</code> how big the baked pictures of the next cube are.</li>
-        <li lang="de"><code>LOOKS</code> ist eine kleine Tabelle: ein Objekt für jede Stufe. <code>lamp</code> und <code>sun</code> sagen, wie viel ihre Schatten malen, <code>cells</code>, wie viele Lampen ein Pixel fragt, <code>fluid</code>, wie groß und wie oft das Muster des Wassers gemalt wird, <code>bake</code>, wie groß die gebackenen Bilder des nächsten Würfels sind.</li>
+        <li lang="en"><code>LOOKS</code> is a little table: one object for each level. <code>lamp</code> and <code>sun</code> say how much their shadows draw, <code>cells</code> how many lamps a pixel asks, <code>fluid</code> how big and how often the water's pattern is painted, <code>bake</code> how big the baked pictures of the next cube are, <code>movingSun</code> whether the sun goes round with the time of day (on the lowest level it stays at noon, and only the light changes).</li>
+        <li lang="de"><code>LOOKS</code> ist eine kleine Tabelle: ein Objekt für jede Stufe. <code>lamp</code> und <code>sun</code> sagen, wie viel ihre Schatten malen, <code>cells</code>, wie viele Lampen ein Pixel fragt, <code>fluid</code>, wie groß und wie oft das Muster des Wassers gemalt wird, <code>bake</code>, wie groß die gebackenen Bilder des nächsten Würfels sind, <code>movingSun</code>, ob die Sonne mit der Tageszeit wandert (auf der niedrigsten Stufe bleibt sie am Mittag stehen, und nur das Licht ändert sich).</li>
         <li lang="en"><code>range</code>: how far your lamp's shadows reach. <code>figures</code>: how far away a monster may be and still cast one. <code>every: 2</code>: the shadow picture is drawn every second frame.</li>
         <li lang="de"><code>range</code>: wie weit die Schatten deiner Lampe reichen. <code>figures</code>: wie weit weg ein Monster sein darf und trotzdem einen wirft. <code>every: 2</code>: Das Schattenbild wird jedes zweite Bild gemalt.</li>
         <li lang="en"><code>apply</code> turns every knob for a level. Nothing switches a shadow off for real: that would make three.js build every shader again, and the game would freeze for seconds. A shadow that goes just gets weaker (<code>strength</code>) and is no longer drawn.</li>
@@ -357,6 +360,8 @@ vec4 v = clamp((s - 0.5) / fwidth(s) + 0.5, 0.0, 1.0);</code></pre>
       <ul class="small">
         <li lang="en">This runs for every pixel of the ground. <code>vec4</code> is four numbers at once: four lamps' channels in one go.</li>
         <li lang="de">Das läuft für jedes Pixel des Bodens. <code>vec4</code> sind vier Zahlen auf einmal: die Kanäle von vier Lampen in einem Rutsch.</li>
+        <li lang="en">The sun's own pictures: two, for the two places it stands between. <code>mix</code> blends their distances by <code>uBakeSunT</code>, so the edge slides from one place to the next.</li>
+        <li lang="de">Die eigenen Bilder der Sonne: zwei, für die zwei Stellen, zwischen denen sie steht. <code>mix</code> mischt ihre Abstände nach <code>uBakeSunT</code>, so gleitet der Rand von einer Stelle zur nächsten.</li>
         <li lang="en">In the picture, distances are stored from 0 to 1, so the edge is at <code>0.5</code>. <code>s - 0.5</code> is the distance again: below 0 in the shadow.</li>
         <li lang="de">Im Bild werden Abstände von 0 bis 1 gespeichert, darum ist der Rand bei <code>0.5</code>. <code>s - 0.5</code> ist wieder der Abstand: unter 0 im Schatten.</li>
         <li lang="en">Dividing by <code>fwidth(s)</code> turns it into "pixels to the edge". Zoomed in, <code>s</code> changes slowly from pixel to pixel, so the same distance becomes more pixels.</li>

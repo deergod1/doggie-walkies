@@ -41,7 +41,7 @@ export function buildWorld(m, showPath, seen, geo = buildCubeParts(m), open = []
   // Flip's box turns about its middle: its meshes and markers hang in a pivot (render/flipview.js)
   const flip = m.flip ? flipPivot(group, m) : null, host = flip ? flip.inner : group;
   // its fixed lights and their baked shadows (render/bake.js: baked once it is shown)
-  const bake = newBake(geo, group, !!flip);
+  const bake = newBake(geo, group, !!flip, m);
   // what its fluids meet (render/wet.js)
   const water = waterUniforms(m);
   // (Flip's box draws its sides itself, render/flipview.js: the cube's parts are its proxy's)

@@ -2,7 +2,7 @@
 // (fractional) depth, blended between the starts of the world's theme stretches. Below the
 // ground the character's light grows with the theme's `lamp` (about half in the sunlit hollows,
 // full in the dark deep), since local lights are all there is. A boss can make it night
-// (`dark`), and a theme with days and nights (`cycle`: the slime marsh) has its own.
+// (`dark`), and the world's days and nights go round under the sky (game/daycycle.js lookCycle).
 import * as THREE from 'three';
 import { scene, hemi, sun } from './scene.js';
 import { setSkyLook } from './sky.js';
@@ -50,36 +50,68 @@ function duskLight(d) {
     lamp: lerp(SUNSET.lamp, NIGHTFALL.lamp, u) };
 }
 
-// A theme's own night (its `cycle`, themes/index.js: the slime marsh's days and nights,
-// game/daycycle.js): its `dark` light as colours, made once
-const nights = new Map();
-const nightOf = L => nights.get(L) ?? nights.set(L, { ...toColors(L), sky: [0, 1, 2, 3].map(i => new THREE.Color(skyStop(L.sky, i))) }).get(L);
+// The time of day (game/daycycle.js lookCycle): the lights it blends into the cube's (the
+// night's, the warm light of a low sun, a night theme's day), each as colours made once; what it
+// shows (cyc) follows what it asks for (eased), so coming into a cube or out of one, or the time
+// of day jumping, fades it in.
+const colors = new Map();
+const colorsOf = L => colors.get(L) ?? colors.set(L, { ...toColors(L), sky: [0, 1, 2, 3].map(i => new THREE.Color(skyStop(L.sky, i))) }).get(L);
+const lightParts = () => ({ w: 0, sky: [0, 1, 2, 3].map(() => new THREE.Color()), stars: 0, hemi: [new THREE.Color(), new THREE.Color(), 0],
+  sun: [new THREE.Color(), 0], fog: 0, lamp: 0, sunK: 1 });
+const cyc = lightParts(), want = lightParts(), part = new THREE.Color();
+// cycle: { parts: [[light, weight]], sunK, ease } (null: none, at once)
+function followCycle(cycle) {
+  if (!cycle) { cyc.w = 0; cyc.sunK = 1; return; }
+  const k = cycle.ease ?? 1, w = (cycle.parts ?? []).reduce((s, [, x]) => s + x, 0);
+  if (w > 1e-4) {
+    // what it asks for: the parts' weighted mean
+    for (const c of [...want.sky, want.hemi[0], want.hemi[1], want.sun[0]]) c.setRGB(0, 0, 0);
+    want.stars = want.hemi[2] = want.sun[1] = want.fog = want.lamp = 0;
+    for (const [L, x] of cycle.parts) {
+      const C = colorsOf(L), f = x / w;
+      for (let i = 0; i < 4; i++) want.sky[i].add(part.copy(C.sky[i]).multiplyScalar(f));
+      want.hemi[0].add(part.copy(C.hemi[0]).multiplyScalar(f)); want.hemi[1].add(part.copy(C.hemi[1]).multiplyScalar(f));
+      want.sun[0].add(part.copy(C.sun[0]).multiplyScalar(f));
+      want.stars += (L.stars ?? 0) * f; want.hemi[2] += C.hemi[2] * f; want.sun[1] += C.sun[1] * f; want.fog += L.fog * f; want.lamp += (L.lamp ?? 0) * f;
+    }
+    // (shown faintly or not at all yet: its colours at once, only its weight eases)
+    const j = cyc.w < 1e-3 ? 1 : k;
+    for (let i = 0; i < 4; i++) cyc.sky[i].lerp(want.sky[i], j);
+    cyc.hemi[0].lerp(want.hemi[0], j); cyc.hemi[1].lerp(want.hemi[1], j); cyc.sun[0].lerp(want.sun[0], j);
+    cyc.stars = lerp(cyc.stars, want.stars, j); cyc.fog = lerp(cyc.fog, want.fog, j); cyc.lamp = lerp(cyc.lamp, want.lamp, j);
+    cyc.hemi[2] = lerp(cyc.hemi[2], want.hemi[2], j); cyc.sun[1] = lerp(cyc.sun[1], want.sun[1], j);
+  }
+  cyc.w = lerp(cyc.w, w, k);
+  if (cyc.w < 1e-3 && w <= 1e-4) cyc.w = 0;
+  cyc.sunK = lerp(cyc.sunK, cycle.sunK ?? 1, k);
+}
 
 // camDist: distance from the camera to what it looks at (fog is placed around that); themes: the
 // world's theme picks (themes/depth.js worldThemes); dark: how far into a boss's darkness (0..1)
 // mist: 0..1, a boss's fog rolling in (Squarlo growing): the far side fades into pale grey;
 // gone: 0..1, how far the world round Flip's box has gone (VOID); dusk: 0..1, how far Renew's
-// fight has fallen into the night (duskLight); cycle: { w: 0..1, light }: how far a theme's own
-// night has fallen (game/daycycle.js) and its light (the theme's `cycle.dark`)
+// fight has fallen into the night (duskLight); cycle: the time of day (game/daycycle.js lookCycle,
+// followCycle)
 const MIST = new THREE.Color('#d6dfe4');
 export function applyLook(depth, camDist, themes = NO_WORLD, dark = 0, mist = 0, gone = 0, dusk = 0, cycle = null) {
   const { a, b, t } = lightAt(depth, themes), k = dark * dark * (3 - 2 * dark), D = duskLight(dusk), w = D.w;
-  const n = cycle?.w ?? 0, Nt = nightOf(cycle?.light ?? NIGHT);
+  followCycle(cycle);
+  const n = cyc.w, Nt = cyc;
   hemi.color.copy(mix(a.hemi[0], b.hemi[0], t)).lerp(Nt.hemi[0], n).lerp(D.hemi[0], w).lerp(night.hemi[0], k);
   hemi.groundColor.copy(mix(a.hemi[1], b.hemi[1], t)).lerp(Nt.hemi[1], n).lerp(D.hemi[1], w).lerp(night.hemi[1], k);
   hemi.intensity = lerp(lerp(lerp(lerp(a.hemi[2], b.hemi[2], t), Nt.hemi[2], n), D.hemiI, w), NIGHT.hemi[2], k);
   sun.color.copy(mix(a.sun[0], b.sun[0], t)).lerp(Nt.sun[0], n).lerp(D.sun, w).lerp(night.sun, k);
-  sun.intensity = lerp(lerp(lerp(lerp(a.sun[1], b.sun[1], t), Nt.sun[1], n), D.sunI, w), NIGHT.sun[1], k);
+  sun.intensity = lerp(lerp(lerp(lerp(a.sun[1], b.sun[1], t), Nt.sun[1], n) * cyc.sunK, D.sunI, w), NIGHT.sun[1], k);
   const v = gone * gone * (3 - 2 * gone);
   for (let i = 0; i < 4; i++) sky[i].copy(mix(skyStop(a.sky, i), skyStop(b.sky, i), t)).lerp(Nt.sky[i], n).lerp(D.sky[i], w).lerp(night.sky[i], k).lerp(VOID[i], v);
-  setSkyLook(sky[0], sky[1], sky[2], sky[3], lerp(lerp(lerp(lerp(lerp(a.stars ?? 0, b.stars ?? 0, t), Nt.stars ?? 0, n), D.stars, w), NIGHT.stars, k), VOID_STARS, v));
+  setSkyLook(sky[0], sky[1], sky[2], sky[3], lerp(lerp(lerp(lerp(lerp(a.stars ?? 0, b.stars ?? 0, t), Nt.stars, n), D.stars, w), NIGHT.stars, k), VOID_STARS, v));
   // fog: nothing at 0, at 1 the far half of the cube disappears into the dark
   const m = mist * mist * (3 - 2 * mist), f = Math.max(lerp(lerp(lerp(lerp(a.fog, b.fog, t), Nt.fog, n), D.fog, w), NIGHT.fog, k), 0.85 * m);
   scene.fog.color.copy(sky[1]).lerp(MIST, m);
   scene.fog.near = f > 0.01 ? camDist - 6 : 1e4;
   scene.fog.far = f > 0.01 ? camDist + 6 + 70 * (1 - f) : 2e4;
   if (character.ready) {
-    const lamp = lerp(lerp(lerp(lampAt(depth, themes), Nt.lamp ?? 0, n), D.lamp, w), NIGHT.lamp, k);
+    const lamp = lerp(lerp(lerp(lampAt(depth, themes), Nt.lamp, n), D.lamp, w), NIGHT.lamp, k);
     // (it hangs ~2.3 over the feet, render/character.js: brighter and farther reaching than it
     // was at the chest, for about the same light on the floor around, less at the feet)
     character.light.intensity = lerp(2.1, 5.2, lamp);

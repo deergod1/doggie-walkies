@@ -16,6 +16,8 @@
 //   motes   what drifts in the air
 //   bake    how finely a cube is baked (render/bake.js BAKE_DETAIL: for the next cube baked; the
 //           lightmap's texels a unit when a world starts)
+//   movingSun whether the sun goes round with the time of day under an open sky, its shadows baked
+//           again as it goes (game/daycycle.js; else it stays at noon and only the light turns)
 import { graphics, onSettingsChange } from './settings.js';
 import { BAKE } from '../render/lighthook.js';
 import { setShadowLook, tickShadows, snapShadows } from '../render/shadows.js';
@@ -29,13 +31,13 @@ export const LEVELS = ['lowest', 'low', 'medium', 'high'];
 // learn: light.html#looks #looks-code (see learn/README.md)
 export const LOOKS = {
   high: { lamp: { range: Infinity, figures: Infinity, every: 1, strength: 1 }, sun: { map: 2048, figures: Infinity, every: 1 },
-    cells: 16, fluid: [512, 0], motes: 1, bake: 'full' },
+    cells: 16, fluid: [512, 0], motes: 1, bake: 'full', movingSun: true },
   medium: { lamp: { range: 5, figures: 5, every: 1, strength: 1 }, sun: { map: 1024, figures: 12, every: 1 },
-    cells: 12, fluid: [512, 30], motes: 1, bake: 'full' },
+    cells: 12, fluid: [512, 30], motes: 1, bake: 'full', movingSun: true },
   low: { lamp: { range: 5, figures: 0, every: 2, strength: 1 }, sun: { map: 1024, figures: 8, every: 2 },
-    cells: 8, fluid: [256, 30], motes: 0.5, bake: 'light' },
+    cells: 8, fluid: [256, 30], motes: 0.5, bake: 'light', movingSun: true },
   lowest: { lamp: { range: 5, figures: 0, every: 2, strength: 0 }, sun: { map: 512, figures: 0, every: 2 },
-    cells: 6, fluid: [256, 20], motes: 0.5, bake: 'lighter' },
+    cells: 6, fluid: [256, 20], motes: 0.5, bake: 'lighter', movingSun: false },
 };
 const KEY = 'crawler.quality';    // the level Auto reached last
 const CELL_EASE = 8;              // lights a second: how fast uBakeK follows
@@ -82,6 +84,8 @@ export function tickQuality(dt) {
   tickShadows(dt);
 }
 export const qualityLevel = () => LEVELS[level] ?? null;
+// does the sun go round with the time of day on this level (game/daycycle.js)?
+export const movingSun = () => LOOKS[LEVELS[level]]?.movingSun ?? true;
 
 settings();
 tickQuality(0);

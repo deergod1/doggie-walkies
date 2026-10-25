@@ -1,5 +1,5 @@
 // In devtools (?dev=1&theme=slime): await (await import('./tests/browser/meteors.js')).runMeteorChecks()
-// Slime meteorites (game/meteors.js) in a slime marsh cube at depth 4: none by day; at night
+// Slime meteorites (game/meteors.js) in a slime marsh cube (act II): none by day; at the world's night
 // their shadows show, they fall and land; one aimed at the player hits and slows them, one that
 // lands on an enemy hurts it, and the splat it leaves slows whoever wades through it.
 import { paused } from './combat.js';
@@ -10,6 +10,7 @@ import { updateMeteors, meteorsNow, splatsNow, clearMeteors } from '../../src/ga
 import { updateEnemies } from '../../src/game/enemies.js';
 import { updatePlayer } from '../../src/game/update.js';
 import { nightMeteors, METEOR } from '../../src/core/meteors.js';
+import { DAY } from '../../src/core/daycycle.js';
 import { themeOf } from '../../src/themes/depth.js';
 import { moveFactor } from '../../src/core/status.js';
 import { ceilingAt } from '../../src/physics/collide.js';
@@ -18,21 +19,23 @@ import { floorY } from '../../src/core/surfaces.js';
 const check = (value, message) => { if (!value) throw Error(message); };
 
 export async function runMeteorChecks() {
-  await goHorde(4);
+  await goHorde(state.cubes.layout.themes.find(s => s.theme.props === 'slime')?.at ?? 7);
   return paused(async () => {
-    const hero = { ...player }, clock = state.run.clock, out = {};
+    const hero = { ...player }, clock = state.run.clock, shift = state.dayShift, out = {};
     try {
       const theme = themeOf(state.map);
-      check(theme.meteors && theme.cycle, 'in the slime marsh');
+      check(theme.meteors && theme.sky === 'hazy', 'in the slime marsh');
       clearEnemies();
       const step = (dt = 1 / 30) => { state.run.clock += dt; updatePlayer(dt); updateEnemies(dt); updateMeteors(dt); };
-      const period = theme.cycle.day + theme.cycle.night, night = Math.floor(clock / period) + 1;
+      // (the time of day's clock is the world's play time: no dev shift meanwhile)
+      const period = DAY.length, night = Math.floor(clock / period) + 1;
+      state.dayShift = 0;
       // by day: none
       state.run.clock = night * period + 5;
       for (let i = 0; i < 60; i++) step();
       check(!meteorsNow().length, 'none by day');
       // at night: one aimed at the player comes down beside them
-      const list = nightMeteors(state.map.seed, state.cubeKey, theme.cycle, night), aimed = list.find(m => m.aimed);
+      const list = nightMeteors(state.map.seed, state.cubeKey, night), aimed = list.find(m => m.aimed);
       check(aimed, 'an aimed one tonight');
       // (out in the open, away from the portals: under the sky)
       const f = state.map.floors.find(g => !g.fluid && !g.kind && g.x > 5 && g.x < 11 && g.z > 5 && g.z < 11
@@ -58,7 +61,8 @@ export async function runMeteorChecks() {
       if (w?.at) {
         const [e] = spawnEnemies('snake', { level: 4, at: { x: w.at.x, y: w.at.y, z: w.at.z } });
         Object.assign(e, { x: w.at.x, z: w.at.z, y: w.at.y, mode: 'idle', dormant: true });
-        player.x = w.at.x + 4;
+        // (the player back on the floor under the sky, standing: off it they could fall out of the cube)
+        Object.assign(player, { x, z, y: floorY(f, 0.5, 0.5), vx: 0, vy: 0, vz: 0, grounded: true, support: f });
         const before = e.hp;
         for (let t = 0; t < METEOR.warn + 0.1; t += 1 / 30) { Object.assign(e, { x: w.at.x, z: w.at.z }); step(); }
         check(e.hp < before, 'it hurt the enemy it landed on');
@@ -68,7 +72,7 @@ export async function runMeteorChecks() {
       return out;
     } finally {
       clearEnemies(); clearMeteors();
-      state.run.clock = clock;
+      state.run.clock = clock; state.dayShift = shift;
       Object.assign(player, hero);
     }
   });

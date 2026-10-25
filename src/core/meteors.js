@@ -1,4 +1,4 @@
-// Slime meteorites: at night (core/daycycle.js) in a theme with `meteors` (the slime marsh),
+// Slime meteorites: at the world's night (core/daycycle.js) in a theme with `meteors` (the slime marsh),
 // lumps of glowing slime fall out of the sky. Pure rules; game/meteors.js lets them fall,
 // render/meteors.js draws them.
 //
@@ -12,11 +12,12 @@
 // and a splat of slime is left that slows whoever wades through it for `splat.time` s. Under a
 // roof (a slab, an arch, a tunnel) nothing reaches you.
 import { mulberry32, hash32 } from './util.js';
+import { DAY } from './daycycle.js';
 import { GROWTH, depthLevel } from './enemies.js';
 import { msg } from '../i18n/i18n.js';
 
 export const METEOR = {
-  every: [3.5, 6.5],   // s between two in a cube
+  every: [2, 4],       // s between two in a cube
   warn: 1.7,           // s its shadow shows before it lands
   notice: 0.6,         // s its shadow must have shown for it to hit the player (game/meteors.js)
   fall: 0.55,          // s it falls (the end of the warning)
@@ -30,20 +31,21 @@ export const METEOR = {
 
 const keyHash = key => { let h = 2166136261; for (let i = 0; i < key.length; i++) h = Math.imul(h ^ key.charCodeAt(i), 16777619); return h >>> 0; };
 
-// the meteorites of night n (counted from 0) of cube `key`: [{ id, t (the world's play time it
-// lands), u, v (0..1: where, game/meteors.js), aimed }]
-export function nightMeteors(seed, key, cycle, n) {
+// the meteorites of night n (counted from 0) of cube `key`: [{ id, t (the time of day's clock,
+// game/daycycle.js dayClock, it lands), u, v (0..1: where, game/meteors.js), aimed }]
+export function nightMeteors(seed, key, n) {
   const R = mulberry32(hash32((seed >>> 0) ^ keyHash(key) ^ Math.imul(n + 1, 0x2c1b3c6d) ^ 0x3e7e0));
-  // (from the first shadow once it is night to the last landing before the dawn: core/daycycle.js)
-  const period = cycle.day + cycle.night, start = n * period + cycle.day + 0.5 + METEOR.warn, end = (n + 1) * period - cycle.fade;
+  // (landing from once it is all night to the dawn, their shadows from late in the dusk:
+  // core/daycycle.js)
+  const night = n * DAY.length + DAY.day + DAY.dusk, start = night + 0.5, end = night + DAY.night;
   const [lo, hi] = METEOR.every, out = [];
   for (let t = start + R() * lo; t < end; t += lo + R() * (hi - lo)) out.push({ id: `${n}:${out.length}`, t, u: R(), v: R(), aimed: R() < METEOR.aimed });
   return out;
 }
 // those showing at `clock`: from their warning on until they have landed (and `after` s more)
-export function meteorsAt(seed, key, cycle, clock, after = 0.1) {
-  const period = cycle.day + cycle.night, n = Math.floor(clock / period);
-  return [n - 1, n].filter(i => i >= 0).flatMap(i => nightMeteors(seed, key, cycle, i))
+export function meteorsAt(seed, key, clock, after = 0.1) {
+  const n = Math.floor(clock / DAY.length);
+  return [n - 1, n].filter(i => i >= 0).flatMap(i => nightMeteors(seed, key, i))
     .filter(m => clock >= m.t - METEOR.warn && clock < m.t + after);
 }
 // how far a meteorite has fallen at `clock`: 0 up in the sky (or not falling yet), 1 landed

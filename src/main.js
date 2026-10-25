@@ -200,9 +200,9 @@ function frame(now = performance.now()) {
   // and the dusk of Renew's fight falls slowly, and lifts as slowly once he is beaten (game/rewind.js)
   state.lookDusk += (state.dusk - state.lookDusk) * Math.min(1, dt * (state.dusk > state.lookDusk ? 0.8 : 0.4));
   if (state.lookDusk < 0.002) state.lookDusk = 0;
-  // and a theme's own night falls and lifts as its day goes round (game/daycycle.js)
+  // and the world's days and nights go round (game/daycycle.js)
   updateDayCycle(dt);
-  applyLook(state.lookDepth, camera.position.distanceTo(focusPoint(player.x, player.visY, player.z)), state.cubes?.layout.themes, state.lookDark, state.lookMist, state.lookVoid, state.lookDusk, lookCycle());
+  applyLook(state.lookDepth, camera.position.distanceTo(focusPoint(player.x, player.visY, player.z)), state.cubes?.layout.themes, state.lookDark, state.lookMist, state.lookVoid, state.lookDusk, lookCycle(dt));
   followHero(dt);   // the hero's light where it stands (render/character.js)
   updateLightPool(focusPoint(player.x, player.visY + 1, player.z));
   // (the close view's camera stays out of the solids: nothing of the neighbours is cut either)

@@ -619,7 +619,7 @@ depth they may appear at: an act with any of them shows them alone.
 |---|---|---|
 | | 0 | Meadow islands (the town and its road, always: `TOWN`) |
 | I | 1–6 | Meadow islands, Cloud kingdom, Lagoon isles, Karst terraces, Dark forest (a night theme), Snowy peaks, Prayer highlands, Salt flats, Badlands, Deep canyon (walled in like a cave, under the sky) |
-| II | 7–13 | Root caves, Sunken grotto, Dwarven forge (open), Honey hive, Fungal swamp (open), Jungle cenote (open), Frozen caves, Slime marsh (open, days and nights) |
+| II | 7–13 | Root caves, Sunken grotto, Dwarven forge (open), Honey hive, Fungal swamp (open), Jungle cenote (open), Frozen caves, Slime marsh (open, meteorites at night) |
 | III | 14–19 | Crystal mines, Spider nests, Ossuary, Buried ruins, Volcanic depths, Obsidian abyss |
 | | 20 | Obsidian abyss (the core, always: `CORE`) |
 
@@ -637,6 +637,28 @@ depth they may appear at: an act with any of them shows them alone.
   sets how bright the character's own light is (`render/look.js`). A **night** theme (`night`:
   the dark forest) is under the sky in the light band but lit like the deep: a few stars, a dim
   blue moon, fog, the character's full lamp, and its own lights.
+- **Days and nights** (`core/daycycle.js`, `game/daycycle.js`, `themes/skies.js`): the world
+  has one day of `DAY.length` (210) s on its play time (`state.run.clock`,
+  `game/worldclock.js`), the same in every cube and for friends playing together (the host's
+  clock); it goes on while you are elsewhere. A world begins in the morning: 140 s of sun, 15
+  s of dusk, 40 s of night, 15 s of dawn. What a cube shows of it is its theme's `sky` (from the
+  rest unless given):
+  - `open` (act I under the sky, the town): the sun goes along an arc through the noon sun
+    (`NOON`, where it always stood), never lower than `sunLow` (35°; the canyon 50°, over its
+    walls), its shadows baked again as it goes (docs/lighting.md); mornings and evenings take
+    on a warm light (`SUNSET`), the night its `light.night` (else one made from its sky: a blue
+    moonlight, lit like the deep, the character's full lamp). At night the moon stands where the
+    noon sun does; the sun gives way to it (and it to the sun) halfway through the dusk (the
+    dawn), where neither shines.
+  - `hazy` (act II's open themes): the same light, the sun staying at noon (no bakes).
+  - `night` (the dark forest): always night, a little lighter by day (`light.day`).
+  - `none` (the caves, act III, the core): no days and nights. Neither indoors, in trial and
+    test rooms, nor in a boss's arena, where it is always noon (the bosses' own light: Totnar's
+    dark, Renew's dusk).
+  `state.night` is how far into the night the cube is; the look follows the time of day eased
+  (`render/look.js`), so coming out of a cave at night fades the dark in; a word says when it
+  turns. On the lowest lighting level the sun stays at noon everywhere (`movingSun`,
+  `game/quality.js`). `/daytime` and `/dayspeed` (docs/console.md).
 - **What the theme changes:** acts I and II mix open themes and walled ones (`cave`, `walls`);
   every theme of act III is walled in. The route, its guardians and hordes depend on the seed
   alone; the gorge spans (and with them where the branches go) are the theme's. Which large
@@ -700,16 +722,11 @@ vents, reeds, and the craters the slime meteorites left. What makes it so, in it
   hold. Whoever walks there leaves wet footprints that dry up in a few seconds
   (`render/footprints.js`): the hero's at each foot's touchdown (`game/footsteps.js`), a friend's
   and the enemies' every so far as they walk.
-- **Day and night** (`cycle`, `core/daycycle.js`, `game/daycycle.js`): 45 s of its own light,
-  then 45 s of its `dark` (a green moonlight, lit like the deep: stars, fog, the character's full
-  lamp, the slime glowing), each turn over the last 4 s of the half it ends. It runs on the world's
-  play time (`state.run.clock`, `game/worldclock.js`), so it goes on while you are elsewhere, and
-  friends see the same sky: together everyone's clock is the host's ([online.md](online.md)).
-  `state.night` is how far into the night the cube is, `state.lookNight` follows it (coming
-  into the marsh at night fades the dark in, `render/look.js`); a word says when it turns, and
-  at night glowing spores and a wisp drift (`cycle.motes`, `render/motes.js`).
+- **Its nights** (the world's, see Days and nights above): a green moonlight of its own
+  (`light.night`: stars, fog, the character's full lamp, the slime glowing), and glowing spores
+  and a wisp drifting (`nightMotes`, `render/motes.js`).
 - **Slime meteorites** (`meteors`, `core/meteors.js`, `game/meteors.js`, `render/meteors.js`): at
-  night lumps of glowing slime fall out of the sky, every 3.5–6.5 s a cube. When and where is the
+  the world's night lumps of glowing slime fall out of the sky, every 2–4 s a cube. When and where is the
   cube's and the night's (from the cube's seed and the world's play time), so every game playing
   together sees the same ones; a third of them come down near the player instead (each game near
   its own: a friend does not see those). Each first shows where it will land, a shadow growing

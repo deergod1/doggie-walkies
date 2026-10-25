@@ -8,7 +8,8 @@
 // The light comes in three bands of depths, one per act: light under the sky (0-6), medium in the
 // sunlit hollows (7-13: open marshes and works yards under a hazy sky, caves where light falls in
 // through cracks, glowing things), dark down in the deep (14-20, only local lights). A night theme
-// (`night`: the dark forest) is under the sky in the light band but lit like the deep. Acts I
+// (`night`: the dark forest) is under the sky in the light band but lit like the deep. Under the
+// sky the world's days and nights go round (`sky`, core/daycycle.js, themes/skies.js). Acts I
 // and II mix open themes and walled ones (`cave`, `walls`); every theme of act III is walled in.
 // A theme's id is its prop set (`props`).
 //   act: 1, 2 or 3 (the town's depth, 0, is always TOWN's, the core's, 20, CORE's); `depths`, the
@@ -24,7 +25,14 @@
 //   clutter/, themes/ <set>.glb), propDensity: chance of a prop per floor (0.32)
 //   light: sky [top, bottom, haze, tint] (backdrop, see render/sky.js: haze is the nebula's band,
 //     tint its patch low on the right; walled-in caves too, faint, with no stars), stars 0..1, hemi [sky, ground, intensity], sun [colour, intensity], fog 0..1,
-//     lamp 0..1: how bright the character's own light is (0 under the sky, 1 in the dark deep)
+//     lamp 0..1: how bright the character's own light is (0 under the sky, 1 in the dark deep);
+//     night: its light at night (else one made from its sky, themes/skies.js); day: a night
+//     theme's by day (a little lighter)
+//   sky: what the world's days and nights do here (core/daycycle.js, game/daycycle.js), from the
+//     rest unless given: 'open' (under the sky: the sun goes round, its shadows with it), 'hazy'
+//     (act II's open themes: the light turns, the sun stays), 'night' (`night`: always night, a
+//     little lighter by day), 'none' (`cave`: no days and nights)
+//   sunLow: the lowest the sun goes under an open sky, degrees (35; the canyon's walls: higher)
 //   music: the song (music/<name>.scrim) that plays here; the town and the core have their own (SONGS)
 //   spans: gorge spans (world/spans.js), or null: the chance of any on a depth, at most `max`,
 //   the chance of one on the route where it fits, of a lonely island branch and of a span over
@@ -43,9 +51,8 @@
 //     the trees with a lantern hanging from a branch; strings: the most strings of lanterns
 //   mire: how much its slime holds the feet (core/footing.js mireOf: a speed factor on its slime
 //     ground for everyone walking on it, 1 elsewhere)
-//   meteors: slime meteorites fall at night (core/meteors.js, game/meteors.js; with a `cycle`)
-//   cycle: days and nights (core/daycycle.js, game/daycycle.js): `day` s of its `light`, then `night`
-//     s of its `dark` (a light like the deep's), turning over `fade` s; `motes` drift at night
+//   meteors: slime meteorites fall at night (core/meteors.js, game/meteors.js)
+//   nightMotes: what drifts in the air at night instead of `motes` (render/motes.js)
 //   waylights: lamps beside the way (render/propplace.js waylights): { props, share (of the
 //     floors beside it), back (from the floor's middle, 0.36), foot (its collider, 0.06) }
 import { WATER, ACID } from '../core/constants.js';
@@ -170,12 +177,11 @@ const SLIME = T('Slime marsh', {
   side: [[0, '#2e3424'], [6, '#3e4630'], [11, '#545a44'], [20, '#6e705e']],
   soft: '#7ac040', lip: '#5a8a2a', under: '#1e2214', bed: ['#181c12', '#13160e'], fluids: [0.08, 0, 0.92], river: ACID,
   tiles: { lake: 2, river: 1.5, highland: 0.8 },
-  light: { sky: ['#1c3a30', '#08140e', '#4a6a50', '#34482e'], stars: 0.2, hemi: ['#d4e6c0', '#2e3418', 1.0], sun: ['#e6f6c8', 1.4], fog: 0.22, lamp: 0.45 },
-  // 45 s of day, 45 s of night: a green moonlight, the slime glowing, spores drifting
-  cycle: { day: 45, night: 45, fade: 4,
-    dark: { sky: ['#04100a', '#010503', '#0c2416', '#0e2a1a'], stars: 1, hemi: ['#6a9a80', '#060a06', 0.5], sun: ['#a8f0b4', 0.5], fog: 0.4, lamp: 1 },
-    motes: { colors: ['#b8ff5a', '#d8ff9a', '#9aff7a'], rate: 6, drift: 0.25, rise: [0.02, 0.2], life: [2.5, 5], size: [0.03, 0.06],
-      wisps: 1, wisp: '#b8ff5a' } },
+  light: { sky: ['#1c3a30', '#08140e', '#4a6a50', '#34482e'], stars: 0.2, hemi: ['#d4e6c0', '#2e3418', 1.0], sun: ['#e6f6c8', 1.4], fog: 0.22, lamp: 0.45,
+    // at night a green moonlight, the slime glowing, spores drifting
+    night: { sky: ['#04100a', '#010503', '#0c2416', '#0e2a1a'], stars: 1, hemi: ['#6a9a80', '#060a06', 0.5], sun: ['#a8f0b4', 0.5], fog: 0.4, lamp: 1 } },
+  nightMotes: { colors: ['#b8ff5a', '#d8ff9a', '#9aff7a'], rate: 6, drift: 0.25, rise: [0.02, 0.2], life: [2.5, 5], size: [0.03, 0.06],
+    wisps: 1, wisp: '#b8ff5a' },
 });
 // the deep canyon: the last of the sky, far down between sheer sandstone walls (red, salmon and
 // cream strata), a green river floor with cottonwoods, hanging gardens at the springs
@@ -184,6 +190,7 @@ const CANYON = T('Deep canyon', {
   props: 'canyon', propDensity: 0.3,
   act: 1, spans: { chance: 0.85, max: 2, route: 0.8, island: 0.5, sky: 0, deck: 15 },
   void: 0.1, relief: 1.1, walls: true, heights: { tableland: 0.8, tunnel: 0.45 },
+  sunLow: 50,   // (the sun high over its walls: low, their shadows would sweep the floor too fast)
   arche: { chasm: 3, mesa: 2, spire: 2, plain: 1 },
   top: [[0, '#5e7a3a'], [4, '#7a8a46'], [7, '#c27a48'], [11, '#d49466'], [15, '#e2b48a'], [20, '#f0dcc0']],
   side: [[0, '#6e2e1c'], [5, '#9a4426'], [9, '#b8603a'], [13, '#c8825a'], [17, '#d8a880'], [22, '#e8cfae']],
@@ -211,7 +218,9 @@ const DARKFOREST = T('Dark forest', {
   side: [[0, '#2a221c'], [6, '#3a2e24'], [11, '#48423c'], [20, '#5c5854']],
   soft: '#3e5e32', lip: '#24402a', under: '#1a1612', bed: ['#14161a', '#101215'], fluids: [0.95, 0, 0.05], river: WATER,
   tiles: { slope: 2, highland: 1.3, gorge: 1.4, river: 1.3, lake: 0.6 },
-  light: { sky: ['#060a12', '#020406', '#0e1822', '#120e22'], stars: 0.4, hemi: ['#7084b4', '#0a0e0a', 0.55], sun: ['#9ab0e8', 0.55], fog: 0.45, lamp: 1 },
+  light: { sky: ['#060a12', '#020406', '#0e1822', '#120e22'], stars: 0.4, hemi: ['#7084b4', '#0a0e0a', 0.55], sun: ['#9ab0e8', 0.55], fog: 0.45, lamp: 1,
+    // by day a deep blue twilight under the trees, never more
+    day: { sky: ['#0c1424', '#04070c', '#1a2a40', '#1e1a36'], stars: 0.2, hemi: ['#8496c4', '#10160e', 0.7], sun: ['#aec0ec', 0.7], fog: 0.38, lamp: 0.9 } },
 });
 
 // the depths of the three acts (docs/story.md): I under the sky (childhood), II the sunlit
@@ -222,8 +231,11 @@ export const ACTS = [null, [1, 6], [7, 13], [14, 19]];
 // down the act (themes/depth.js worldThemes)
 export const THEMES = [MEADOW, CLOUDS, LAGOON, KARST, DARKFOREST, PEAKS, HIGHLANDS, SALTFLATS, BADLANDS, CANYON,
   ...SUNLIT_THEMES, SLIME, ...DEEP_THEMES];
-// the depths a theme may appear at: its act's
-for (const t of THEMES) t.depths = ACTS[t.act];
+// the depths a theme may appear at: its act's; its sky (what the days and nights do there)
+for (const t of THEMES) {
+  t.depths = ACTS[t.act];
+  t.sky ??= t.cave ? 'none' : t.night ? 'night' : t.act === 2 ? 'hazy' : 'open';
+}
 // the town and its road (depth 0), the core (depth 20)
 export const TOWN = MEADOW;
 export { CORE };

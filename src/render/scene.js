@@ -2,6 +2,7 @@
 import './lighthook.js';   // (before any material: render/lighthook.js)
 import * as THREE from 'three';
 import { N } from '../core/constants.js';
+import { NOON } from '../core/daycycle.js';
 import { bakeScene, bakeRenderer } from './lighthook.js';
 
 // no antialias: the anti-aliasing is our own, at the level of the settings (msaa.js)
@@ -58,10 +59,13 @@ export const camera = new THREE.PerspectiveCamera(28, innerWidth / innerHeight, 
 // learn: drawing.html#light (see learn/README.md)
 export const hemi = new THREE.HemisphereLight(0xdfeaff, 0x3a3020, 1.1);
 scene.add(hemi);
+// It stands where the cube played in has its sun (render/bake.js setCurrentBake: at noon, or
+// where the time of day has it, core/daycycle.js), looking at the cube's middle a little up (its
+// shadow map's box holds the cube however low the sun goes).
 // learn: drawing.html#light, light.html#shadow-map (see learn/README.md)
 export const sun = new THREE.DirectionalLight(0xfff1dd, 2.4);
-sun.position.set(N / 2 - 12, 34, N / 2 + 8);
-sun.target.position.set(N / 2, 0, N / 2);
+sun.target.position.set(N / 2, 4, N / 2);
+sun.position.set(...NOON).multiplyScalar(38).add(sun.target.position);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
 Object.assign(sun.shadow.camera, { left: -16, right: 16, top: 16, bottom: -16, near: 1, far: 90 });

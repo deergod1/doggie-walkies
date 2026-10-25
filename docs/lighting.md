@@ -8,7 +8,7 @@ anti-aliasing (MSAA) and every material's own look stay what they were.
 
 | light | what | its shadows |
 |---|---|---|
-| the sun (and the moon of the night themes, and of the slime marsh's nights) | `render/scene.js` `sun` | of the fixed parts: baked; of what moves: three.js's shadow map |
+| the sun (and the moon of the night themes and of the world's nights) | `render/scene.js` `sun`, where the cube played in has it (`render/bake.js setCurrentBake`) | of the fixed parts: baked, again as it moves (below); of what moves: three.js's shadow map |
 | the fixed lights | what a cube's glowing things give off, every one of them (`render/props.js`): lanterns, fires, lava, portals, crystals, a trial's braziers (`render/lightpool.js adoptLights` takes those not on a villager; at most 128 a cube) | baked when the cube is shown (`render/bake.js`) |
 | the moving lights | the hero's lamp (`render/character.js`, a three.js light); shots, enemies, loot, villagers' lamps, a partner (`trackLight`, `render/lightpool.js`) | the hero's lamp: a cube of shadow maps, as the quality level asks (`render/shadows.js`); the others: none |
 
@@ -63,11 +63,12 @@ What it does:
    first, each the first channel none of its neighbours has (reaches count to 85%: beyond that a
    light is faint). A light left without one shares the channel of one within 1.2 units (the
    lanterns on a string: its shadow is near enough); else it shines without a shadow.
-2. **The lightmap** (three RGBA8 textures; the first's red is the sun's): for each texel of the
+2. **The lightmap** (three RGBA8 textures, the first's red unused; the sun has its own, below): for each texel of the
    solids, the **signed distance** to the edge of the light's shadow, in texels (±1.5, 0.5 on the
    edge). Found by testing points a quarter texel apart round the texel (on its plane) against
    the light's shadow map: a cube of 1024² depth maps for a light (only out of 0.3 from it, so a
-   lamp's own frame casts none), a 2048² one of the cube for the sun. Where a coarse look round
+   lamp's own frame casts none), a 2048² one of the cube for the sun (1024² where it moves; its
+   distances reach ±4 texels: The sun going round). Where a coarse look round
    finds the light everywhere or nowhere, the texel is ±1.5 at once. The charts' edges are filled
    outwards.
 3. **The volume** (three RGBA8 textures, 4 samples a unit, round the cube): how much of each
@@ -76,7 +77,8 @@ What it does:
    texture a draw each, about 35 a light: a render pass each, costly on phones' tiled GPUs); a
    shader reads the two slices round a point and blends them. Without it (Lowest) props, figures
    and fluids take every fixed light unshadowed (in the overview 0.3% of the pixels differ).
-4. The sun's shadow map of the fixed parts (16-bit) is kept, for what is not lightmapped.
+4. The sun's shadow map of the fixed parts (16-bit) is kept, for what is not lightmapped (one
+   for each of the sun's places kept).
 
 **The lightmap's layout** (`render/lightmap.js`, in the world worker with the rest of the
 cube's geometry): charts of the triangles facing mostly the same way (the six axis
@@ -84,6 +86,47 @@ directions), connected by their edges, projected along that axis; one that would
 itself (a spiral ramp) is split. 16 texels a unit, two texels round each chart, packed in
 shelves; an atlas of about 1024 × 800 for a cube of the dark forest. The lit solids carry the
 place of each corner (`lm`, render/parts.js).
+
+## The sun going round (`render/bake.js updateSun`, `core/daycycle.js`)
+
+Under an open sky the sun moves with the world's time of day (docs/world.md, Days and nights):
+along its path, `SUN_KEYS` + 1 places (keys) 1.5 s of the day apart, spaced so that the tips of
+the shadows move as far from one to the next (about 0.3 a key for something 10 high; 0.16 in the
+canyon, whose sun stays higher). Each place has its own bake, kept with the cube's:
+
+- **A lightmap of the sun's own** (one channel, `RedFormat`, the lightmap's size) and its shadow
+  map of the fixed parts (1024² where it moves, else `sunMap`). Its signed distances reach
+  farther than a light's (`SUN_RANGE`: ±4 texels, searched in half texels, against ±1.5 in
+  quarters), so that blending two places' distances moves an edge from one to the other.
+- **What shows** is a blend of the two places the sun stands between (`uBakeSunT`): on the
+  solids their lightmaps' distances blended (`uBakeSunA`, `uBakeSunB`), so an edge slides from
+  one place to the next. On everything else their shadow maps (`uBakeSun`, `uBakeSun2`, read
+  raw), each moved to where the sun stands now (`render/lighthook.js bakeSunAt`): what shades a
+  point lies some way s towards the sun (the map's nearer depths in a 3 × 3 look round it, as
+  far as such a shadow moves between the places), so the map is read at p + s × (sun now − the
+  place's sun), compared by hand 2 × 2. Exact for a shade at one distance; read from the nearer
+  place, from both in the middle, blended. The scene's sun (the realtime map of what moves, the
+  light's direction) stands at the same blend.
+- **The sun's shadow maps hold the first surface the sun sees** (`sunPass`: both sides of
+  everything drawn; three draws only the far sides, so where a wall met the ground its shaded
+  side stood as far from the sun as the ground beside it, and the ground at its foot and round
+  its corners came out lit). What is lit sees itself in them then, so whatever reads them keeps
+  off it by a texel or two along its normal (more the more it turns from the sun) with as much
+  leeway in depth, slope-scaled (the bake's `VISIBLE`, `bakeSunAt`). The blend shown eases
+  after the time of day (`SUN_EASE`); after a jump of the clock (a hidden tab, joining a game,
+  `/daytime`) it fades over from what showed.
+- **Baked ahead:** each frame `updateSun` wants the place the sun is at, the next one and the one
+  after; the first missing one is baked, a step a frame under the same fences and budget as the
+  lights (`tickBakes`, only while no cube is baking): its shadow map, then its lightmap in
+  `STRIPS` (8) strips (a scissor over the atlas), then filled out round the charts. A desktop
+  does one in a few frames; a key comes every 1.5 s. Places neither shown nor wanted are let go:
+  about three are kept.
+- **The night:** the moon stands where the noon sun does (`NOON`, the place every other cube's
+  sun has), so the sun's last place gives way to it halfway through the dusk and the first
+  place takes over from it halfway through the dawn, while neither shines (`sunAt` `light`).
+- **Not on the lowest level** (`movingSun`, `game/quality.js`): there the sun stays at noon and
+  only the light turns. Nor under the hazy skies of act II, in a night theme, the caves, or a
+  boss's arena (always noon).
 
 ## Drawing (`render/lighthook.js`)
 
@@ -107,9 +150,11 @@ every shader, so no program changes its cache key.
 - **On the lightmapped solids** (`BAKED_LM`, `render/bake.js bakedSurface`): the distance from the
   lightmap, turned into light over one pixel (its change across the pixel, `fwidth`): the edge
   is a pixel wide and smooth at any zoom, without MSAA's help (MSAA only smooths the edges of
-  triangles). The sun's light takes the lightmap's first channel too.
+  triangles). The sun's light the same from its own lightmaps (the two places it stands between,
+  their distances blended).
 - **On everything else** (props, figures, fluids): the volume at the point (a little out along
-  the normal), soft; the sun from the kept shadow map of the fixed parts.
+  the normal), soft; the sun from the kept shadow maps of the fixed parts (the two places',
+  blended).
 - Times three.js's shadow map of the sun for what moves, as before.
 - The proxies of the surroundings take none of it (`NO_BAKE`, `render/neighbors.js`).
 - What a cube is built of shows its own cube's lights and shadows (`render/bake.js

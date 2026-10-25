@@ -1,5 +1,5 @@
-// The slime meteorites of the cube being played (core/meteors.js): at night in a theme with
-// `meteors` (the slime marsh), each one's shadow grows where it will come down, then it falls and
+// The slime meteorites of the cube being played (core/meteors.js): at the world's night in a
+// theme with `meteors` (the slime marsh: under its sky, game/daycycle.js), each one's shadow grows where it will come down, then it falls and
 // lands: our player within its reach is hit (unless under a roof), and the enemies there too, but
 // only in the game that runs them (playing together: net/foes.js; the others are shown what it
 // does to them). Where it landed a splat of slime slows whoever wades through it, the enemies too.
@@ -11,7 +11,9 @@ import { state, player } from './state.js';
 import { allEnemies, mirroring } from './enemies.js';
 import { hitBody } from './enemycombat.js';
 import { afflictEnemy } from './statuses.js';
-import { cycleTheme } from './daycycle.js';
+import { dayClock, skyOf, fullCycle } from './daycycle.js';
+import { themeOf } from '../themes/depth.js';
+import { DAY } from '../core/daycycle.js';
 import { slowPlayer } from './enemycombat.js';
 import { METEOR, meteorsAt, meteorBlow, enemyMeteorDamage } from '../core/meteors.js';
 import { damageEnemy } from '../core/combat.js';
@@ -50,15 +52,14 @@ function place(m, map) {
 
 // every step (game/enemies.js, after the enemies moved)
 export function updateMeteors(dt) {
-  const map = state.map, theme = cycleTheme();
+  const map = state.map, falling = !!map && fullCycle(skyOf(map)) && !!themeOf(map).meteors;
   if (state.cubeKey !== cube) { clearMeteors(); cube = state.cubeKey; }
   splats = splats.filter(s => (s.t += dt) < METEOR.splat.time);
   wade();
-  if (!theme?.meteors || !allowed(map) || state.transitioning) { for (const v of shown.values()) removeMeteorView(v); shown.clear(); return; }
-  const clock = state.run.clock, now = meteorsAt(map.seed ?? 0, state.cubeKey, theme.cycle, clock), ids = new Set(now.map(m => m.id));
+  if (!falling || !allowed(map) || state.transitioning) { for (const v of shown.values()) removeMeteorView(v); shown.clear(); return; }
+  const clock = dayClock(), now = meteorsAt(map.seed ?? 0, state.cubeKey, clock), ids = new Set(now.map(m => m.id));
   for (const [id, v] of shown) if (!ids.has(id)) { removeMeteorView(v); shown.delete(id); }
-  const period = theme.cycle.day + theme.cycle.night;
-  for (const [id, t] of landed) if (t < clock - 2 * period) landed.delete(id);
+  for (const [id, t] of landed) if (t < clock - 2 * DAY.length) landed.delete(id);
   for (const m of now) {
     let v = shown.get(m.id);
     if (!v) {
@@ -108,7 +109,7 @@ function wade() {
     afflictEnemy(e, 'slowed', METEOR.splat.slow);
 }
 export function drawAllMeteors(dt, off) {
-  drawMeteors([...shown.values()], state.run.clock, dt, off);
+  drawMeteors([...shown.values()], dayClock(), dt, off);
   drawSplats(splats, dt, off);
 }
 export function clearMeteors() { clearMeteorViews([...shown.values()]); shown.clear(); splats = []; landed.clear(); }

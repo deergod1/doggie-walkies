@@ -7,8 +7,10 @@
 //     cube's solids from their lightmap (crisp at any zoom: signed distances to the shadow's edge,
 //     antialiased over a pixel), on everything else (props, figures, fluids) from a volume of the
 //     light's visibility round the cube (soft).
-// The sun's shadow of the cube's fixed parts is baked too (render/bake.js); three.js's own shadow
-// map of the sun then only holds what moves.
+// The sun's shadow of the cube's fixed parts is baked too (render/bake.js): on the solids from a
+// lightmap of its own (a blend of two of its places where it moves with the time of day), on
+// everything else from its shadow map; three.js's own shadow map of the sun then only holds what
+// moves.
 //
 // Every lit material takes part without being told: this module wraps Material.onBeforeCompile
 // (whatever a material sets, three.js calls the wrapper), so it must be imported before any
@@ -30,7 +32,7 @@ export const MAX_BAKED = 128;  // fixed lights a cube gives off at most
 // learn: light.html#kinds (see learn/README.md)
 export const MAX_MOVING = 64;  // moving lights shining at once at most (render/lightpool.js)
 // learn: light.html#pots (see learn/README.md)
-export const SETS = 3;         // the lightmap's (and volume's) textures, four channels each: the sun's and eleven for lights
+export const SETS = 3;         // the lightmap's (and volume's) textures, four channels each: eleven for lights (the first unused)
 // The fixed lights a point walks are its cell's (render/bake.js lightCells): the cube's ground in
 // cells of a unit (CELLS a side from CELL0, a little round the cube), each with the lights that
 // reach it, the strongest first, CELL_MAX at most (uBakeK: how many of them a point takes, fewer
@@ -47,11 +49,11 @@ export function lightTable(n) {
 }
 
 // uBakeSun before a cube's sun is baked (and where it never is): never sampled then (uBakeR is
-// 0), but a shadow sampler must always have a depth texture that compares, or WebGL drops the
-// draw (three's own fallback for an empty shadow sampler is never uploaded). needsUpdate: every
-// renderer (the item pictures have their own) makes its own.
+// 0), but its sampler must always have a depth texture (read raw, without comparing: the sun's
+// shadow maps are, VIS), or WebGL drops the draw. needsUpdate: every renderer (the item pictures
+// have their own) makes its own.
 export const NO_SUN = new THREE.DepthTexture(1, 1);
-NO_SUN.compareFunction = THREE.LessEqualCompare;
+NO_SUN.minFilter = NO_SUN.magFilter = THREE.NearestFilter;
 NO_SUN.needsUpdate = true;
 
 // the volume where there is none (not baked yet, or baked without one: render/bake.js): every
@@ -73,6 +75,12 @@ export const BAKE = {
   uBakeVD: { value: new THREE.Vector4(1, 1, 1, 1) },   // its samples across, up (slices), deep, and slices a row of its atlas
   uBakeSun: { value: NO_SUN },                 // the sun's shadow map of the cube's fixed parts
   uBakeSunM: { value: new THREE.Matrix4() },   // from the cube's coordinates into it
+  uBakeSunA: { value: null }, uBakeSunB: { value: null },   // the sun's lightmaps of the two places it stands between
+  uBakeSun2: { value: NO_SUN }, uBakeSunM2: { value: new THREE.Matrix4() },   // the second one's shadow map (uBakeSun: the first's)
+  uBakeSunPA: { value: new THREE.Vector4() }, uBakeSunPB: { value: new THREE.Vector4() },   // the first's and second's way to the sun, and their depth (world units)
+  uBakeSunD: { value: new THREE.Vector3() },   // the way to the sun now
+  uBakeSunX: { value: new THREE.Vector4(1, 1, 0, 0) },   // each map's texel (world units), how far round it to look for what shades a point (in the map; 0: right there)
+  uBakeSunT: { value: 0 },                     // how far from the first to the second
   uMoveN: { value: 0 },                        // how many moving lights
   uMoveT: { value: lightTable(MAX_MOVING) },   // their table (x, y, z in the world; channel unused)
   uBakeDbg: { value: 0 },                      // dev (/lightview): 1 the sun's baked shadow, 2 the fixed lights' light, 3 the lightmap's texels
@@ -94,25 +102,68 @@ uniform float uBakeOn, uBakeR, uBakeDbg, uBakeK;
 uniform int uBakeN, uMoveN;
 uniform highp sampler2D uBakeT, uMoveT, uBakeC;
 uniform vec3 uBakeO;
+uniform float uBakeSunT;
 #ifdef BAKED_LM
   varying vec2 vBakeLm;
   ${sets(i => `uniform sampler2D uBakeLm${i};\n`)}
+  uniform sampler2D uBakeSunA, uBakeSunB;
 #else
   ${sets(i => `uniform sampler2D uBakeVol${i};\n`)}
   uniform vec3 uBakeV0, uBakeVS;
   uniform vec4 uBakeVD;
-  uniform highp sampler2DShadow uBakeSun;
-  uniform mat4 uBakeSunM;
+  uniform highp sampler2D uBakeSun, uBakeSun2;
+  uniform mat4 uBakeSunM, uBakeSunM2;
+  uniform vec4 uBakeSunPA, uBakeSunPB;
+  uniform vec3 uBakeSunD;
+  uniform vec4 uBakeSunX;
 #endif
 float bakeFalloff(float d, float reach) {
   return 1.0 / max(d * d, 0.01) * pow2(saturate(1.0 - pow4(d / reach)));
 }
+#ifndef BAKED_LM
+// The sun's shadow at p from the shadow map of one of its places (m: into it, at.xyz the way to
+// that place's sun, at.w its depth in world units), for the sun where it stands now (uBakeSunD:
+// between two places). A shadow map only says in or out, so the map's answer is moved instead:
+// what shades p lies some way s towards the sun (the map's nearer depths round p, r round it in
+// the map); seen from the place's sun, its shadow of a point s further along the way to the sun
+// now is where p's would be, so the map is read there, p + s * (now - place). The edge slides
+// with the sun between two places, as the lightmap's does (exactly for a shade at one distance).
+// The map holds the first surface the sun sees (render/bake.js sunPass), so what is lit sees
+// itself in it: p keeps off its surface by a texel or two (texel: the map's, in world units)
+// along its normal n, more the more it turns from the sun, with as much leeway in depth.
+// Read raw, compared by hand (2 x 2, blended): 1 outside the map.
+float bakeSunLit(highp sampler2D map, vec2 uv, float z) {
+  vec2 ts = vec2(textureSize(map, 0)), f = uv * ts - 0.5, i = floor(f), w = f - i;
+  vec2 t = (i + 0.5) / ts, d = 1.0 / ts;
+  float a = step(z, texture(map, t).r), b = step(z, texture(map, t + vec2(d.x, 0.0)).r);
+  float c = step(z, texture(map, t + vec2(0.0, d.y)).r), e = step(z, texture(map, t + d).r);
+  return mix(mix(a, b, w.x), mix(c, e, w.x), w.y);
+}
+float bakeSunAt(highp sampler2D map, mat4 m, vec4 at, float texel, float r, vec3 p, vec3 n) {
+  float nl = clamp(dot(n, at.xyz), 0.1, 1.0);
+  p += n * texel * (1.0 + 1.5 * (1.0 - nl));
+  float bias = texel * (0.5 + min(3.0, sqrt(1.0 - nl * nl) / nl)) / at.w;
+  vec3 c = (m * vec4(p, 1.0)).xyz;
+  if (any(lessThanEqual(c, vec3(0.0))) || any(greaterThanEqual(c, vec3(1.0)))) return 1.0;
+  if (r <= 0.0) return bakeSunLit(map, c.xy, c.z - bias);
+  float sum = 0.0, k = 0.0;
+  for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++) {
+    float zb = texture(map, c.xy + vec2(i, j) * r).r;
+    if (zb < c.z - bias) { sum += zb; k += 1.0; }
+  }
+  if (k == 0.0) return 1.0;
+  // (moved off p's surface: as much more leeway as it moved, for a surface sloping to the sun)
+  vec3 shift = (c.z - sum / k) * at.w * (uBakeSunD - at.xyz), cq = (m * vec4(p + shift, 1.0)).xyz;
+  return bakeSunLit(map, cq.xy, cq.z - bias - length(shift) / at.w);
+}
+#endif
 #endif
 `;
 
 // before the lights: where the point is (in the world: bakeW, in the cube: bakeP), the
-// visibility of the sun (bakeSun) and of the fixed lights' channels (bake0..: four each; channel
-// 0 is the sun's in the lightmap)
+// visibility of the sun (bakeSun: on the solids from its own lightmap, the distances of the two
+// places it stands between blended, so the edge moves between them) and of the fixed lights'
+// channels (bake0..: four each)
 // learn: light.html#edge-code #sharp (see learn/README.md)
 const VIS = `
 #ifndef NO_BAKE
@@ -126,7 +177,8 @@ const VIS = `
       if (uBakeOn > 0.5 && uBakeR > 0.0) {
         ${sets(i => `vec4 s${i} = texture(uBakeLm${i}, vBakeLm), v${i} = clamp((s${i} - 0.5) / max(fwidth(s${i}), vec4(1e-4)) + 0.5, 0.0, 1.0);\n`)}
         ${sets(i => `bake${i} = mix(vec4(1.0), v${i}, uBakeR);\n`)}
-        bakeSun = bake0.r;
+        float ss = mix(texture(uBakeSunA, vBakeLm).r, texture(uBakeSunB, vBakeLm).r, uBakeSunT);
+        bakeSun = mix(1.0, clamp((ss - 0.5) / max(fwidth(ss), 1e-4) + 0.5, 0.0, 1.0), uBakeR);
       }
     }
   #else
@@ -142,9 +194,12 @@ const VIS = `
       vec2 vt0 = (vec2(mod(vz0, uBakeVD.w), floor(vz0 / uBakeVD.w)) * uBakeVD.xz + vtile) / vatlas;
       vec2 vt1 = (vec2(mod(vz1, uBakeVD.w), floor(vz1 / uBakeVD.w)) * uBakeVD.xz + vtile) / vatlas;
       ${sets(i => `bake${i} = mix(vec4(1.0), inside ? mix(texture(uBakeVol${i}, vt0), texture(uBakeVol${i}, vt1), vz - vz0) : vec4(0.0), uBakeR);\n`)}
-      vec4 sc = uBakeSunM * vec4(bakeP + bakeN * 0.03, 1.0);
-      sc.xyz /= sc.w;
-      if (all(greaterThan(sc.xyz, vec3(0.0))) && all(lessThan(sc.xyz, vec3(1.0)))) bakeSun = mix(1.0, texture(uBakeSun, vec3(sc.xy, sc.z - 0.0004)), uBakeR);
+      // (the two places the sun stands between, each moved to where it stands now; read from
+      // the nearer, from both in between, blended)
+      float sw = smoothstep(0.25, 0.75, uBakeSunT);
+      float sa = sw < 1.0 ? bakeSunAt(uBakeSun, uBakeSunM, uBakeSunPA, uBakeSunX.x, uBakeSunX.z, bakeP, bakeN) : 1.0;
+      float sb = sw > 0.0 ? bakeSunAt(uBakeSun2, uBakeSunM2, uBakeSunPB, uBakeSunX.y, uBakeSunX.w, bakeP, bakeN) : 1.0;
+      bakeSun = mix(1.0, mix(sa, sb, sw), uBakeR);
     }
   #endif
 #endif

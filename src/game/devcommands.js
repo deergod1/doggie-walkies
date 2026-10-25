@@ -34,7 +34,8 @@ import { pickFloor, pointer } from './pointer.js';
 import { heroLevel, MAX_WORLDS } from '../core/save.js';
 import { store, play, saveAs, newSavedWorld, savedHero, savedWorld, forget } from './save.js';
 import { quitToMenu } from './menu.js';
-import { cycleTheme } from './daycycle.js';
+import { skyNow, dayClock } from './daycycle.js';
+import { DAYTIMES, DAY, dayPhase, nextDaytime } from '../core/daycycle.js';
 import { setFluidPalettes, paletteOf } from '../render/fluidpal.js';
 import { rowSlot } from '../themes/fluids.js';
 import { LIGHT_VIEWS, lightview } from './teach.js';
@@ -66,18 +67,34 @@ dev({
   },
 });
 
-// the time of day of a theme with days and nights (the slime marsh: core/daycycle.js): to the
-// start of the next day or night (the world's play time on to it)
-addType(commands, { name: 'daytime', values: () => ['day', 'night'].map(v => ({ value: v, label: v })) });
+// The world's time of day (core/daycycle.js, game/daycycle.js). /daytime: the world's play time
+// on to the next morning, noon, evening, dusk, night or dawn (alone or as the host: a guest's
+// clock follows the host's). /dayspeed: how fast the time of day runs here, the world's play time
+// left as it is (0: it stands still; this game only).
+const SKY_SAYS = { open: 'under the open sky, the sun going round', hazy: 'under the haze: the light turns, the sun stays',
+  night: 'always night here, a little lighter by day', none: 'no days and nights here' };
+const timeOfDay = () => {
+  const s = dayPhase(dayClock()), name = Object.entries(DAYTIMES).filter(([, at]) => at <= s).sort((a, b) => b[1] - a[1])[0][0];
+  return `${name}, ${Math.floor(s)} of ${DAY.length} s`;
+};
+addType(commands, { name: 'daytime', values: () => Object.keys(DAYTIMES).map(v => ({ value: v, label: v, hint: `${DAYTIMES[v]} s into the day` })) });
 dev({
-  name: 'daytime', help: "a theme's day or night (the slime marsh): the world's play time on to the next", args: [{ name: 'when', type: 'daytime' }],
+  name: 'daytime', help: "the world's time of day: on to the next morning, noon, evening, dusk, night or dawn (none: what it is)",
+  args: [{ name: 'when', type: 'daytime', optional: true }],
   run({ when }) {
-    const t = cycleTheme();
-    if (!t) return 'No days and nights here';
-    const { day, night } = t.cycle, period = day + night, n = Math.floor(state.run.clock / period);
-    const at = when === 'night' ? n * period + day : (n + 1) * period;
-    state.run.clock = at > state.run.clock ? at : at + period;
-    return `It is ${when} in the ${t.name} now`;
+    if (when) state.run.clock += nextDaytime(dayClock(), when) - dayClock();
+    return `It is ${timeOfDay()} (${SKY_SAYS[skyNow()]})`;
+  },
+});
+const SPEEDS = [0, 0.5, 1, 2, 5, 10, 30];
+addType(commands, { name: 'dayspeed', values: () => SPEEDS.map(v => ({ value: v, label: String(v), hint: v ? `${v}× as fast` : 'the time of day stands still' })),
+  read: t => /^\d+(\.\d+)?$/.test(t) && Number(t) <= 60 ? Number(t) : undefined });
+dev({
+  name: 'dayspeed', help: 'how fast the time of day runs, in this game only (1: as the world\'s clock, 0: it stands still)',
+  args: [{ name: 'speed', type: 'dayspeed', optional: true }],
+  run({ speed }) {
+    if (speed !== undefined) state.daySpeed = speed;
+    return `The time of day runs ${state.daySpeed === 0 ? 'not at all' : `${state.daySpeed}× as fast`}: it is ${timeOfDay()}`;
   },
 });
 

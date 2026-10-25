@@ -64,7 +64,7 @@ The themes of each act, in their story order (a world shows them in this order d
 | II | Fungal swamp | open | acid river |
 | II | Jungle cenote | open | water (some lava) |
 | II | Frozen caves | cave | water |
-| II | Slime marsh | open, days and nights | acid river |
+| II | Slime marsh | open, meteorites at night | acid river |
 | III | Crystal mines | cave | water (some lava) |
 | III | Spider nests | cave | acid river |
 | III | Ossuary | cave | acid river |

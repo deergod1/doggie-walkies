@@ -104,12 +104,12 @@ test('the light comes in three bands of depths: light, medium and dark (and nigh
   for (const t of THEMES) for (let d = t.depths[0]; d <= t.depths[1]; d++)
     assert.equal(look(t), t.night ? 'dark' : band(d), `${t.props} at ${d}`);
   for (const t of THEMES.filter(t => t.night)) assert.ok(!t.cave && band(t.depths[1]) === 'light' && t.light.stars > 0, `${t.props}: a night sky`);
-  // a theme with days and nights: its day in its band, its night lit like the deep, under the sky
-  for (const t of THEMES.filter(t => t.cycle)) {
-    assert.ok(!t.cave && !t.walls && t.cycle.dark.stars > 0, `${t.props}: a night sky`);
-    assert.equal(look({ light: t.cycle.dark }), 'dark', `${t.props}: its night`);
+  // under the sky the world's nights: lit like the deep (tests/daycycle.test.js)
+  for (const t of THEMES.filter(t => t.light.night)) {
+    assert.ok(!t.cave && !t.walls && t.light.night.stars > 0, `${t.props}: a night sky`);
+    assert.equal(look({ light: t.light.night }), 'dark', `${t.props}: its night`);
   }
-  assert.ok(THEMES.some(t => t.cycle), 'the slime marsh has days and nights');
+  assert.ok(THEMES.some(t => t.light.night), 'the slime marsh has a night of its own');
   assert.ok(THEMES.some(t => t.night), 'the dark forest is a night theme');
   assert.deepEqual(['light', 'medium', 'dark'].map(b => DEPTHS.filter(d => band(d) === b).length), [7, 7, 7]);
   // open themes under the sky in the light band; in the medium band too, under its haze (dimmer

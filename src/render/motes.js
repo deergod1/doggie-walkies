@@ -19,10 +19,10 @@ export function setMoteRate(k) { rate = k; }
 const wisps = [];
 const holder = new THREE.Object3D();   // (what the wisps' lights hang on: the world itself)
 
-// theme: the current cube's (or none); (x, y, z): the character; night: how far into its night a
-// theme with days and nights is (game/daycycle.js): then its `cycle.motes` drift instead
+// theme: the current cube's (or none); (x, y, z): the character; night: how far into the world's
+// night the cube is (game/daycycle.js): at night a theme's `nightMotes` drift instead
 export function tickMotes(dt, theme, x, y, z, night = 0) {
-  const M = theme?.cycle && night >= 0.5 ? theme.cycle.motes ?? theme.motes : theme?.motes;
+  const M = theme?.nightMotes && night >= 0.5 ? theme.nightMotes : theme?.motes;
   if (M) for (due += dt * M.rate * rate; due >= 1; due--) {
     const a = Math.random() * Math.PI * 2, d = rand(1.2, 7.5);
     emit(glow, x + Math.cos(a) * d, y + rand(0.3, 2.4), z + Math.sin(a) * d, {

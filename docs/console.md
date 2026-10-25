@@ -93,7 +93,8 @@ Developer (`?dev=1`):
 | `/spawn <enemy> [level] [count] [front\|cursor]` | enemies into this cube (no level: this depth's) |
 | `/kill`, `/remove` | every enemy here dies (XP and loot) / goes (none) |
 | `/passive [on\|off]` | enemies stand still and never attack (no argument: toggle) |
-| `/daytime day\|night` | a theme's day or night (the slime marsh's: the world's play time moves on to the next one) |
+| `/daytime [morning\|noon\|evening\|dusk\|night\|dawn]` | the world's time of day (`core/daycycle.js`): the world's play time moves on to the next one (alone or as the host); none: what it is now, and what this cube's sky makes of it |
+| `/dayspeed [speed]` | how fast the time of day runs in this game (0: it stands still, 1: as the world's clock, up to 60); the world's play time (respawns) is left as it is |
 | `/god [on\|off]` | invincible: blows, falls, fire and poison take no health, a fluid puts you back on safe ground (no argument: toggle) |
 | `/goto <down\|up>`, `/find <down\|up>` | take the nearest way down / up (PgDn / PgUp), or stand next to it (G) |
 | `/goto <east\|west\|south\|north>` | into the next cube on that side, if the depth has one (Alt + WASD: the side on screen) |

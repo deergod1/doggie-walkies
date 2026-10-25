@@ -37,7 +37,7 @@ function show(t) {
   const worst = Math.max(0, ...frames.filter(([at]) => t - at < 5000).map(f => f[1]));
   const long = frames.filter(([, d]) => d > 50).length;
   const sh = shadowState(), res = resolutionState(), info = renderer.info.render;
-  const b = { frames: bakeStats.frames - bake0.frames, waits: bakeStats.waits - bake0.waits, steps: bakeStats.steps - bake0.steps };
+  const b = { frames: bakeStats.frames - bake0.frames, waits: bakeStats.waits - bake0.waits, steps: bakeStats.steps - bake0.steps, suns: bakeStats.suns - bake0.suns };
   bake0 = { ...bakeStats };
   box.textContent = [
     `fps ${second.length} · p95 ${round(second[Math.floor(second.length * 0.95)] ?? 0)} ms · worst (5 s) ${round(worst)} ms · over 50 ms (10 s) ${long}`,
@@ -45,7 +45,7 @@ function show(t) {
     `lamp: shadow reach ${round(sh.lampRange, 1)} · enemies within ${round(sh.lampFigures, 1)} · every ${sh.lamp.every} · strength ${round(sh.lampStrength, 2)}`,
     `sun: map ${sun.shadow.mapSize.x} · enemies within ${round(sh.sunFigures, 1)} · every ${sh.sun.every}`,
     `fixed lights a point ${round(BAKE.uBakeK.value, 1)} · draw calls ${info.calls} · triangles ${round(info.triangles / 1000)}k`,
-    `bake: ${baked(state.world) ? 'done' : 'baking'} · steps ${b.steps} in ${b.frames} frames · waited ${b.waits}`,
+    `bake: ${baked(state.world) ? 'done' : 'baking'} · steps ${b.steps} in ${b.frames} frames · waited ${b.waits} · sun places ${b.suns}`,
     `shaders compiled while drawing ${programStats.compiledWhileDrawing}${programStats.last ? ' (last ' + programStats.last + ')' : ''}`,
   ].join('\n');
 }
