@@ -118,7 +118,8 @@ The design rules behind the table:
 - **Each theme has one or two signature species:** Wolks and Tornados under the open sky of the
   meadows, the snowy peaks, the badlands and the canyon, Octonauts and Shraps in the frozen caves,
   snakes and Spicies in the swamp and the cenote, Meckeds (by kind) from the root caves to the ossuary, Wollas (by kind) from the canyon down, spiders in the nests, Triangles in the mines and ruins, Fire-faces,
-  Fire-cats and Fire shraps in the volcanic depths and the abyss.
+  Fire-cats and Fire shraps in the volcanic depths and the abyss, and the Slugs and the Bolimes,
+  which live nowhere else, in the slime marsh.
 - **Kinds take turns where they fit, and get stronger with depth.** A kind keeps its colours
   everywhere; the rosters place it where its look and name fit ([enemy-kinds.md](enemy-kinds.md#the-palette)).
   Frost spiders, Frost stunders, Frost adders and the Shraps live in the snow and ice. Bog
@@ -136,7 +137,7 @@ The design rules behind the table:
   about three times as often as its rarest sibling (`/tools/palette.html` measures it).
 - **Rare guests preview the next theme.** A 10–20% roll lets a species show up a theme
   early: an Octonaut at 6 and 7, a Mecked at 6, a Shraps at 3, a Triangle at 10 and 15, a Blaze-face at 11 and 12, an Ash cat at 16.
-- **Ranged species stay few.** Fire-faces, Triangles, Shraps, Spicies, Wollas, Wolks and Tornados never go above 4 per
+- **Ranged species stay few.** Fire-faces, Triangles, Shraps, Spicies, Wollas, Wolks, Tornados and Slugs never go above 4 per
   cube, because several shooters at once are hard to read and to dodge. The Shraps throws and
   pinches, so it stays at 1–3; so does the Spicy, whose lasers are easy to dodge one at a time
   but not from three sides. The Wolk, whose lightning also stuns, comes alone or in twos, and so

@@ -17,7 +17,7 @@
 //     always-present species are kept first, the others in a random order weighted by chance.
 //   The lead: one present species (picked by chance) dominates the cube. It draws its count
 //     from the top half of its range, every other species from the bottom half.
-// Ranged species (Fire-face, Triangle, Shraps, Spicy, Wolla, Wolk, Squirtle, Tornado) stay at a few per cube; the melee ones, the spiders
+// Ranged species (Fire-face, Triangle, Shraps, Spicy, Wolla, Wolk, Squirtle, Tornado, Slug) stay at a few per cube; the melee ones, the spiders
 // above all, come in larger and larger packs further down.
 import { mulberry32, hash32 } from './util.js';
 import { ENEMY_KINDS, STAGE_PROFILES } from './enemies.js';

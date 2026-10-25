@@ -23,6 +23,8 @@ chests, combat stats) and prints where the player stands on arrival at every dep
   | Wolk | 2–3 | 5–6 (and stuns) |
   | Mecked | 3 | 4.5–5.5 (a grab is two bites) |
   | Tornado | 3–4 | 5–6 (its twisters knock you down) |
+  | Slug | 3–5 | 6–8.5 (its slime balls slow you) |
+  | Bolime | 3–5 | 4–6 swallows (each up to four bites of 0.4 of its blow, through the armor) |
   | Fire-face, Fire-cat | 3 | 4–4.5 |
   | Fire shraps | 4 | 3.5 |
   | Stunders | 3–5 | 2.5–4 |

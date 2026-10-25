@@ -110,7 +110,8 @@ for (let seed = 1; seed <= SEEDS; seed++) {
     }
     for (const { k, share } of cubes) {
       if (enemyFreeAt(k) || !share) continue;
-      const g = L.guardians.get(k), map = { seed: hash32(seed * 31 + serial * 977), depth, key: k, guardian: g ?? null, horde: L.hordes.get(k), populationScale: L.populationScale.get(k) ?? 1 };
+      const g = L.guardians.get(k), map = { seed: hash32(seed * 31 + serial * 977), depth, key: k, biome: L.theme.props, guardian: g ?? null, horde: L.hordes.get(k), populationScale: L.populationScale.get(k) ?? 1 };
+      // (the map's theme: the species that keep to some themes, the dark forest's, the slime marsh's)
       // a real boss (core/bosses.js) stands alone: it is the guardian, below
       if (!g?.boss) for (const [, spec] of population(map)) for (let i = 0; i < spec.count; i++) {
         const base = pick(spec.kinds, R()), kind = spec.swarm ? swarmKind(base, spec.rewardScale) : base;

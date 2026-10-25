@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { BOLIME, TOXIC_BOLIME, GLOW_BOLIME, ENEMY_KINDS, fireAt, airborne } from '../src/core/enemies.js';
-import { DEPTH_SPAWNS } from '../src/core/spawns.js';
+import { DEPTH_SPAWNS, population } from '../src/core/spawns.js';
 
 test('the Bolime pounces: its shadow, a leap, down at the hit frame, holding, then spitting out', () => {
   const [a] = BOLIME.attacks, g = a.engulf;
@@ -35,4 +35,15 @@ test('Bolimes live only in the slime marsh', () => {
     assert.deepEqual(r.where, ['slime']);
     for (const k of Object.keys(r.kinds)) assert.equal(ENEMY_KINDS[k].species, 'bolime');
   }
+});
+
+test('a slime marsh cube mostly has Slugs or Bolimes, a cube anywhere else never', () => {
+  const cube = (seed, depth, biome) => population({ seed, depth, key: `${seed},-${depth},0`, biome });
+  let slimy = 0;
+  for (let seed = 0; seed < 200; seed++) for (const depth of [4, 5]) {
+    const marsh = cube(seed, depth, 'slime'), flats = cube(seed, depth, depth === 4 ? 'saltflats' : 'canyon');
+    if (marsh.has('slug') || marsh.has('bolime')) slimy++;
+    assert.ok(!flats.has('slug') && !flats.has('bolime'));
+  }
+  assert.ok(slimy > 300, `${slimy} of 400`);
 });

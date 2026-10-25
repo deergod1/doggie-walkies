@@ -31,6 +31,7 @@ import { pickFloor, pointer } from './pointer.js';
 import { heroLevel, MAX_WORLDS } from '../core/save.js';
 import { store, play, saveAs, newSavedWorld, savedHero, savedWorld, forget } from './save.js';
 import { quitToMenu } from './menu.js';
+import { cycleTheme } from './daycycle.js';
 import { setFluidPalettes, paletteOf } from '../render/fluidpal.js';
 import { rowSlot } from '../themes/fluids.js';
 import { LIGHT_VIEWS, lightview } from './teach.js';
@@ -59,6 +60,21 @@ dev({
   run({ 'on|off': on }) {
     state.devPassive = on ? on === 'on' : !state.devPassive;
     return `Enemies are ${state.devPassive ? 'passive' : 'awake'}`;
+  },
+});
+
+// the time of day of a theme with days and nights (the slime marsh: core/daycycle.js): to the
+// start of the next day or night (the world's play time on to it)
+addType(commands, { name: 'daytime', values: () => ['day', 'night'].map(v => ({ value: v, label: v })) });
+dev({
+  name: 'daytime', help: "a theme's day or night (the slime marsh): the world's play time on to the next", args: [{ name: 'when', type: 'daytime' }],
+  run({ when }) {
+    const t = cycleTheme();
+    if (!t) return 'No days and nights here';
+    const { day, night } = t.cycle, period = day + night, n = Math.floor(state.run.clock / period);
+    const at = when === 'night' ? n * period + day : (n + 1) * period;
+    state.run.clock = at > state.run.clock ? at : at + period;
+    return `It is ${when} in the ${t.name} now`;
   },
 });
 
