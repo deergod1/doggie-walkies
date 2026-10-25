@@ -99,7 +99,7 @@ import { musicInfo } from './audio/music.js';
 import { travelling, updateTravel, drawTravelEnemies } from './game/travel.js';
 import { updateOnline, hostGame, joinGame, leaveGame, sessionStatus } from './net/session.js';
 import { online } from './net/online.js';
-import { frameRate, antialias, onSettingsChange, chooseLanguage } from './game/settings.js';
+import { frameRate, antialiasSamples, onSettingsChange, chooseLanguage } from './game/settings.js';
 import { setMsaa, beginFrame, endFrame } from './render/msaa.js';
 import { updateSaves, store, play, saveAs, saveNow, savedHero, savedWorld } from './game/save.js';
 import { openMainMenu, updateMenu, quitToMenu, heroBox } from './game/menu.js';
@@ -274,9 +274,9 @@ function menuFrame(dt, start) {
   requestAnimationFrame(frame);
 }
 
-// the anti-aliasing follows the settings (render/msaa.js)
-setMsaa(antialias());
-onSettingsChange(() => setMsaa(antialias()));
+// the anti-aliasing follows the settings (render/msaa.js), and nothing else
+setMsaa(antialiasSamples());
+onSettingsChange(() => setMsaa(antialiasSamples()));
 
 // the dev tools and ?seed= start in a world, everyone else in the main menu (game/state.js mode)
 if (state.mode === 'play') {

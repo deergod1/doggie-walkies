@@ -85,6 +85,7 @@ export default {
   'camera|Close': 'Nah',
   Lighting: 'Beleuchtung',
   'lighting|Auto': 'Auto',
+  'antialias|Auto': 'Auto',
   'lighting|High': 'Hoch',
   'lighting|Medium': 'Mittel',
   'lighting|Low': 'Niedrig',

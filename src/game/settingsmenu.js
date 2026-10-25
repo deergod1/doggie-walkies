@@ -60,8 +60,9 @@ function renderLanguage() {
 }
 function renderGraphics() {
   choice($('settings-fps'), FRAME_RATES.map(f => [f, f ? String(f) : tr('Unlimited')]), frameRate());
-  // the levels this GPU can do; one asked for beyond them shows as the one used
-  choice($('settings-msaa'), MSAA_LEVELS.map(n => [n, n ? `${n}x` : tc('toggle', 'Off')]), msaaLevel(antialias()));
+  // Auto (by the screen), then the levels this GPU can do; one asked for beyond them shows as the one used
+  const msaa = antialias();
+  choice($('settings-msaa'), [['auto', tc('antialias', 'Auto')], ...MSAA_LEVELS.map(n => [n, n ? `${n}x` : tc('toggle', 'Off')])], msaa === 'auto' ? msaa : msaaLevel(msaa));
   choice($('settings-graphics'), [['auto', tc('lighting', 'Auto')], ['high', tc('lighting', 'High')], ['medium', tc('lighting', 'Medium')], ['low', tc('lighting', 'Low')], ['lowest', tc('lighting', 'Lowest')]], graphics());
   choice($('settings-camera'), [['overview', tr('Overview')], ['close', tc('camera', 'Close')]], cameraMode());
   const scale = Math.round(uiScale() * 100);
@@ -196,7 +197,7 @@ $('settings-graphics').addEventListener('click', e => {
 });
 $('settings-msaa').addEventListener('click', e => {
   const b = e.target.closest('[data-value]');
-  if (b) setAntialias(Number(b.dataset.value));
+  if (b) setAntialias(b.dataset.value === 'auto' ? 'auto' : Number(b.dataset.value));
 });
 // while dragged only the number follows: the panel growing under the pointer would move the slider away from it
 $('settings-ui-scale').addEventListener('input', e => { $('settings-ui-level').textContent = `${e.target.value}%`; });

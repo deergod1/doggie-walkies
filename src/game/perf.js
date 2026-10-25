@@ -14,7 +14,7 @@ import { bakeStats, baked } from '../render/bake.js';
 import { shadowState } from '../render/shadows.js';
 import { resolutionState } from '../render/resolution.js';
 import { BAKE } from '../render/lighthook.js';
-import { beginFrame, endFrame, setMsaaDrop } from '../render/msaa.js';
+import { beginFrame, endFrame, msaaSamples, readScreenPixel } from '../render/msaa.js';
 import { CELLS, bakeCells } from '../render/watercells.js';
 import { graphics } from './settings.js';
 import { qualityLevel } from './quality.js';
@@ -41,7 +41,7 @@ function show(t) {
   bake0 = { ...bakeStats };
   box.textContent = [
     `fps ${second.length} · p95 ${round(second[Math.floor(second.length * 0.95)] ?? 0)} ms · worst (5 s) ${round(worst)} ms · over 50 ms (10 s) ${long}`,
-    `lighting ${qualityLevel()}${graphics() === 'auto' ? ' (auto)' : ''} · pixel ratio ${round(res.ratio, 2)} · MSAA dropped ${res.drop}`,
+    `lighting ${qualityLevel()}${graphics() === 'auto' ? ' (auto)' : ''} · pixel ratio ${round(res.ratio, 2)} · MSAA ${msaaSamples() ? msaaSamples() + 'x' : 'off'}`,
     `lamp: shadow reach ${round(sh.lampRange, 1)} · enemies within ${round(sh.lampFigures, 1)} · every ${sh.lamp.every} · strength ${round(sh.lampStrength, 2)}`,
     `sun: map ${sun.shadow.mapSize.x} · enemies within ${round(sh.sunFigures, 1)} · every ${sh.sun.every}`,
     `fixed lights a point ${round(BAKE.uBakeK.value, 1)} · draw calls ${info.calls} · triangles ${round(info.triangles / 1000)}k`,
@@ -78,9 +78,8 @@ export async function runBench() {
   const raf = window.requestAnimationFrame, held = [];
   window.requestAnimationFrame = f => { held.push(f); return 0; };
   await sleep(50);
-  setMsaaDrop(99);   // (straight onto the canvas: its pixel can be read back)
   const draw = () => { beginFrame(); renderer.render(scene, camera); endFrame(); };
-  const sync = () => { renderer.setRenderTarget(null); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); };
+  const sync = () => readScreenPixel(px);   // (the canvas, after the frame was resolved onto it)
   const time = fn => {
     fn(); fn(); sync();
     const t = [];
@@ -107,7 +106,6 @@ export async function runBench() {
     const cells = time(() => { for (const c of Object.values(CELLS)) c.used = Infinity; bakeCells(tc += 1 / 60); draw(); });
     rows.push({ part: "with the fluids' patterns", ...cells });
   } finally {
-    setMsaaDrop(resolutionState().drop);
     window.requestAnimationFrame = raf;
     for (const f of held) raf(f);
   }
@@ -115,5 +113,5 @@ export async function runBench() {
   const table = rows.map(r => ({ part: r.part, 'min ms': +r.min.toFixed(2), 'median ms': +r.median.toFixed(2), 'vs as it is': (r.min - base >= 0 ? '+' : '') + (r.min - base).toFixed(2) }));
   console.table(table);
   const [w, h] = [gl.drawingBufferWidth, gl.drawingBufferHeight];
-  return `Bench at ${w}×${h}, ${qualityLevel()}: a frame ${base.toFixed(1)} ms; ` + table.slice(1).map(r => `${r.part} ${r['vs as it is']}`).join(', ') + ' (the console has the table)';
+  return `Bench at ${w}×${h}, ${qualityLevel()}, MSAA ${msaaSamples() ? msaaSamples() + 'x' : 'off'}: a frame ${base.toFixed(1)} ms; ` + table.slice(1).map(r => `${r.part} ${r['vs as it is']}`).join(', ') + ' (the console has the table)';
 }

@@ -85,7 +85,7 @@ async function full() {
   const { renderer, scene, camera } = sc, gl = renderer.getContext();
   const lost = () => gl.isContextLost();
   account(renderer, scene);
-  post('start', { graphics: S.graphics(), level: Q.qualityLevel(), msaa: S.antialias(), fps: S.frameRate(), px: [gl.drawingBufferWidth, gl.drawingBufferHeight], ratio: renderer.getPixelRatio() });
+  post('start', { graphics: S.graphics(), level: Q.qualityLevel(), msaa: S.antialiasSamples(), fps: S.frameRate(), px: [gl.drawingBufferWidth, gl.drawingBufferHeight], ratio: renderer.getPixelRatio() });
   post('compile', await compileTest(THREE, renderer, scene, camera));
   post('fence', await fenceTest(renderer, scene, camera));
   const look = P.get('look') ?? 'low';

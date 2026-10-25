@@ -1,6 +1,6 @@
 // The lighting's quality level (the settings, game/settings.js graphics): one pinned, or Auto,
-// which follows the frame rate (render/resolution.js, core/resolution.js: down after the
-// anti-aliasing and before the resolution, up again after a calm spell). The level Auto
+// which follows the frame rate (render/resolution.js, core/resolution.js: down before the
+// resolution, up again after it once frames have been calm a while). The level Auto
 // reached is kept for the next visit (KEY); it starts low where the screen is touched and at
 // medium elsewhere.
 //

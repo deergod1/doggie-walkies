@@ -106,87 +106,46 @@ test('a frame rate cap is not mistaken for slow frames', () => {
   assert.deepEqual(capped(f, 1000, 30, 5, 1000 / 60), [1.7]);
 });
 
-// feed `ms` of frames with `steps` MSAA levels that may be dropped; returns the states it went
-// through ([ratio, drop] after each change)
-function stepped(c, ms, interval, spent, steps) {
+// the same with quality levels (the lighting on Auto): [ratio, level] after each change
+function leveled(c, ms, interval, spent) {
   const seen = [];
   for (let t = 0; t < ms; t += interval) {
-    const before = `${c.ratio},${c.drop}`;
-    c.tick(interval, spent, 0, steps);
-    if (`${c.ratio},${c.drop}` !== before) seen.push([c.ratio, c.drop]);
+    const before = `${c.ratio},${c.level}`;
+    c.tick(interval, spent, 0);
+    if (`${c.ratio},${c.level}` !== before) seen.push([c.ratio, c.level]);
   }
   return seen;
 }
 
-test('the anti-aliasing goes down before the resolution, and comes back after it', () => {
-  const c = resolutionController(2);
-  assert.deepEqual(stepped(c, 1000, 30, 5, 2), [[2, 1]]);
-  assert.deepEqual(stepped(c, 1000, 25, 5, 2), [[2, 2]]);    // it helped (30 -> 25 ms): the next level
-  assert.deepEqual(stepped(c, 1000, 22, 5, 2), [[1.7, 2]]);  // none left: now the resolution
-  stepped(c, 1000, 16.7, 4, 2);                              // proves itself
-  const up = stepped(c, 30000, 16.7, 4, 2).map(([r, d]) => `${r.toFixed(2)},${d}`);
-  assert.deepEqual(up, ['1.87,2', '2.00,2', '2.00,1', '2.00,0']);
-});
-
-test('dropping the anti-aliasing that does not help is taken back', () => {
-  const c = resolutionController(2);
-  assert.deepEqual(stepped(c, 1000, 33.4, 4, 1), [[2, 1]]);  // a browser capping at 30
-  assert.deepEqual(stepped(c, 1000, 33.4, 4, 1), [[2, 0]]);
-  assert.deepEqual(stepped(c, 20000, 33.4, 4, 1), []);
-});
-
-test('fewer levels to drop (a lower setting) shrink what is dropped', () => {
-  const c = resolutionController(2);
-  stepped(c, 1000, 30, 5, 2);
-  stepped(c, 1000, 25, 5, 2);
-  assert.equal(c.drop, 2);
-  c.tick(16.7, 4, 0, 0);    // MSAA turned off in the settings
-  assert.equal(c.drop, 0);
-});
-
-// the same with quality levels (the lighting on Auto): [ratio, drop, level] after each change
-function leveled(c, ms, interval, spent, steps = 0) {
-  const seen = [];
-  for (let t = 0; t < ms; t += interval) {
-    const before = `${c.ratio},${c.drop},${c.level}`;
-    c.tick(interval, spent, 0, steps);
-    if (`${c.ratio},${c.drop},${c.level}` !== before) seen.push([c.ratio, c.drop, c.level]);
-  }
-  return seen;
-}
-
-test('on Auto the quality level goes down after the anti-aliasing, before the resolution', () => {
+test('on Auto the quality level goes down before the resolution', () => {
   const c = resolutionController(2, undefined, { levels: 3, level: 2 });
-  assert.deepEqual(leveled(c, 1000, 30, 5, 1), [[2, 1, 2]]);
-  assert.deepEqual(leveled(c, 1000, 26, 5, 1), [[2, 1, 1]]);     // it helped: the level next
-  assert.deepEqual(leveled(c, 2100, 23, 5, 1), [[2, 1, 0]]);     // judged a second later: helped, next
-  assert.deepEqual(leveled(c, 2100, 20.5, 5, 1), [[1.7, 1, 0]]); // none left: the resolution
+  assert.deepEqual(leveled(c, 1000, 30, 5), [[2, 1]]);
+  assert.deepEqual(leveled(c, 2100, 26, 5), [[2, 0]]);     // judged a second later: helped, next
+  assert.deepEqual(leveled(c, 2100, 23, 5), [[1.7, 0]]);   // none left: the resolution
 });
 
 test('CPU-bound slow frames take only the quality level down', () => {
   const c = resolutionController(2, undefined, { levels: 3, level: 3 });
-  assert.deepEqual(leveled(c, 1000, 30, 25, 2), [[2, 0, 2]]);
-  assert.deepEqual(leveled(c, 2100, 26, 22, 2), [[2, 0, 1]]);
+  assert.deepEqual(leveled(c, 1000, 30, 25), [[2, 2]]);
+  assert.deepEqual(leveled(c, 2100, 26, 22), [[2, 1]]);
   assert.equal(c.ratio, 2);
-  assert.equal(c.drop, 0);
 });
 
 test('a quality step that does not help is taken back after its settling second', () => {
   const c = resolutionController(2, undefined, { levels: 3, level: 2 });
-  assert.deepEqual(leveled(c, 1000, 30, 25), [[2, 0, 1]]);
-  assert.deepEqual(leveled(c, 1000, 30, 25), []);                // settling
-  assert.deepEqual(leveled(c, 1000, 30, 25), [[2, 0, 2]]);       // no faster: back
-  assert.deepEqual(leveled(c, 20000, 30, 25), []);               // and it rests
+  assert.deepEqual(leveled(c, 1000, 30, 25), [[2, 1]]);
+  assert.deepEqual(leveled(c, 1000, 30, 25), []);          // settling
+  assert.deepEqual(leveled(c, 1000, 30, 25), [[2, 2]]);    // no faster: back
+  assert.deepEqual(leveled(c, 20000, 30, 25), []);         // and it rests
 });
 
-test('smooth frames raise the resolution first, then the quality level, then the samples', () => {
+test('smooth frames raise the resolution first, then the quality level', () => {
   const c = resolutionController(2, undefined, { levels: 3, level: 1 });
-  leveled(c, 1000, 30, 5, 1);                                    // 2,1,1
-  leveled(c, 2000, 26, 5, 1);                                    // 2,1,0
-  leveled(c, 1000, 23, 5, 1);                                    // 1.7,1,0
-  leveled(c, 1000, 16.7, 4, 1);                                  // proves itself
-  const up = leveled(c, 60000, 16.7, 4, 1).map(([r, d, l]) => `${r.toFixed(2)},${d},${l}`);
-  assert.deepEqual(up, ['1.87,1,0', '2.00,1,0', '2.00,1,1', '2.00,1,2', '2.00,1,3', '2.00,0,3']);
+  leveled(c, 1000, 30, 5);                                 // 2,0
+  leveled(c, 2100, 26, 5);                                 // settled, helped: 1.7,0
+  leveled(c, 1000, 16.7, 4);                               // proves itself
+  const up = leveled(c, 60000, 16.7, 4).map(([r, l]) => `${r.toFixed(2)},${l}`);
+  assert.deepEqual(up, ['1.87,0', '2.00,0', '2.00,1', '2.00,2', '2.00,3']);
 });
 
 test('without Auto the level stays where it was set', () => {
@@ -201,10 +160,9 @@ test('without Auto the level stays where it was set', () => {
 test('a few hitches in a second of smooth frames step nothing down', () => {
   const c = resolutionController(2, undefined, { levels: 3, level: 2 });
   for (let s = 0; s < 5; s++) {
-    for (let i = 0; i < 55; i++) c.tick(16.7, 4, 0, 1);
-    for (let i = 0; i < 4; i++) c.tick(200, 150, 0, 1);   // a shader compiling, a cube built
+    for (let i = 0; i < 55; i++) c.tick(16.7, 4, 0);
+    for (let i = 0; i < 4; i++) c.tick(200, 150, 0);   // a shader compiling, a cube built
   }
   assert.equal(c.ratio, 2);
-  assert.equal(c.drop, 0);
   assert.ok(c.level >= 2, String(c.level));   // (smooth enough to try one up, even)
 });

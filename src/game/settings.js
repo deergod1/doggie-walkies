@@ -24,13 +24,16 @@ function read() {
 }
 const volume = v => (Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : 1);
 export const FRAME_RATES = [30, 60, 0];       // frames a second at most; 0: as many as the screen shows
-export const ANTIALIAS = [0, 2, 4, 8];        // MSAA samples; 0: off (the GPU may offer fewer, render/msaa.js)
-// 2x MSAA by default: on a high-DPI screen it looks like 4x for less of the GPU's work (and when
-// the GPU cannot keep up, render/resolution.js drops it further before the resolution). Where
-// the screen is touched (phones, tablets) 30 frames a second at first: they stay cooler and last
-// longer, and the GPU has twice the time for a frame.
+// MSAA samples; 0: off (the GPU may offer fewer, render/msaa.js). 'auto' (the default) picks once,
+// when the page starts, by the screen: 2x on a high-DPI one (it looks like 4x there, for less of
+// the GPU's work), 4x on others. It never changes by itself after that (render/msaa.js: a new
+// number of samples freezes the game for a moment). Where the screen is touched (phones,
+// tablets) 30 frames a second at first: they stay cooler and last longer, and the GPU has twice
+// the time for a frame.
+export const ANTIALIAS = ['auto', 0, 2, 4, 8];
+const AUTO_MSAA = (globalThis.devicePixelRatio || 1) >= 1.5 ? 2 : 4;
 const touch = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
-const DEFAULT_FPS = touch ? 30 : 60, DEFAULT_MSAA = 2;
+const DEFAULT_FPS = touch ? 30 : 60, DEFAULT_MSAA = 'auto';
 export const CAMERAS = ['overview', 'close'];
 // the lighting's quality level (game/quality.js): 'auto' (it follows the frame rate,
 // render/resolution.js) or one of them pinned, the best first
@@ -43,9 +46,11 @@ export const UI_SCALE_MIN = 0.9, UI_SCALE_MAX = 2;
 export const clampUiScale = s => (Number.isFinite(s) ? Math.round(Math.min(UI_SCALE_MAX, Math.max(UI_SCALE_MIN, s)) * 100) / 100 : 1);
 const oneOf = (list, v, fallback) => (list.includes(v) ? v : fallback);
 const stored = read();
+// (settings kept before version 2 always had msaa: 2x was the default then, not a choice)
+const storedMsaa = (stored.v ?? 1) < 2 && stored.msaa === 2 ? 'auto' : stored.msaa;
 const settings = {
   language: isLanguage(stored.language) ? stored.language : null,   // null: the browser's
-  fps: oneOf(FRAME_RATES, stored.fps, DEFAULT_FPS), msaa: oneOf(ANTIALIAS, stored.msaa, DEFAULT_MSAA),
+  fps: oneOf(FRAME_RATES, stored.fps, DEFAULT_FPS), msaa: oneOf(ANTIALIAS, storedMsaa, DEFAULT_MSAA),
   graphics: oneOf(GRAPHICS, OLD_GRAPHICS[stored.graphics] ?? stored.graphics, DEFAULT_GRAPHICS),
   camera: oneOf(CAMERAS, stored.camera, CAMERAS[0]), uiScale: clampUiScale(stored.uiScale),
   lookSpeed: clampLookSpeed(stored.lookSpeed), invertLook: stored.invertLook === true,
@@ -59,7 +64,7 @@ function changed() {
   setVolume('music', settings.musicVolume);
   setVolume('sounds', settings.soundVolume);
   try {
-    localStorage.setItem(KEY, JSON.stringify({ v: 1, ...(settings.language && { language: settings.language }), fps: settings.fps, msaa: settings.msaa, graphics: settings.graphics, camera: settings.camera, uiScale: settings.uiScale,
+    localStorage.setItem(KEY, JSON.stringify({ v: 2, ...(settings.language && { language: settings.language }), fps: settings.fps, msaa: settings.msaa, graphics: settings.graphics, camera: settings.camera, uiScale: settings.uiScale,
       lookSpeed: settings.lookSpeed, invertLook: settings.invertLook, music: settings.music, musicVolume: settings.musicVolume,
       soundVolume: settings.soundVolume, keys: overrides(settings.keys) }));
   } catch { /* private mode: for this page only */ }
@@ -85,6 +90,8 @@ export async function chooseLanguage(code) {
 export const frameRate = () => settings.fps;
 export function setFrameRate(fps) { settings.fps = oneOf(FRAME_RATES, fps, DEFAULT_FPS); changed(); }
 export const antialias = () => settings.msaa;
+// the samples the setting means here ('auto': by the screen, chosen when the page started)
+export const antialiasSamples = () => settings.msaa === 'auto' ? AUTO_MSAA : settings.msaa;
 export function setAntialias(samples) { settings.msaa = oneOf(ANTIALIAS, samples, DEFAULT_MSAA); changed(); }
 export const graphics = () => settings.graphics;
 export function setGraphics(g) { settings.graphics = oneOf(GRAPHICS, g, DEFAULT_GRAPHICS); changed(); }

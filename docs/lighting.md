@@ -203,7 +203,7 @@ fixed lights' light alone, the lightmap's texels. The Teacher (learn/tutor/) swi
 
 What the frames cost (`game/perf.js`), on any device: **`?perf=1`** (or `/perf`) shows the frame
 rate and the worst frames, the quality level and what it draws (`render/shadows.js shadowState`),
-the pixel ratio and the MSAA dropped, the bake's steps and waits (`bakeStats`), shaders compiled
+the pixel ratio and the MSAA samples, the bake's steps and waits (`bakeStats`), shaders compiled
 while drawing (`render/programs.js programStats`; with `?dev=1` each named in the console), draw
 calls. **`/bench`** holds the game and times the frame to the end of the GPU's work (a pixel read
 back from the screen: Safari has no GPU timers) with a part off at a time. On the software
@@ -271,15 +271,23 @@ changes is how much is drawn for that:
   second: enemies' shadows drop out and come back one by one at the edge), the fixed lights a
   point takes eased (`uBakeK`, a float: the last light fades); the fluids' patterns and the sun's
   map size simply switch.
-- **Auto** (`core/resolution.js`, with the resolution and the anti-aliasing): too slow, a step
-  down: the MSAA samples first, then the level, then the resolution; CPU-bound slow frames take
-  only the level down. A second's hitches (frames over 3× its median: a shader compiling, a cube
-  built) are not counted. A level's step is judged a second later than the others (its fades). Up
-  after a calm spell: the resolution, then the level, then the samples. The level reached is kept
+- **Auto** (`core/resolution.js`, with the resolution): too slow, a step down: the level first,
+  then the resolution; CPU-bound slow frames take only the level down. A second's hitches (frames
+  over 3× its median: a shader compiling, a cube built) are not counted. A level's step is judged
+  a second later than the others (its fades). Up after a calm spell: the resolution, then the
+  level. The level reached is kept
   for the next visit (`crawler.quality`); a first visit starts at Low where the screen is touched,
   at Medium elsewhere.
 
 Where the screen is touched the frame rate cap is 30 at first (a setting like any other).
+
+The anti-aliasing is not one of Auto's steps (`render/msaa.js`): its setting's Auto picks once, as
+the page starts, 2× MSAA on a high-DPI screen (a device pixel ratio of 1.5 or more) and 4×
+elsewhere, and nothing changes it but the settings. A new number of samples makes the driver build
+every material's pipeline again when it is next drawn (ANGLE on Metal, which the shader warm-up
+cannot do ahead): 2× to off froze the game for a second, 2× to 8× for 3.6 s on an M5 Max, and the
+next cubes entered stalled for a few hundred ms more. Dropping samples while the GPU could not
+keep up (and taking them back after a calm spell) was the worst of the stutters.
 
 ## Not yet
 
