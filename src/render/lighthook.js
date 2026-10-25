@@ -12,8 +12,12 @@
 //
 // Every lit material takes part without being told: this module wraps Material.onBeforeCompile
 // (whatever a material sets, three.js calls the wrapper), so it must be imported before any
-// material sets its own (main.js imports it first). The edit is the same for every material and
-// steered by uniforms and defines, so no program's cache key changes:
+// material sets its own (main.js imports it first). Only the game's renderer (bakeRenderer,
+// render/scene.js) draws with the edit: the others (the item pictures, the skin painter) never
+// turn the lights on, and their programs, compiled in a context of their own that nothing
+// warms, would be the big ones for nothing. The edit is the same for every material and
+// steered by uniforms and defines, so no program's cache key changes (and each renderer keeps
+// its own programs):
 //   - BAKED_LM (render/bake.js bakedSurface): the cube's solids, lightmapped (attribute `lm`)
 //   - NO_BAKE: none of it (the proxies of the surroundings, render/neighbors.js)
 // A material that brings uniforms of the same names keeps its own: what a cube is built of shows
@@ -74,8 +78,10 @@ export const BAKE = {
   uBakeDbg: { value: 0 },                      // dev (/lightview): 1 the sun's baked shadow, 2 the fixed lights' light, 3 the lightmap's texels
 };
 
-// the scene's lights on, only while the world's scene is drawn (not the portrait, the item
-// pictures: their materials take part as well)
+// the scene's lights on, only while the world's scene is drawn (not the main menu's portrait,
+// which the game's renderer draws too)
+const baking = new WeakSet();   // the renderers whose programs take the edit
+export const bakeRenderer = renderer => { baking.add(renderer); };
 export function bakeScene(scene) {
   scene.onBeforeRender = () => { BAKE.uBakeOn.value = 1; };
   scene.onAfterRender = () => { BAKE.uBakeOn.value = 0; };
@@ -232,7 +238,7 @@ Object.defineProperty(THREE.Material.prototype, 'onBeforeCompile', {
     const own = this[OWN] ?? plain;
     let w = this[WRAPPED];
     if (!w || w.own !== own) {
-      w = function (sh, r) { own.call(this, sh, r); edit(sh); };
+      w = function (sh, r) { own.call(this, sh, r); if (baking.has(r)) edit(sh); };
       w.own = own;
       w.toString = () => own.toString();
       this[WRAPPED] = w;

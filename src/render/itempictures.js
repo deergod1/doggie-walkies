@@ -20,6 +20,9 @@ function gl(w, h) {
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setClearColor(0x000000, 0);
     renderer.setPixelRatio(1);
+    // (as the game's, render/scene.js: in Chrome, asking for a program's log waits for all the
+    // GPU process has queued, the game's bake too; only with the dev tools)
+    renderer.debug.checkShaderErrors = new URLSearchParams(location.search).get('dev') === '1';
   }
   // it only grows: each view uses its bottom-left corner
   const s = renderer.getSize(new THREE.Vector2());

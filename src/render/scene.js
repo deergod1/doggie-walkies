@@ -2,11 +2,12 @@
 import './lighthook.js';   // (before any material: render/lighthook.js)
 import * as THREE from 'three';
 import { N } from '../core/constants.js';
-import { bakeScene } from './lighthook.js';
+import { bakeScene, bakeRenderer } from './lighthook.js';
 
 // no antialias: the anti-aliasing is our own, at the level of the settings (msaa.js)
 export const renderer = new THREE.WebGLRenderer({ antialias: false });
 renderer.localClippingEnabled = true;
+bakeRenderer(renderer);   // (its programs, and only its, take the fixed lights: render/lighthook.js)
 // Checking a program for errors the first time it draws asks the driver for its log, and in
 // Chrome that waits for everything the GPU process has queued (other programs compiling ahead
 // among it): 100-400 ms stalls on entering a cube. Only with the dev tools (?dev=1).
