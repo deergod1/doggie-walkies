@@ -1,4 +1,4 @@
-PROPS FOR CUBE CRAWLER - what the game needs from Blender
+PROPS FOR THE GLASS BIRD - what the game needs from Blender
 =========================================================
 
 Context

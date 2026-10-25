@@ -1,4 +1,4 @@
-"""Cube Crawler loot / equipment library, built through Blender MCP.
+"""The Glass Bird loot / equipment library, built through Blender MCP.
 
 Texture-free, flat-shaded, deterministic geometry; reuses props.Mesh and palette.
 Weapons use character.py rig units and grip-centred pivots (runtime scale .55).

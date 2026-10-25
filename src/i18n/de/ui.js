@@ -1,6 +1,7 @@
 // The menus, the settings, the HUD, the keys and the chat box.
 export default {
   // index.html
+  'The Glass Bird': 'Der Glasvogel',
   'Chat and what happened': 'Chat und was passiert ist',
   All: 'Alles',
   Chat: 'Chat',

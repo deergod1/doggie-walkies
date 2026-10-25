@@ -1,5 +1,5 @@
 """
-Clutter library for Cube Crawler: a second scatter library next to props/.
+Clutter library for The Glass Bird: a second scatter library next to props/.
 
 Same contract as props.py: one Blender unit = one game cell, Z up, flat normals,
 linear COLOR_0, ONE mesh per prop named "<set>_<prop>_<variant>" at the origin,
@@ -553,7 +553,7 @@ def main(directory=None, render=True):
     bpy.ops.wm.save_as_mainfile(filepath=str(blends / "clutter.blend"))
     if render:
         render_previews(scene, blocks, previews)
-    print(f"Cube Crawler clutter: {len(objects)} props, {sum(r['triangles'] for r in report)} triangles")
+    print(f"The Glass Bird clutter: {len(objects)} props, {sum(r['triangles'] for r in report)} triangles")
     return report
 
 

@@ -1,7 +1,7 @@
 """Bake the :ninjajavamc Easter-egg paint layer onto the existing SkinUV atlas.
 
 Reference: the user's rotating gray-stone/cyan Minecraft skin with a grass/dirt cape.
-Adapted as paint on Cube Crawler's existing rounded character (no replacement rig/cape).
+Adapted as paint on The Glass Bird's existing rounded character (no replacement rig/cape).
 
   Blender -b blender/character.blend --python blender/skin_ninjajavamc.py
 

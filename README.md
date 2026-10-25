@@ -1,4 +1,4 @@
-# Cube Crawler
+# The Glass Bird
 
 A browser dungeon crawler made of 16x16-cell cubes stacked into themed depths.
 Plain ES modules and a vendored three.js; no build step.

@@ -1,6 +1,6 @@
 # The kids' guide
 
-An interactive guide to how Cube Crawler works, written for children around 12, in English and
+An interactive guide to how The Glass Bird works, written for children around 12, in English and
 German. It goes from the big ideas down to the real code. The grown-up design notes are in
 `docs/`; this is the friendly version of the same knowledge.
 

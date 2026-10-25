@@ -70,9 +70,9 @@ function build() {
   dock = document.createElement('section');
   dock.id = 'game-dock';
   dock.dataset.keys = '1';
-  dock.innerHTML = `<header><b>Cube Crawler</b> <span class="seed"></span>
+  dock.innerHTML = `<header><b>${t('The Glass Bird', 'Der Glasvogel')}</b> <span class="seed"></span>
     <button class="big" title="${t('Bigger / smaller', 'Größer / kleiner')}">\u2922</button><button class="new" title="${t('A new world', 'Eine neue Welt')}">\u21BB</button><button class="x" title="${t('Close the game', 'Spiel schließen')}">\u2715</button></header>
-    <div class="frame"><iframe title="Cube Crawler" allow="autoplay; fullscreen"></iframe>
+    <div class="frame"><iframe title="${t('The Glass Bird', 'Der Glasvogel')}" allow="autoplay; fullscreen"></iframe>
     <button class="wake" type="button">${t('Click to play', 'Klicken zum Spielen')}<small>${t('the keys then go to the game', 'die Tasten gehen dann ans Spiel')}</small></button></div>`;
   frame = dock.querySelector('iframe');
   frame.onload = loaded;

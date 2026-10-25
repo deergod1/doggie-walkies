@@ -1,5 +1,5 @@
 """
-Theme library for Cube Crawler: artwork for themes the game does not have yet.
+Theme library for The Glass Bird: artwork for themes the game does not have yet.
 
 Same contract as clutter.py (and props.py): one Blender unit = one game cell, Z up,
 flat normals, linear COLOR_0, ONE mesh per prop named "<set>_<prop>_<variant>" at the
@@ -1056,7 +1056,7 @@ def main(directory=None, render=True):
     if render:
         render_previews(scene, blocks, previews)
         render_vignette(vignette, previews)
-    print(f"Cube Crawler themes: {len(objects)} props, {sum(r['triangles'] for r in report)} triangles")
+    print(f"The Glass Bird themes: {len(objects)} props, {sum(r['triangles'] for r in report)} triangles")
     return report
 
 

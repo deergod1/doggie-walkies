@@ -1,4 +1,4 @@
-# Writing music for Cube Crawler
+# Writing music for The Glass Bird
 
 Read this before you write or change a song in `music/`. The technical side (player, moods,
 files) is in `docs/music.md`; this file covers how the songs should sound and how to write them.

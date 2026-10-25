@@ -655,7 +655,7 @@ def main(directory=None, render=True):
         for obj in objects:
             obj.location = (0, 0, 0)
     bpy.ops.wm.save_as_mainfile(filepath=str(Path(blends) / "trials.blend"))
-    print(f"Cube Crawler trials: {len(objects)} pieces, {sum(c for _, c in report)} triangles")
+    print(f"The Glass Bird trials: {len(objects)} pieces, {sum(c for _, c in report)} triangles")
     return objects
 
 

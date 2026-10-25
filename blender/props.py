@@ -1,5 +1,5 @@
 """
-Low-poly decoration library for Cube Crawler (all P1 and P2 in docs/asset-brief.txt).
+Low-poly decoration library for The Glass Bird (all P1 and P2 in docs/asset-brief.txt).
 
 One cell = one Blender unit. Geometry uses Z up, flat normals and linear
 COLOR_0; only glowing faces use an additional emissive material. Each prop
@@ -1235,7 +1235,7 @@ def main(scene=None, export_dir=None):
     report = validate(objects)
     if export_dir:
         export_sets(objects, export_dir)
-    print(f"Cube Crawler: {len(objects)} props, {sum(r['triangles'] for r in report)} triangles")
+    print(f"The Glass Bird: {len(objects)} props, {sum(r['triangles'] for r in report)} triangles")
     return objects
 
 
