@@ -45,6 +45,8 @@ docs that explain how the game works, from the big ideas down to the real code:
     menu the glass bird (`blender/glassbird.py`) waits in the dark for the first click or key, is
     struck and breaks in slow motion, and everything fades to black into the menu. Not with
     `?dev=1`, `?seed=` or in the guide; `?splash=1` shows it anyway, `?splash=0` never.
+  - The look of the menus (`docs/ui.md`): the bird's faceted teal glass with an amber core, so
+    far on the main menu and the settings (`style.css`, the panels' facets `assets/ui/facets.svg`).
   - Saves (`src/core/save.js`, `src/game/save.js`): up to three heroes and eight worlds,
     apart, in `localStorage`; each hero remembers its world, goes into any other, a friend's too;
     every seed has its own name (`src/core/names.js`, `docs/saves.md`).
@@ -111,7 +113,8 @@ docs that explain how the game works, from the big ideas down to the real code:
   weapon drop tables (`node tools/loot-table.mjs`), the balance simulation
   (`node tools/balance.mjs`, see `docs/balance.md`), the enemy palette page
   (`/tools/palette.html`, see `docs/enemy-kinds.md`) and the iOS Safari probe in an Xcode simulator
-  (`uv run --no-project tools/sim-probe.py --full`, see `docs/lighting.md`).
+  (`uv run --no-project tools/sim-probe.py --full`, see `docs/lighting.md`), and the menus' glass
+  facets (`node tools/facets.mjs`, see `docs/ui.md`).
 - `docs/`: design notes; `docs/assets/` documents the asset libraries.
 - `learn/`: an interactive guide for children (about 12), in English and German (the German in the
   game's own words: `src/i18n/glossary.js`), from the

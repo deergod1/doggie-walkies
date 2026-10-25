@@ -147,6 +147,11 @@ function renderPages() {
     $(`settings-page-${b.dataset.page}`).classList.toggle('shown', on);
   }
 }
+// a slider's amber line reaches as far as its value (style.css --fill)
+function fill(el) {
+  const lo = Number(el.min), hi = Number(el.max);
+  el.style.setProperty('--fill', `${(Number(el.value) - lo) / (hi - lo) * 100}%`);
+}
 function renderSettings() {
   languages.set(LANGUAGES.map(l => ({ value: l.code, label: l.name, lang: l.code })), languageNow());
   for (const [id, [options, now]] of Object.entries(CHOICES)) choice($(id), options(), now());
@@ -154,6 +159,7 @@ function renderSettings() {
   for (const [id, s] of Object.entries(SLIDERS)) {
     const v = s.get();
     $(id).value = String(v);
+    fill($(id));
     $(s.out).textContent = s.show(v);
   }
   for (const el of document.querySelectorAll('.settings-fullscreen')) el.hidden = !canFullscreen();
@@ -282,6 +288,7 @@ for (const [id, [now, set]] of Object.entries(TOGGLES)) $(id).onclick = () => se
 for (const [id, s] of Object.entries(SLIDERS)) {
   $(id).addEventListener('input', e => {
     const v = Number(e.target.value);
+    fill(e.target);
     if (s.live) s.set(v); else $(s.out).textContent = s.show(v);
   });
   $(id).addEventListener('change', e => { if (!s.live) s.set(Number(e.target.value)); s.done?.(); });

@@ -4,6 +4,70 @@
   --safe-l: env(safe-area-inset-left, 0px);
   --pad: calc(16px + var(--safe-t)) calc(16px + var(--safe-r)) calc(16px + var(--safe-b)) calc(16px + var(--safe-l));
   --pad-y: calc(32px + var(--safe-t) + var(--safe-b)); --ui: 1; }
+
+/* the glass (docs/ui.md): the look of the glass bird (game/splash.js), for now on the main menu and the settings.
+   Cool glass outside, a warm amber core inside: the frames are dark teal glass with lit edges, amber only marks
+   what is alive (the main action, what is chosen, the focus). No round corners: cut ones, like a cut stone. */
+:root { --void: #0b0c0d; --glass-line: #86e0d2; --glass-hi: #d8f6f0; --ember: #ffa040; --ember-hi: #ffd6a0; --ember-text: #ffe2bc;
+  --ink: #e3ece9; --ink-dim: #98aaa5; --ink-faint: #62716d; }
+/* (registered: they ease when they change, and each surface has its own, nothing inherited from the panel around it) */
+@property --face { syntax: '<color>'; inherits: false; initial-value: transparent; }
+@property --edge-hi { syntax: '<color>'; inherits: false; initial-value: transparent; }
+@property --edge-lo { syntax: '<color>'; inherits: false; initial-value: transparent; }
+@property --glow { syntax: '<color>'; inherits: false; initial-value: transparent; }
+@property --glint { syntax: '<percentage>'; inherits: false; initial-value: 100%; }
+/* a surface: its corners cut by --c1 (top left) to --c4 (bottom left), clockwise; --face fills it; its edges lit from above,
+   --edge-hi on top fading to --edge-lo below (the straight ones a border-image, the cut ones a line in each corner);
+   --glow an amber light from inside, coming from --glow-at; --glint a band of light crossing it (from 100%, off its left,
+   to 0%, off its right): only on what is pressed, as it is hovered, never across the panels (it would distract).
+   --frame is the edges and the glint, under them each kind of surface puts its own. */
+:where(#title-panel, #settings-panel, .dropdown-list, #title-panel :is(button, input, .title-link), #settings-panel button:not(#settings-close)) {
+  --c1: 5px; --c2: 5px; --c3: 5px; --c4: 5px; --glow-at: 50% 115%; --glint-color: var(--glass-hi);
+  --face: #18201f; --edge-hi: #4d6a64; --edge-lo: #263231;
+  border: 1px solid transparent; border-radius: 0; border-image: linear-gradient(var(--edge-hi), var(--edge-lo)) 1;
+  clip-path: polygon(var(--c1) 0, calc(100% - var(--c2)) 0, 100% var(--c2), 100% calc(100% - var(--c3)), calc(100% - var(--c3)) 100%,
+    var(--c4) 100%, 0 calc(100% - var(--c4)), 0 var(--c1));
+  --frame: linear-gradient(110deg, transparent 42%, color-mix(in srgb, var(--glint-color) 16%, transparent) 42% 46.5%,
+      color-mix(in srgb, var(--glint-color) 7%, transparent) 46.5% 50%, transparent 50%) var(--glint) 0 / 250% 100% no-repeat border-box,
+    linear-gradient(to bottom right, var(--edge-hi) calc(50% + 1px), transparent calc(50% + 1px)) left top / var(--c1) var(--c1) no-repeat border-box,
+    linear-gradient(to bottom left, var(--edge-hi) calc(50% + 1px), transparent calc(50% + 1px)) right top / var(--c2) var(--c2) no-repeat border-box,
+    linear-gradient(to top left, var(--edge-lo) calc(50% + 1px), transparent calc(50% + 1px)) right bottom / var(--c3) var(--c3) no-repeat border-box,
+    linear-gradient(to top right, var(--edge-lo) calc(50% + 1px), transparent calc(50% + 1px)) left bottom / var(--c4) var(--c4) no-repeat border-box;
+  background: var(--frame), radial-gradient(ellipse 75% 95% at var(--glow-at), var(--glow), transparent) border-box, var(--face);
+  color: var(--ink); transition: --face .15s, --edge-hi .15s, --edge-lo .15s, --glow .25s, color .15s;
+}
+/* the panels: large uneven cuts, darker glass the world shows through a little, the facets lit from the top left
+   (assets/ui/facets.svg, tools/facets.mjs) and a still spark where the light meets the cut */
+:where(#title-panel, #settings-panel) {
+  --c1: 18px; --c2: 6px; --c3: 18px; --c4: 6px; --face: #0e1312eb; --edge-hi: #6b968d; --edge-lo: #1f2b29;
+  background: var(--frame), radial-gradient(circle at 18px 1px, #f2fffc 0, #d8f6f080 1.5px, #86e0d224 14px, transparent 70px) border-box,
+    url(assets/ui/facets.svg) left top / 960px 960px no-repeat border-box, var(--face);
+}
+/* pressed things: the glint crosses them on hover (the way back is instant, not swept) */
+:where(#title-panel :is(button, .title-link), #settings-panel button:not(#settings-close)) { cursor: pointer; }
+:where(#title-panel :is(button, .title-link), #settings-panel button:not(#settings-close)):hover:not(:disabled) {
+  --face: #213030; --edge-hi: #7fb3a8; --edge-lo: #2d3d3a; color: #fff;
+  --glint: 0%; transition: --glint .75s cubic-bezier(.2, .6, .3, 1), --face .15s, --edge-hi .15s, --edge-lo .15s, --glow .25s, color .15s; }
+/* the main action and what is chosen: the bird's amber core glowing from inside */
+:where(#title-panel .menu-big, #title-panel .title-pick.chosen, #settings-panel :is(.settings-choice button.on, .settings-toggle.on, #settings-pages button.on,
+  #settings-tabs button.on), .dropdown.open .dropdown-button) {
+  --face: #22170f; --edge-hi: #d99a5c; --edge-lo: #6b4226; --glow: #ffa04052; --glint-color: #ffe6c4; color: var(--ember-text); }
+:where(#title-panel .menu-big, #title-panel .title-pick.chosen, #settings-panel :is(.settings-choice button.on, .settings-toggle.on)):hover {
+  --face: #2c1d12; --edge-hi: #ffc78a; --edge-lo: #8a5530; --glow: #ffa04080; color: #fff4e4; }
+/* asking to be sure (delete, reset): a red glass */
+:where(#title-panel .confirm, #settings-panel .confirm) { --face: #2a1411; --edge-hi: #c8664c; --edge-lo: #5e281d; --glow: #ff6a4033; color: #ffd0c4; }
+:where(#title-panel .confirm, #settings-panel .confirm):hover { --face: #3a1a14; --edge-hi: #f08a6c; color: #fff0ea; }
+/* typed into: darker, deeper glass */
+:where(#title-panel input) { --face: #0a0e0d; --edge-hi: #2a3836; --edge-lo: #4a625d; color: #fff; cursor: text; }
+:where(#title-panel input)::placeholder { color: var(--ink-faint); }
+:where(#title-panel, #settings-panel) :disabled { opacity: .5; cursor: default; }
+/* the focus, over all of the above: amber edges (an outline would be cut off with the corners) */
+:where(#title-panel :is(button, input, .title-link), #settings-panel button:not(#settings-close)):focus-visible {
+  outline: none; --edge-hi: var(--ember-hi); --edge-lo: #c47a3e; --glow: #ffa04040; box-shadow: inset 0 0 0 1px #ffd6a066; }
+/* a small heading: a cut gem before it, lit on its upper face */
+:where(#settings-panel h2, #title-panel h3)::before { content: ''; flex: none; width: 6px; height: 6px; margin: 0 1px; transform: rotate(45deg);
+  background: linear-gradient(135deg, var(--glass-hi) 0 35%, var(--glass-line) 35% 55%, #3f8a7f 55%); box-shadow: 0 0 6px #86e0d266; }
+body.calm :is(#title-panel, #settings-panel, #title-panel *, #settings-panel *) { --glint-color: transparent; }
 /* the UI scale (the settings, game/uiscale.js): the HUD and the menus zoomed as a whole, offsets from the window's edges and all.
    Inside them nothing uses vw / vh (browsers disagree on whether zoom scales those): percentages of the window instead. */
 :is(#quickbar, #effects, #teleport-menu, #chat, #minimap, #quest-track, #trial-hud, #trial-banner, #loading, #look-hint, #crosshair, #teach-pace,
@@ -157,17 +221,19 @@ kbd { display: inline-block; min-width: 1.2em; text-align: center; background: #
 :is(#leave-panel, #death-panel) kbd { margin-left: 6px; color: #8a96a8; font-size: 11px; }
 body.touch :is(#leave-panel, #death-panel) kbd { display: none; }
 /* the settings (game/settingsmenu.js): over the Esc menu or the main menu */
-#settings-overlay { position: fixed; inset: 0; z-index: 27; display: grid; place-items: center; padding: var(--pad); background: #080c1399; }
+#settings-overlay { position: fixed; inset: 0; z-index: 27; display: grid; place-items: center; padding: var(--pad);
+  background: radial-gradient(ellipse at 50% 45%, #0b0c0d8c 0%, #0b0c0dc4 60%, #050606eb 100%); }
 #settings-panel { box-sizing: border-box; width: min(720px, 100%); max-height: 100%; overflow: auto;
-  padding: 16px 20px; background: #12161ef5; border: 1px solid #444c5c; border-radius: 8px; box-shadow: 0 16px 60px #0008; font-size: 15px; }
+  padding: 16px 20px; font-size: 15px; }
 #settings-panel header { display: flex; align-items: baseline; gap: 12px; }
 #settings-panel h1 { margin: 0 0 4px; color: #fff; font-size: 16px; letter-spacing: 3px; }
 /* the pages: their tabs on the left, the pages stacked in one place so it is as large as the largest */
 .settings-body { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; margin-top: 14px; }
-#settings-pages { display: flex; flex-direction: column; gap: 2px; min-width: 8.5em; padding-right: 12px; border-right: 1px solid #2a2f3a; }
-#settings-panel #settings-pages button { padding: 7px 10px; text-align: left; color: #8a96a8; background: none; border: 1px solid transparent; }
-#settings-panel #settings-pages button:hover { color: #e6e9ef; background: #1e2430; }
-#settings-panel #settings-pages button.on { color: #ffe4ae; background: #2a2f3a; border-color: #444c5c; }
+#settings-pages { display: flex; flex-direction: column; gap: 2px; min-width: 8.5em; padding-right: 12px;
+  border-right: 1px solid; border-image: linear-gradient(transparent, #3b4f4b 12%, #3b4f4b 70%, transparent) 1; }
+#settings-panel #settings-pages button { --c1: 0px; --c2: 0px; --c3: 8px; --c4: 0px; --glow-at: 0% 50%; padding: 7px 10px; text-align: left; }
+#settings-panel #settings-pages button:not(.on, :focus-visible) { --face: transparent; --edge-hi: transparent; --edge-lo: transparent; color: var(--ink-dim); }
+#settings-panel #settings-pages button:not(.on):hover { --face: #ffffff08; color: var(--ink); }
 .settings-page-box { display: grid; min-width: 0; }
 .settings-page { grid-area: 1 / 1; min-width: 0; }
 .settings-page:not(.shown) { visibility: hidden; }
@@ -175,54 +241,70 @@ body.touch :is(#leave-panel, #death-panel) kbd { display: none; }
 /* narrow: the tabs in a row above */
 @media (max-width: 560px) {
   .settings-body { grid-template-columns: minmax(0, 1fr); gap: 12px; }
-  #settings-pages { flex-direction: row; min-width: 0; padding: 0 0 8px; border-right: none; border-bottom: 1px solid #2a2f3a; }
-  #settings-panel #settings-pages button { flex: 1; text-align: center; }
+  #settings-pages { flex-direction: row; min-width: 0; padding: 0 0 8px; border-right: none; border-bottom: 1px solid;
+    border-image: linear-gradient(90deg, transparent, #3b4f4b 15%, #3b4f4b 85%, transparent) 1; }
+  #settings-panel #settings-pages button { --c3: 0px; --c2: 6px; --glow-at: 50% 115%; flex: 1; text-align: center; }
 }
-#settings-panel h2 { display: flex; align-items: center; gap: 12px; margin: 16px 0 8px; padding-top: 12px; border-top: 1px solid #2a2f3a; color: #c5cdbc; font-size: 13px; }
-#settings-tabs { display: flex; gap: 2px; margin: 10px 0 0; border-bottom: 1px solid #444c5c; }
-#settings-panel #settings-tabs button { flex: 1; margin-bottom: -1px; padding: 6px 4px; color: #8a96a8; background: none; border: 1px solid transparent; border-radius: 4px 4px 0 0; }
-#settings-panel #settings-tabs button:hover { color: #e6e9ef; background: #1e2430; }
-#settings-panel #settings-tabs button.on { color: #ffe4ae; background: #12161e; border-color: #444c5c #444c5c #12161e; }
+#settings-panel h2 { display: flex; align-items: center; gap: 9px; margin: 16px 0 8px; padding-top: 12px; color: #9cc9bf; font-size: 13px; letter-spacing: 1px;
+  border-top: 1px solid; border-image: linear-gradient(90deg, #3b4f4b, #3b4f4b55 60%, transparent) 1; }
+#settings-tabs { display: flex; gap: 2px; margin: 10px 0 0; border-bottom: 1px solid;
+  border-image: linear-gradient(90deg, transparent, #3b4f4b 10%, #3b4f4b 90%, transparent) 1; }
+#settings-panel #settings-tabs button { --c1: 6px; --c2: 6px; --c3: 0px; --c4: 0px; flex: 1; margin-bottom: -1px; padding: 6px 4px; }
+#settings-panel #settings-tabs button:not(.on, :focus-visible) { --face: transparent; --edge-hi: transparent; --edge-lo: transparent; color: var(--ink-dim); }
+#settings-panel #settings-tabs button:not(.on):hover { --face: #ffffff08; color: var(--ink); }
 #settings-keys { display: grid; align-content: start; gap: 4px; min-height: calc(var(--rows, 9) * 30px - 4px); padding-top: 10px; }
-#settings-panel button { font-size: 13px; color: #e6e9ef; background: #2a2f3a; border: 1px solid #444c5c; border-radius: 4px; padding: 5px 10px; cursor: pointer; }
-#settings-panel button:hover { background: #364052; color: #fff; }
-#settings-panel :is(button, input):focus-visible { outline: 2px solid #ffcf7a; outline-offset: 1px; }
-#settings-close { margin-left: auto; color: #8a96a8 !important; background: none !important; border: none !important; padding: 0 !important; font-size: 11px !important; }
-#settings-reset { margin-left: auto; padding: 2px 8px !important; font-size: 11px !important; color: #aab3c2 !important; }
-#settings-reset.confirm { color: #ffd0c4 !important; border-color: #b0563f !important; background: #3a2420 !important; }
+#settings-panel button { font-size: 13px; padding: 5px 10px; }
+#settings-close { margin-left: auto; color: var(--ink-dim); background: none; border: none; padding: 0 !important; font-size: 11px !important; cursor: pointer; }
+#settings-close:hover { color: var(--ember-text); }
+#settings-close:focus-visible { outline: 1px solid var(--ember-hi); outline-offset: 3px; }
+#settings-panel #settings-reset { --c1: 3px; --c2: 3px; --c3: 3px; --c4: 3px; margin-left: auto; padding: 2px 8px; font-size: 11px; }
+#settings-panel #settings-reset:not(.confirm, :hover) { color: #b3c2be; }
 /* the mouse turning the view (game/camerakey.js) */
 body.orbiting, body.orbiting * { cursor: none !important; }
 /* a page's rows: the name, then a choice (both columns), a toggle or a slider and its number */
-.settings-rows { display: grid; grid-template-columns: 11em 1fr 3.5em; align-items: center; gap: 8px 12px; color: #e6e9ef; }
+.settings-rows { display: grid; grid-template-columns: 11em 1fr 3.5em; align-items: center; gap: 8px 12px; color: var(--ink); }
 .settings-choice { display: flex; flex-wrap: wrap; gap: 4px; grid-column: span 2; }
 .settings-choice button { min-width: 4em; }
-#settings-panel .settings-choice button.on { color: #ffe4ae; border-color: #8a7a52; background: #2f3020; }
 .settings-rows .settings-toggle { justify-self: start; min-width: 5em; }
 #settings-language { justify-self: start; width: min(12em, 100%); }
-#settings-panel .settings-toggle.on { color: #ffe4ae; border-color: #8a7a52; background: #2f3020; }
-.settings-rows input[type=range] { width: 100%; margin: 0; accent-color: #ffcf7a; }
-.settings-rows output { color: #aab3c2; text-align: right; }
+/* a slider: a thin line of glass, amber as far as it is filled (--fill, game/settingsmenu.js), a cut gem to hold */
+.settings-rows input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 20px; margin: 0; background: none; cursor: pointer; }
+.settings-rows input[type=range]::-webkit-slider-runnable-track { height: 3px;
+  background: linear-gradient(90deg, #c47a3e, var(--ember) var(--fill, 0%), #2c3a37 var(--fill, 0%)); box-shadow: 0 0 6px #ffa04033; }
+.settings-rows input[type=range]::-moz-range-track { height: 3px; background: #2c3a37; }
+.settings-rows input[type=range]::-moz-range-progress { height: 3px; background: linear-gradient(90deg, #c47a3e, var(--ember)); box-shadow: 0 0 6px #ffa04033; }
+.settings-rows input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 11px; height: 11px; margin-top: -4px; border: none;
+  transform: rotate(45deg); background: linear-gradient(135deg, #fff6e8 0 40%, var(--ember-hi) 40% 60%, #d8843a 60%); box-shadow: 0 0 8px #ffa040aa; }
+.settings-rows input[type=range]::-moz-range-thumb { width: 11px; height: 11px; border: none; border-radius: 0;
+  transform: rotate(45deg); background: linear-gradient(135deg, #fff6e8 0 40%, var(--ember-hi) 40% 60%, #d8843a 60%); box-shadow: 0 0 8px #ffa040aa; }
+.settings-rows input[type=range]:hover::-webkit-slider-thumb { box-shadow: 0 0 12px #ffa040; }
+.settings-rows input[type=range]:hover::-moz-range-thumb { box-shadow: 0 0 12px #ffa040; }
+.settings-rows input[type=range]:focus-visible { outline: none; }
+.settings-rows input[type=range]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 2px #0e1312, 0 0 0 3px var(--ember-hi), 0 0 12px #ffa040; }
+.settings-rows input[type=range]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 2px #0e1312, 0 0 0 3px var(--ember-hi), 0 0 12px #ffa040; }
+.settings-rows output { color: var(--ink-dim); text-align: right; }
 .settings-rows [hidden] { display: none; }
-.settings-note { margin: 0 0 4px; color: #6f7a8c; font-size: 14px; }
-.settings-key { display: grid; grid-template-columns: 1fr 8.5em 8.5em; align-items: center; gap: 6px; height: 26px; color: #e6e9ef; }
-.settings-key span { color: #aab3c2; }
+.settings-note { margin: 0 0 4px; color: var(--ink-faint); font-size: 14px; }
+.settings-key { display: grid; grid-template-columns: 1fr 8.5em 8.5em; align-items: center; gap: 6px; height: 26px; color: var(--ink); }
+.settings-key span { color: #b3c2be; }
 #settings-keys button { padding: 3px 6px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#settings-keys button.empty { color: #5a6678; }
-#settings-keys button.waiting { color: #1a1408; background: #ffcf7a; border-color: #ffcf7a; }
-#settings-feedback { min-height: 1.4em; margin: 12px 0 0; color: #cfe2ff; }
+#settings-keys button.empty:not(:hover) { color: var(--ink-faint); }
+/* waiting for a key: lit amber through */
+#settings-panel #settings-keys button.waiting { --face: #e8903e; --edge-hi: #ffe2bc; --edge-lo: #b8692e; --glow: #fff0d899; color: #1a1008; }
+#settings-feedback { min-height: 1.4em; margin: 12px 0 0; color: #bfe6de; }
 /* a dropdown (game/dropdown.js): the button with the choice, the list under it */
 .dropdown { position: relative; }
 .dropdown .dropdown-button { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; }
 .dropdown-value { flex: 1; }
-.dropdown-arrow { width: 0; height: 0; border: 5px solid transparent; border-top-color: currentColor; border-bottom: none; color: #8a96a8; transition: transform .1s; }
-.dropdown.open .dropdown-arrow { transform: rotate(180deg); }
-.dropdown.open .dropdown-button { border-color: #8a7a52; }
-.dropdown-list { position: absolute; z-index: 1; top: calc(100% + 2px); left: 0; min-width: 100%; box-sizing: border-box; max-height: 16em; overflow: auto;
-  margin: 0; padding: 3px; list-style: none; background: #1a1f29; border: 1px solid #444c5c; border-radius: 4px; box-shadow: 0 8px 24px #0009; }
-.dropdown-list li { padding: 5px 10px; border-radius: 3px; color: #e6e9ef; font-family: var(--font-display); font-size: 13px; white-space: nowrap; cursor: pointer; }
-.dropdown-list li.on { color: #ffe4ae; }
-.dropdown-list li:is(:hover, :focus) { background: #364052; outline: none; }
-.dropdown-list li:focus-visible { outline: 2px solid #ffcf7a; outline-offset: -2px; }
+.dropdown-arrow { width: 0; height: 0; border: 5px solid transparent; border-top-color: currentColor; border-bottom: none; color: var(--ink-dim); transition: transform .1s; }
+.dropdown.open .dropdown-arrow { transform: rotate(180deg); color: var(--ember-hi); }
+.dropdown-list { --c1: 0px; --c2: 0px; --c3: 8px; --c4: 3px; --face: #111716f7; --edge-hi: #4d6a64; --edge-lo: #2c3a37;
+  position: absolute; z-index: 1; top: calc(100% + 2px); left: 0; min-width: 100%; box-sizing: border-box; max-height: 16em; overflow: auto;
+  margin: 0; padding: 3px; list-style: none; }
+.dropdown-list li { padding: 5px 10px; color: var(--ink); font-family: var(--font-display); font-size: 13px; white-space: nowrap; cursor: pointer; }
+.dropdown-list li.on { color: var(--ember-text); }
+.dropdown-list li:is(:hover, :focus) { background: linear-gradient(90deg, #86e0d21f, #86e0d208); outline: none; }
+.dropdown-list li:focus-visible { box-shadow: inset 2px 0 0 var(--ember-hi); }
 #inventory-overlay { position: fixed; inset: 0; z-index: 20; background: #080c13b8; display: grid; place-items: center; padding: 16px 16px 84px; }
 /* game/inventory.js: the hero | (floor or shop) | the bag and the actions underneath | the details. Nothing in it changes
    its size with the selection: the details scroll inside their column, the actions keep their rows. */
@@ -549,32 +631,34 @@ body.touch.ui-roomy #inventory-overlay { padding: calc(12px + env(safe-area-inse
 /* the main menu (game/menu.js): the heroes, the worlds, joining a friend */
 body.in-menu :is(#quickbar, #teleport-menu, #chat, #minimap, #effects, #touch, #loot-labels, #dev, #teach-pace) { display: none !important; }
 #title-overlay { position: fixed; inset: 0; z-index: 25; display: grid; place-items: center; padding: var(--pad); overflow: auto; }
-/* wide: the menu on the left, the living cube right of it (game/showcase.js moves the picture) */
+/* wide: the menu on the left, the living cube right of it (game/showcase.js moves the picture); the dark the bird waits in
+   behind the menu */
 @media (min-width: 901px) {
   #title-overlay { place-items: center start; padding-left: max(24px + var(--safe-l), 5vw);
-    background: linear-gradient(90deg, #080c13cc 0%, #080c1366 32%, transparent 55%); }
+    background: linear-gradient(90deg, #0b0c0de0 0%, #0b0c0d80 32%, transparent 55%); }
 }
 /* a phone held upright: the menu at the bottom, the cube above it */
 @media (max-width: 900px) and (max-aspect-ratio: 5/6) {
   #title-overlay { place-items: end center; padding-bottom: max(16px + var(--safe-b), 4vh);
-    background: linear-gradient(0deg, #080c13cc 0%, #080c1366 35%, transparent 60%); }
+    background: linear-gradient(0deg, #0b0c0de0 0%, #0b0c0d80 35%, transparent 60%); }
 }
 /* (the box is not zoomed, what is in it is: game/menu.js measures it to place the hero beside it) */
 #title-box { box-sizing: border-box; width: min(calc(360px * var(--ui)), 100%); max-height: 100%; display: flex; flex-direction: column; }
-#title-logo { flex: none; margin: 0 0 18px; text-align: center; color: #ffe4ae; font-size: 30px; font-weight: normal; letter-spacing: 8px; text-transform: uppercase;
-  text-shadow: 0 2px 0 #8a5a2a, 0 0 24px #ffb45a55; }
-#title-panel { padding: 16px 20px; background: #12161ee6; border: 1px solid #444c5c; border-radius: 8px; box-shadow: 0 16px 60px #0008; font-size: 15px;
-  min-height: 0; overflow: auto; }
+/* the name: amber like the bird's core, glowing */
+#title-logo { flex: none; margin: 0 0 18px; text-align: center; font-size: 30px; font-weight: normal; letter-spacing: 8px; text-transform: uppercase;
+  color: transparent;
+  background: linear-gradient(#ffeed4 15%, #ffbe70 55%, #e88f42 90%);
+  -webkit-background-clip: text; background-clip: text;
+  filter: drop-shadow(0 2px 0 #6a3a1a) drop-shadow(0 0 16px #ffa04059); }
+#title-panel { padding: 16px 20px; font-size: 15px; min-height: 0; overflow: auto; }
 #title-panel h2 { margin: 0 0 10px; color: #fff; font-size: 14px; letter-spacing: 1px; }
-#title-panel h2 small { color: #8a96a8; font-family: var(--font-body); font-weight: normal; font-size: 14px; letter-spacing: 0; margin-left: 6px; }
-#title-panel h3 { margin: 16px 0 6px; color: #c5cdbc; font-size: 12px; font-weight: normal; }
-#title-panel p { margin: 8px 0; color: #aab3c2; }
-#title-panel :is(button, input, .title-link) { color: #e6e9ef; background: #2a2f3a; border: 1px solid #444c5c; border-radius: 4px; padding: 6px 10px; }
-#title-panel button, .title-link { cursor: pointer; font-size: 13px; text-decoration: none; text-align: center; }
-#title-panel :is(button, .title-link):hover { background: #364052; color: #fff; }
-#title-panel :is(button, input, .title-link):focus-visible { outline: 2px solid #ffcf7a; outline-offset: 1px; }
-#title-panel .menu-big { display: block; width: 100%; padding: 10px; font-size: 14px; color: #ffe4ae; border-color: #8a7a52; }
-#title-panel .menu-big small { display: block; margin-top: 2px; color: #aab3c2; font-size: 14px; }
+#title-panel h2 small { color: var(--ink-dim); font-family: var(--font-body); font-weight: normal; font-size: 14px; letter-spacing: 0; margin-left: 6px; }
+#title-panel h3 { display: flex; align-items: center; gap: 9px; margin: 16px 0 6px; color: #9cc9bf; font-size: 12px; font-weight: normal; letter-spacing: 1px; }
+#title-panel p { margin: 8px 0; color: #aebcb8; }
+#title-panel :is(button, input, .title-link) { padding: 6px 10px; }
+#title-panel button, .title-link { font-size: 13px; text-decoration: none; text-align: center; }
+#title-panel .menu-big { --c1: 8px; --c3: 8px; display: block; width: 100%; padding: 10px; font-size: 14px; letter-spacing: .5px; }
+#title-panel .menu-big small { display: block; margin-top: 2px; color: #c9b49a; font-size: 14px; letter-spacing: 0; }
 #title-panel .title-item { display: block; box-sizing: border-box; width: 100%; padding: 9px; font-size: 13px; }
 .title-world .title-pick b { white-space: normal; }
 .title-skin .title-pick img, .title-skin .title-pick i { width: 32px; height: 40px; }   /* (the thumbnails are 144×180) */
@@ -586,36 +670,37 @@ body.in-menu :is(#quickbar, #teleport-menu, #chat, #minimap, #effects, #touch, #
 #title-panel .title-pick { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; text-align: left; padding: 6px 10px; }
 .title-pick img, .title-pick i { flex: none; width: 34px; height: 34px; object-fit: contain; }
 .title-pick span { min-width: 0; display: grid; }
-.title-pick b { color: #fff; font-weight: normal; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.title-pick b { color: var(--ink); font-weight: normal; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.title-pick.chosen b { color: var(--ember-text); }
 .title-pick em { color: #8fd48a; font-style: normal; font-size: 11px; margin-left: 4px; }
-#title-panel .title-pick.chosen { border-color: #8a7a52; background: #2f3020; }
-.title-none { color: #e6e9ef !important; text-align: center; font-size: 13px; }
-.title-preview { color: #cfe2ff !important; min-height: 1.4em; }
-.title-preview.bad { color: #8a96a8 !important; }
-.title-pick small { color: #8a96a8; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.title-none { color: var(--ink) !important; text-align: center; font-size: 13px; }
+.title-preview { color: #bfe6de !important; min-height: 1.4em; }
+.title-preview.bad { color: var(--ink-dim) !important; }
+.title-pick small { color: var(--ink-dim); font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .title-actions { display: flex; flex-direction: column; gap: 4px; }
-#title-panel .title-actions button { padding: 2px 8px; font-size: 11px; color: #aab3c2; }
-#title-panel .title-actions button.confirm { color: #ffd0c4; border-color: #b0563f; background: #3a2420; }
-#title-panel .title-empty button { flex: 1; padding: 14px; color: #8a96a8; border-style: dashed; background: none; }
+#title-panel .title-actions button { --c1: 3px; --c2: 3px; --c3: 3px; --c4: 3px; padding: 2px 8px; font-size: 11px; }
+#title-panel .title-actions button:not(.confirm, :hover) { color: #b3c2be; }
+/* a place for something new: hollow glass */
+#title-panel .title-empty button { flex: 1; padding: 14px; }
+#title-panel :is(.title-empty, .title-new) button:not(:hover) { --face: #0e131266; --edge-hi: #3a504b; --edge-lo: #1c2624; color: var(--ink-dim); }
 .title-form { display: flex; gap: 6px; }
 .title-form input { flex: 1; min-width: 0; }
 .title-rename { flex: 1; display: flex; gap: 6px; }
 .title-rename input { flex: 1; min-width: 0; }
 .title-new-world { flex-direction: column; margin-top: 8px; }
 #title-panel .title-new { margin-top: 8px; }
-#title-panel .title-new button { color: #c5cdbc; border-style: dashed; background: none; }
 #title-code { text-transform: uppercase; letter-spacing: 4px; }
 #title-panel .title-back { margin-top: 16px; }
-.title-status { color: #cfe2ff !important; min-height: 1.4em; }
+.title-status { color: #bfe6de !important; min-height: 1.4em; }
 .title-note { color: #ffb3a3 !important; }
 /* the chosen hero, drawn into #title-hero-view (render/portrait.js); placed by game/menu.js heroBox */
 #title-hero { position: fixed; display: flex; flex-direction: column; align-items: center; padding: 0 0 4px; background: none; border: none;
-  cursor: pointer; color: #ffe4ae; }
+  cursor: pointer; color: var(--ember-text); }
 #title-hero-view { flex: 1; align-self: stretch; }
-#title-hero b { font-weight: normal; font-size: 16px; letter-spacing: 2px; text-shadow: 0 2px 8px #000; }
-#title-hero small { color: #aab3c2; font-size: 14px; text-shadow: 0 1px 4px #000; }
+#title-hero b { font-weight: normal; font-size: 16px; letter-spacing: 2px; text-shadow: 0 2px 8px #000, 0 0 14px #ffa04059; }
+#title-hero small { color: #b3c2be; font-size: 14px; text-shadow: 0 1px 4px #000; }
 #title-hero:hover b { color: #fff; }
-#title-hero:focus-visible { outline: 2px solid #ffcf7a; outline-offset: 2px; border-radius: 6px; }
+#title-hero:focus-visible { outline: 2px solid var(--ember-hi); outline-offset: 2px; }
 
 /* Native modal keeps the game/menu behind the paint tools inert, including on touch. */
 #skin-editor { box-sizing: border-box; width: min(760px, 96vw); max-height: 94dvh; overflow: auto;
