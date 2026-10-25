@@ -2,6 +2,7 @@
 // (measured from the clips, render/character.js), on the surface underfoot (core/footing.js),
 // and a heavier one on landing. On a ladder each hand and foot knocks on its rung (or scuffs in
 // its hold, rustles its vines ...) as the climb cycle (up or down) passes its grip. The sounds are audio/footsteps.js.
+// On slime each step leaves a wet print (render/footprints.js).
 import { player, state } from './state.js';
 import { character } from '../render/character.js';
 import { blend, W } from '../render/blendtree.js';
@@ -9,6 +10,8 @@ import { footstep } from '../audio/footsteps.js';
 import { surfaceAt } from '../core/footing.js';
 import { themeOf } from '../themes/depth.js';
 import { LADDER_STYLES } from '../themes/builds.js';
+import { footprint } from '../render/footprints.js';
+import { groundAt } from '../physics/collide.js';
 
 let prev = null, prevClimb = null, landCount = 0, surface = null;
 
@@ -45,6 +48,7 @@ export function updateFootsteps() {
     landCount = p.landCount;
     const s = !p.swimming && underfoot();
     if (s) footstep(s, p.landImpact > 3 ? 'land' : 'walk', { volume: Math.min(1, 0.4 + p.landImpact / 10) });
+    if (s === 'slime') { footprint(p.x, p.y, p.z, p.yaw, -1); footprint(p.x, p.y, p.z, p.yaw, 1); }   // (both feet)
   }
   const last = prev, moving = W.walk + W.run;
   prev = blend.phase;
@@ -57,5 +61,15 @@ export function updateFootsteps() {
     if (at <= 0 || at > moved) continue;
     const s = underfoot();
     if (s) footstep(s, blend.run > 0.5 ? 'run' : 'walk', { volume: 0.5 + 0.5 * Math.min(1, moving) });
+    if (s === 'slime') footprint(p.x, p.y, p.z, p.yaw, i ? 1 : -1);   // a wet print where the foot came down (render/footprints.js)
   }
+}
+
+// Is (x, y, z) standing on slime (a friend, render/partner.js)? Within a step of the ground.
+export function slimeAt(x, y, z) {
+  if (!state.map?.biome || state.transitioning) return false;
+  const theme = themeOf(state.map);
+  if (!theme.mire) return false;
+  const g = groundAt(x, z, y + 0.1, 0.3);
+  return !!g.s && Math.abs(g.h - y) < 0.15 && surfaceAt(g.s, state.map, theme.props, x, z) === 'slime';
 }

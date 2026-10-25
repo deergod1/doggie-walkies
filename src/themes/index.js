@@ -37,6 +37,8 @@
 //   grove: a forest's own props (render/propplace.js grove): trees (bases of its set) in thickets
 //     and clearings, density (the most a floor gets one), scale [min, max]; lanterns: the share of
 //     the trees with a lantern hanging from a branch; strings: the most strings of lanterns
+//   mire: how much its slime holds the feet (core/footing.js mireOf: a speed factor on its slime
+//     ground for everyone walking on it, 1 elsewhere)
 //   cycle: days and nights (core/daycycle.js, game/daycycle.js): `day` s of its `light`, then `night`
 //     s of its `dark` (a light like the deep's), turning over `fade` s; `motes` drift at night
 //   waylights: lamps beside the way (render/propplace.js waylights): { props, share (of the
@@ -151,7 +153,7 @@ const SALTFLATS = T('Salt flats', {
 // meteorites left; low and wet, few holes, more lakes and rivers than anywhere under the sky
 const SLIME = T('Slime marsh', {
   music: 'swamp',
-  props: 'slime', propDensity: 0.3,
+  props: 'slime', propDensity: 0.3, mire: 0.88,
   depths: [4, 5], spans: { chance: 0.7, max: 2, route: 0.8, island: 0.3, sky: 0 },
   void: 0.1, relief: 0.55,
   arche: { plain: 3, crater: 2, archipelago: 2, mesa: 1 },

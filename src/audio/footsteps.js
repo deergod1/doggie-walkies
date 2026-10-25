@@ -93,6 +93,15 @@ const RECIPES = {
     const at = t + 0.09 + 0.03 * R();
     k.tone('sine', 280, 620, at, 0.035, k.amp(at, 0.002, 0.12 * w, 0.035, out));
   },
+  slime(k, t, out, w, R) {  // a wet, sticky squelch, then the foot pulled out with a gloop
+    k.thump(t, 80, 40, 0.11, 0.55 * w, out);
+    const f = k.filter('lowpass', 1100, 10, k.amp(t, 0.012, 0.55 * w, 0.16, out));
+    f.frequency.setValueAtTime(1100, t); f.frequency.exponentialRampToValueAtTime(180, t + 0.14);
+    k.noise(t, 0.18, f);
+    const at = t + 0.12 + 0.04 * R(), p = 220 + 60 * R();
+    k.tone('sine', p, p * 2.4, at, 0.05, k.amp(at, 0.004, 0.16 * w, 0.05, out));
+    k.tone('sine', p * 1.5, p * 3, at + 0.03, 0.03, k.amp(at + 0.03, 0.003, 0.06 * w, 0.03, out));
+  },
   stone(k, t, out, w) {     // a dry click and a short "tok"
     k.thump(t, 170, 80, 0.045, 0.55 * w, out);
     k.noise(t, 0.03, k.filter('bandpass', 2000, 1.4, k.amp(t, 0.001, 0.45 * w, 0.025, out)));

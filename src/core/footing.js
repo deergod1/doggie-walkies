@@ -1,4 +1,5 @@
-// What the ground under the player sounds like (the sounds: audio/footsteps.js). Built
+// What the ground under the player sounds like (the sounds: audio/footsteps.js), and how much it
+// holds the feet (mireOf). Built
 // structures say what they are made of; terrain goes by the depth's theme and the height (as
 // its colours do, render/palette.js), fluid banks are mud (scorched gravel by lava) and the
 // paths through the town and the merchant camp are dirt.
@@ -6,7 +7,7 @@ import { LAVA } from './constants.js';
 import { BRIDGE_STYLES } from '../themes/builds.js';
 
 // learn: sound.html#recipe (see learn/README.md)
-export const SURFACES = ['grass', 'dirt', 'gravel', 'snow', 'ice', 'mud', 'stone', 'wood', 'rope', 'iron'];
+export const SURFACES = ['grass', 'dirt', 'gravel', 'snow', 'ice', 'mud', 'slime', 'stone', 'wood', 'rope', 'iron'];
 
 // theme (by its prop set) -> surface, or [[from level, surface], ...]
 const GROUND = {
@@ -18,7 +19,7 @@ const GROUND = {
   highlands: [[0, 'grass'], [13, 'gravel'], [17, 'snow']], saltflats: 'snow',   // salt crust crunches
   grotto: 'dirt', hive: 'mud', ossuary: 'stone', forge: 'gravel', cenote: 'dirt',
   darkforest: [[0, 'dirt'], [3, 'grass'], [16, 'stone']],   // soft earth and needles, moss higher up
-  slime: [[0, 'mud'], [6, 'grass'], [17, 'stone']],   // wet ground by the pools, moss higher up
+  slime: [[0, 'slime'], [16, 'stone']],   // slimy moss, bare rock on the highest tops
 };
 
 function terrain(props, level) {
@@ -55,4 +56,15 @@ export function surfaceAt(support, map, props, x, z) {
   const bank = support.link?.find(g => g?.fluid);
   if (bank) return bank.fluid === LAVA ? 'gravel' : 'mud';
   return terrain(props, support.top);
+}
+
+// How much the ground slows whoever walks on it: the slime marsh's slime (its theme's `mire`,
+// themes/index.js) holds every foot a little, the player's (physics/move.js) and the enemies'
+// (game/enemyai.js) alike; structures (bridges, stairs) and everywhere else do not.
+export const mireOf = (surface, theme) => surface === 'slime' ? theme?.mire ?? 1 : 1;
+// ... an enemy's (game/enemyai.js) in `map` of `theme`: as the player's, but not the slime's own
+// creatures (`slimeborn`), nor what floats (`hover`), rides the air or goes under the floor
+export function enemyMire(e, map, theme) {
+  if (!theme?.mire || e.profile.slimeborn || e.profile.hover || e.riding || e.under || !e.f) return 1;
+  return mireOf(surfaceAt(e.f, map, theme.props, e.x, e.z), theme);
 }

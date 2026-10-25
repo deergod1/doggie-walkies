@@ -76,6 +76,7 @@ import { beams } from './game/beams.js';
 import { tickBurning } from './render/burning.js';
 import { tickFlames } from './render/flames.js';
 import { tickMotes } from './render/motes.js';
+import { tickFootprints } from './render/footprints.js';
 import { tickQuality } from './game/quality.js';   // the lighting's quality level (the settings: Auto or pinned)
 import './game/perf.js';   // ?perf=1: what the frames cost, on any device
 import { tickChill } from './render/chilled.js';
@@ -165,6 +166,7 @@ function frame(now = performance.now()) {
   tickProps(state.time);
   tickFlames(dt, state.time, focusPoint(player.x, player.visY, player.z));   // the fires: flames, embers, smoke (render/flames.js)
   tickMotes(dt, state.map?.biome && themeById(state.map.biome), player.x, player.visY, player.z, state.night);   // what drifts in the air (render/motes.js)
+  tickFootprints(dt, state.cubeKey);   // wet prints on the slime dry up (render/footprints.js)
   if (state.world) animateWorld(state.world, dt, state.time);
   updateHud(player, state.map);
   updateConsole();   // the chat box: the chronicle and the game's last word (game/console.js)

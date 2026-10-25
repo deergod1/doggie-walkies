@@ -691,6 +691,15 @@ vents, reeds, and the craters the slime meteorites left. What makes it so, in it
   planks cross it (`BUILDS.slime`). Its spans keep to what the route depends on.
 - **Props** (`assets/themes/slime.glb`, `blender/themes_slime.py`): the slime glows a little,
   more so where it is fresh; landmarks: a meteorite's crater and a giant slime tree.
+- **The slime holds the feet** (`mire` 0.88, `core/footing.js mireOf`): on its slime ground
+  (the `slime` surface: everything under the highest tops, which are bare rock; its own squelching
+  steps, `audio/footsteps.js`) the player walks and runs a little slower (`physics/move.js
+  mired`: what was underfoot last holds through a jump off it, and the jumps click to move takes
+  are planned with it), and so do the enemies that walk (`game/enemyai.js`, `enemyMire`: not the
+  slime's own `slimeborn` creatures, nor what floats or rides the air). Bridges and stairs do not
+  hold. Whoever walks there leaves wet footprints that dry up in a few seconds
+  (`render/footprints.js`): the hero's at each foot's touchdown (`game/footsteps.js`), a friend's
+  and the enemies' every so far as they walk.
 - **Day and night** (`cycle`, `core/daycycle.js`, `game/daycycle.js`): 45 s of its own light,
   then 45 s of its `dark` (a green moonlight, lit like the deep: stars, fog, the character's full
   lamp, the slime glowing), each turn over the last 4 s of the half it ends. It runs on the world's

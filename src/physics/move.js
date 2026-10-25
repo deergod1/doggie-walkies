@@ -1,23 +1,35 @@
 // Character controller: walk / run / swim, jumping, gravity, ceilings and slopes.
 import { STEP, SWIM_STEP, GRAV, SNAP, STEEP, ACID, WALK_SPEED, RUN_SPEED, SWIM_SPEED, JUMP_V, RUN_RAMP, BRAKE, HEAD_Y, WADE_SLOW } from '../core/constants.js';
-import { player } from '../game/state.js';
+import { player, state } from '../game/state.js';
 import { groundAt, ceilingAt, slopeAt } from './collide.js';
 import { canMove } from './canmove.js';
 import { chillFactor } from '../core/projectiles.js';
 import { effectMod } from '../core/potions.js';
 import { wornTotals } from '../core/gear/stats.js';
 import { pushStep, pushControl } from '../core/gusts.js';
+import { surfaceAt, mireOf } from '../core/footing.js';
+import { themeById } from '../themes/depth.js';
 
 // how much faster the boots worn make you (not swimming)
 const feet = p => p.swimming ? 0 : wornTotals(p.inventory).moveSpeed / 100;
+// how much the ground holds the feet (the slime marsh's slime, core/footing.js mireOf): what was
+// underfoot last, so a jump off the slime is no quicker than walking through it
+export function mired(p) {
+  if (p.swimming) return 1;
+  if (p.grounded) {
+    const theme = state.map?.biome && themeById(state.map.biome);
+    p.mire = theme?.mire && p.support ? mireOf(surfaceAt(p.support, state.map, theme.props, p.x, p.z), theme) : 1;
+  }
+  return p.mire ?? 1;
+}
 
 // learn: physics.html#feel #walls (see learn/README.md)
 function horizontal(dt, dx, dz, run) {
   const p = player;
   // an ice ball's chill slows every way of moving (core/projectiles.js), a swiftness potion
   // quickens it (core/potions.js), and so do light boots (core/gear/stats.js), wading the more the
-  // deeper the water (physics/hazards.js)
-  const speed = (p.swimming ? (p.fluid === ACID ? 0.6 : SWIM_SPEED) : run ? RUN_SPEED : WALK_SPEED) * chillFactor(p.chilled)
+  // deeper the water (physics/hazards.js), and slime holds the feet (mired)
+  const speed = (p.swimming ? (p.fluid === ACID ? 0.6 : SWIM_SPEED) : run ? RUN_SPEED : WALK_SPEED) * chillFactor(p.chilled) * mired(p)
     * (1 + effectMod(p, 'moveSpeed') + feet(p)) * (1 - WADE_SLOW * Math.min(1, (p.wade || 0) / HEAD_Y));
   let tx = dx * speed, tz = dz * speed;
   if (p.grounded && !p.swimming && p.support) {
@@ -54,7 +66,7 @@ const LEAP = 3.4;   // horizontal speed of a jump while moving
 // chill): what the jumps click to move takes depend on (physics/leaps.js)
 export function jumpPowers(p) {
   const quick = 1 + effectMod(p, 'moveSpeed') + feet(p);
-  return { run: RUN_SPEED * chillFactor(p.chilled) * quick, leap: LEAP * quick, boost: Math.sqrt(1 + effectMod(p, 'jump')) };
+  return { run: RUN_SPEED * chillFactor(p.chilled) * mired(p) * quick, leap: LEAP * quick, boost: Math.sqrt(1 + effectMod(p, 'jump')) };
 }
 
 // jump with a little coyote time (just walked off a ledge) and a short input buffer

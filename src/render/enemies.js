@@ -69,6 +69,8 @@ import { sfx } from '../audio/sfx.js';
 import { trackLight, untrackLight } from './lightpool.js';
 import { glow, soft, emit, rand } from './particles.js';
 import { wetTrail, removeTrail } from './trails.js';
+import { walkPrints, forgetWalker } from './footprints.js';
+import { slimeAt } from '../game/footsteps.js';
 import { dressEnemy, paintParts } from './enemymodel.js';
 import { findTentacles, shakeTentacles, findShed, hideShed, findBall, turnBall } from './bossbones.js';
 import { attackOf, makeEnemy, ENEMY_KINDS } from '../core/enemies.js';
@@ -371,6 +373,13 @@ function wardLook(v, e, dt) {
 }
 // A giant striding (Squarlo grown: the gait `stride`, whose feet come down at phases 0 and 0.5,
 // blender/squarlo.py): each footfall thuds and jolts the ground a little
+// wet footprints of what walks over slime (render/footprints.js); not what floats, goes under the
+// floor or is slime itself (`slimeborn`: they leave trails of their own), and only in the cube
+// being played
+function prints(e, off) {
+  if (off.x || off.y || off.z || e.profile.hover || e.profile.slimeborn || e.under || e.riding) return;
+  walkPrints(e, e.x, e.y, e.z, e.yaw, e.view.size, slimeAt(e.x, e.y, e.z));
+}
 function footfalls(v, e, gait) {
   const was = v.stepPhase ?? v.phase;
   v.stepPhase = v.phase;
@@ -682,6 +691,7 @@ export function animateEnemies(list, dt, off = ZERO) {
     v.mark.scale.setScalar(0.5 * (e.mode === 'alert' ? 1 + 0.35 * Math.sin(Math.PI * v.markT) : v.markT));
     v.mixer.update(0);
     spinWheels(v, e, dt); turnWaves(v, e, dt); spinRings(v, e, dt); thunder(v, e); wetTrail(v, e, dt, off); flail(v, e, 1);
+    prints(e, off);
     shedParts(v, e); tumble(v, e, dt); lightTurns(v, e, dt);
     burrowLook(v, e, dt); ripples(v, e, dt); wardLook(v, e, dt);
     if (v.fog) foggeryLook(v, e, dt);
@@ -719,7 +729,7 @@ export function removeEnemyViews(list) {
     scene.remove(v.group);
     if (v.light) untrackLight(v.light);
     if (v.flash) untrackLight(v.flash);
-    removeTrail(v);
+    removeTrail(v); forgetWalker(e);
     if (v.fog) disposeFoggeryLook(v.fog);
     v.mixer.stopAllAction(); v.mixer.uncacheRoot(v.model);
     v.material.dispose();

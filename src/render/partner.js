@@ -20,6 +20,8 @@ import { trackLight, untrackLight } from './lightpool.js';
 import { makeBar, makeLevelLabel, makeNote } from './bars.js';
 import { playerColor } from '../net/online.js';
 import { tr } from '../i18n/i18n.js';
+import { walkPrints } from './footprints.js';
+import { slimeAt } from '../game/footsteps.js';
 
 // a player's colour, lighter (towards white by `k`)
 const shade = (slot, k) => new THREE.Color(playerColor(slot)).lerp(new THREE.Color(0xffffff), k);
@@ -145,6 +147,8 @@ export function showPartner(slot, span, name) {
   const A = a.pose, B = b.pose, mix = (x, y) => x + (y - x) * k;
   fig.group.position.set(mix(A.p[0], B.p[0]), mix(A.p[1], B.p[1]), mix(A.p[2], B.p[2]));
   fig.group.rotation.y = lerpAngle(A.yaw, B.yaw, k);
+  const at = fig.group.position;   // (a wet print as they walk over slime, render/footprints.js)
+  walkPrints('partner:' + slot, at.x, at.y, at.z, fig.group.rotation.y, 1, slimeAt(at.x, at.y, at.z));
   const bones = fig.f.bones;
   bones.hips.position.set(mix(A.hips[0], B.hips[0]), mix(A.hips[1], B.hips[1]), mix(A.hips[2], B.hips[2]));
   BONES.forEach((n, i) => {

@@ -39,6 +39,8 @@ import { launchProjectile } from './projectiles.js';
 import { fireBeam } from './beams.js';
 import { tryHordeAttack } from './hordes.js';
 import { enemySlow } from '../core/status.js';
+import { enemyMire } from '../core/footing.js';
+import { themeById } from '../themes/depth.js';
 
 const THINK = 0.2;         // s between decisions
 export const AHEAD = -0.2; // ahead: the cosine of the angle to the player is above this (about 100 degrees each way)
@@ -71,8 +73,11 @@ const turn = (e, yaw, dt, rate = 8) => { e.yaw += Math.atan2(Math.sin(yaw - e.ya
 const foe = e => e.target && (e.target === player || e.target.here) ? e.target : player;
 const toPlayer = e => { const p = foe(e); return Math.atan2(p.x - e.x, p.z - e.z); };
 const side = () => Math.random() < 0.5 ? -1 : 1;
+// slime holds an enemy's feet as it holds the player's (core/footing.js enemyMire)
+const mired = e => enemyMire(e, state.map, state.map?.biome && themeById(state.map.biome));
 function steer(e, x, z, speed, dt) {
   if (e.under) speed *= e.profile.burrow.speed / e.profile.chase;   // (it moves fast under the floor)
+  speed *= mired(e);
   const dx = x - e.x, dz = z - e.z, d = Math.hypot(dx, dz);
   if (d < 0.05) { e.speed = 0; return true; }
   turn(e, Math.atan2(dx, dz), dt);
@@ -86,6 +91,7 @@ function steer(e, x, z, speed, dt) {
 // of the step it managed.
 function slide(e, ux, uz, speed, dt) {
   const x0 = e.x, z0 = e.z;
+  speed *= mired(e);
   stepEnemy(e, ux * speed * dt, uz * speed * dt);
   turn(e, toPlayer(e), dt);
   e.speed = Math.hypot(e.x - x0, e.z - z0) / dt;

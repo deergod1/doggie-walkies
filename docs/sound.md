@@ -10,7 +10,7 @@ click. It runs at 44.1 kHz whatever the speakers run at (the browser resamples),
 |---|---|
 | `src/audio/sfx.js` | one-shot effects: `sfx(name, { at, pitch, volume })`; `at` pans by screen position |
 | `src/audio/voices.js` | the enemies' voices, registered with sfx.js as `<species>_alert/_windup/_death` |
-| `src/audio/footsteps.js` | footsteps per surface and gait, pre-rendered into variants when audio starts |
+| `src/audio/footsteps.js` | footsteps per surface and gait (the slime marsh's slime squelches and lets go with a gloop), pre-rendered into variants when audio starts |
 | `src/audio/loops.js` | continuous sounds: the charge and cast drones, the ambient beds, drips and lava pops |
 | `src/core/footing.js` | the surface under the player (theme, height, structures, banks, town paths) |
 | `src/game/footsteps.js` | steps on the walk / run cycle and the ladder rungs (each ladder style its own sound: `LADDER_STYLES[style].sound`, `themes/builds.js`), landings |
