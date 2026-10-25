@@ -1,0 +1,25 @@
+# Before writing or changing music, read music/README.md (style, moods, format).
+# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim). For an item enchanted or forged (game/enchants.js, the Smith; its own sound now).
+# Not played by the game yet: only in tools/player.html, under Jingles.
+title    Enchant
+composer Claude
+about    An item enchanted or forged: a crystal run up an A minor chord, struck by an anvil bell, a glass harmonica chord and the bird's wide call.
+tempo    100
+beats    2
+steps    6
+reverb   0.55
+
+# mood explore: bird sweep anvil harm
+
+voice bird     crystal    vol=0.45 pan=0.35 rev=0.75
+voice sweep    crystal    vol=0.3  pan=-0.3 rev=0.6
+voice anvil    bell       vol=0.22 pan=0.1  rev=0.5
+voice harm     glassharp  vol=0.2  pan=0    center=A4 att=0.1 rel=1
+
+pattern forged
+sweep   | A4 C5 E5 A5 C6 E6 .----- |
+anvil   | .----- A5!----- |
+harm    | .----- [Aadd9]----- |
+bird    | .------- E7 A6+B6-- |
+
+loop forged

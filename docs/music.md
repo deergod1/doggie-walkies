@@ -106,7 +106,9 @@ toy tune trying again), `trial` (a trial room lived through), `quest` (a quest d
 `act2`, `act3` and `core` (the first cube of each act and the core, the toy tune whole, varied,
 in pieces and mended, for when the story goes in: `docs/story.md`), all 3.5 to 4.5 s, and short
 stingers meant to play over the music: `levelup`, `chest` (a chest's glint), `legendary` and
-`memorized` (one soft ring for a cube got through).
+`memorized` (one soft ring for a cube got through), `questtaken`, `questfailed`, `trialsealed` (the
+knock and the ring), `trialfailed`, `revived` (by a friend), `horde` (it wakes), `dawn`, `dusk`,
+`enchant` and `portal` (the first time through one).
 
 ## Scheduling
 

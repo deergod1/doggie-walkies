@@ -1,0 +1,25 @@
+# Before writing or changing music, read music/README.md (style, moods, format).
+# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim). For dawn (game/daycycle.js, game/worldclock.js; nothing plays now).
+# Not played by the game yet: only in tools/player.html, under Jingles.
+title    Dawn
+composer Claude
+about    Day breaks: a crystal run rising over F and then C, wind chimes, and the bird's wide call.
+tempo    90
+beats    2
+steps    6
+reverb   0.55
+
+# mood explore: bird sweep harm chimes
+
+voice bird     crystal    vol=0.5  pan=0.35 rev=0.75
+voice sweep    crystal    vol=0.26 pan=-0.3 rev=0.65
+voice harm     glassharp  vol=0.22 pan=0    center=A4 att=0.4 rel=1.2
+voice chimes   chimes     vol=0.36 pan=-0.35
+
+pattern rise
+sweep   | F4- A4- C5- E5- G5- A5- | C5 E5 G5 C6 .------- |
+harm    | [F]?----------- | [C]?----------- |
+chimes  | ...... x..... | x..x.. ...... |
+bird    | _ | .----- G6 C6+D6---- |
+
+loop rise

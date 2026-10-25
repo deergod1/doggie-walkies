@@ -1,0 +1,25 @@
+# Before writing or changing music, read music/README.md (style, moods, format).
+# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim). For dusk (game/daycycle.js, game/worldclock.js; nothing plays now).
+# Not played by the game yet: only in tools/player.html, under Jingles.
+title    Dusk
+composer Claude
+about    Night falls: a crystal run falling over A minor and D minor, a low singing bowl, and the bird's wide call, then once more an octave lower.
+tempo    90
+beats    2
+steps    6
+reverb   0.6
+
+# mood explore: bird sweep harm bowl
+
+voice bird     crystal    vol=0.5  pan=0.35 rev=0.75
+voice sweep    crystal    vol=0.26 pan=-0.3 rev=0.65
+voice harm     glassharp  vol=0.22 pan=0    center=A4 att=0.4 rel=1.2
+voice bowl     bowl       vol=0.38 pan=0.1  rev=0.6
+
+pattern fall
+sweep   | E6- C6- A5- E5- C5- A4- | _ |
+harm    | [Am]?----------- | [Dm]?----------- |
+bowl    | _ | D3----------- |
+bird    | .----- E6 A5+B5---- | A5 D5+E5---------- |
+
+loop fall

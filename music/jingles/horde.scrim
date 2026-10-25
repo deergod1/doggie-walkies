@@ -1,0 +1,27 @@
+# Before writing or changing music, read music/README.md (style, moods, format).
+# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim). For a horde waking (game/hordes.js; nothing plays now, the music only changes its mood).
+# Not played by the game yet: only in tools/player.html, under Jingles.
+title    Horde
+composer Claude
+about    A horde wakes: a low singing bowl, glass breaking far off, and two bars of the title's cracked ostinato (A and Bb) over a low tom, a fretless bass sinking from A to Bb.
+tempo    110
+beats    2
+steps    6
+reverb   0.55
+
+# mood explore: ost bowl shatter toms bass
+
+voice ost      crystal    vol=0.42 pan=-0.3 oct=1
+voice bowl     bowl       vol=0.42 pan=0.1
+voice shatter  shatter    vol=0.22 pan=0.5  rev=0.8
+voice toms     tomlo      vol=0.45 pan=-0.2
+voice bass     fretless   vol=0.6
+
+pattern wake
+ost     | A2!- A2- Bb2- A2!- A2- Bb2- | A2!- Bb2- A2- Bb2!- A2- Bb2- |
+bowl    | A2----------- | _ |
+shatter | ..X... ...... | _ |
+toms    | X..X.. X..... | X..X.. X.XXXX |
+bass    | A1----------- | Bb1----------- |
+
+loop wake

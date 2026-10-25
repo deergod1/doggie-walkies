@@ -1,0 +1,23 @@
+# Before writing or changing music, read music/README.md (style, moods, format).
+# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim). For a quest failed (game/quests.js; only a status line now).
+# Not played by the game yet: only in tools/player.html, under Jingles.
+title    Quest failed
+composer Claude
+about    A quest failed: the bird's call, then again lower and narrowed to a half step, over A minor falling to D minor and a low singing bowl.
+tempo    90
+beats    2
+steps    6
+reverb   0.55
+
+# mood explore: bird harm bowl
+
+voice bird     crystal    vol=0.5  pan=0.3  rev=0.75
+voice harm     glassharp  vol=0.2  pan=-0.2 center=A4 att=0.15 rel=1
+voice bowl     bowl       vol=0.35 pan=-0.1
+
+pattern lost
+bird    | E6 A5+B5---- B5 E5+F5---- |
+harm    | [Am]?----- [Dm]?----- |
+bowl    | .----- D3----- |
+
+loop lost

@@ -10,5 +10,15 @@
   { "name": "levelup", "title": "Level up (stinger)", "file": "levelup.scrim" },
   { "name": "chest", "title": "Treasure (stinger, a chest's glint)", "file": "chest.scrim" },
   { "name": "legendary", "title": "Legendary (stinger, a legendary drop)", "file": "legendary.scrim" },
-  { "name": "memorized", "title": "Memorized (stinger, a cube got through)", "file": "memorized.scrim" }
+  { "name": "memorized", "title": "Memorized (stinger, a cube got through)", "file": "memorized.scrim" },
+  { "name": "questtaken", "title": "Quest taken (stinger)", "file": "questtaken.scrim" },
+  { "name": "questfailed", "title": "Quest failed (stinger)", "file": "questfailed.scrim" },
+  { "name": "trialsealed", "title": "Trial sealed (a trial room shuts)", "file": "trialsealed.scrim" },
+  { "name": "trialfailed", "title": "Trial failed (stinger, start over)", "file": "trialfailed.scrim" },
+  { "name": "revived", "title": "Revived (by a friend)", "file": "revived.scrim" },
+  { "name": "horde", "title": "Horde (it wakes)", "file": "horde.scrim" },
+  { "name": "dawn", "title": "Dawn", "file": "dawn.scrim" },
+  { "name": "dusk", "title": "Dusk", "file": "dusk.scrim" },
+  { "name": "enchant", "title": "Enchant (stinger, enchanted or forged)", "file": "enchant.scrim" },
+  { "name": "portal", "title": "Portal (the first time through)", "file": "portal.scrim" }
 ]

@@ -1,0 +1,23 @@
+# Before writing or changing music, read music/README.md (style, moods, format).
+# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim). For being revived by a friend, playing together (game/downed.js; the sfx levelUp now).
+# Not played by the game yet: only in tools/player.html, under Jingles.
+title    Revived
+composer Claude
+about    Back on your feet: the opposite of the death jingle, the bird's narrow call (A and Bb) opening to its wide one (A and B), with a crystal shimmer and a glass harmonica chord swelling in.
+tempo    80
+beats    2
+steps    6
+reverb   0.55
+
+# mood explore: bird sweep harm
+
+voice bird     crystal    vol=0.5  pan=0.35 rev=0.75
+voice sweep    crystal    vol=0.26 pan=-0.3 rev=0.65
+voice harm     glassharp  vol=0.22 pan=0    center=A4 att=0.3 rel=1
+
+pattern up
+bird    | A6 A5+Bb5---- A6 A5+B5---- |
+sweep   | .----- A5 B5 E6 A6 B6- |
+harm    | .----- [Aadd9]?----- |
+
+loop up

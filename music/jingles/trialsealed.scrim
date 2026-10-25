@@ -1,0 +1,25 @@
+# Before writing or changing music, read music/README.md (style, moods, format).
+# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim). For a trial room sealing you in (game/trials.js; a rumble and the gate now): a memory that holds on to you.
+# Not played by the game yet: only in tools/player.html, under Jingles.
+title    Trial sealed
+composer Claude
+about    A memory that holds on to you: the knock and the thin glass ring of the title's cracking, held while time stands still, over a low D and a singing bowl.
+tempo    72
+beats    2
+steps    6
+reverb   0.6
+
+# mood explore: knock bass ring bowl
+
+voice knock    kick       vol=0.4
+voice bass     fretless   vol=0.6
+voice ring     glassharp  vol=0.2  pan=0.3  rev=0.8 att=0.1 rel=1.2
+voice bowl     bowl       vol=0.3  pan=-0.1 rev=0.6
+
+pattern held
+knock   | X..... ...... |
+bass    | D1!- .--------- |
+ring    | G6----------- |
+bowl    | D3----------- |
+
+loop held
