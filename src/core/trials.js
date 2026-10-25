@@ -8,14 +8,16 @@
 //           sealed, timed, depths: [first, last], themes (theme ids it fits, null: any),
 //           weight (when drawn among the kinds that fit), color, built (planned at all),
 //           strict (its themes hold even for a sunken room's stages: the ice slide is ice only),
-//           population (how many enemies live in the room, times the usual) }
+//           population (how many enemies live in the room, times the usual),
+//           combines (a combiner: how many puzzles of the rotation it holds, world/trials.js
+//           combinerStages), mounts (a puzzle a combiner may hold: cubegen/trials/puzzles.js) }
 import { msg } from '../i18n/i18n.js';
 
 export const TRIALS = {
   flood: { name: msg('Rising water'), family: 'event', sealed: true, timed: true, depths: [1, 19], themes: null, weight: 1, color: '#3fa8ff', built: true,
     population: 0.5 },
   sunken: { name: msg('The sunken room'), family: 'event', sealed: false, timed: false, depths: [2, 19], themes: null, weight: 1, color: '#3fd0c0', built: true,
-    population: 0.3 },
+    population: 0.3, combines: 2 },
   collapse: { name: msg('Crumbling floor'), family: 'event', sealed: true, timed: true, depths: [1, 19], themes: null, weight: 1, color: '#e0a050', built: true,
     population: 0.3 },
   cold: { name: msg('Cold snap'), family: 'event', sealed: true, timed: true, depths: [1, 13], themes: ['peaks', 'frozen'], weight: 1.5, color: '#9fe8ff', built: true,
@@ -30,26 +32,19 @@ export const TRIALS = {
   miasma: { name: msg('Sinking fog'), family: 'event', sealed: true, timed: true, depths: [5, 19], themes: 'walled', weight: 1, color: '#9adf50', built: true,
     population: 0.5 },
   slide: { name: msg('Ice slide'), family: 'puzzle', sealed: false, timed: false, depths: [1, 19], themes: ['peaks', 'frozen'], strict: true, weight: 2, color: '#bfe8ff', built: true,
-    population: 0.5 },
+    population: 0.5, mounts: true },
   mirror: { name: msg('Mirror beam'), family: 'puzzle', sealed: false, timed: false, depths: [1, 19], themes: ['mines', 'forge', 'ruins', 'abyss', 'highlands'], weight: 1.5, color: '#ffe060', built: true,
-    population: 0.5 },
+    population: 0.5, mounts: true },
   braziers: { name: msg('Lights out'), family: 'puzzle', sealed: false, timed: false, depths: [1, 19], themes: null, weight: 1, color: '#ffa040', built: true,
-    lean: { ossuary: 2.5, ruins: 2.5 }, population: 0.5 },
+    lean: { ossuary: 2.5, ruins: 2.5 }, population: 0.5, mounts: true },
   crates: { name: msg('Crates on plates'), family: 'puzzle', sealed: false, timed: false, depths: [1, 19], themes: null, weight: 1, color: '#c09060', built: true,
-    population: 0.5 },
+    population: 0.5, mounts: true },
   timedgate: { name: msg('Timed gate'), family: 'puzzle', sealed: false, timed: false, depths: [1, 19], themes: null, weight: 1, color: '#f0d0a0', built: true,
     population: 0.5 },
   runes: { name: msg('Rune order'), family: 'puzzle', sealed: false, timed: false, depths: [1, 19], themes: ['ruins', 'highlands', 'ossuary', 'karst', 'abyss'], weight: 1.5, color: '#c0a0ff',
     built: true, population: 0.5 },
 };
-for (const [id, t] of Object.entries(TRIALS)) {
-  t.id = id;
-  // a puzzle's deck in a sunken room (field and rim): 6 x 6 for the slide and the crates, else 5 x 5
-  if (t.family === 'puzzle') t.deck = id === 'slide' || id === 'crates' ? 6 : 5;
-}
-// may a sunken room have small stage puzzles (a 5 x 5 deck): any built? (then it has three stages
-// from depth 10, and its last may share the exit's quadrant: cubegen/trials/sunken.js)
-export const smallStages = () => TRIAL_KINDS.some(k => TRIALS[k].built && TRIALS[k].deck === 5 && k !== 'runes' && k !== 'timedgate');
+for (const [id, t] of Object.entries(TRIALS)) t.id = id;
 export const TRIAL_KINDS = Object.keys(TRIALS);
 
 // a trial resolved is its gate in run.unlockedGates (core/guardians.js portalLocked)
@@ -82,17 +77,26 @@ export function parseForce(s) {
 
 // --- timing (docs/trials.md "Timing check") -----------------------------------------------------
 
-// learn: world.html#trial-check (see learn/README.md)
 export const ARM_TIME = 3;   // s of telegraph between arming and the clock running
+// The pace every timed event is checked and fitted against: the hero runs (RUN_SPEED: the game
+// always does), and a slow player takes SLACK times as long as the fastest way, plus REACT s to
+// take in the banner. The hazard is fitted as close to that slow player as it allows, so that a
+// perfect runner comes within CLOSE s of it at least once (the tests check both sides).
 // learn: world.html#trial-check (see learn/README.md)
-export const SLACK = 1.5;    // a slow player: every arrival times this
+export const SLACK = 1.3;
+// learn: world.html#trial-check (see learn/README.md)
+export const REACT = 1.5;
+// learn: world.html#trial-check (see learn/README.md)
+export const CLOSE = 5;
+// when the slow player gets where a perfect runner is at t s (the trial's clock: from arming)
+export const slowTime = t => t * SLACK + REACT;
 export const DRAIN_TIME = 5;   // s for the water to drain back once resolved
 
 // The flood's timeline: the water starts at `from` (levels) and rises in pulses of `step` levels,
 // each over `rise` s, the j-th starting at pulses[j] s (the trial's clock: from arming), never over
 // `to`. Pure data: physics, render and tests all read the same thing.
 //   { kind: 'flood', from, to, step, rise, pulses: [s, ...] }
-export const FLOOD = { step: 2, rise: 3, hold: 4, min: 50, max: 70 };
+export const FLOOD = { step: 2, rise: 2, max: 70 };
 
 // the water's level (in levels, fractional) at time t of the trial's clock
 export function floodLevel(tl, t) {
@@ -123,30 +127,24 @@ export const floodEnd = tl => (tl.pulses.at(-1) ?? 0) + tl.rise;
 export const drainLevel = (tl, at, s) => at - (at - tl.from) * Math.min(1, s / DRAIN_TIME);
 
 // Fit a flood's pulses to the way up: needs[j] is the earliest the j-th pulse may start (a slow
-// player has left every floor it floods by then). Pulses come one per rise + hold at the most,
-// later where a need says so, stretched to last FLOOD.min s at least. null: it cannot be done
-// within FLOOD.max s (the way up is too long).
-export function fitFlood(from, to, needs = [], step = FLOOD.step) {
-  const { rise, hold, min, max } = FLOOD, n = Math.max(1, Math.ceil((to - from) / step));
-  const place = gap => {
-    const out = [];
-    for (let j = 0; j < n; j++) out.push(Math.max(needs[j] ?? 0, ARM_TIME, j ? out[j - 1] + gap : 0));
-    return out;
-  };
-  let pulses = place(rise + hold);
-  const end = () => pulses.at(-1) + rise;
-  if (end() < min && n > 1) pulses = place(rise + hold + (min - end()) / (n - 1));
-  if (end() < min) pulses = pulses.map(p => p + min - end());
-  if (end() > max) return null;
-  return { kind: 'flood', from, to, step, rise, pulses: pulses.map(p => Math.round(p * 100) / 100) };
+// player has left every floor it floods by then). Each pulse starts then, no later: the water
+// comes up behind the slow player; but never before the one before it is done (the water rises
+// `step` levels in `rise` s at the fastest) nor while the room is still armed. null: it cannot be
+// done within FLOOD.max s (the way up is too long).
+export function fitFlood(from, to, needs = [], step = FLOOD.step, rise = FLOOD.rise) {
+  const n = Math.max(1, Math.ceil((to - from) / step)), pulses = [];
+  for (let j = 0; j < n; j++) pulses.push(Math.ceil(Math.max(needs[j] ?? 0, ARM_TIME, j ? pulses[j - 1] + rise : 0) * 100) / 100);
+  if (pulses.at(-1) + rise > FLOOD.max) return null;
+  return { kind: 'flood', from, to, step, rise, pulses };
 }
 
 // --- miasma -----------------------------------------------------------------------------------------
 // The fog (a flood upside down): timeline { kind: 'miasma', top (levels: where its underside
 // starts), from: 0, to (the levels it sinks), step, rise, pulses }. Its underside's height (world
 // units) at time t; resolved, it lifts back up over DRAIN_TIME. A head in it hurts: FOG.hurt of the
-// max HP a second, FOG.more more for every further second in it.
-export const FOG = { over: 4, hurt: 0.06, more: 0.03, pulses: 8 };   // (pulses: at most, the steps grow to fit)
+// max HP a second, FOG.more more for every further second in it. It sinks a step in FOG.rise s at
+// the fastest (quicker than the water rises: a way down drops faster than a way up climbs).
+export const FOG = { over: 3, rise: 1, hurt: 0.06, more: 0.03, pulses: 8 };   // (pulses: at most, the steps grow to fit)
 export const fogLevel = (tl, t) => tl.top - floodLevel(tl, t);   // (levels)
 export function fogY(m, s) {
   if (!m?.timeline || m.kind !== 'miasma' || !s || s.phase === 'idle') return null;
@@ -157,14 +155,16 @@ export function fogY(m, s) {
 export const fogHurt = (maxHp, inFor) => maxHp * (FOG.hurt + FOG.more * inFor);
 
 // --- cold --------------------------------------------------------------------------------------------
-// Each player's cold meter (0-100): away from warmth it rises to 100 in COLD.freeze s; within
-// COLD.radius cells of a lit brazier (or the great fire) it drops COLD.thaw times as fast. At 100
-// you freeze. The generator keeps every gap between warm circles within COLD.gap s for a slow player
-// (setting each brazier as far on as COLD.reach of that allows), the braziers at least COLD.apart cells
-// apart, along: how many on the way (at least, at most), least: the cells the way takes at least.
-export const COLD = { freeze: 20, radius: 2.5, thaw: 4, gap: 12, reach: 0.9, apart: 6, along: [2, 6], least: 25 };
-export function coldStep(meter, dt, warm) {
-  const rate = 100 / COLD.freeze;
+// Each player's cold meter (0-100): away from warmth it rises to 100 in `freeze` s (the room's,
+// map.trial.freeze); within COLD.radius cells of a lit brazier (or the great fire) it drops
+// COLD.thaw times as fast. At 100 you freeze. The generator fits the room's freezing time so that a
+// perfect runner going straight for the great fire freezes at COLD.dash of the way (between
+// COLD.quick and COLD.freeze s), and sets the braziers so that the meter of a slow player lighting
+// them on the way never goes over COLD.reach; the braziers at least COLD.apart cells apart; along:
+// how many on the way (at least, at most); least: the cells the way takes at least.
+export const COLD = { freeze: 20, quick: 7, dash: 0.8, radius: 2.5, thaw: 4, reach: 0.9, apart: 6, along: [1, 6], least: 25 };
+export function coldStep(meter, dt, warm, freeze = COLD.freeze) {
+  const rate = 100 / freeze;
   return Math.max(0, Math.min(100, meter + (warm ? -rate * COLD.thaw : rate) * dt));
 }
 
@@ -172,8 +172,11 @@ export function coldStep(meter, dt, warm) {
 // The gusts, in a steady cycle of STORM.period s from the clock running: a warning, the gust, a
 // lull. Out on the hill's ramp and not behind a boulder, a gust pulls a body outwards off the hill
 // (away from its eye) at STORM.speed cells/s and takes STORM.hold of its steering against it
-// (physics/move.js pulled): over the ramp's edge.
-export const STORM = { warning: 2, gust: 2.5, lull: 4.5, period: 9, speed: 2.6, hold: 0.5, shun: 5 };   // (shun: the way checked keeps to the shelter, exposed time counting so much more)
+// (physics/move.js pulled): over the ramp's edge. A slow player crosses each stretch out in the
+// wind within (lull + warning) / SLACK; the boulders stand as far apart as that lets (a perfect
+// runner's longest stretch at least STORM.wait), so the gusts must be waited out behind them.
+export const STORM = { warning: 1.5, gust: 2.5, lull: 3.5, period: 7.5, speed: 2.6, hold: 0.5, shun: 5, wait: 1.75 };   // (shun: the way checked keeps to the shelter, exposed time counting so much more)
+export const stormAllowance = () => (STORM.lull + STORM.warning) / SLACK;
 export function stormPhase(t) {
   if (t < ARM_TIME) return { phase: 'calm', left: ARM_TIME - t };
   const c = (t - ARM_TIME) % STORM.period;
@@ -188,12 +191,14 @@ export const SIEGE = { waves: 4 };
 export const holdTime = depth => Math.round(45 + 45 * Math.max(0, Math.min(1, (depth - 2) / 17)));
 
 // --- chase: the relic ---------------------------------------------------------------------------------
-// Taking the relic arms the room; HUNTER.wake s later its warden breaks out of its lair: a kind of the
-// depth's roster (its heaviest that fights up close), HUNTER.mods stronger, hunting the players over
-// the floor graph (no ladders, no jumps) at HUNTER.ratio times the speed its quarry runs at now (a
-// swiftness potion quickens it too, a chill slows it). Dropping the portcullis (the lever inside the
-// gate) traps it; killing it ends the hunt as well.
-export const HUNTER = { wake: 1.5, ratio: 1, mods: { hp: 6, damage: 2, size: 1.35, xp: 2 }, mass: 4, race: 1.15, least: 12, linger: 6 };
+// Taking the relic arms the room; `wake` s later (the room's, map.trial.wake) its warden breaks out of
+// its lair: a kind of the depth's roster (its heaviest that fights up close), HUNTER.mods stronger,
+// hunting the players over the floor graph (no ladders, no jumps) at HUNTER.ratio times the speed its
+// quarry runs at now (a swiftness potion quickens it too, a chill slows it): faster than you. Its
+// waking is fitted per room: as soon as still lets a slow player pull the lever before it is at the
+// gate, between HUNTER.wake and HUNTER.late s. Dropping the portcullis (the lever inside the gate)
+// traps it; killing it ends the hunt as well.
+export const HUNTER = { wake: 1, late: 6, ratio: 1.2, mods: { hp: 6, damage: 2, size: 1.35, xp: 2 }, mass: 4, least: 12, linger: 6 };
 
 // --- runes ---------------------------------------------------------------------------------------------
 // A rune room's stones and the order to press them in, from the trial's id alone (the clue's tablet,
@@ -281,16 +286,19 @@ export function trialFluidLevel(m, s) {
 export const PART_REACH = 1.1;   // how near a part (a button, a lever ...) has to be to use it (cells)
 
 // About how long a trial room takes a player who knows what to do (s): the balance simulation's
-// estimate (tools/balance.mjs). An event: its clock to the goal; a puzzle: walking it through.
-export const TRIAL_TIME = { flood: 45, collapse: 30, slide: 60, sunken: 150, mirror: 60, braziers: 50, crates: 120, timedgate: 40,
-  miasma: 55, cold: 40, storm: 50, siege: 75, chase: 45, runes: 45 };
+// estimate (tools/balance.mjs). An event: its clock to the goal (about the slow player's, the
+// hazard fitted to it); a puzzle: walking it through.
+export const TRIAL_TIME = { flood: 18, collapse: 16, slide: 60, sunken: 150, mirror: 60, braziers: 50, crates: 120, timedgate: 40,
+  miasma: 10, cold: 20, storm: 25, siege: 75, chase: 20, runes: 45 };
 export const trialTime = kind => TRIAL_TIME[kind] ?? 60;
 
 // --- collapse ----------------------------------------------------------------------------------------
 // The crust crumbles in a wave from the entry: a crust cell d cells (over the crust) from the entry
-// apron goes at ARM_TIME + delay + d / speed, shaking for SHAKE s before. The delay is fitted per
-// room (cubegen/trials/index.js): as little as lets a slow player outrun it, plus a margin.
-export const WAVE = { speed: 1.3, margin: 0.5, most: 8, shake: 1.5 };
+// apron goes at ARM_TIME + delay + d / speed, shaking for WAVE.shake s before. Both are fitted per
+// room (cubegen/trials/index.js): the speed the slow player's own pace along the crust (between
+// WAVE.speed and WAVE.fastest cells/s), the delay as little as lets that slow player outrun it, plus
+// WAVE.margin s (at most WAVE.most).
+export const WAVE = { speed: 1.3, fastest: 2.8, margin: 0.3, most: 8, shake: 1.5 };
 export const crumbleTime = (wave, d) => ARM_TIME + wave.delay + d / wave.speed;
 
 // is crust cell q ({ d }) of trial m gone at state s? (shaking: the SHAKE s before)

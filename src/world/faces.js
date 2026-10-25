@@ -11,7 +11,7 @@ import { spanFace } from './spans.js';
 import { areaPad, isInnerFace } from './areas.js';
 import { isTown, isMerchantCamp, townExitPosition } from './town.js';
 import { MAX_DEPTH } from '../themes/depth.js';
-import { trialPortalLayer } from './trials.js';
+import { trialPortalLayer, trialPortalPos } from './trials.js';
 import { BOSS_ARENAS } from '../core/bosses.js';
 
 export const LAYER_BASE = [0, 10, 16, 22];   // the levels of the world-wide layers
@@ -49,6 +49,7 @@ function sideFace(world, k, d, withPortal) {
   else do pos = 3 + Math.floor(R() * 10); while (f.river && Math.abs(pos - f.river.pos - (f.river.w - 1) / 2) < 3.5);
   if (spanFace(world, fk)?.kind === 'cross') pos = spanFace(world, fk).span.pos;   // one straight bridge
   pos = areaPad(world, fk)?.pos ?? pos;   // where a large area's ramp or ridge meets the face
+  pos = trialPortalPos(world, fk) ?? pos;   // where a trial room's shape wants it (a sunken room's, world/trials.js)
   const own = guardian ? doorOf(world, k, d) : null;
   if (own?.centre) pos = own.centre;
   // the portal's layer: any layer both cubes have, mostly the highest one (sky routes)

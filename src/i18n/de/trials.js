@@ -70,7 +70,6 @@ export default {
   'The order: {glyphs}': 'Die Reihenfolge: {glyphs}',
   'Press the runestones in the right order: a carved tablet in a room before this one tells it': 'Drück die Runensteine in der richtigen Reihenfolge: Eine Steintafel in einem Raum davor verrät sie',
   'The gate is open: {n} s': 'Das Tor ist offen: {n} s',
-  "Stage {n} of {of}: solve the dry platform's puzzle to drain the room": 'Stufe {n} von {of}: Löse das Rätsel der trockenen Plattform, um den Raum leerlaufen zu lassen',
   'The wind rises…': 'Der Wind frischt auf …',
   'A gust is coming! Behind a boulder ({n})': 'Eine Böe kommt! Hinter einen Felsbrocken ({n})',
   'GUST! Hold on behind the boulders': 'BÖE! Halt dich hinter den Felsbrocken fest',

@@ -7,6 +7,11 @@ second on 25%). The rest is the list of what to build, kind by kind, until done 
 "Implementation order" at the end). `drift`, `channels`, `stones`, `sluices` and `plates` were
 built once and taken out again: they did not play well.
 
+Steps 12 and 13 ("Retiming and combiners" at the end) followed play: the events were far too easy
+(timed for a walker given half again as long, but the hero always runs), and the sunken room built
+its own smaller copies of the puzzles instead of the puzzles themselves. Now the events are fitted
+to a running player, and the sunken room is a combiner of two puzzles of the rotation.
+
 A **trial** is a room built around one goal that is more than walking to the exit: getting to
 high ground before the water does, outrunning a collapsing floor, turning mirrors until a beam
 hits its mark. The world plans trials from the seed, like guardians and hordes, and the cube
@@ -136,23 +141,27 @@ that while it is not resolved:
 
 ### Timing check (`cubegen/trials/timing.js`)
 
-Every timed event is checked against a slow player, not a perfect one:
+Every timed event is checked against a slow player, not a perfect one, and fitted to come
+close to it:
 
 - A Dijkstra over the cube's reach graph (`cubegen/reach.js`, the real one after smoothing,
-  with structures) gives each floor the earliest arrival time. Each move costs its real
-  duration: walking at `WALK_SPEED` (1.9 cells/s; `chase` uses `RUN_SPEED`, 2.8), ladders at
-  the climb speed, a jump or drop 0.6 s, an interaction (`F`) 1 s.
+  with structures) gives each floor a perfect runner's earliest arrival. Each move costs its real
+  duration: running at `RUN_SPEED` (2.8 cells/s: the hero always runs), ladders at the climb
+  speed, a jump or drop 0.6 s (a jump a second more for its run-up), an interaction (`F`) 1 s.
+- **The slow player** gets everywhere at `slowTime(t) = t × SLACK + REACT` (`SLACK` 1.3, `REACT`
+  1.5 s to take in the banner), on the trial's clock (from arming).
 - **Deadlines** (`flood`, `collapse`, `miasma`): the hazard gives each floor the time it stops
-  being safe. The path must leave every floor before its deadline, with
-  `arrival × SLACK + ARM_TIME ≤ deadline` (`SLACK` 1.5), and end on a floor with no deadline
-  (the summit, the apron, the valve's ledge).
-- **Gaps** (`cold`, `storm`): the longest stretch between two safe spots must take at most
-  the allowance (below), at walking speed × `SLACK`.
+  being safe. The slow player must leave every floor by its deadline, and end on a floor with no
+  deadline (the summit, the apron, the valve's ledge). The hazard is fitted to that: it reaches
+  each floor of the way about as the slow player leaves it, so a perfect runner sees it within
+  `CLOSE` (5 s) at least once (`check.close`; the tests check both).
+- **Gaps** (`cold`, `storm`): the stretches out in the cold or the wind, timed for the slow
+  player, within the kind's allowance (below), which is fitted as tight.
 - **Races** (`chase`): compare two travel times (below), the warden's over an enemy's ways only.
 - Enemies in a timed room are placed off the checked path and outside its 2-cell band.
 
-Each kind's tests also run the real character along the checked path with the real physics
-and hazard, and require it to make it.
+Each kind's tests also run the real character (running) along the checked path with the real
+physics and hazard, and require it to make it.
 
 ### Puzzle parts (`core/trials.js`, `game/trials.js`, `render/trials.js`)
 
@@ -231,50 +240,58 @@ that stops it.
   with stairs and ladders. The way up winds; it is not one ladder. The button stands on the
   summit, the exit portal anywhere else.
 - **Water:** the depth's river fluid (water, lava, acid). It starts one level under the lowest
-  ground and rises in pulses: 2 levels over 3 s, then holds for 4 s. It stops 2 levels under
-  the summit's top. From about 50 s to 70 s in all.
+  ground and rises in pulses of 2 levels, each over `FLOOD.rise` (2 s), each starting as the slow
+  player leaves the floors it covers (never sooner after the one before than its rise). It stops 2
+  levels under the summit's top. About 15-25 s in all (at most `FLOOD.max`, 70 s).
 - **Rules:** the fluid kills as every fluid does (`inFluid` reads `max(floor surf, trial
   level)`): lava and acid on contact, water once it is over the head (it is waded through until
   then, [bosses.md](bosses.md#water-wading-and-drowning)). Enemies drown too, without rewards. The water is one surface
   clipped to the glass box (the room fills like an aquarium).
 - **Goal:** the button (`F`). The water drains back in 5 s and the seals open.
 - **Telegraph (idle):** tide lines on rocks and walls, the button glowing on the summit.
-- **Check:** deadlines: a floor's deadline is when the water reaches its top.
+- **Check:** deadlines: a floor's deadline is when the water reaches its lowest corner; a perfect
+  runner sees it come within 2.5-4.5 s.
 - **Population:** half, none on the summit or the checked path.
 
 ### `sunken`: The sunken room
 
+The first **combiner** ("Combiners" below): two puzzles of the rotation, tied together by the water.
 You come in from above, and everything under you is flooded. Each puzzle you solve drains the
 room one stage further, showing the platform with the next puzzle, until the ground and the
 exit come out of the water.
 
-- **Room:** two or more layers. You enter on the highest layer. The exit portal is on the
-  ground layer, under water at first (its glow seen through the water).
-- **Stages:** 2 (depths 2–9) or 3 (10–19). Stage `i` has a water level `W_i` and a puzzle
-  platform that is dry at `W_(i-1)`. Stage 1's platform is reachable from the entry pad.
-  Solving stage `i` lowers the water to `W_i` (over 4 s), which uncovers the way to stage
-  `i+1`. The last stage drains the room down to its rivers' level.
-- **Stage puzzles:** any puzzle kind but `runes` and `timedgate`, drawn by the theme's
-  weights, no kind twice in one room. Each is built at a size that fits its platform (the
-  generator shapes a deck of at least 6×6 for `slide` and `crates`, 5×5 for the others).
+- **Room:** three layers. You enter on the highest layer. The exit portal is on the ground
+  layer, under water at first (its glow seen through the water).
+- **Stages:** 2. Stage `i` has a water level `W_i` and a puzzle platform that is dry at
+  `W_(i-1)`. Stage 1's platform is reachable from the entry pad. Solving stage `i` lowers the
+  water to `W_i` (over 4 s), which uncovers the way to stage `i+1`. The last stage drains the
+  room down to its rivers' level.
+- **Stage puzzles:** two puzzles of the depth's rotation (the kinds and weights a puzzle slot
+  draws from, their themes held; `world/trials.js combinerStages`), any that can be mounted
+  (`TRIALS[kind].mounts`: not `runes`, whose clue is in another room, nor `timedgate`, a whole
+  room), no kind twice. Each is mounted exactly as in its own room: the same field, tuning,
+  parts, drawing and HUD hint (`cubegen/trials/puzzles.js mountPuzzle`).
 - **Rules:** untimed, not sealed. Falling into the water is an ordinary death. Drained stages
   stay drained for the run.
 - **Check:** at every level `W_i`, the next platform is dry and reachable from the entry pad.
   Once fully drained, the exit is reachable from the entry both ways (stairs or ladders lead
-  back up to the entry layer). Each stage puzzle passes its own check.
+  back up to the entry layer). Each stage puzzle passes the checks of its own room.
 - **Population:** a few on the platforms; more on the ground, waiting for the water to go.
 - **As built** (`cubegen/trials/sunken.js`): three layers (you come in at level 16; the room before
   gets as many, `world/wfc.js`, and its portal stands on the top layer, `world/faces.js`). The
-  room's four quadrants make a ring: the entry's a terrace at the entry's height, the stage
-  platforms round the ring the long way, the exit's last; anything left is the river's water. The
-  water stands at `W_i` (`core/trials.js sunkenLevel`, sinking over `SINK` s), one level under
-  platform i (a level over the water it is dry at); the platforms are joined by what the route
-  search builds over the water. A stage puzzle's field is 4x4 (its deck, field and rim, 6x6:
-  `TRIALS[kind].deck`). A 6x6 deck finds no room in the exit's quadrant beside its pad, so while
-  only such puzzles are built a sunken room has two stages and the planner wants the exit's
-  quadrant beside the entry's (`world/trials.js roomFits`); with the 5x5 ones built (`smallStages`:
-  mirror and braziers on a 3x3 field) it has three from depth 10, a small one last, by the exit.
-  The stages drained are kept in `run.trials` (saved, and shared when playing together).
+  room in two halves across one axis, 7 cells each (a deck's short side, 5, and its rim or ring):
+  the entry's and the exit's. Along the other axis each half has its puzzle's deck at the far end
+  and its part of a strip at the near end (`sunkenStrip`: 6 cells, 5 from depth 10, what the
+  longest decks leave) where both portals stand, the entry's in its half and the exit's in the
+  other (`sunkenLayout`). The planner moves the room's two portals along their faces as little as
+  that takes (`world/trials.js sunkenPads`, asked by `world/faces.js` through `trialPortalPos`).
+  The entry's half stands at the entry's height (its strip the terrace, the first deck), the
+  exit's a level over `W_1` (the second deck and its strip), the exit's pad down on the ground;
+  each deck's way in (a slide's goal gate too) faces the strip, and the route search joins the
+  strips (stairs, ladders) over the water. The water stands at `W_i` (`core/trials.js
+  sunkenLevel`, sinking over `SINK` s). The HUD names the stage's puzzle and gives its hint, the
+  bar the stages drained. The stages drained are kept in `run.trials` (saved, and shared when
+  playing together).
 
 ### `collapse`: The crumbling floor
 
@@ -285,9 +302,10 @@ The floor breaks up behind you in a wave from the entry; outrun it to the exit.
   dead-end branches 3–6 cells long and now and then a 1-cell gap to jump. Under it is a basin 6+
   levels down, holding the depth's fluid (or the void where `voidAllowed`). The exit is on the
   exit apron.
-- **Wave:** a crust cell crumbles at `ARM_TIME + d / WAVE_SPEED`, where `d` is its route
-  distance from the entry apron over the crust and `WAVE_SPEED` is 1.3 cells/s (walking is
-  1.9). It shakes, cracks and drops dust for 1.5 s first, then falls away.
+- **Wave:** a crust cell crumbles at `ARM_TIME + delay + d / speed`, where `d` is its route
+  distance from the entry apron over the crust. The speed is the room's, the slow player's own
+  pace along the crust (1.3-2.8 cells/s, about 2.1; running is 2.8). It shakes, cracks and drops
+  dust for 1.5 s first, then falls away.
 - **Rules:** falling into the basin fails the trial (the fluid kills; the void counts as a
   fail even where a fall would lead to the cube below).
 - **Goal:** stepping onto the exit apron stops the wave (the keystone) and opens the seals.
@@ -301,8 +319,9 @@ The floor breaks up behind you in a wave from the entry; outrun it to the exit.
   apron climbing to it. Rock walls stand along the room's faces (`world/profile.js caveWall`),
   so the crust is the only way; the planner predicts where the portals stand
   (`world/trials.js portalPos`) and puts a collapse only where the aprons have room. A gap gets
-  two straight blocks of run-up. The wave waits `delay` s (fitted per room: as little as lets a
-  slow player outrun it, `WAVE`), and a jump costs a second of run-up in the timing. Once the
+  two straight blocks of run-up. The wave's speed and its `delay` (1-5 s) are fitted per room
+  (`WAVE`): of the speeds it may go at, the one that follows the slow player closest, and as little
+  delay as lets that player outrun it; a jump costs a second of run-up in the timing. Once the
   whole crust is gone and nobody is across, the trial fails. The crust floors are drawn on their
   own (`render/trials.js`) and are not there for the physics once gone (`physics/collide.js
   setGoneFloors`); the basin's fluid stands over every hole while it runs.
@@ -314,14 +333,14 @@ The cold sets in. Keep warm by lighting braziers along the way to the great fire
 - **Room:** one layer, ridges across it making the way wind, with braziers far apart along the
   way and the **great fire** (a bonfire pit) near the exit. One or two extra braziers stand off
   the way.
-- **Cold meter:** 0–100. Away from warmth it rises to 100 in `FREEZE_TIME` (30 s); within
-  `WARM_RADIUS` (2.5 cells) of a lit brazier it drops four times as fast. Frost creeps in from
-  the screen's edges as it rises. At 100 you freeze: the trial fails.
+- **Cold meter:** 0–100. Away from warmth it rises to 100 in the room's `freeze` time (7-20 s);
+  within `COLD.radius` (2.5 cells) of a lit brazier it drops four times as fast. Frost creeps in
+  from the screen's edges as it rises. At 100 you freeze: the trial fails.
 - **Rules:** a brazier is lit with `F` (1 s); it stays lit.
 - **Goal:** lighting the great fire.
-- **Check:** gaps: walking from one brazier's warm circle to the next (and to the great fire)
-  takes at most `FREEZE_TIME × 0.6`, at walking speed × `SLACK`, with the lighting time
-  included.
+- **Check:** the meter, run along the way: going straight for the great fire, a perfect runner
+  freezes (at `COLD.dash`, 4/5, of the way: the freezing time is fitted to that); a slow player
+  lighting the braziers on the way (1 s each) keeps it within `COLD.reach` (90%).
 - **Population:** the depth's frost kinds, half the usual, never inside a warm circle.
 - **As built** (`cubegen/trials/cold.js`, `index.js finishCold`; `core/trials.js COLD`,
   `game/trials.js stepCold`): the room is entered and left on opposite faces (the planner asks
@@ -329,12 +348,13 @@ The cold sets in. Keep warm by lighting braziers along the way to the great fire
   three ridges of rock (six levels up, one cell thick, nothing built onto or over them, to the
   cube's edge) stand across the way, each open at one end (three cells), the ends alternating, so
   the way winds back and forth: 37-46 cells (at least `COLD.least`). A ridge across another
-  portal's pad is open at that end, or left out. The braziers stand on the slow player's fastest
-  way, each as far on from the last (or the entry) as keeps the slow time out in the cold within
-  `COLD.reach` (0.9) of the gap allowed, at least `COLD.apart` (6) cells from each other and the
-  entry (a warm circle reaches through a ridge): two or three, and one or two 3-6 cells off the
-  way. `FREEZE_TIME` is 20 s (the gap allowed 12 s). Each player has their own meter; freezing is a
-  death (back in the room before). Lit braziers stay lit for everyone (the trial's bits).
+  portal's pad is open at that end, or left out. The room's freezing time (`map.trial.freeze`,
+  about 7-11 s) lets a perfect runner going straight for the fire get 4/5 of the way. The braziers
+  stand on the fastest way, each as far on from the last (or the entry) as keeps the slow player's
+  meter within `COLD.reach`, at least `COLD.apart` (6) cells from each other and the entry (a warm
+  circle reaches through a ridge): one or two, and one or two 3-6 cells off the way. Each player
+  has their own meter; freezing is a death (back in the room before). Lit braziers stay lit for
+  everyone (the trial's bits).
 
 ### `storm`: The storm
 
@@ -343,25 +363,27 @@ off the hill in a steady rhythm: climb in the lulls, wait out the gusts behind t
 pull the rod at the top.
 
 - **Room:** one layer, a needle of rock in the middle, sixteen levels over its foot, its ramp once
-  round it. Boulders stand on the ramp's outer edge every few cells; the summit is the storm's calm
-  eye. The lightning rod stands in the middle of the summit.
-- **Gusts:** a steady cycle of `STORM.period` (9 s) from the clock running: 2 s warning (a whistle,
-  a tick each second, streaks starting), 2.5 s gust, 4.5 s lull. Out on the ramp and not behind a
+  round it. Boulders stand on the ramp's outer edge as far apart as a slow player can run between
+  gusts; the summit is the storm's calm eye. The lightning rod stands in the middle of the summit.
+- **Gusts:** a steady cycle of `STORM.period` (7.5 s) from the clock running: 1.5 s warning (a
+  whistle, a tick each second, streaks starting), 2.5 s gust, 3.5 s lull. Out on the ramp and not behind a
   boulder, a gust pulls a body outwards off the hill (away from its middle) at 2.6 cells/s and takes
   half its steering against it (`core/trials.js`, `physics/move.js`): over the ramp's edge, to the
   ground. The HUD counts each phase down.
 - **Rules:** being blown off is a fall (its damage as any fall's), back at the foot; dying fails.
 - **Goal:** the lightning rod (`F`). The storm ends.
-- **Check:** gaps: every stretch of the slow player's way out in the wind between two shelters
-  takes at most `(lull + warning) / SLACK` (about 4.3 s); the way climbs at least 20 cells of the
-  hill.
+- **Check:** gaps: the slow player crosses every stretch of the way out in the wind between two
+  shelters within the lull and the warning (5 s; a perfect runner within `stormAllowance`, about
+  3.8 s), and a perfect runner's longest takes `STORM.wait` (1.75 s) at least, so the gusts have to
+  be waited out; the way climbs at least 20 cells of the hill.
 - **Population:** few, never on the hill.
 - **As built** (`cubegen/trials/storm.js`, `index.js finishStorm`; `core/trials.js STORM`,
   `game/trials.js stepStorm`): the hill as the flood's summit (`HILL`: a summit of radius 2.3, the
   ramp two cells wide round it over 0.9 of a turn, a ring of flat foot), in the middle of the room
   as far from the pads as it gets, nothing built onto it (`stormRoute`), no fences on it. A boulder
-  (three levels up) stands on the ramp's outer half every five cells along it, only where there is
-  room to pass inside it; the cells whose way out from the hill's middle meets a boulder within a
+  (three levels up) stands on the ramp's outer half, evenly along it, as few as keep every stretch
+  within the run allowed (`HILL.reach` of it along the ramp's middle; two on its 19 cells), only
+  where there is room to pass inside it; the cells whose way out from the hill's middle meets a boulder within a
   cell and a half are shelter, the rest of the ramp `exposed`. The checked way is the fastest that
   keeps to the shelter (exposed time counting five times, `arrivals`' `weigh`).
 
@@ -404,20 +426,23 @@ warden; run back through the gate and drop the portcullis on it.
   corner the **relic** on its altar, and behind it, in the corner, the warden's **lair** (a dark
   arch). Rocks stand about the hall.
 - **Running:** starts when the relic is taken (`F`), not on stepping off the pad: look around and
-  learn the way first. `HUNTER.wake` (1.5 s) later the **warden** breaks out of its lair: the depth's
+  learn the way first. The room's `wake` time (1-6 s, about 3) later the **warden** breaks out of its lair: the depth's
   heaviest kind that fights up close, `HUNTER.mods` stronger (six times the health, twice the damage,
   bigger, heavier: "Raging stunder"). It is an ordinary enemy (it fights, it can be hit), always
   hunting the nearest player over the floor graph: no ladders, no jumps. It runs at `HUNTER.ratio`
-  (1) times the speed its quarry can run at now: a swiftness potion quickens it too, a chill slows
-  it. Out-running it on the straight is not enough; jumps and ladders it cannot take are.
+  (1.2) times the speed its quarry can run at now: a swiftness potion quickens it too, a chill
+  slows it. It is faster than you: only the head start gets you to the lever.
 - **Goal:** the lever (`F`, only once the relic is taken) drops the portcullis for good: a warden
   in the hall is shut in (it goes back to its lair and is gone a while later), one already through
   is gone at once. Killing it ends the hunt too.
 - **Fails by:** death (back in the room before, the relic back on its altar).
-- **Check:** races: a player running from the relic to the lever at `RUN_SPEED` (`x HUNTER.race`
-  1.15, plus a second for the lever) gets there before the warden, out `HUNTER.wake` s later and
-  running at `RUN_SPEED x HUNTER.ratio` over an enemy's ways only (`timing.js arrivals`, `enemy`),
-  reaches the gate; the warden can reach the gate at all; the run goes through the gate.
+- **Check:** races: the slow player running from the relic to the lever (`× SLACK`, no `REACT`: it
+  is taken when the player is ready; plus a second for the lever) gets there before the warden,
+  running at `RUN_SPEED × HUNTER.ratio` over an enemy's ways only (`timing.js arrivals`, `enemy`),
+  reaches the gate. Its waking is fitted to that: as late as it must be, so that it is at the gate
+  just as the slow player pulls the lever (`map.trial.wake`, between `HUNTER.wake` and
+  `HUNTER.late`, else the room is retried). The warden can reach the gate at all; the run goes
+  through the gate.
 - **Population:** none but the warden.
 - **As built** (`cubegen/trials/chase.js`, `index.js finishChase`; `core/trials.js HUNTER`,
   `game/trialevents.js stepChase`): the planner asks for faces that meet at a corner with both
@@ -425,8 +450,8 @@ warden; run back through the gate and drop the portcullis on it.
   from the corner, the gate in the middle of the wall's longer arm, the altar a flat 3x3 two cells in
   from the far corner, nothing built onto or over the wall and the rocks (`chaseRoute`). The owner of
   the trial spawns the warden and sets its speed every frame; it comes to the others like any enemy.
-  The relic's model is the emitter's for now, the lair the siege's mouth. The races come out close:
-  the warden a third to half a second behind the lever.
+  The relic's model is the emitter's for now, the lair the siege's mouth. A perfect runner is at
+  the lever about 2 s before the warden is at the gate.
 
 ### `miasma`: Sinking fog
 
@@ -435,8 +460,9 @@ before it reaches you.
 
 - **Room:** walled (canyon, caves), two or more layers. You enter on the highest layer. The
   **vent valve** stands in the lowest part (a pit or grotto); the exit is on the ground.
-- **Fog:** its underside starts 4 levels over the highest floor and sinks in pulses down to
-  one level over the lowest ground, in 50–70 s.
+- **Fog:** its underside starts `FOG.over` (3) levels over the highest floor you can get to and
+  sinks in pulses, each a step in `FOG.rise` (1 s) and starting as the slow player leaves the
+  floors it reaches, down to half a level over a head on the valve's ledge: about 10-15 s in all.
 - **Rules:** while your head is in the fog you take 6% of your max HP per second, plus 3% for
   every further second in it. Death fails the trial.
 - **Goal:** the valve (`F`, 1 s). The fog lifts in 5 s.
@@ -447,7 +473,8 @@ before it reaches you.
   `fogY`, `game/trials.js stepFog`): a terrace (five wide, three deep) at the high entry, the pit
   (3x3, two levels under the ground round it) at least six cells from the entry and four from the
   exit; the route search builds the way down. The fog is a flood upside down (`fitFlood` in the
-  levels it has sunk, its steps grown so it sinks in at most eight pulses); it stops half a level
+  levels it has sunk, its steps grown so it sinks in at most eight pulses, each in a second: a way
+  down drops faster than a way up climbs); it stops half a level
   over a head on the valve's ledge. The damage is told in bites of 3% of the max HP (a death: back
   in the room before). Drawn as a haze from its underside up with a denser sheet at the
   underside.
@@ -459,9 +486,15 @@ minimal solution length within its depth's band (easy up to depth 6, harder from
 starts unsolved. They are built at one level on a deck or in a hollow of the room, with a
 2-cell walkway around and the gate (the exit's or a vault's) beside it.
 
+**One puzzle, one builder** (`cubegen/trials/puzzles.js`): every kind has one size table
+(`PUZZLE_SIZE`, by depth) and one `mountPuzzle(ctx, kind, depth, slot)` that lays its deck in a
+slot and builds it there. Its own room mounts it anywhere in the room (`shapePuzzle`, the field
+either way round), a combiner on a platform. A field is at most 5 cells across one way, so that two
+decks (field and rim or ring: 7) fit side by side in a room.
+
 ### `slide`: Ice slide
 
-- **Field:** 6×6 to 9×9 cells of ice with rocks on it, a rim around it. You enter on one side;
+- **Field:** 6×5 (7×5 from depth 10) cells of ice with rocks on it, a rim around it. You enter on one side;
   the goal plate is on another.
 - **Rules:** on the ice you slide in the direction you set off in, only along the grid, until
   a rock or the rim stops you, on a cell's centre. No steering while sliding. Stepping off the
@@ -469,11 +502,11 @@ starts unsolved. They are built at one level on a deck or in a hollow of the roo
 - **Generator:** rocks at random (12–20%). BFS over the stops; keep the field if the shortest
   way to the goal has 4–6 slides (depths 1–9) or 6–9 (10–19), at least three stops lead
   nowhere useful, and from every reachable stop the entry can be reached again (no traps).
-- **Themes:** ice worlds only: peaks and frozen caves (`strict`: not even as a sunken room's
-  stage elsewhere), drawn twice as often there.
+- **Themes:** ice worlds only: peaks and frozen caves (`strict`: not even as a combiner's puzzle
+  elsewhere), drawn twice as often there.
 - **As built** (`cubegen/trials/slide.js`, `deck.js`, `solve.js`; `game/trials.js iceStep`): the
-  field is 6x6 (7x7 from depth 10) on a deck: a rim three levels up round it, a walkway two
-  cells wide round that. Walking in through the entry gap you push inwards, so you slide straight
+  field is 6x5 (7x5 from depth 10) on a deck: a rim three levels up round it, a walkway two
+  cells wide round that. In a combiner its goal's gate is on the side of its way in. Walking in through the entry gap you push inwards, so you slide straight
   on: the puzzle starts where that slide stops (`solve.js slideStart`), and the game always slides
   you in. Sliding back out through the entry gap takes you off the ice; the goal's gate (a
   portcullis in the rim beside the goal plate) opens once solved. A vault's reward site is an
@@ -486,7 +519,7 @@ starts unsolved. They are built at one level on a deck or in a hollow of the roo
 
 ### `mirror`: Mirror beam
 
-- **Field:** 6×6 or 7×7 cells. An emitter crystal on one edge shoots a beam along its row; a
+- **Field:** 6×5 or 7×5 cells. An emitter crystal on one edge shoots a beam along its row; a
   receiver stands on another edge. Mirrors on some cells (rotors, `/` or `\`), lenses (crystals the
   beam shines through) on others, and a few fixed blockers.
 - **Rules:** `F` flips a mirror. The beam is traced live; a body in it blocks it. Harmless. Solved
@@ -500,8 +533,7 @@ starts unsolved. They are built at one level on a deck or in a hollow of the roo
 - **Themes:** mines, forge, ruins, abyss, highlands (sun mirrors).
 - **As built** (`cubegen/trials/grid.js`, `solve.js makeMirror`, `core/trials.js traceBeam`,
   `beamDone`; `render/trials.js setGridParts`): on a deck without a rim (you walk among the
-  mirrors: a mirror's stand is in the way, its cell is not); on a sunken platform 3x3 with two
-  turns and no lenses. The emitter and the receiver stand on the ring round the field, a lens on
+  mirrors: a mirror's stand is in the way, its cell is not). The emitter and the receiver stand on the ring round the field, a lens on
   its cell (for now the receiver's model, violet). A flipped mirror swings round on its turntable
   with a little overshoot; a changed beam grows anew from the emitter (24 cells/s), sparking where
   it turns, and a lens or the receiver lights only once the beam gets there.
@@ -516,12 +548,11 @@ starts unsolved. They are built at one level on a deck or in a hollow of the roo
   presses, not solved at the start.
 - **Themes:** any; ossuary and ruins get it more often.
 - **As built** (`grid.js`, `solve.js makeBraziers`, `solveBraziers`): the braziers stand two
-  cells apart on a 5x5 field (a ring of eight round a 3x3 on a sunken platform, so every one is in
-  reach from round it). Lines on the floor join the linked ones.
+  cells apart on a 5x5 field. Lines on the floor join the linked ones.
 
 ### `crates`: Crates on plates
 
-- **Field:** 6×6 to 7×7 with rubble walls inside, 3 plates, as many heavy crates.
+- **Field:** 6×5 (7×5 from depth 10) with rubble walls inside, 3 plates, as many heavy crates.
 - **Rules:** push only (part rules). A plate counts while a crate is on it (standing on one does
   not); all plates covered at once opens the gate for good. The reset lever at the entrance puts
   the crates back.
@@ -532,10 +563,10 @@ starts unsolved. They are built at one level on a deck or in a hollow of the roo
   between crates at least as often as there are crates (no one crate after the other).
 - **Themes:** mines, ruins, forge, hive (wax blocks), any.
 - **As built** (`grid.js`, `solve.js makeCrates`, `pullSearch`, `solveSokoban`; `game/trials.js
-  stepCrates`): a 6x6 field with three crates (7x7 from depth 10; 4x4 with two on a sunken
-  platform) in a rim, 10-18% of it rubble walls up to the rim's height, the plates not on the entry
-  nor beside it, the way in a gap with the reset lever in front of it. Pushes needed: 10-18 (16-26
-  from depth 10, 5-10 on a platform), as many as the field gives within that. A crate is a box in
+  stepCrates`): a 6x5 field with three crates (7x5 from depth 10) in a rim, 10-18% of it rubble
+  walls up to the rim's height, the plates not on the entry nor beside it, the way in a gap with
+  the reset lever in front of it. Pushes needed: 10-18 (16-26 from depth 10), as many as the field
+  gives within that. A crate is a box in
   the way; walking square into one for 0.3 s pushes it. Playing together the crates' cells go to
   the others with the puzzle's bits.
 
@@ -641,9 +672,10 @@ volcanic fire shrine; candles stay as they are, too small for it).
 
 | Where | What |
 |---|---|
-| `world/trials.js` | the plan (slots, kinds, rooms, `from`, the `runes` clue room), WFC pins |
+| `world/trials.js` | the plan (slots, kinds, rooms, `from`, the `runes` clue room, a combiner's puzzles, a sunken room's portals), WFC pins |
 | `cubegen/trials/index.js` | builds `map.trial` from `spec.trial`, retries within the cube's attempts |
 | `cubegen/trials/<kind>.js` | the room's shape and parts for one kind |
+| `cubegen/trials/puzzles.js` | every puzzle's size and its mount: its own room, a combiner's platform |
 | `cubegen/trials/timing.js` | the timing check (deadlines, gaps, races) |
 | `cubegen/trials/solve.js` | the puzzle solvers (slide BFS, mirror BFS, GF(2), Sokoban) |
 | `core/trials.js` | pure rules: states, timelines, puzzle moves, part rules |
@@ -685,6 +717,103 @@ Each step is done when its kind is planned, generated, checked, playable, reacha
     kind has its `TRIAL_TIME`) and rewards (a siege's waves as kills, a vault's site with the
     chests). The weights and numbers are still the starting values above (some already fitted
     to a cube's size, see each kind's "As built"); tuning them is for play.
+12. [x] **Retiming:** every timed event checked and fitted against a running player, tight from
+    both sides ("Step 12" below).
+13. [x] **Combiners:** the sunken room as the first combiner: two puzzles of the rotation, each
+    built exactly as in its own room, mounted on its platforms ("Step 13" below).
+
+## Retiming and combiners
+
+### What went wrong (measured on generated rooms, a few seeds, depths 1-19)
+
+The timing check's slow player walks (`WALK_SPEED`, 1.9 cells/s) and takes `SLACK` (1.5) times as
+long, plus `ARM_TIME`. The hero always runs (2.8 cells/s, `game/update.js`), so a real player has
+about 2.2 times the time the check allows. And the check only bounds from one side (the slow
+player makes it); nothing asks that anyone is ever pressed.
+
+| Kind | A running player | Why |
+|---|---|---|
+| `flood` | on the summit in 10-15 s; the water needs 50-70 s; 8-15 s to spare at the closest | the slow walker, `FLOOD.min` (50 s), pulses never closer than rise + hold (7 s) |
+| `collapse` | across 7-10 s before the wave | the slow walker; the wave (1.3 cells/s) slower than a walk |
+| `miasma` | down in 5-8 s; the fog needs 50-55 s; 12-37 s to spare | the slow walker, `FLOOD.min` |
+| `cold` | at the great fire in 12-17 s, freezing takes 20 s (after the 3 s armed) | the braziers can be left out: the fire never asks for them |
+| `storm` | out in the wind about 2.4 s at a time; 6.5 s of every 9 s calm | the slow walker; the boulders every 5 cells whatever the timing |
+| `chase` | at the lever 2 s and more before the warden is at the gate | it runs as fast as you and wakes 1.5 s after you, behind you: it never closes in |
+| `siege` | 3-5 weakened attackers a wave | not a timing matter: left for a combat pass |
+| `timedgate` | 1.3-2.5 s to spare | already timed at running speed: stays as it is |
+
+The sunken room's stage puzzles came from a second size table (`grid.js gridSize(kind, depth,
+small)`, `sunken.js SIZE`): lights out on a 3x3 ring with the braziers a cell apart (its link
+lines all but hidden under them), always 3-4 presses; the mirror 3x3 with two turns, no lens;
+the crates 4x4 with two; the slide 4x4. The HUD showed the stage instead of the puzzle's hint.
+
+### Step 12: retiming (done)
+
+- **The pace** (`core/trials.js`): the checked player runs (`RUN_SPEED`, as the game does) and the
+  slow player takes `SLACK` (1.3) times as long as the fastest way, plus `REACT` (1.5 s) to take in
+  the banner (`slowTime`), instead of walking × 1.5 + `ARM_TIME`. Every timed check (`timing.js`:
+  deadlines, gaps, races) uses it.
+- **Fitted, not padded:** each event's hazard is fitted to that slow runner, as close as it
+  allows, and no floor of minimum time is added. The tests check both sides: the slow runner
+  makes it, and a perfect runner (the fastest way at `RUN_SPEED`) comes within `CLOSE` (5 s) of
+  the hazard at least once (`check.close`). The tests' runner (real physics) now runs.
+- `flood`, `miasma`: each pulse starts so that it reaches every floor it covers just as the slow
+  runner leaves it, and at least its rise after the one before (`FLOOD.rise` 2 s; the fog's
+  `FOG.rise` 1 s, a way down drops faster than a way up climbs). No hold, no `FLOOD.min`;
+  `FLOOD.max` still turns away a way up too long. The fog starts over the highest floor you can
+  get to (not the rock walls round the room). Measured: floods 15-26 s, a perfect runner within
+  2.5-4.4 s of the water; fogs 9-15 s, within 2.3-4.1 s.
+- `collapse`: the wave's speed is fitted too (1.3-2.8 cells/s, about 2.1): the one that follows
+  the slow runner closest, its delay (1-5 s) as little as keeps every cell standing until the slow
+  runner is off it. A perfect runner within 2.5-4.5 s of it.
+- `cold`: the freezing time is fitted per room (`map.trial.freeze`, 7-11 s): the straight run to
+  the great fire freezes a perfect runner at 4/5 of the way, so it needs a brazier. The braziers
+  are placed by running the meter along the slow runner's way (warm in a lit brazier's circle,
+  lighting included): it never goes over `COLD.reach` (it peaks at 55-90%). One or two on the way.
+- `storm`: a shorter cycle (7.5 s: 1.5 s warning, 2.5 s gust, 3.5 s lull); the exposed stretches
+  timed at the slow runner's pace within the lull and the warning; the boulders spaced evenly, as
+  few as that lets (two), and a perfect runner's longest stretch `STORM.wait` (1.75 s) at least, so
+  the gusts have to be waited out. Measured: a perfect runner 2.8-3.8 s out in the wind at a time.
+- `chase`: the warden runs faster than you (`HUNTER.ratio` 1.2), and its waking is fitted per
+  room (`map.trial.wake`, about 3 s): it is at the gate just as the slow runner pulls the lever.
+- `siege`, `timedgate`: unchanged.
+- The guide's "slow player" (`learn/world.html#trial-check`, English and German), each kind's
+  section above and `TRIAL_TIME` (the balance simulation) follow the new numbers.
+
+### Step 13: combiners, the sunken room first (done)
+
+A **combiner** is a trial room that holds puzzles of the rotation and ties them together with a
+rule of its own (`TRIALS[kind].combines`: how many). The sunken room is the first: two puzzles,
+each solved drains the room a stage.
+
+- **One puzzle, one builder** (`cubegen/trials/puzzles.js`): every puzzle kind has one size table
+  (`PUZZLE_SIZE`, by depth) and one `mountPuzzle(ctx, kind, depth, slot)` that lays its deck in a
+  slot (anywhere in the room, or a platform's rectangle at its level; the side the way comes in;
+  where a slide's goal may be; the axis its short side lies along) and builds it there. Its own
+  room mounts it in the whole room (`shapePuzzle`). `gridSize(..., small)`, `sunken.js SIZE` and
+  the 3x3 ring-only lights out are gone.
+- **Two to a room.** Inside its edges a room has 14x14 cells, and two decks only fit side by side
+  if each is at most 7 cells across one way (field 5 plus a rim or ring each side): two of 8 need
+  16. So every puzzle's field is at most 5 across: `slide`, `crates` and `mirror` are 6x5 (7x5
+  from depth 10; they were 6x6 and 7x7), in their own rooms too. Their move bands stay.
+  `braziers` (5x5) and `runes` (5x5) are as they were.
+- **The sunken room's shape** (`sunken.js`): the room in two halves, each a deck at its far end and
+  its part of the strip where the portals stand ("`sunken`" above). That only fits about one pair
+  of portal places in five, so the planner moves the room's portals along their faces as little
+  as it takes (`sunkenPads`, `trialPortalPos`). Always two stages.
+- **The stages** are drawn from the depth's puzzle rotation (`combinerStages`: the kinds and
+  weights a puzzle slot draws from, their themes held), those that may be mounted
+  (`TRIALS[kind].mounts`: not `runes`, whose clue is in another room, nor `timedgate`, a whole
+  room); two different kinds.
+- **Running it:** each puzzle behaves as in its own room: the same parts, rules and drawing. The
+  HUD names the room and the stage's puzzle and gives the puzzle's hint, the bar the stages
+  drained. A combiner kind says what a solved puzzle does (`game/trials.js COMBINE`: the sunken
+  room sinks a stage, its last resolves it).
+- **Later combiners** take the same pieces: their own shape and slots, `mountPuzzle` for the
+  puzzles, `combinerStages` for which, their own rule in `COMBINE`.
+- **Checked:** every sunken room generates with two different puzzles that pass the checks of
+  their own rooms (the same size, the same bands); the browser check solves both stages of a
+  sunken room with each kind's own solver.
 
 ## Step 1 in phases
 

@@ -139,7 +139,9 @@ export function finishSpots(ctx) {
     const safe = reachTo(ctx, s.exit, true), around = ctx.portalFloors.every(p => safe?.has(p.id))
       && (plan.kind === 'hide' || safe?.has(access.id) && reachTo(ctx, access, true)?.has(s.entry.id));
     stood.forEach((g, i) => { g.siteBlocked = was[i]; });
-    if (!around) { ctx.spotFailures.push({ id: plan.id, kind: plan.kind, reason: 'in the way' }); continue; }
+    // (an outpost's cart stands on its cell: not on one the route's ways go over either)
+    const onRoute = plan.kind === 'outpost' && (ctx.segments || []).some(sg => sg.some(m => m.from === f || m.to === f || m.cells.includes(f.c)));
+    if (!around || onRoute) { ctx.spotFailures.push({ id: plan.id, kind: plan.kind, reason: 'in the way' }); continue; }
     // facing the one who comes to talk (a seat), the fire (a camp's places)
     const face = (from, to) => Math.atan2(to.x - from.x, to.z - from.z);
     const anchor = at(f, plan.kind === 'seat' ? face(f, access) : 0), approach = at(access, face(access, f));

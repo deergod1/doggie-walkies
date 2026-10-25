@@ -1,14 +1,15 @@
 // The timing check of the timed events (docs/trials.md "Timing check"): against a slow player,
-// not a perfect one. A Dijkstra over the cube's real reach graph (cubegen/reach.js, after the
-// smoothing and the fences, with the structures) gives every floor its earliest arrival, each
-// move costing its real duration: walking at WALK_SPEED (or RUN_SPEED), ramps and stairs by their
-// length, ladders at the climb speed, a jump or a drop 0.6 s (a jump a second more, its run-up).
+// not a perfect one, and close to it. A Dijkstra over the cube's real reach graph (cubegen/reach.js,
+// after the smoothing and the fences, with the structures) gives every floor its earliest arrival
+// for a perfect runner, each move costing its real duration: running at RUN_SPEED (as the hero
+// always does), ramps and stairs by their length, ladders at the climb speed, a jump or a drop 0.6 s
+// (a jump a second more, its run-up). The slow player gets there at slowTime of that
+// (core/trials.js: SLACK times as long, plus REACT s).
 //   deadlines  the hazard gives each floor the time it stops being safe: the path must leave
-//              every floor with arrival x SLACK + ARM_TIME <= deadline, and end on a floor with
-//              none
-import { N, LH, WALK_SPEED, CLIMB_SPEED, CHAR_H } from '../../core/constants.js';
+//              every floor by slowTime <= deadline, and end on a floor with none
+import { N, LH, RUN_SPEED, CLIMB_SPEED, CHAR_H } from '../../core/constants.js';
 import { Heap } from '../../core/heap.js';
-import { ARM_TIME, SLACK } from '../../core/trials.js';
+import { slowTime } from '../../core/trials.js';
 import { graph } from '../reach.js';
 import { floorWalkable } from '../../physics/floornav.js';
 
@@ -36,7 +37,7 @@ function duration(a, b, move, speed) {
 // weigh(node): a move onto it counts that many times its length (a way that keeps out of the wind:
 // time is then what is minimised, `real` the seconds it really takes). enemy: an enemy's ways only
 // (physics/enemynav.js): over joined ground, stairs, bridges and landings; no ladder, jump or drop
-export function arrivals(ctx, start, speed = WALK_SPEED, weigh = null, enemy = false) {
+export function arrivals(ctx, start, speed = RUN_SPEED, weigh = null, enemy = false) {
   const adj = graph(ctx, true), moves = new Map();
   for (const m of ctx.moves) {
     moves.set(m.from.id + '>' + m.to.id, m);
@@ -70,21 +71,23 @@ export function pathOf(arr, goal) {
   return out;
 }
 
-// Deadlines: along `path`, every node is left (the next one reached) with arrival x SLACK + ARM_TIME
-// at or before its deadline (deadline(node): s on the trial's clock, null for none); the last node
-// has none. { ok, slack (the least margin, s), leave: [s, ...] (when each node is left), fail }
+// Deadlines: along `path`, every node is left (the next one reached) by the slow player at or before
+// its deadline (deadline(node): s on the trial's clock, null for none); the last node has none.
+// { ok, slack (the slow player's least margin, s), close (a perfect runner's least margin: how close
+// the hazard comes), leave: [s, ...] (when a perfect runner leaves each node), fail }
 export function checkDeadlines(path, arr, deadline) {
-  let slack = Infinity, fail = null;
+  let slack = Infinity, close = Infinity, fail = null;
   const leave = path.map((n, i) => i + 1 < path.length ? arr.time.get(path[i + 1].id) : Infinity);
   path.forEach((n, i) => {
     const dl = deadline(n);
     if (dl == null) return;
     if (i === path.length - 1) { fail ??= { node: n.id, why: 'ends on a floor with a deadline' }; slack = -Infinity; return; }
-    const margin = dl - (leave[i] * SLACK + ARM_TIME);
+    const margin = dl - slowTime(leave[i]);
     if (margin < slack) slack = margin;
+    close = Math.min(close, dl - leave[i]);
     if (margin < 0) fail ??= { node: n.id, why: `left at ${leave[i].toFixed(1)} s, gone at ${dl.toFixed(1)} s` };
   });
-  return { ok: !fail, slack, leave, fail };
+  return { ok: !fail, slack, close, leave, fail };
 }
 
 // the level a node's floor is lost at (the water over its lowest corner)

@@ -94,8 +94,8 @@ export function lightBeacon(s) {
 
 // --- chase: the relic ------------------------------------------------------------------------------
 
-// The warden: the depth's heaviest close fighter, HUNTER.mods stronger, out of its lair HUNTER.wake s
-// after the relic is taken (the owner spawns it), hunting the players (posted at its lair, always
+// The warden: the depth's heaviest close fighter, HUNTER.mods stronger, out of its lair the room's
+// `wake` s after the relic is taken (the owner spawns it), hunting the players (posted at its lair, always
 // engaged: game/enemyai.js) at HUNTER.ratio times the speed its quarry can run at now. The
 // portcullis dropped: trapped in the hall it stays there, glaring, and is gone once the room is left;
 // one already through is gone at once (it slinks back into its lair a while later either way).
@@ -120,7 +120,7 @@ export function stepChase(m, s, dt, resolve) {
   if (m.kind !== 'chase') return;
   const live = s.phase === 'armed' || s.phase === 'running';
   if (mirroring()) return;   // (the owner runs it; the warden comes to the others as any enemy)
-  if (live && !warden && s.t >= HUNTER.wake) spawnWarden(m);
+  if (live && !warden && s.t >= (m.wake ?? HUNTER.wake)) spawnWarden(m);
   const e = wardenOf();
   if (!e) return;
   if (e.mode === 'dead') { if (live) resolve(); warden = null; return; }

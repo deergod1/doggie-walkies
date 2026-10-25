@@ -101,7 +101,7 @@ function stepCold(m, s, dt) {
   const on = m.kind === 'cold' && s.phase === 'running' && player.hp > 0;
   if (on) {
     const warm = m.parts.some(p => (p.type === 'warm' ? s.bits[p.id] : false) && Math.hypot(p.x - player.x, p.z - player.z) <= COLD.radius && Math.abs(p.y - player.y) < 2);
-    cold = coldStep(cold, dt, warm);
+    cold = coldStep(cold, dt, warm, m.freeze);
     if (cold >= 100) { cold = 0; hurt(player.hp + 1, msg('Frozen solid')); }
   } else if (m.kind !== 'cold' || s.phase !== 'armed') cold = Math.max(0, cold - 40 * dt);
   frost(m.kind === 'cold' ? cold / 100 : 0);
@@ -410,7 +410,9 @@ function hud() {
   const show = !!s && !!m && (s.phase === 'armed' || s.phase === 'running' || (isPuzzle(s.kind) || s.kind === 'sunken' || s.kind === 'siege') && s.phase !== 'resolved');
   el.hidden = !show;
   if (!show) return;
-  $('trial-name').textContent = tr(TRIALS[s.kind].name);
+  // (a combiner, the sunken room: the puzzle it is at, as in a room of its own, under its own name)
+  const at = TRIALS[s.kind].combines ? m.puzzles[Math.min(s.stage ?? 0, m.puzzles.length - 1)] : null;
+  $('trial-name').textContent = at ? `${tr(TRIALS[s.kind].name)} · ${tr(TRIALS[at.kind].name)}` : tr(TRIALS[s.kind].name);
   let line = '', fill = 0;
   if (s.kind === 'flood') {
     const tl = m.timeline, next = nextPulse(tl, s.t);
@@ -426,9 +428,9 @@ function hud() {
     fill = n / order.length;
   }
   if (s.kind === 'timedgate' && timedOpen(m, s)) { const T = m.puzzles[0].T; line = tr('The gate is open: {n} s', { n: Math.max(0, Math.ceil(T - timed.t)) }); fill = Math.max(0, 1 - timed.t / T); }
-  if (s.kind === 'sunken') {
-    line = tr("Stage {n} of {of}: solve the dry platform's puzzle to drain the room", { n: (s.stage ?? 0) + 1, of: m.stages });
-    fill = (s.stage ?? 0) / m.stages;
+  if (at) {
+    line = PUZZLE_HINT[at.kind] ? tr(PUZZLE_HINT[at.kind]) : '';
+    fill = (s.stage ?? 0) / m.puzzles.length;
   }
   const ev = m && eventHud(m, s);
   if (ev) ({ line, fill } = ev);
@@ -808,7 +810,9 @@ function slideFrom(pz, at, d) {
   return true;
 }
 
-// a sunken room's stage i solved: the water sinks a stage (for the run: run.trials), the last for good
+// What a combiner does when one of its puzzles is solved (docs/trials.md "Combiners"): the sunken
+// room's stage i solved, the water sinks a stage (for the run: run.trials), the last for good
+const COMBINE = { sunken: i => solveStage(i) };
 function solveStage(i) {
   const s = state.trial, m = mapTrial();
   if (!sinkStage(m, s, i)) return;
@@ -829,12 +833,12 @@ export function shareTrialStage(m) {
 }
 
 // Puzzle i is solved: in a room of its own the trial is met (its gate into the run, the gate in the
-// rim open, the exit or the vault open); a sunken room's stage drains it a stage further (only the
-// stage it is at: game/sunken). Playing together the owner decides.
+// rim open, the exit or the vault open); in a combiner its rule says (COMBINE: a sunken room's stage
+// drains it a stage further, only the stage it is at). Playing together the owner decides.
 function solvePuzzle(i = 0) {
   const s = state.trial, m = mapTrial();
   if (!s || !m || s.phase === 'resolved' || puzzleSolved(s, i)) return;
   if (mirroring()) { relay.trialAct?.({ key: s.key, act: 'part', id: `solve:${i}` }); return; }
-  if (m.kind === 'sunken') { solveStage(i); return; }
+  if (COMBINE[m.kind]) { COMBINE[m.kind](i); return; }
   resolve();
 }

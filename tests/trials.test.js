@@ -6,10 +6,11 @@ import { World } from '../src/world/world.js';
 import { step, faceKey, parse, key } from '../src/world/coords.js';
 import { voidAllowed, fallMask } from '../src/world/voids.js';
 import { MAX_DEPTH, worldThemes } from '../src/themes/depth.js';
-import { TRIALS, trialGate, floodLevel, floodTime, nextPulse, drainLevel, DRAIN_TIME, fitFlood, floodEnd, FLOOD, ARM_TIME, SLACK,
+import { TRIALS, trialGate, floodLevel, floodTime, nextPulse, drainLevel, DRAIN_TIME, fitFlood, floodEnd, FLOOD, ARM_TIME, CLOSE, slowTime, stormAllowance,
   newTrial, stepTrial, resolveTrial, resetTrial, trialFluidLevel, trialSealed, WAVE, crumbleTime, crustState, BASIN,
   slideStop, fieldIn, isRock, useBit, plateHeld, sinkStage, SINK, traceBeam, beamDone, pressBrazier, allLit, pushTarget, platesHeld, FOG, fogLevel, fogY, fogHurt, COLD, coldStep, STORM, stormPhase, holdTime, HUNTER, runeOrder } from '../src/core/trials.js';
 import { solveSlide, slideBand, solveMirror, solveBraziers, brazierPattern, solveSokoban } from '../src/cubegen/trials/solve.js';
+import { PUZZLE_SIZE } from '../src/cubegen/trials/puzzles.js';
 import { setGoneFloors } from '../src/physics/collide.js';
 import { portalPos } from '../src/world/trials.js';
 import { portalLocked } from '../src/core/guardians.js';
@@ -174,14 +175,14 @@ test('the flood rises in pulses, never falls, and stops at its mark', () => {
   assert.equal(drainLevel(tl, 10, 0), 10); assert.equal(drainLevel(tl, 10, DRAIN_TIME), 2);
 });
 
-test('fitting a flood: pulses wait for a slow player, last 50 to 70 s, and a way too long fails', () => {
+test('fitting a flood: each pulse waits for the slow player and no longer, a rise after the one before at the soonest; a way too long fails', () => {
   const easy = fitFlood(2, 16, []);
-  assert.ok(floodEnd(easy) >= 50 && floodEnd(easy) <= 70, `${floodEnd(easy)}`);
-  assert.ok(easy.pulses[0] >= ARM_TIME);
-  for (let j = 1; j < easy.pulses.length; j++) assert.ok(easy.pulses[j] - easy.pulses[j - 1] >= FLOOD.rise + FLOOD.hold - 1e-9);
+  assert.equal(easy.pulses[0], ARM_TIME);
+  for (let j = 1; j < easy.pulses.length; j++) assert.ok(Math.abs(easy.pulses[j] - easy.pulses[j - 1] - FLOOD.rise) < 1e-9, 'nothing waiting: one straight after the other');
+  assert.equal(floodEnd(easy), ARM_TIME + 7 * FLOOD.rise);
   // a need holds its pulse (and the ones after it) back
   const held = fitFlood(2, 16, [20, undefined, 30]);
-  assert.ok(held.pulses[0] >= 20 && held.pulses[2] >= 30);
+  assert.deepEqual(held.pulses.slice(0, 4), [20, 22, 30, 32]);
   assert.ok(floodEnd(held) <= 70);
   assert.equal(fitFlood(2, 16, [, , , , , , 69]), null);
 });
@@ -191,7 +192,7 @@ test('the deadline check: a synthetic way up passes a fitted flood and fails a t
   const path = Array.from({ length: 12 }, (_, i) => ({ id: i, x: i, z: 0, top: 3 + i, landing: true }));
   const arr = { time: new Map(path.map((n, i) => [n.id, i * 1.5])) };
   const to = 13, needs = [];
-  path.forEach((n, i) => { if (i + 1 < path.length && n.top < to) { const j = Math.floor((n.top - 2) / 2); needs[j] = Math.max(needs[j] ?? 0, arr.time.get(i + 1) * SLACK + ARM_TIME); } });
+  path.forEach((n, i) => { if (i + 1 < path.length && n.top < to) { const j = Math.floor((n.top - 2) / 2); needs[j] = Math.max(needs[j] ?? 0, slowTime(arr.time.get(i + 1))); } });
   const tl = fitFlood(2, to, needs), deadline = tl => n => n.top >= to ? null : floodTime(tl, n.top);
   assert.ok(checkDeadlines(path, arr, deadline(tl)).ok);
   const fast = { ...tl, pulses: tl.pulses.map((_, j) => ARM_TIME + j * 2) };
@@ -201,19 +202,20 @@ test('the deadline check: a synthetic way up passes a fitted flood and fails a t
   assert.ok(!checkDeadlines(path.slice(0, 5), arr, deadline(tl)).ok);
 });
 
-test('every generated flood room passes its own timing check', () => {
+test('every generated flood room passes its own timing check, and the water comes close to a perfect runner', () => {
   let n = 0;
   for (const { seed, d, m } of floods(SEEDS.slice(0, 6))) {
     n++;
     const { timeline: tl, check } = m.trial;
     assert.ok(check.slack >= 0, `${seed}/${d}: slack ${check.slack}`);
-    assert.ok(floodEnd(tl) >= FLOOD.min - 1e-6 && floodEnd(tl) <= FLOOD.max + 1e-6, `${seed}/${d}: ${floodEnd(tl)} s`);
+    assert.ok(check.close <= CLOSE, `${seed}/${d}: never closer than ${check.close} s`);
+    assert.ok(floodEnd(tl) <= FLOOD.max + 1e-6, `${seed}/${d}: ${floodEnd(tl)} s`);
     assert.equal(tl.to, m.trial.summit.level - 2);
     // every floor of the checked path is left in time, again from the stored numbers
     check.path.forEach((p, i) => {
       if (p.dl == null) return;
       assert.ok(i + 1 < check.path.length, `${seed}/${d}: the path ends under water`);
-      assert.ok(check.path[i + 1].t * SLACK + ARM_TIME <= p.dl + 1e-6, `${seed}/${d}: node ${i}`);
+      assert.ok(slowTime(check.path[i + 1].t) <= p.dl + 0.02, `${seed}/${d}: node ${i}`);
     });
     assert.equal(check.path.at(-1).dl, null);
   }
@@ -281,10 +283,10 @@ test('under the trial\'s fluid everything drowns, and walking stops at its edge'
   void entry;
 });
 
-// The slow player: walking (not running) along the checked path, the water rising as the
-// timeline says from the moment it arms (they step off the pad), every step checked for drowning.
-// Climbs the walker cannot do (a ladder, a jump) are taken at their checked time.
-test('walking the checked way up of every flood with the real water: the summit is reached dry', () => {
+// A runner along the checked path, the water rising as the timeline says from the moment it arms
+// (they step off the pad), every step checked for drowning. Climbs the runner cannot do (a ladder, a
+// jump) are taken at their checked time.
+test('running the checked way up of every flood with the real water: the summit is reached dry', () => {
   let n = 0, worst = Infinity;
   for (const { seed, d, m } of floods(SEEDS.slice(0, 4))) {
     const { check, timeline: tl } = m.trial, pts = check.path;
@@ -299,7 +301,7 @@ test('walking the checked way up of every flood with the real water: the summit 
       while (Math.hypot(q.x - player.x, q.z - player.z) > 0.15 && steps++ < 300) {
         const dx = q.x - player.x, dz = q.z - player.z, dist = Math.hypot(dx, dz);
         if (dist < best - 0.01) { best = dist; since = 0; } else if ((since += DT) > 0.5) break;
-        movePlayer(DT, dx / dist, dz / dist, false, false);
+        movePlayer(DT, dx / dist, dz / dist, true, false);
         t += DT; water();
         const gr = groundAt(player.x, player.z, player.y + 0.1, 0);
         if (inFluid(gr, player.y)) { drowned = `at ${t.toFixed(1)} s on the way to point ${j}`; break; }
@@ -416,6 +418,8 @@ test('every collapse room generates: aprons, a crust 25-40 cells along with its 
     assert.ok(along >= 15 && along <= 40, `${seed}/${d}: ${along} cells along`);
     branches += tr.branches; gaps += tr.gaps;
     assert.ok(tr.check.slack >= 0 && tr.wave.delay <= WAVE.most, `${seed}/${d}: slack ${tr.check.slack}, delay ${tr.wave.delay}`);
+    assert.ok(tr.check.close <= CLOSE, `${seed}/${d}: never closer than ${tr.check.close} s`);
+    assert.ok(tr.wave.speed >= WAVE.speed && tr.wave.speed <= WAVE.fastest, `${seed}/${d}: the wave at ${tr.wave.speed} cells/s`);
     // the checked path crosses the crust (there is no way round it) and ends on the exit apron
     assert.ok(tr.check.path.some(p => p.dl != null), `${seed}/${d}: the way does not cross the crust`);
     const last = tr.check.path.at(-1);
@@ -448,9 +452,9 @@ test('the planner predicts where a trial room\'s portals stand', () => {
   }
 });
 
-// The slow player again: walking the checked path while the crust falls away behind, as the wave
-// says from the moment it arms; never in the basin, onto the exit apron in the end
-test('walking the checked way across every collapse with the real crust falling: across, dry', () => {
+// A runner again along the checked path while the crust falls away behind, as the wave says from the
+// moment it arms; never in the basin, onto the exit apron in the end
+test('running the checked way across every collapse with the real crust falling: across, dry', () => {
   let n = 0;
   for (const { seed, d, m } of collapses(SEEDS.slice(0, 4))) {
     const tr = m.trial, pts = tr.check.path;
@@ -474,7 +478,7 @@ test('walking the checked way across every collapse with the real crust falling:
         // (just before the edge would stop it: still running)
         const jump = gap && !jumped && player.grounded && dist - 1.5 < CHAR_R + Math.hypot(player.vx, player.vz) * DT * 2 + 0.1;
         if (jump) jumped = true;
-        movePlayer(DT, dx / dist, dz / dist, gap, jump);
+        movePlayer(DT, dx / dist, dz / dist, true, jump);
         t += DT; gone = goneNow();
         if (inFluid(groundAt(player.x, player.z, player.y + 0.1, 0), player.y)) { fell = `at ${t.toFixed(1)} s, on the way to point ${j}`; break; }
         if (gap && jumped && player.grounded && dist < 0.6) break;
@@ -614,25 +618,35 @@ function* sunkens(seeds) {
   }
 }
 
-test('every sunken room generates: in from up high, out on the ground, a platform a stage, each dry only once the one before drains', () => {
+test('every sunken room generates: in from up high, out on the ground, two puzzles of the rotation each as in its own room, each dry only once the one before drains', () => {
   let n = 0;
-  const stages = {};
+  const kinds = {};
   for (const { seed, d, m, t } of sunkens(SEEDS.slice(0, 5))) {
     n++;
     const tr = m.trial, W = tr.water, entry = m.portals.find(p => p.dir === tr.entry), exit = m.portals.find(p => p.dir === t.exit);
     assert.equal(m.K, 3); assert.equal(entry.layer, 2); assert.equal(exit.layer, 0);
-    assert.equal(tr.puzzles.length, tr.stages); assert.equal(W.length, tr.stages + 1);
+    assert.equal(tr.puzzles.length, 2); assert.equal(tr.stages, 2); assert.equal(W.length, 3);
     assert.deepEqual(tr.puzzles.map(p => p.kind), t.stages);
+    assert.notEqual(t.stages[0], t.stages[1]);
+    // its portals where the plan moved them
+    const along = p => p.dir < 2 ? p.z : p.x;
+    assert.equal(along(entry), t.pads[tr.entry]); assert.equal(along(exit), t.pads[t.exit]);
     for (let i = 1; i < W.length; i++) assert.ok(W[i] < W[i - 1], `${seed}/${d}: the water sinks`);
-    assert.ok(entry.y > W[0] * LH && exit.y < W[tr.stages - 1] * LH, `${seed}/${d}: in over the water, out under it until the end`);
+    assert.ok(entry.y > W[0] * LH && exit.y < W[1] * LH, `${seed}/${d}: in over the water, out under it until the end`);
     tr.puzzles.forEach((pz, i) => {
       assert.ok(pz.deck.level > W[i], `${seed}/${d}: platform ${i} dry at its stage`);
       if (i) assert.ok(pz.deck.level < W[i - 1], `${seed}/${d}: platform ${i} under water before`);
-      if (pz.kind === 'slide') assert.ok(solveSlide(pz.field).slides < Infinity);
+      // the puzzle as in a room of its own: its field's size and how hard it is
+      const size = PUZZLE_SIZE[pz.kind](d);
+      assert.deepEqual([Math.min(pz.deck.w, pz.deck.h), Math.max(pz.deck.w, pz.deck.h)], [size.short, size.long], `${seed}/${d}: ${pz.kind} ${pz.deck.w}x${pz.deck.h}`);
+      const bits = type => pz.parts.filter(p => p.type === type).sort((a, b) => a.i - b.i).map(p => tr.start[p.id]);
+      const moves = pz.kind === 'slide' ? solveSlide(pz.field).slides : pz.kind === 'mirror' ? solveMirror(pz.field, bits('mirror')).flips
+        : pz.kind === 'braziers' ? solveBraziers(pz.field.links, bits('brazier')).presses : pz.check.pushes;
+      assert.ok(moves >= size.band[0] && moves <= size.band[1], `${seed}/${d}: ${pz.kind} in ${moves}, its band ${size.band}`);
+      kinds[pz.kind] = (kinds[pz.kind] ?? 0) + 1;
     });
-    stages[tr.stages] = (stages[tr.stages] ?? 0) + 1;
   }
-  assert.ok(n > 40 && stages[3] > 10, `${n} sunken rooms, by stages ${JSON.stringify(stages)}`);
+  assert.ok(n > 40 && Object.keys(kinds).length >= 3, `${n} sunken rooms, puzzles ${JSON.stringify(kinds)}`);
 });
 
 test('the sunken water: a stage at a time, sinking over SINK s, gone once resolved', () => {
@@ -784,25 +798,26 @@ test('the fog sinks in pulses from over the highest floor, never rises while it 
   assert.ok(fogHurt(100, 0) === 6 && fogHurt(100, 2) === 12);
 });
 
-// The slow player walking the checked way down, the fog sinking from the moment it arms: the head
-// never in it, the valve reached
-test('walking the checked way down of every miasma room with the real fog: the valve reached, never in it', () => {
+// A runner along the checked way down, the fog sinking from the moment it arms: the head never in
+// it, the valve reached; and the fog comes close
+test('running the checked way down of every miasma room with the real fog: the valve reached, never in it', () => {
   let n = 0, worst = Infinity;
   for (const { seed, d, m } of fogs(SEEDS.slice(0, 3))) {
     const { check, timeline: tl } = m.trial, pts = check.path, valve = m.floors[m.trial.goalFloor];
     place(m, pts[0].x, pts[0].y, pts[0].z);
-    let t = ARM_TIME, choked = null;
+    let t = 0, choked = null;
+    assert.ok(check.slack >= 0 && check.close <= CLOSE, `${seed}/${d}: slack ${check.slack}, closest ${check.close} s`);
     for (let j = 1; j < pts.length && !choked; j++) {
       const q = pts[j];
       let steps = 0, best = Infinity, since = 0;
       while (Math.hypot(q.x - player.x, q.z - player.z) > 0.15 && steps++ < 300) {
         const dx = q.x - player.x, dz = q.z - player.z, dist = Math.hypot(dx, dz);
         if (dist < best - 0.01) { best = dist; since = 0; } else if ((since += DT) > 0.5) break;
-        movePlayer(DT, dx / dist, dz / dist, false, false);
+        movePlayer(DT, dx / dist, dz / dist, true, false);
         t += DT;
         if (player.y + CHAR_H > fogLevel(tl, t) * LH) { choked = `at ${t.toFixed(1)} s on the way to point ${j}`; break; }
       }
-      if (!choked && Math.hypot(q.x - player.x, q.z - player.z) > 0.15) { t = Math.max(t - 0.5, q.t + ARM_TIME); place(m, q.x, q.y + 0.05, q.z); }
+      if (!choked && Math.hypot(q.x - player.x, q.z - player.z) > 0.15) { t = Math.max(t - 0.5, q.t); place(m, q.x, q.y + 0.05, q.z); }
     }
     assert.ok(!choked, `${seed}/${d}: in the fog ${choked}`);
     // on the valve's ledge the fog stays over a head
@@ -831,7 +846,7 @@ test('the cold meter: up to 100 in COLD.freeze s away from warmth, down four tim
   assert.equal(coldStep(99.9, 1, false), 100);
 });
 
-test('every cold room: a long way round the ridges, the braziers along it far apart, no gap too long, the great fire by the exit', () => {
+test('every cold room: a long way round the ridges, the braziers along it far apart, the meter kept under freezing, no way straight to the fire', () => {
   let n = 0;
   for (const { seed, d, m, t } of events('cold', [0, 1, 2])) {
     const tr = m.trial, along = tr.parts.filter(p => p.type === 'warm' && !p.off), warm = tr.parts.filter(p => p.type === 'warm'), path = tr.check.path;
@@ -840,7 +855,10 @@ test('every cold room: a long way round the ridges, the braziers along it far ap
     assert.ok(along.length >= COLD.along[0] && along.length <= COLD.along[1], `${seed}/${d}: ${along.length} braziers`);
     assert.ok(Math.hypot(along[0].x - path[0].x, along[0].z - path[0].z) >= COLD.apart, `${seed}/${d}: the first by the entry`);
     for (const a of along) for (const b of warm) if (a !== b) assert.ok(Math.hypot(a.x - b.x, a.z - b.z) >= COLD.apart * 0.75 - 0.01, `${seed}/${d}: braziers too close`);
-    assert.ok(tr.check.gaps.every(g => g <= COLD.gap), `${seed}/${d}: gaps ${tr.check.gaps}`);
+    // the freezing time fitted: going straight for the fire freezes a perfect runner, lighting the braziers keeps a slow player warm enough
+    assert.ok(tr.freeze >= COLD.quick && tr.freeze <= COLD.freeze, `${seed}/${d}: freezes in ${tr.freeze} s`);
+    assert.ok(tr.check.dash >= 100, `${seed}/${d}: straight to the fire the meter is at ${tr.check.dash}`);
+    assert.ok(tr.check.worst <= COLD.reach * 100, `${seed}/${d}: the meter goes up to ${tr.check.worst}`);
     assert.ok(tr.parts.some(p => p.type === 'fire'));
     n++;
   }
@@ -855,11 +873,12 @@ test('the storm\'s cycle: a warning, the gust, a lull, from the clock running', 
   assert.equal(stormPhase(ARM_TIME + STORM.period + 0.5).phase, 'warning');
 });
 
-test('every storm room: the rod on a tall hill, the way round it, out in the wind at most (lull + warning) / SLACK at a time', () => {
+test('every storm room: the rod on a tall hill, the way round it, out in the wind longer than a gust\'s warning, but not longer than a slow player can cross between gusts', () => {
   let n = 0;
   for (const { seed, d, m } of events('storm', [0, 1, 2])) {
     const tr = m.trial, rod = tr.parts.find(p => p.type === 'rod'), foot = tr.check.path[0];
-    assert.ok(tr.check.exposed <= (STORM.lull + STORM.warning) / SLACK + 1e-9, `${seed}/${d}: ${tr.check.exposed} s in the wind`);
+    assert.ok(tr.check.exposed <= stormAllowance() + 1e-9 && tr.check.exposed >= STORM.wait - 1e-9, `${seed}/${d}: ${tr.check.exposed} s in the wind`);
+    assert.ok(tr.check.slow <= STORM.lull + STORM.warning + 0.01, `${seed}/${d}: ${tr.check.slow} s in the wind, slowly`);
     assert.ok(rod.y - foot.y >= 6, `${seed}/${d}: the rod ${rod.y - foot.y} over the way's start`);   // (12 levels at least)
     assert.ok(tr.check.climb >= 20 && tr.stones.length >= 2 && tr.exposed.length > 10, `${seed}/${d}: ${tr.check.climb} cells up, ${tr.stones.length} boulders`);
     // the way goes round the hill: its angle about the eye sweeps most of a turn
@@ -888,14 +907,15 @@ test('every siege room: the ring flat round the beacon, 2-3 mouths far from it, 
   assert.equal(holdTime(2), 45); assert.equal(holdTime(19), 90);
 });
 
-test('every relic room: a courtyard with both portals walled off from the hall but for its gate; the race to the lever won running', () => {
+test('every relic room: a courtyard with both portals walled off from the hall but for its gate; the race to the lever won running, just', () => {
   let n = 0;
   for (const seed of [0, 1, 2, 3, 4]) {
     const w = new World(seed, { trial: 'chase' });
     for (const d of DEPTHS) for (const t of w.layout(d).trials) if (t.kind === 'chase') {
       const m = w.cube(t.key).map, tr = m.trial, c = tr.check, hall = new Set(tr.hall);
-      assert.ok(c.lever < c.hunter && c.cells >= HUNTER.least, `${seed}/${d}: lever ${c.lever} s, warden ${c.hunter} s, ${c.cells} cells`);
-      assert.ok(c.hunter - c.lever < 6, `${seed}/${d}: the warden ${c.hunter - c.lever} s behind: no race`);
+      assert.ok(c.lever <= c.hunter && c.cells >= HUNTER.least, `${seed}/${d}: lever ${c.lever} s, warden ${c.hunter} s, ${c.cells} cells`);
+      assert.ok(c.hunter - c.lever < 0.2, `${seed}/${d}: the warden ${c.hunter - c.lever} s behind the slow player: no race`);
+      assert.ok(tr.wake >= HUNTER.wake && tr.wake <= HUNTER.late, `${seed}/${d}: it wakes after ${tr.wake} s`);
       const cellOf = p => Math.floor(p.z) * 16 + Math.floor(p.x), part = type => tr.parts.find(p => p.type === type);
       // the relic and the lair in the hall, the lever and both portals' pads out of it
       assert.ok(hall.has(cellOf(part('relic'))) && hall.has(cellOf(tr.lair)), `${seed}/${d}: relic or lair outside the hall`);

@@ -78,7 +78,6 @@ export default {
   'The order: {glyphs}': 'Urutannya: {glyphs}',
   'Press the runestones in the right order: a carved tablet in a room before this one tells it': 'Tekan batu-batu runenya dengan urutan yang benar: tablet ukir di ruangan sebelum ruang ini yang memberitahunya',
   'The gate is open: {n} s': 'Gerbangnya terbuka: {n} dtk',
-  "Stage {n} of {of}: solve the dry platform's puzzle to drain the room": 'Tahap {n} dari {of}: pecahkan teka-teki pijakan kering untuk mengeringkan ruangannya',
   'The wind rises…': 'Anginnya mulai kencang…',
   'A gust is coming! Behind a boulder ({n})': 'Satu hembusan datang! Berlindung di balik batu ({n})',
   'GUST! Hold on behind the boulders': 'HEMBUSAN! Bertahanlah di balik batu-batunya',

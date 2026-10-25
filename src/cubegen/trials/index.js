@@ -14,9 +14,10 @@ import { search, take } from '../route.js';
 import { reachFrom, reachTo, graph } from '../reach.js';
 import { shapeFlood, floodGoal, floodRoute } from './flood.js';
 import { shapeCollapse, collapseGoal, collapseRoute } from './collapse.js';
-import { shapeSlide, puzzleGoal, slideRoute } from './slide.js';
+import { puzzleGoal, slideRoute } from './slide.js';
 import { shapeSunken, sunkenGoal } from './sunken.js';
-import { shapeGrid, gridRecord } from './grid.js';
+import { gridRecord } from './grid.js';
+import { shapePuzzle } from './puzzles.js';
 import { RIM } from './deck.js';
 import { shapeTimed, timedGoal, timedRoute } from './timed.js';
 import { shapeMiasma, miasmaGoal } from './miasma.js';
@@ -25,7 +26,7 @@ import { shapeStorm, stormGoal, stormRoute } from './storm.js';
 import { shapeSiege, siegeGoal, RING } from './siege.js';
 import { shapeChase, chaseGoal, chaseRoute } from './chase.js';
 import { arrivals, pathOf, checkDeadlines, floorLevel, USE_TIME } from './timing.js';
-import { ARM_TIME, SLACK, fitFlood, floodTime, FLOOD, WAVE, crumbleTime, FOG, COLD, STORM, HUNTER, runeOrder } from '../../core/trials.js';
+import { ARM_TIME, SLACK, REACT, slowTime, fitFlood, floodTime, FLOOD, WAVE, crumbleTime, FOG, COLD, STORM, stormAllowance, HUNTER, runeOrder } from '../../core/trials.js';
 
 const KINDS = {
   flood: { shape: shapeFlood, goal: floodGoal, costs: floodRoute, finish: finishFlood },
@@ -35,12 +36,12 @@ const KINDS = {
   storm: { shape: shapeStorm, goal: stormGoal, costs: stormRoute, finish: finishStorm },
   siege: { shape: shapeSiege, goal: siegeGoal, costs: null, finish: finishSiege },
   chase: { shape: shapeChase, goal: chaseGoal, costs: chaseRoute, finish: finishChase },
-  slide: { shape: shapeSlide, goal: puzzleGoal, costs: slideRoute, finish: finishPuzzles },
+  slide: { shape: shapePuzzle, goal: puzzleGoal, costs: slideRoute, finish: finishPuzzles },
   sunken: { shape: shapeSunken, goal: sunkenGoal, costs: slideRoute, finish: finishSunken },
-  mirror: { shape: shapeGrid, goal: puzzleGoal, costs: slideRoute, finish: finishPuzzles },
-  braziers: { shape: shapeGrid, goal: puzzleGoal, costs: slideRoute, finish: finishPuzzles },
-  crates: { shape: shapeGrid, goal: puzzleGoal, costs: slideRoute, finish: finishPuzzles },
-  runes: { shape: shapeGrid, goal: puzzleGoal, costs: slideRoute, finish: finishPuzzles },
+  mirror: { shape: shapePuzzle, goal: puzzleGoal, costs: slideRoute, finish: finishPuzzles },
+  braziers: { shape: shapePuzzle, goal: puzzleGoal, costs: slideRoute, finish: finishPuzzles },
+  crates: { shape: shapePuzzle, goal: puzzleGoal, costs: slideRoute, finish: finishPuzzles },
+  runes: { shape: shapePuzzle, goal: puzzleGoal, costs: slideRoute, finish: finishPuzzles },
   timedgate: { shape: shapeTimed, goal: timedGoal, costs: timedRoute, finish: finishTimed },
 };
 
@@ -103,7 +104,9 @@ export function finishTrial(ctx, pathPoints) {
   return { trial: out, reservations };
 }
 
-// the checked path as plain points: where, when a slow player arrives, when it is lost (null: never)
+// a deadline check's margins, rounded: the slow player's least, and how close it comes to a perfect runner
+const margins = check => ({ slack: Math.round(check.slack * 100) / 100, close: Math.round(check.close * 100) / 100 });
+// the checked path as plain points: where, when a perfect runner arrives, when it is lost (null: never)
 const checkPath = (path, arr, deadline) => path.map(n => ({ x: n.x + 0.5, y: n.landing ? n.top * LH : floorY(n, 0.5, 0.5), z: n.z + 0.5,
   t: Math.round(arr.time.get(n.id) * 100) / 100, dl: deadline(n) }));
 
@@ -122,36 +125,39 @@ function finishFlood(ctx, t, out) {
 }
 
 // The flood's timeline, fitted to the fastest way up for a slow player, then checked on its own:
-// { timeline, check: { path: [{ x, y, z, t (arrival), dl (deadline) }], slack } }, or null
+// { timeline, check: { path: [{ x, y, z, t (a perfect runner's arrival), dl (deadline) }], slack (the
+// slow player's least margin), close (a perfect runner's) } }, or null
 function fitFloodRoom(ctx, entry, goal, summit) {
   const arr = arrivals(ctx, entry), path = pathOf(arr, goal);
   if (!path) return null;
   const ground = ctx.floors.filter(f => !f.fluid && f.layer === 0);
   const from = Math.min(...ground.map(f => f.top)) - 1, to = summit - 2;
-  // each pulse no earlier than a slow player has left every floor of the path it floods
+  // each pulse no earlier than the water comes over every floor of the path it floods just as the
+  // slow player leaves it
   const needs = [];
   path.forEach((n, i) => {
     const h = floorLevel(n);
     if (i + 1 >= path.length || h >= to) return;
-    const j = Math.max(0, Math.floor((h - from) / FLOOD.step)), need = arr.time.get(path[i + 1].id) * SLACK + ARM_TIME;
-    needs[j] = Math.max(needs[j] ?? 0, need);
+    const j = Math.max(0, Math.floor((h - from) / FLOOD.step)), up = Math.max(0, h - from - FLOOD.step * j) / FLOOD.step * FLOOD.rise;
+    needs[j] = Math.max(needs[j] ?? 0, slowTime(arr.time.get(path[i + 1].id)) - up);
   });
   const timeline = fitFlood(from, to, needs);
   if (!timeline) return null;
   const deadline = n => floorLevel(n) >= to ? null : floodTime(timeline, floorLevel(n));
   const check = checkDeadlines(path, arr, deadline);
   if (!check.ok) return null;
-  return { timeline, check: { slack: Math.round(check.slack * 100) / 100, path: checkPath(path, arr, deadline) } };
+  return { timeline, check: { ...margins(check), path: checkPath(path, arr, deadline) } };
 }
 
 // --- miasma -----------------------------------------------------------------------------------------
 
 // The fog's timeline is a flood's turned upside down: its underside starts FOG.over levels over the
-// highest floor and sinks in pulses to just over a body's head on the valve's ledge; in `u`, the
+// highest floor one can get to from the entry (not the rock walls round the room) and sinks in pulses to just over a body's head on the valve's ledge; in `u`, the
 // levels it has sunk, it is a flood (core/trials.js fogY). A floor's deadline: the fog's underside
 // at its top + CHAR_H (a head there in it).
 function finishMiasma(ctx, t, out) {
-  const valve = t.goal, top = Math.max(...ctx.floors.filter(f => !f.fluid).map(f => f.landing ? f.top : Math.max(...f.cs) / LH));
+  const valve = t.goal, reach = reachFrom(ctx, [t.entry], true);
+  const top = Math.max(...ctx.floors.filter(f => !f.fluid && reach.has(f.id)).map(f => f.landing ? f.top : Math.max(...f.cs) / LH));
   const head = CHAR_H / LH, from = Math.ceil(top) + FOG.over, to = valve.top + head + 0.5;
   const u = n => from - (floorLevel(n) + head);   // (the fog's sinking to reach a head on floor n)
   const arr = arrivals(ctx, t.entry), path = pathOf(arr, valve);
@@ -159,10 +165,10 @@ function finishMiasma(ctx, t, out) {
   const end = from - to, needs = [], step = Math.max(FLOOD.step, Math.ceil(end / FOG.pulses));
   path.forEach((n, i) => {
     if (i + 1 >= path.length || u(n) >= end) return;
-    const j = Math.max(0, Math.floor(u(n) / step)), need = arr.time.get(path[i + 1].id) * SLACK + ARM_TIME;
-    needs[j] = Math.max(needs[j] ?? 0, need);
+    const j = Math.max(0, Math.floor(u(n) / step)), down = Math.max(0, u(n) - step * j) / step * FOG.rise;
+    needs[j] = Math.max(needs[j] ?? 0, slowTime(arr.time.get(path[i + 1].id)) - down);
   });
-  const tl = fitFlood(0, end, needs, step);
+  const tl = fitFlood(0, end, needs, step, FOG.rise);
   if (!tl) return null;
   const timeline = { ...tl, kind: 'miasma', top: from };
   const deadline = n => n === valve || u(n) >= end ? null : floodTime(tl, Math.max(0, u(n)));
@@ -170,45 +176,63 @@ function finishMiasma(ctx, t, out) {
   if (!check.ok) return null;
   const at = { x: valve.x + 0.5, y: floorY(valve, 0.5, 0.5), z: valve.z + 0.5 };
   return { timeline, valve: at, pit: t.pit, parts: [{ id: 'valve', type: 'valve', ...at }],
-    check: { slack: Math.round(check.slack * 100) / 100, path: checkPath(path, arr, deadline) } };
+    check: { ...margins(check), path: checkPath(path, arr, deadline) } };
 }
 
 // --- cold ----------------------------------------------------------------------------------------------
 
-// The braziers along the way (a slow player's fastest way from the entry to the great fire, round
-// the ridges): set far apart, each as far on along the way as keeps the slow time out in the cold
-// (from leaving one warm circle, or the entry, to coming into the next, lighting included) within
-// COLD.reach x COLD.gap s, and at least COLD.apart cells from every other one and the entry (a warm
-// circle reaches through a ridge: none just across one from the last); the gap to the fire
-// too must be within COLD.gap. One or two more off the way. Each is lit once (F) and stays lit.
+// The cold meter of a player going along `path` (time(n): a perfect runner's arrival), lighting the
+// braziers at the path's indices `lit` on the way (each USE_TIME s, warm), in a room that freezes
+// in `freeze` s; slow: the slow player (core/trials.js slowTime), else a perfect runner. The meter
+// runs from the clock running (ARM_TIME); a stretch is warm where its middle is in a lit brazier's
+// circle. -> the meter on arriving at each node of the path (over 100: frozen on the way)
+function coldTrace(path, time, lit, freeze, slow) {
+  const rate = 100 / freeze, burning = [], meters = [0];
+  let m = 0, shift = 0, prev = slow ? slowTime(0) : 0;
+  for (let k = 1; k < path.length; k++) {
+    const a = path[k - 1], b = path[k], now = (slow ? slowTime(time(b)) : time(b)) + shift, dt = Math.max(0, now - Math.max(prev, ARM_TIME));
+    const warm = burning.some(w => Math.hypot((a.x + b.x) / 2 - w.x, (a.z + b.z) / 2 - w.z) <= COLD.radius);
+    m = warm ? Math.max(0, m - rate * COLD.thaw * dt) : m + rate * dt;
+    meters.push(m);
+    prev = now;
+    if (lit.has(k)) { burning.push(b); m = Math.max(0, m - rate * COLD.thaw * USE_TIME); shift += USE_TIME; prev += USE_TIME; }
+  }
+  return meters;
+}
+
+// The great fire at the end of the way (a perfect runner's fastest from the entry, round the ridges)
+// and the room's freezing time, fitted: going straight for the fire, a perfect runner freezes at
+// COLD.dash of the way, so it takes a brazier or more (a room too short for that is retried). The
+// braziers along the way: each as far on as keeps the meter of a slow player lighting them on the
+// way within COLD.reach, at least COLD.apart cells from every other one and the entry (a warm circle
+// reaches through a ridge: none just across one from the last); the fire too is reached within
+// COLD.reach. One or two more off the way. Each is lit once (F) and stays lit.
 function finishCold(ctx, t, out) {
   const fire = t.goal, arr = arrivals(ctx, t.entry), path = pathOf(arr, fire);
   if (!path || path.length < COLD.least) return null;
   const at = n => ({ x: n.x + 0.5, y: n.landing ? n.top * LH : floorY(n, 0.5, 0.5), z: n.z + 0.5 });
-  const time = n => arr.time.get(n.id), near = (n, w, r = COLD.radius) => !!w && Math.hypot(n.x - w.x, n.z - w.z) <= r;
-  // the slow time out in the cold from warm spot a (null: the entry, cold from the start) to b
-  const gap = (a, b) => {
-    const seg = path.filter(n => time(n) >= (a ? time(a) : 0) && time(n) <= time(b)), cold = seg.filter(n => !near(n, a) && !near(n, b));
-    const span = cold.length ? time(cold.at(-1)) - time(cold[0]) + 1 / 1.9 : 0;
-    return span * SLACK + (a ? USE_TIME : 0);
-  };
-  const picked = [];
-  let last = null;
+  const time = n => arr.time.get(n.id), end = path.length - 1;
+  const freeze = Math.round(Math.min(COLD.freeze, Math.max(COLD.quick, (time(fire) - ARM_TIME) * COLD.dash)) * 10) / 10;
+  const dash = coldTrace(path, time, new Set(), freeze, false)[end];
+  if (dash < 100) return null;
+  const limit = COLD.reach * 100, picked = [];
   for (;;) {
-    if (gap(last, fire) <= COLD.gap) break;
-    const from = last ? path.indexOf(last) : 0;
-    // the farthest spot on that keeps within reach of the last, well apart from every brazier
-    let best = null;
-    for (let k = from + 1; k < path.length - 1; k++) {
+    const meters = coldTrace(path, time, new Set(picked), freeze, true);
+    if (meters[end] <= limit) break;
+    // the farthest spot on that the meter allows, well apart from every brazier
+    let best = -1;
+    for (let k = (picked.at(-1) ?? 0) + 1; k < end; k++) {
       const n = path[k];
-      if (gap(last, n) > COLD.gap * COLD.reach) break;
-      if (!n.landing && !ctx.trialKeep?.has(n.c) && [path[0], ...picked].every(p => Math.hypot(p.x - n.x, p.z - n.z) >= COLD.apart)
-        && Math.hypot(fire.x - n.x, fire.z - n.z) >= COLD.apart * 0.75) best = n;
+      if (meters[k] > limit) break;
+      if (!n.landing && !ctx.trialKeep?.has(n.c) && [path[0], ...picked.map(i => path[i])].every(p => Math.hypot(p.x - n.x, p.z - n.z) >= COLD.apart)
+        && Math.hypot(fire.x - n.x, fire.z - n.z) >= COLD.apart * 0.75) best = k;
     }
-    if (!best || picked.length >= COLD.along[1]) return null;
-    picked.push(best); last = best;
+    if (best < 0 || picked.length >= COLD.along[1]) return null;
+    picked.push(best);
   }
   if (picked.length < COLD.along[0]) return null;
+  const worst = Math.max(...coldTrace(path, time, new Set(picked), freeze, true));
+  const along = picked.map(k => path[k]);
   // one or two more off the way: dry ground 3-6 cells from it, reached from it, apart from the rest
   const on = new Set(path.map(n => n.id)), reach = reachFrom(ctx, [t.entry], true);
   const dist = f => Math.min(...path.map(n => Math.hypot(n.x - f.x, n.z - f.z)));
@@ -216,22 +240,23 @@ function finishCold(ctx, t, out) {
   const extra = [];
   for (let k = 0; k < 1 + (ctx.R() < 0.5 ? 1 : 0) && off.length; k++) {
     const f = off.splice(Math.floor(ctx.R() * off.length), 1)[0];
-    if ([...picked, ...extra].every(e => Math.hypot(e.x - f.x, e.z - f.z) >= COLD.apart * 0.75)) extra.push(f);
+    if ([...along, ...extra].every(e => Math.hypot(e.x - f.x, e.z - f.z) >= COLD.apart * 0.75)) extra.push(f);
   }
-  const parts = [...picked, ...extra].map((n, i) => ({ id: `warm${i}`, type: 'warm', ...at(n), i, off: i >= picked.length }));
+  const parts = [...along, ...extra].map((n, i) => ({ id: `warm${i}`, type: 'warm', ...at(n), i, off: i >= along.length }));
   parts.push({ id: 'fire', type: 'fire', ...at(fire) });
   // nobody waits in a warm circle
   for (const f of ctx.floors) if (parts.some(p => Math.hypot(f.x + 0.5 - p.x, f.z + 0.5 - p.z) <= COLD.radius + 0.5)) f.noSpawn = true;
-  const g = [null, ...picked].map((a, k) => gap(a, k < picked.length ? picked[k] : fire));
-  return { parts, fire: at(fire), check: { gaps: g.map(v => Math.round(v * 100) / 100), worst: Math.round(Math.max(...g) * 100) / 100,
-    cells: path.length, path: checkPath(path, arr, () => null) } };
+  return { parts, fire: at(fire), freeze, check: { freeze, dash: Math.round(dash), worst: Math.round(worst), cells: path.length,
+    path: checkPath(path, arr, () => null) } };
 }
 
 // --- storm --------------------------------------------------------------------------------------------
 
-// The way up (a slow player's fastest from the entry to the lightning rod, round the hill) is out in
-// the wind for stretches between the boulders' shelter: each must take at most (lull + warning) /
-// SLACK s. The hill's top must be its summit (the highest ground), and the way must climb it.
+// The way up (the fastest from the entry to the lightning rod, round the hill) is out in the wind for
+// stretches between the boulders' shelter: a slow player crosses each within the lull and the
+// warning (a perfect runner within stormAllowance), and a perfect runner's longest takes STORM.wait
+// at least (or the gusts need not be waited out). The hill's top must be its summit (the highest
+// ground), and the way must climb it.
 function finishStorm(ctx, t, out) {
   const rod = t.goal, exposed = new Set(t.exposed), safe0 = n => n.landing || !exposed.has(n.c);
   if (!t.hill.has(rod.c) || rod.top < t.top - 1) return null;
@@ -243,11 +268,11 @@ function finishStorm(ctx, t, out) {
     if (safe(n)) { if (from != null) worst = Math.max(worst, arr.time.get(n.id) - from); from = null; continue; }
     if (from == null) { const k = path.indexOf(n); from = arr.time.get(path[k - 1].id); }
   }
-  if (worst > (STORM.lull + STORM.warning) / SLACK) return null;
+  if (worst > stormAllowance() || worst < STORM.wait) return null;
   const at = { x: rod.x + 0.5, y: floorY(rod, 0.5, 0.5), z: rod.z + 0.5 };
   for (const c of t.hill) for (const f of ctx.cols[c]) f.noSpawn = true;
   return { eye: t.eye, exposed: t.exposed, stones: t.stones, rod: at, parts: [{ id: 'rod', type: 'rod', ...at }],
-    check: { exposed: Math.round(worst * 100) / 100, climb: path.filter(n => t.hill.has(n.c)).length, path: checkPath(path, arr, () => null) } };
+    check: { exposed: Math.round(worst * 100) / 100, slow: Math.round(worst * SLACK * 100) / 100, climb: path.filter(n => t.hill.has(n.c)).length, path: checkPath(path, arr, () => null) } };
 }
 
 // --- siege --------------------------------------------------------------------------------------------
@@ -269,11 +294,13 @@ function finishSiege(ctx, t, out) {
 
 // --- chase: the relic -------------------------------------------------------------------------------
 
-// The race: a player running from the relic (taken: the clock starts) to the lever, x HUNTER.race
-// + USE_TIME, is there before the warden, out HUNTER.wake s later and hunting at HUNTER.ratio x
-// RUN_SPEED over an enemy's ways only, is at the gate; and the warden can get there at all (or it
-// is no chase). The player's way is the checked path. Everything at the gate, the lever, the relic
-// and the lair is on dry, walkable ground.
+// The race: a slow player running from the relic (taken: the clock starts) to the lever (its slowTime
+// of a perfect runner's way, without the REACT: it is taken when the player is ready) + USE_TIME is
+// there before the warden, hunting at HUNTER.ratio x RUN_SPEED over an enemy's ways only, is at the
+// gate. The warden's waking is fitted to that: as late as it must, so that it is at the gate just as
+// the slow player pulls the lever (between HUNTER.wake and HUNTER.late s; else the room is retried),
+// and it must get there at all (or it is no chase). The player's way is the checked path.
+// Everything at the gate, the lever, the relic and the lair is on dry, walkable ground.
 function finishChase(ctx, t, out) {
   const relic = t.goal, lever = ctx.layerFloor(t.lever.c, 0), gate = ctx.layerFloor(t.gate.c, 0), lair = ctx.layerFloor(t.lair.c, 0);
   if (!lever || !gate || !lair || [lever, gate, lair].some(f => f.fluid)) return null;
@@ -282,23 +309,25 @@ function finishChase(ctx, t, out) {
   if (!path || path.length < HUNTER.least || !path.some(n => n === gate)) return null;
   const hunter = arrivals(ctx, lair, RUN_SPEED * HUNTER.ratio, null, true);
   if (!hunter.time.has(gate.id) || !hunter.time.has(relic.id)) return null;
-  const tLever = run.time.get(lever.id) * HUNTER.race + USE_TIME, tGate = HUNTER.wake + hunter.time.get(gate.id);
-  if (!(tLever < tGate)) return null;
+  const tLever = slowTime(run.time.get(lever.id)) - REACT + USE_TIME, wake = Math.ceil((tLever - hunter.time.get(gate.id)) * 10) / 10;
+  if (wake < HUNTER.wake || wake > HUNTER.late) return null;
+  const tGate = wake + hunter.time.get(gate.id);
   const at = f => ({ x: f.x + 0.5, y: floorY(f, 0.5, 0.5), z: f.z + 0.5 });
   const d = t.gate.dir, toward = [Math.PI / 2, -Math.PI / 2, 0, Math.PI][d];
   for (const c of [...t.altar.cells, t.lair.c]) for (const f of ctx.cols[c]) f.noSpawn = true;
   return { parts: [{ id: 'relic', type: 'relic', ...at(relic) },
       { id: 'lever', type: 'lever', ...at(lever), yaw: toward },
       { id: 'portcullis', type: 'portcullis', ...at(gate), side: d, w: 1 }],
-    lair: { ...at(lair), yaw: t.lair.yaw, f: lair.id }, hall: [...t.hall],
-    check: { lever: Math.round(tLever * 100) / 100, hunter: Math.round(tGate * 100) / 100, cells: path.length, path: checkPath(path, run, () => null) } };
+    lair: { ...at(lair), yaw: t.lair.yaw, f: lair.id }, hall: [...t.hall], wake,
+    check: { lever: Math.round(tLever * 100) / 100, hunter: Math.round(tGate * 100) / 100, run: Math.round(run.time.get(lever.id) * 100) / 100, cells: path.length, path: checkPath(path, run, () => null) } };
 }
 
 // --- collapse ----------------------------------------------------------------------------------------
 
 // Every crust cell's distance from the entry apron over the crust (a gap jumped counts two cells),
-// the wave fitted to a slow player (its delay: as little as keeps every crust cell of the fastest
-// way to the exit apron standing until it is left), then checked on its own. Each dead end must be
+// the wave fitted to a slow player (its speed: the one that follows that player closest; its delay:
+// as little as keeps every crust cell of the fastest way to the exit apron standing until it is
+// left), then checked on its own. Each dead end must be
 // one: nothing but the crust it leaves leads off it.
 function finishCollapse(ctx, t, out) {
   const crust = t.crust, apron = new Set(t.entryApron), exitApron = new Set(t.exitApron);
@@ -320,15 +349,21 @@ function finishCollapse(ctx, t, out) {
   const arr = arrivals(ctx, t.entry), path = pathOf(arr, t.goal);
   if (!path) return null;
   const onCrust = n => !n.landing && crust.has(n.c) && floorOf(n.c) === n;
-  // the delay that lets a slow player off every crust cell of the way before it goes
-  let delay = 0;
-  path.forEach((n, i) => {
-    if (i + 1 >= path.length || !onCrust(n)) return;
-    delay = Math.max(delay, arr.time.get(path[i + 1].id) * SLACK + ARM_TIME - crumbleTime({ speed: WAVE.speed, delay: 0 }, dist.get(n.c)));
-  });
-  delay = Math.ceil((delay + WAVE.margin) * 10) / 10;
-  if (delay > WAVE.most) return null;
-  const wave = { speed: WAVE.speed, delay };
+  // when the slow player leaves each crust cell of the way, and how far along the crust it is
+  const leave = [];
+  path.forEach((n, i) => { if (i + 1 < path.length && onCrust(n)) leave.push({ d: dist.get(n.c), at: slowTime(arr.time.get(path[i + 1].id)) }); });
+  if (!leave.length) return null;
+  // the wave: of the speeds it may go at, the one that follows the slow player closest (the least
+  // time to spare on the way, on the whole), its delay as little as lets that player off every cell
+  let wave = null;
+  for (let speed = WAVE.speed; speed <= WAVE.fastest + 1e-9; speed += 0.05) {
+    const v = Math.round(speed * 100) / 100, at = d => crumbleTime({ speed: v, delay: 0 }, d);
+    const delay = Math.ceil((Math.max(0, ...leave.map(q => q.at - at(q.d))) + WAVE.margin) * 10) / 10;
+    const spare = leave.reduce((s, q) => s + at(q.d) + delay - q.at, 0);
+    if (delay <= WAVE.most && (!wave || spare < wave.spare)) wave = { speed: v, delay, spare };
+  }
+  if (!wave) return null;
+  delete wave.spare;
   const deadline = n => onCrust(n) ? crumbleTime(wave, dist.get(n.c)) : null;
   const check = checkDeadlines(path, arr, deadline);
   if (!check.ok) return null;
@@ -348,7 +383,7 @@ function finishCollapse(ctx, t, out) {
   const centre = ctx.floors[t.goal.id];
   return { wave, crust: cells, entryApron: t.entryApron, exitApron: t.exitApron, gaps: t.gaps.length, branches: t.branches,
     keystone: { x: centre.x + 0.5, y: floorY(centre, 0.5, 0.5), z: centre.z + 0.5 },
-    check: { slack: Math.round(check.slack * 100) / 100, path: checkPath(path, arr, deadline) } };
+    check: { ...margins(check), path: checkPath(path, arr, deadline) } };
 }
 
 // --- puzzles -----------------------------------------------------------------------------------------
@@ -371,6 +406,7 @@ function finishPuzzles(ctx, t) {
     const rec = FINISH[pz.kind](ctx, pz, `p${i}`);
     if (!rec) return null;
     rec.index = i;
+    if (pz.approach != null) rec.approach = pz.approach;   // (where you stand to begin it: a combiner's, the crates')
     for (const part of rec.parts) { part.puzzle = i; parts.push(part); }
     Object.assign(start, rec.start || {});
     puzzles.push(rec);

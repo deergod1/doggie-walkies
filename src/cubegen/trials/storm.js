@@ -2,15 +2,17 @@
 // (a needle of rock, sixteen levels over its foot), the way up a ramp once round it (the pinnacle's
 // shape, cubegen/heights.js), with no rails. The gusts tear outwards off the hill (core/trials.js stormPhase,
 // game/trials.js stepStorm): out on the ramp a gust carries you over its edge, down a lap or to the
-// ground. Boulders stand on the ramp's outer edge every few cells; the cells inside one are
-// shelter (the gust only presses you against it). The summit is the storm's calm eye.
+// ground. Boulders stand on the ramp's outer edge, evenly, as few as let a slow player run from one
+// to the next between two gusts (core/trials.js stormAllowance); the cells inside one are shelter
+// (the gust only presses you against it). The summit is the storm's calm eye.
 //   build: { eye: { x, z } (the hill's middle, cells), ramp: [cells], stones: [cells],
 //            exposed: [cells] (the ramp's cells out in the wind), summit: [cells], rod: { c } }
-import { N, MAX_L } from '../../core/constants.js';
+import { N, MAX_L, RUN_SPEED } from '../../core/constants.js';
 import { idx, clamp } from '../../core/util.js';
+import { stormAllowance } from '../../core/trials.js';
 
 const TAU = Math.PI * 2;
-export const HILL = { summit: 2.3, lap: 2, arc: 0.9, rise: 16, stone: 5, up: 3 };   // (radii and widths in cells, arc in turns, the stones every `stone` cells along the way)
+export const HILL = { summit: 2.3, lap: 2, arc: 0.9, rise: 16, reach: 0.75, up: 3 };   // (radii and widths in cells, arc in turns; reach: how much of the run allowed between boulders the way along the ramp's middle may take)
 
 // where the side portals' pads are (their cells one step in from the face)
 const pads = spec => spec.portals.filter(p => p.dir < 4).map(p => [[N - 2, p.pos], [1, p.pos], [p.pos, N - 2], [p.pos, 1]][p.dir]);
@@ -19,7 +21,7 @@ export function shapeStorm(ctx) {
   const { spec, lvl0, void0, R } = ctx;
   ctx.trialBuild = { kind: 'storm', failed: true, keep: [] };
   ctx.stats.mode = `${spec.kind} / storm`;
-  const { summit: rs, lap: w, rise, stone: every } = HILL, rOut = rs + w, foot = rOut + 1;
+  const { summit: rs, lap: w, rise } = HILL, rOut = rs + w, foot = rOut + 1;
   // the hill's middle: in the middle of the room, as far from the pads as it gets
   const ps = pads(spec), spots = [];
   for (let z = 6; z <= 9; z++) for (let x = 6; x <= 9; x++)
@@ -43,13 +45,14 @@ export function shapeStorm(ctx) {
     ramp.push(i); info.set(i, { u, off: d - (rs + w / 2) });
   }
   const radius = () => rs + w / 2;
-  // the boulders: on the outer edge of the way every `every` cells along it (by its middle line's
-  // length), but near its foot and its top
-  const along = u => radius() * u;
+  // the boulders: on the outer edge of the way, evenly along it (by its middle line's length), as few
+  // as keep each stretch within the run allowed between two gusts; but near its foot and its top
+  const along = u => radius() * u, most = stormAllowance() * RUN_SPEED * HILL.reach;
+  const every = along(total) / Math.max(2, Math.ceil(along(total) / most));
   const inward = i => { const x = i % N + 0.5, z = ((i / N) | 0) + 0.5, d = Math.hypot(x - cx, z - cz); return idx(Math.floor(x - (x - cx) / d), Math.floor(z - (z - cz) / d)); };
   for (const i of ramp) {
     const { u, off } = info.get(i), s = along(u), j = inward(i);
-    if (off < w / 2 - 1 || s < 3 || u > total - 0.5 || s % every >= 1.2) continue;
+    if (off < w / 2 - 1 || s < 3 || u > total - 0.5 || s % every >= 1.6) continue;
     if (!info.has(j) || Math.abs(lvl0[j] - lvl0[i]) > 1 || info.get(j).off > w / 2 - 1) continue;   // (room to pass inside it)
     if (stones.some(q => Math.abs(q % N - i % N) <= 1 && Math.abs(((q / N) | 0) - ((i / N) | 0)) <= 1)) continue;
     stones.push(i);

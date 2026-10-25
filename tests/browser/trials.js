@@ -74,14 +74,15 @@ export async function runSlideChecks(role = 'branch') {
   return ['solved', role];
 }
 
-// A sunken room (?trial=sunken): in from up high, every stage's slide solved in turn along its
-// solution, the water sinking a stage each time, the next platform dry; drained, the way on open.
+// A sunken room (?trial=sunken, or ?trial=sunken:slide,crates for its two puzzles): in from up
+// high, each stage's puzzle solved in turn along its own solution (as in a room of its own), the water
+// sinking a stage each time, the next platform dry; drained, the way on open.
 export async function runSunkenChecks() {
   const { slideStop } = await import('../../src/core/trials.js');
   const all = [];
   for (let d = 1; d < 20; d++) all.push(...state.cubes.layout(d).trials.filter(t => t.kind === 'sunken'));
   check(state.dev && all.length, 'load the game with ?dev=1&trial=sunken');
-  const t = all.find(x => x.stages.length === 3) ?? all[0];
+  const t = all[0];
   await goTrial('sunken', t.depth, t.key);
   await until(() => !state.transitioning && state.cubeKey === t.from, 'into the room before');
   takePortal(state.map.portals.find(p => p.dir === t.fromDir));
@@ -103,8 +104,8 @@ export async function runSunkenChecks() {
         await delay(80);
         for (let k = 0; k < n; k++) { useAction(); await delay(30); }
       }
-      const D = pz.deck;
-      Object.assign(player, { x: D.x0 - 0.5, y: D.level * 0.5, z: D.z0 - 0.5, vx: 0, vz: 0 });
+      // (off it: where you stand to begin it, on the platform in front of it)
+      Object.assign(player, { x: pz.approach % 16 + 0.5, y: pz.deck.level * 0.5, z: Math.floor(pz.approach / 16) + 0.5, vx: 0, vz: 0 });
       await until(() => state.trial.stage === i + 1 || state.trial.phase === 'resolved', `stage ${i} solved`, 3000);
       await delay(4500);
       out.push(`stage ${i} (${pz.kind})`);
@@ -127,7 +128,8 @@ export async function runSunkenChecks() {
     await delay(4500);   // the water sinks
     out.push(`stage ${i} (slide)`);
   }
-  check(state.trial.phase === 'resolved' && state.run.unlockedGates.has(t.gate) && !trialFluid(), 'drained, resolved');
+  await until(() => !trialFluid(), 'drained', 8000);
+  check(state.trial.phase === 'resolved' && state.run.unlockedGates.has(t.gate), 'drained, resolved');
   check(!portalLocked(state.map, state.run, { dir: t.exit }), 'the way on is open');
   return [...out, 'drained'];
 }
@@ -419,8 +421,8 @@ export async function runTrialChecks(kind = 'flood') {
     check(!allEnemies().some(e => e.id.startsWith(`trial:${t.key}:siege`) && e.mode !== 'dead'), 'the rest fled');
     results.push('held');
   }
-  // the relic: taken, its warden (a known kind, stronger) breaks out and hunts at the player's own
-  // running speed (a swiftness potion quickens it too); the run back along the checked way at
+  // the relic: taken, its warden (a known kind, stronger) breaks out and hunts faster than the
+  // player can run (a swiftness potion quickens it too); the run back along the checked way at
   // RUN_SPEED beats it to the lever, which drops the portcullis with the warden shut in the hall
   if (kind === 'chase') {
     const m = state.map.trial, relic = m.parts.find(p => p.type === 'relic'), lever = m.parts.find(p => p.type === 'lever'), path = m.check.path;
@@ -433,11 +435,11 @@ export async function runTrialChecks(kind = 'flood') {
     useAction();
     check(state.trial.phase === 'armed', 'taking it arms the room');
     const t0 = performance.now();
-    await until(() => allEnemies().some(e => e.warden), 'the warden breaks out', 4000);
+    await until(() => allEnemies().some(e => e.warden), 'the warden breaks out', (m.wake + 2) * 1000);
     const w = allEnemies().find(e => e.warden);
     check(w.profile.label.startsWith('Raging') && w.profile.hp > w.profile.damage, `a known kind, stronger: ${w.profile.label}`);
     await delay(100);
-    check(Math.abs(w.profile.chase - RUN_SPEED * HUNTER.ratio) < 1e-6, `it runs as fast as we do (${w.profile.chase})`);
+    check(Math.abs(w.profile.chase - RUN_SPEED * HUNTER.ratio) < 1e-6, `it runs faster than we do (${w.profile.chase})`);
     player.effects ??= {};
     player.effects['buff:moveSpeed'] = { kind: 'buff', buff: 'moveSpeed', value: 0.3, until: Infinity };
     await delay(100);
