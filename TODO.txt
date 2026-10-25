@@ -1,5 +1,0 @@
-- movement and attack speed
-- shoes
-- town portal scroll
-
-- bug: waterfalls often make no sense because only one tile has one, but the water ends otherwise still

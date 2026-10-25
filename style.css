@@ -156,11 +156,26 @@ kbd { display: inline-block; min-width: 1.2em; text-align: center; background: #
 body.touch :is(#leave-panel, #death-panel) kbd { display: none; }
 /* the settings (game/settingsmenu.js): over the Esc menu or the main menu */
 #settings-overlay { position: fixed; inset: 0; z-index: 27; display: grid; place-items: center; padding: var(--pad); background: #080c1399; }
-#settings-panel { box-sizing: border-box; width: min(520px, 100%); max-height: 100%; overflow: auto;
+#settings-panel { box-sizing: border-box; width: min(720px, 100%); max-height: 100%; overflow: auto;
   padding: 16px 20px; background: #12161ef5; border: 1px solid #444c5c; border-radius: 8px; box-shadow: 0 16px 60px #0008; font-size: 15px; }
 #settings-panel header { display: flex; align-items: baseline; gap: 12px; }
 #settings-panel h1 { margin: 0 0 4px; color: #fff; font-size: 16px; letter-spacing: 3px; }
-#settings-panel .settings-language { margin-top: 14px; }
+/* the pages: their tabs on the left, the pages stacked in one place so it is as large as the largest */
+.settings-body { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; margin-top: 14px; }
+#settings-pages { display: flex; flex-direction: column; gap: 2px; min-width: 8.5em; padding-right: 12px; border-right: 1px solid #2a2f3a; }
+#settings-panel #settings-pages button { padding: 7px 10px; text-align: left; color: #8a96a8; background: none; border: 1px solid transparent; }
+#settings-panel #settings-pages button:hover { color: #e6e9ef; background: #1e2430; }
+#settings-panel #settings-pages button.on { color: #ffe4ae; background: #2a2f3a; border-color: #444c5c; }
+.settings-page-box { display: grid; min-width: 0; }
+.settings-page { grid-area: 1 / 1; min-width: 0; }
+.settings-page:not(.shown) { visibility: hidden; }
+#settings-panel .settings-page > h2:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+/* narrow: the tabs in a row above */
+@media (max-width: 560px) {
+  .settings-body { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  #settings-pages { flex-direction: row; min-width: 0; padding: 0 0 8px; border-right: none; border-bottom: 1px solid #2a2f3a; }
+  #settings-panel #settings-pages button { flex: 1; text-align: center; }
+}
 #settings-panel h2 { display: flex; align-items: center; gap: 12px; margin: 16px 0 8px; padding-top: 12px; border-top: 1px solid #2a2f3a; color: #c5cdbc; font-size: 13px; }
 #settings-tabs { display: flex; gap: 2px; margin: 10px 0 0; border-bottom: 1px solid #444c5c; }
 #settings-panel #settings-tabs button { flex: 1; margin-bottom: -1px; padding: 6px 4px; color: #8a96a8; background: none; border: 1px solid transparent; border-radius: 4px 4px 0 0; }
@@ -173,7 +188,6 @@ body.touch :is(#leave-panel, #death-panel) kbd { display: none; }
 #settings-close { margin-left: auto; color: #8a96a8 !important; background: none !important; border: none !important; padding: 0 !important; font-size: 11px !important; }
 #settings-reset { margin-left: auto; padding: 2px 8px !important; font-size: 11px !important; color: #aab3c2 !important; }
 #settings-reset.confirm { color: #ffd0c4 !important; border-color: #b0563f !important; background: #3a2420 !important; }
-#settings-panel .settings-ui { margin-top: 8px; }
 .settings-graphics { display: grid; grid-template-columns: 9em 1fr; align-items: center; gap: 8px 12px; color: #e6e9ef; }
 /* the mouse turning the view (game/camerakey.js) */
 body.orbiting, body.orbiting * { cursor: none !important; }
@@ -182,6 +196,7 @@ body.orbiting, body.orbiting * { cursor: none !important; }
 #settings-panel .settings-choice button.on { color: #ffe4ae; border-color: #8a7a52; background: #2f3020; }
 .settings-sound { display: grid; grid-template-columns: 9em 1fr 3.5em; align-items: center; gap: 8px 12px; color: #e6e9ef; }
 .settings-sound button { justify-self: start; min-width: 5em; }
+#settings-language { justify-self: start; width: min(12em, 100%); }
 #settings-music.on, #settings-invert.on { color: #ffe4ae; border-color: #8a7a52; background: #2f3020; }
 .settings-sound input[type=range] { width: 100%; margin: 0; accent-color: #ffcf7a; }
 .settings-sound output { color: #aab3c2; text-align: right; }
@@ -192,6 +207,19 @@ body.orbiting, body.orbiting * { cursor: none !important; }
 #settings-keys button.empty { color: #5a6678; }
 #settings-keys button.waiting { color: #1a1408; background: #ffcf7a; border-color: #ffcf7a; }
 #settings-feedback { min-height: 1.4em; margin: 12px 0 0; color: #cfe2ff; }
+/* a dropdown (game/dropdown.js): the button with the choice, the list under it */
+.dropdown { position: relative; }
+.dropdown .dropdown-button { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; }
+.dropdown-value { flex: 1; }
+.dropdown-arrow { width: 0; height: 0; border: 5px solid transparent; border-top-color: currentColor; border-bottom: none; color: #8a96a8; transition: transform .1s; }
+.dropdown.open .dropdown-arrow { transform: rotate(180deg); }
+.dropdown.open .dropdown-button { border-color: #8a7a52; }
+.dropdown-list { position: absolute; z-index: 1; top: calc(100% + 2px); left: 0; min-width: 100%; box-sizing: border-box; max-height: 16em; overflow: auto;
+  margin: 0; padding: 3px; list-style: none; background: #1a1f29; border: 1px solid #444c5c; border-radius: 4px; box-shadow: 0 8px 24px #0009; }
+.dropdown-list li { padding: 5px 10px; border-radius: 3px; color: #e6e9ef; font-family: var(--font-display); font-size: 13px; white-space: nowrap; cursor: pointer; }
+.dropdown-list li.on { color: #ffe4ae; }
+.dropdown-list li:is(:hover, :focus) { background: #364052; outline: none; }
+.dropdown-list li:focus-visible { outline: 2px solid #ffcf7a; outline-offset: -2px; }
 #inventory-overlay { position: fixed; inset: 0; z-index: 20; background: #080c13b8; display: grid; place-items: center; padding: 16px 16px 84px; }
 /* game/inventory.js: the hero | (floor or shop) | the bag and the actions underneath | the details. Nothing in it changes
    its size with the selection: the details scroll inside their column, the actions keep their rows. */

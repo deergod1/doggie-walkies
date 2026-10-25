@@ -42,7 +42,7 @@ turns the view, there is no cursor and no walking by mouse.
 
 - **Turning:** right turns right, down looks down (`look`, `LOOK_PER_PX` 0.0035 rad a pixel),
   at once, no easing. Up and down go from `PITCH_MIN` (-0.45, looking up) to `PITCH_MAX` (1.1,
-  steeply down); looking up, the arm meets the floor and comes in. The settings (Mouse) have
+  steeply down); looking up, the arm meets the floor and comes in. The settings (Input, Mouse) have
   the look speed (20% to 300%) and invert up / down. One movement over `LOOK_SPIKE` (300 px)
   is a browser glitch and is dropped, so is the first one after capturing.
 - **The crosshair** is the middle of the screen: the arm's pivot, a little over the hero's

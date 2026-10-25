@@ -1,8 +1,15 @@
-// The settings menu, from the Esc menu (game/escmenu.js) and the main menu (game/menu.js): the
-// language, the frame rate cap and the anti-aliasing, the lighting's quality level (Auto or pinned, game/quality.js), the camera (overview or close view), the UI scale (game/uiscale.js:
-// taken when the slider is let go, as the panel itself grows or shrinks with it), the mouse look's speed
-// and inverting it up and down, the music on or off, the music's and the sounds' volume, and the keys: each control's primary and
-// secondary key (core/keybinds.js). Everything is kept as it changes (game/settings.js).
+// The settings menu, from the Esc menu (game/escmenu.js) and the main menu (game/menu.js), in three
+// pages, picked from the tabs on the left (Up and Down go through them too; the menu opens on the
+// last one shown):
+//   General   the language (a dropdown, game/dropdown.js), the UI scale (game/uiscale.js: taken
+//             when the slider is let go, as the panel itself grows or shrinks with it), the music
+//             on or off, the music's and the sounds' volume
+//   Graphics  the frame rate cap and the anti-aliasing, the lighting's quality level (Auto or
+//             pinned, game/quality.js), the camera (overview or close view)
+//   Input     the mouse look's speed and inverting it up and down, and the keys: each control's
+//             primary and secondary key (core/keybinds.js)
+// The pages keep the size of the largest, so the panel does not jump between them. Everything is
+// kept as it changes (game/settings.js).
 //
 // The keys come in tabs, one per kind of control (core/keybinds.js GROUPS; Left and Right go
 // through them too). A click on a key waits for the new one: the next key pressed takes the place (taken from the
@@ -18,10 +25,14 @@ import {
 import { tr, tc, LANGUAGES, onLanguageChange } from '../i18n/i18n.js';
 import { sfx } from '../audio/sfx.js';
 import { MSAA_LEVELS, msaaLevel } from '../render/msaa.js';
+import { dropdown } from './dropdown.js';
 
 const $ = id => document.getElementById(id);
 const overlay = $('settings-overlay'), keysBox = $('settings-keys'), tabs = $('settings-tabs'), feedback = $('settings-feedback');
+const pages = $('settings-pages');
+const PAGES = [...pages.querySelectorAll('[data-page]')].map(b => b.dataset.page);
 const CONFIRM_MS = 4000;
+let page = PAGES[0];   // the page shown
 let waiting = null;    // { id, slot }: the key place waiting for a key
 let tab = GROUPS[0];   // the kind of controls shown
 let resetUntil = 0;    // the reset button asks again until then
@@ -41,6 +52,7 @@ export function openSettings() {
 }
 export function closeSettings() {
   if (!settingsOpen()) return;
+  languages.close(false);
   overlay.hidden = true;
   waiting = null;
   if (opener?.isConnected && opener.offsetParent) opener.focus(); else document.activeElement?.blur?.();
@@ -54,9 +66,18 @@ function choice(box, options, current) {
   box.innerHTML = options.map(([v, label]) => `<button data-value="${v}" aria-pressed="${v === current}" class="${v === current ? 'on' : ''}">${esc(label)}</button>`).join('');
 }
 // each language by its own name, so whoever reads it finds theirs
+const languages = dropdown($('settings-language'), { labelledBy: 'settings-language-label', choose: chooseLanguage });
 function renderLanguage() {
-  choice($('settings-language'), LANGUAGES.map(l => [l.code, l.name]), languageNow());
-  for (const b of $('settings-language').children) b.lang = b.dataset.value;
+  languages.set(LANGUAGES.map(l => ({ value: l.code, label: l.name, lang: l.code })), languageNow());
+}
+function renderPages() {
+  for (const b of pages.children) {
+    const on = b.dataset.page === page;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-selected', String(on));
+    b.tabIndex = on ? 0 : -1;
+    $(`settings-page-${b.dataset.page}`).classList.toggle('shown', on);
+  }
 }
 function renderGraphics() {
   choice($('settings-fps'), FRAME_RATES.map(f => [f, f ? String(f) : tr('Unlimited')]), frameRate());
@@ -110,13 +131,21 @@ function render() {
   const focused = document.activeElement?.closest?.('#settings-keys [data-id]');
   const place = focused && { id: focused.dataset.id, slot: focused.dataset.slot };
   const onTab = document.activeElement?.closest?.('#settings-tabs');
+  const onPage = document.activeElement?.closest?.('#settings-pages');
   const pressed = document.activeElement?.closest?.('.settings-choice [data-value]');
   const chosen = pressed && { box: pressed.parentElement.id, value: pressed.dataset.value };
-  renderLanguage(); renderGraphics(); renderMouse(); renderSound(); renderKeys();
+  renderPages(); renderLanguage(); renderGraphics(); renderMouse(); renderSound(); renderKeys();
   // the focus stays on the key place, the tab or the choice it was on (they were drawn anew)
   if (chosen) $(chosen.box).querySelector(`[data-value="${chosen.value}"]`)?.focus();
   else if (place) keysBox.querySelector(`[data-id="${place.id}"][data-slot="${place.slot}"]`)?.focus();
   else if (onTab) tabs.querySelector('.on')?.focus();
+  else if (onPage) pages.querySelector('.on')?.focus();
+}
+function showPage(p) {
+  if (p === page) return;
+  page = p; waiting = null; say('');
+  languages.close(false);
+  render();
 }
 function showTab(g) {
   if (g === tab) return;
@@ -159,7 +188,16 @@ addEventListener('keydown', e => {
   if (!settingsOpen()) return;
   e.stopImmediatePropagation();
   if (waiting) { e.preventDefault(); if (!e.repeat) take(e); return; }
+  if (languages.key(e)) return;   // the open list takes its keys (Esc closes only it)
   if (e.code === 'Escape') { e.preventDefault(); closeSettings(); return; }
+  // on the pages' tabs: Up and Down (Left and Right too) go to the one before and after
+  if (e.target?.closest?.('#settings-pages') && /^Arrow(Up|Down|Left|Right)$/.test(e.code)) {
+    e.preventDefault();
+    const i = PAGES.indexOf(page) + (e.code === 'ArrowUp' || e.code === 'ArrowLeft' ? -1 : 1);
+    showPage(PAGES[(i + PAGES.length) % PAGES.length]);
+    pages.querySelector('.on')?.focus();
+    return;
+  }
   // on the tabs: Left and Right go to the one before and after
   if (e.target?.closest?.('#settings-tabs') && (e.code === 'ArrowLeft' || e.code === 'ArrowRight')) {
     e.preventDefault();
@@ -169,6 +207,10 @@ addEventListener('keydown', e => {
   }
 }, true);
 
+pages.addEventListener('click', e => {
+  const b = e.target.closest('[data-page]');
+  if (b) showPage(b.dataset.page);
+});
 tabs.addEventListener('click', e => {
   const b = e.target.closest('[data-tab]');
   if (b) showTab(b.dataset.tab);
@@ -179,10 +221,6 @@ keysBox.addEventListener('click', e => {
 });
 $('settings-close').onclick = () => closeSettings();
 overlay.addEventListener('pointerdown', e => { if (e.target === overlay) closeSettings(); });
-$('settings-language').addEventListener('click', e => {
-  const b = e.target.closest('[data-value]');
-  if (b) chooseLanguage(b.dataset.value);
-});
 $('settings-fps').addEventListener('click', e => {
   const b = e.target.closest('[data-value]');
   if (b) setFrameRate(Number(b.dataset.value));
