@@ -1,5 +1,6 @@
 // The platforms floating round Foggery's tower (game/movers.js moves them, physics/collide.js
-// keeps them): slabs of dark basalt two cells square, a seam of glowing lava round their sides and
+// keeps them): slabs of the tower's stone (its theme's masonry, themes/surfaces.js) two cells
+// square, a seam of glowing lava round their sides and
 // a ring of runes glowing on top, and under them the glow of the magic that keeps them up. None
 // shows until they rise out of the lava (game/movers.js); each frame they go where the physics has
 // them.
@@ -7,11 +8,13 @@ import * as THREE from 'three';
 import { PLATFORMS } from '../core/foggery.js';
 import { moversNow } from '../physics/collide.js';
 import { cutMaterial } from './section.js';
+import { surfacesOf } from '../themes/surfaces.js';
+import { themeOf } from '../themes/depth.js';
 
 const S = PLATFORMS.size, INSET = 0.03;
 export function buildMoverView(m, group) {
   const thick = m.movers.thick, root = new THREE.Group();
-  const stone = cutMaterial(new THREE.MeshStandardMaterial({ color: '#57504b', roughness: 0.92 }), 'self', false);
+  const stone = cutMaterial(new THREE.MeshStandardMaterial({ color: surfacesOf(themeOf(m)).masonry.top, roughness: 0.92 }), 'self', false);
   const seam = cutMaterial(new THREE.MeshStandardMaterial({ color: '#3a2a22', emissive: '#ff6a1a', emissiveIntensity: 1.3, roughness: 0.8 }), 'self', false);
   const rune = cutMaterial(new THREE.MeshBasicMaterial({ color: '#ffb050', transparent: true, opacity: 0.75 }), false, false);
   const slab = new THREE.BoxGeometry(S - 2 * INSET, thick, S - 2 * INSET).translate(S / 2, -thick / 2, S / 2);

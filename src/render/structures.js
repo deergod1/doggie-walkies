@@ -1,7 +1,7 @@
 // All built structures: stairs, landings, bridges and visible fences.
 import { buildStair, buildLanding } from './stairs.js';
 import { BRIDGES, buildPlankBridge } from './bridges.js';
-import { POST, RAIL, STONE2, CAP } from './palette.js';
+import { POST, RAIL, SURFACE } from './palette.js';
 import { buildLadder } from './ladders.js';
 
 export function buildStructures(m, layers) {
@@ -25,12 +25,12 @@ export function buildStructures(m, layers) {
   }
 }
 
-// a low stone parapet along an edge (Foggery's ramp and bridge, cubegen/towerarena.js): a wall of
-// blocks following the floor, capped
+// a low stone parapet along an edge (Foggery's bridge, cubegen/towerarena.js): a wall of blocks
+// following the floor, of the theme's masonry, capped with its trim (themes/surfaces.js)
 function stoneParapet(f, S) {
   for (let s = 0; s + 1 < f.pts.length; s++) {
     const p = f.pts[s], q = f.pts[s + 1];
-    S.beam([p[0], p[1] + 0.16, p[2]], [q[0], q[1] + 0.16, q[2]], 0.16, 0.34, STONE2);
-    S.beam([p[0], p[1] + 0.36, p[2]], [q[0], q[1] + 0.36, q[2]], 0.2, 0.06, CAP);
+    S.beam([p[0], p[1] + 0.16, p[2]], [q[0], q[1] + 0.16, q[2]], 0.16, 0.34, SURFACE.masonry.side[0]);
+    S.beam([p[0], p[1] + 0.36, p[2]], [q[0], q[1] + 0.36, q[2]], 0.2, 0.06, SURFACE.trim.top);
   }
 }

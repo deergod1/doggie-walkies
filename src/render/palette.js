@@ -3,6 +3,7 @@ import * as THREE from '../../vendor/three/three.core.js';   // plain path, no r
 import { WATER, LAVA } from '../core/constants.js';
 import { buildOf, ICE as ICE_DEFAULT, VINE as VINE_DEFAULT } from '../themes/builds.js';
 import { TOWN } from '../themes/index.js';
+import { surfacesOf } from '../themes/surfaces.js';
 
 export const C = s => new THREE.Color(s);
 
@@ -23,10 +24,21 @@ export function gradient(stops, v) {
 
 // terrain: tops by height (in levels), rock strata on the sides; set per depth (usePalette)
 export let TOP_STOPS, SIDE_STOPS, LIP, UNDERSIDE, BEDROCK, SOFT;
+// built and paved ground by role (themes/surfaces.js): SURFACE.masonry.top, ...
+export let SURFACE;
 export function usePalette(theme) {
   TOP_STOPS = theme.top; SIDE_STOPS = theme.side; SOFT = C(theme.soft);
   LIP = C(theme.lip); UNDERSIDE = C(theme.under); BEDROCK = theme.bed.map(C);
+  SURFACE = surfaceColors(theme);
   useBuild(buildOf(theme));
+}
+// a theme's surfaces as colours (shared: clone before changing one), for whoever draws a cube
+// without setting the palette (render/flipgeo.js, render/movers.js)
+const surfaceCache = new WeakMap();
+export function surfaceColors(theme) {
+  if (!surfaceCache.has(theme)) surfaceCache.set(theme, Object.fromEntries(Object.entries(surfacesOf(theme)).map(([k, r]) =>
+    [k, { top: C(r.top), alt: C(r.alt), side: r.side.map(C), under: C(r.under) }])));
+  return surfaceCache.get(theme);
 }
 export const fluidBed = t => C(t === WATER ? '#7d6f52' : t === LAVA ? '#2b1d1a' : '#3e4a2a');
 export const fluidBank = t => C(t === WATER ? '#c9b98a' : t === LAVA ? '#3a2a22' : '#a4a64a');

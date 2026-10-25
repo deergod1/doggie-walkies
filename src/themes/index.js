@@ -17,6 +17,8 @@
 //   top / side: colour stops by height in levels (grass tops, cliff strata)
 //   fluids: weights [water, lava, acid] for pools and falls; river: fluid of the rivers
 //   soft: the colour of a plunge's soft landing (world/heights.js: hay, sand, snow, moss, web, ash)
+//   surfaces: its own colours for built ground by role, any part of any role (themes/surfaces.js:
+//     masonry, paving, trim, crust); else made from its structures' stone, its rock and `under`
 //   heights: overrides for the big height pieces (world/heights.js heightsOf)
 //   tiles: weight multipliers for the WFC kinds; cave: below the ground (no sun, no sky)
 //   walls: rock walls along the faces like a cave's, under the open sky (the canyons)

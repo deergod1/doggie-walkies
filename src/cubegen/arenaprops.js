@@ -7,6 +7,7 @@ import { N, DIRS, OPP, EDGE_CORNERS } from '../core/constants.js';
 import { idx, inb } from '../core/util.js';
 import { floorY } from '../core/surfaces.js';
 import { propMetadata, CLUTTER } from '../core/propcatalog.js';
+import { PROP_METADATA } from '../core/propmetadata.js';
 import { segDist } from './arenashapes.js';
 
 const L = (set, names) => names.split(' ').map(b => set + '_' + b);
@@ -140,6 +141,13 @@ export const PALETTES = {
     stone: L('cenote', 'jade_idol serpent_head'), wall: L('cenote', 'glyph_panel'), lip: L('cenote', 'jungle_drape'),
     bones: [], ritual: 'cenote_copal_bowl' },
 };
+
+// The small loose things of the prop sets `sets` (nothing that blocks, glows or is a landmark, at
+// most `height` tall), by name: what the arenas of their own strew about (cubegen/fliparena.js,
+// cubegen/towerarena.js), their theme's set and the sets their boss brings (core/bosses.js
+// BOSS_ARENAS `props`)
+export const smallProps = (sets, height = Infinity) => PROP_METADATA.filter(p => sets.includes(p.set) && !p.blocking
+  && p.attach === 'ground' && (p.height ?? 0) <= height && !p.landmark && !p.light).map(p => p.name);
 
 const variants = new Map();
 function variantsOf(base) {

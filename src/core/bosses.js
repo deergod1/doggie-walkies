@@ -13,5 +13,8 @@ export const bossAt = (depth, role = 'descent') => role === 'descent' ? BOSSES[d
 // Flip's box (cubegen/fliparena.js), which he turns any side up; Foggery's caldera of lava with
 // his tower in the middle (cubegen/towerarena.js): its doorway stands `door` levels up, in the
 // middle of its face (`centre`, world/faces.js), so you come in on a bridge over the lava.
+// An arena of its own looks like the theme of its depth (its floors name their `surface`,
+// themes/surfaces.js; docs/bosses.md "An arena of its own"); `props`: prop sets whose small
+// things it strews about besides its theme's (Foggery's volcanic rocks by his lava).
 export const BOSS_ARENAS = Object.freeze({ totnar: { braziers: 5 }, squarlo: { type: 'tidal' }, flip: { type: 'flip' },
-  foggery: { type: 'tower', door: 8, centre: 7 }, renew: { braziers: 4 } });
+  foggery: { type: 'tower', door: 8, centre: 7, props: ['volcanic'] }, renew: { braziers: 4 } });

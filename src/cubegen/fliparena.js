@@ -7,13 +7,14 @@
 // pyramids, humps, each with its stairs: FEATURES), overhead on a wall, and small clutter glued to
 // it. The doorway, the well and the boss's spot on the floor stay clear, and so does the middle of
 // every side (where the fight goes on after a turn) and the way from the doorway to the well.
-import { N, LH, DIRS } from '../core/constants.js';
+import { N, LH } from '../core/constants.js';
 import { idx } from '../core/util.js';
 import { floorY } from '../core/surfaces.js';
-import { indexBlockers } from '../core/blockers.js';
 import { S, vi, GROUP, SIDES, FACES, IDENTITY, orientedFloors, dirIndex, turnTo, turnPoint } from '../core/flip.js';
-import { PROP_METADATA } from '../core/propmetadata.js';
 import { themeOf } from '../themes/depth.js';
+import { rockTint } from '../themes/surfaces.js';
+import { smallProps } from './arenaprops.js';
+import { finishArena, reachFrom } from './arenamap.js';
 
 export const FLIP_ARENA = Object.freeze({
   island: { r: 4.1, y0: 7, y1: 9 },   // the floating island: its radius (cells) and the cells it fills up the box
@@ -123,7 +124,7 @@ function wallCell(face, u, v, j = 0) {
 
 // spec: the arena's; ctx: the guardian's context, its portals placed (cubegen/guardian.js); U: the
 // boss's spot (cell); approach: the way he looks; level: the doorways' level
-export function flipArena({ spec, ctx, level, U, approach: [dx, dz], exit, role, R }) {
+export function flipArena({ spec, ctx, level, U, approach: [dx, dz], exit, role, R, own }) {
   const bottom = Math.max(1, Math.ceil(level / 2)), solid = new Uint8Array(S * S * S);
   const rand = (a, b) => a + Math.floor(R() * (b - a + 1));
   for (let y = 0; y < S; y++) for (let z = 0; z < S; z++) for (let x = 0; x < S; x++) {
@@ -289,11 +290,12 @@ export function flipArena({ spec, ctx, level, U, approach: [dx, dz], exit, role,
   // on the island's underside (its floor upside down) a little stepped pyramid in the middle
   place('island', 'pyramid', [6, 6], [9, 9]);
 
-  // Clutter on every side (the theme's small things, and frost crystals): glued to it, its up the
-  // side's, so it is right whichever side is down and turns with the box (render/flipview.js). It
-  // stands in nobody's way (none of it blocks) and keeps off the holes, the stairs and the portals.
-  const theme = themeOf(spec), sets = new Set([theme.props, 'frozen']);
-  const pool = PROP_METADATA.filter(p => sets.has(p.set) && !p.blocking && p.attach === 'ground' && (p.height ?? 0) <= 0.55 && !p.landmark && !p.light);
+  // Clutter on every side (the theme's small things and loose stones of its rock, and what the
+  // arena brings: core/bosses.js BOSS_ARENAS `props`): glued to it, its up the side's, so it is
+  // right whichever side is down and turns with the box (render/flipview.js). It stands in
+  // nobody's way (none of it blocks) and keeps off the holes, the stairs and the portals.
+  const theme = themeOf(spec), tint = rockTint(theme);
+  const pool = smallProps([theme.props, 'any', ...own?.props ?? []], 0.55);
   const clutter = [];
   if (pool.length) for (const face of ['bottom', ...SIDES, 'island']) {
     const cand = [];
@@ -308,10 +310,10 @@ export function flipArena({ spec, ctx, level, U, approach: [dx, dz], exit, role,
       cand.push([u, v, h]);
     }
     for (let n = Math.min(cand.length, rand(...FLIP_ARENA.clutter)); n > 0; n--) {
-      const [u, v, h] = cand.splice(Math.floor(R() * cand.length), 1)[0], p = pool[Math.floor(R() * pool.length)];
+      const [u, v, h] = cand.splice(Math.floor(R() * cand.length), 1)[0], name = pool[Math.floor(R() * pool.length)];
       const c = F[face].at(u, v, h), up = F[face].up, ju = (R() - 0.5) * 0.5, jv = (R() - 0.5) * 0.5;
       const [du, dv] = [F[face].way([1, 0]), F[face].way([0, 1])];
-      clutter.push({ name: p.name, side: face === 'island' ? 'island' : face, on: vi(...F[face].at(u, v, h - 1)), yaw: R() * Math.PI * 2, s: 0.85 + R() * 0.35, normal: up,
+      clutter.push({ name, tint: name.startsWith('any_') ? tint : null, side: face === 'island' ? 'island' : face, on: vi(...F[face].at(u, v, h - 1)), yaw: R() * Math.PI * 2, s: 0.85 + R() * 0.35, normal: up,
         x: c[0] + 0.5 - up[0] * 0.5 + du[0] * ju + dv[0] * jv, y: c[1] + 0.5 - up[1] * 0.5 + du[1] * ju + dv[1] * jv,
         z: c[2] + 0.5 - up[2] * 0.5 + du[2] * ju + dv[2] * jv });
     }
@@ -327,25 +329,9 @@ export function flipArena({ spec, ctx, level, U, approach: [dx, dz], exit, role,
   const guardian = { role, bossPlaceholder: false, boss, exit, floor: guardFloor, x: guardFloor.x + .5, z: guardFloor.z + .5,
     y: floorY(guardFloor, .5, .5), yaw: Math.atan2(dx, dz), approach: [dx, dz], portalId: portals[1].id };
   // the way from the doorway to the well
-  const prev = new Map([[portals[0].floor, null]]), queue = [portals[0].floor];
-  for (let i = 0; i < queue.length; i++) for (const g of queue[i].link) if (g && !prev.has(g)) { prev.set(g, queue[i]); queue.push(g); }
-  if (!prev.has(guardFloor) || !prev.has(portals[1].floor) || !guardFloor.encounter) throw new Error('Disconnected flip arena');
-  const path = [];
-  for (let f = portals[1].floor; f; f = prev.get(f)) path.unshift(f);
-  const moves = path.slice(1).map((to, i) => ({ kind: 'walk', from: path[i], to, cells: [], cost: 1,
-    d: DIRS.findIndex(([x, z]) => path[i].x + x === to.x && path[i].z + z === to.z) }));
-  const staticBlockers = indexBlockers([]);
+  const reached = reachFrom(portals[0].floor);
+  if (!reached.has(guardFloor) || !reached.has(portals[1].floor) || !guardFloor.encounter) throw new Error('Disconnected flip arena');
   ctx.stats.layers = 1; ctx.stats.mode = 'guardian arena (flip)';
-  return { seed: spec.seed, attempts: 1, K: 1, B: [0], cols, floors,
-    pieces: Array.from({ length: N * N }, () => []), runs: [], falls: [], ladders: [],
-    fences: new Map(), fenceList: [], stats: ctx.stats, moves, portals, exit, guardian,
-    arena: { type: 'flip', requested: 'flip' }, tide: null, flip,
-    routeIndex: spec.routeIndex, route: spec.route, gateKeys: spec.gateKeys, trialFaces: spec.trialFaces || [null, null, null, null],
-    safe: Uint8Array.from(floors, f => prev.has(f) ? 1 : 0),
-    kind: spec.kind, archetype: 'arena', roomRole: `${role}-guardian`, biome: spec.biome,
-    key: spec.key, depth: spec.depth, cave: !!spec.cave, walled: true, enemyFree: false,
-    rewardSites: [], siteFailures: [], sitePlacements: [], siteReservations: [], spots: [],
-    arenaPlacements: [], staticBlockers, blockers: staticBlockers,
-    routes: [path, [...path].reverse()].map(p => p.map(f => ({ x: f.x + .5, y: floorY(f, .5, .5) + .12, z: f.z + .5 }))),
-  };
+  return finishArena({ spec, ctx, role, cols, floors, portals, exit, guardian, reached,
+    arena: { type: 'flip', requested: 'flip' }, walled: true, more: { flip } });
 }

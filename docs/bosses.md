@@ -29,6 +29,37 @@ bodies go. A boss's minions (`minion` kinds, summoned) live in no roster: they p
 once, no coins, no weapons, now and then a minor health potion, and go with their boss when it
 dies.
 
+## An arena of its own
+
+A boss's arena is drawn from a shape like any guardian's (`cubegen/arenashapes.js`: Squarlo's
+tidal hills are `BOSS_SHAPES.tidal`) or built by a generator of its own (`OWN_ARENAS` in
+`cubegen/guardian.js`: Foggery's caldera, `cubegen/towerarena.js`; Flip's box,
+`cubegen/fliparena.js`). Either way it looks like the theme of its depth:
+
+- **Colours come from the theme, never from the generator.** The terrain's colours go by height
+  (grass tops, cliff strata, snow up high); what a generator builds has no height to go by (a tower
+  from the floor to the top of the cube, a box that turns any side up), so its floors name what
+  they are built of (`f.surface`) and `themes/surfaces.js` says the colour: `masonry` (built
+  stone), `paving` (a checker of two tiles), `trim` (caps) and `crust` (dark ground by lava).
+  Every theme has them, made from what it has anyway (its structures' stone, its rock, its
+  underside); a theme may set its own (`surfaces` in `themes/index.js`). The renderers take them
+  from the map's theme (`render/palette.js` `SURFACE`, `surfaceColors`), and footsteps go by them
+  too (`core/footing.js`: masonry and paving are stone, crust gravel). No colours in `cubegen/`
+  (`tests/arenasurfaces.test.js` builds every boss arena in every theme of its depth).
+- **Props come from the theme's sets**, and from the sets the boss brings
+  (`BOSS_ARENAS[boss].props`: Foggery's volcanic rocks); `cubegen/arenaprops.js smallProps`
+  picks their small loose things. Neutral `any_` props are tinted the theme's rock
+  (`themes/surfaces.js rockTint`).
+- **The map is made by `finishArena`** (`cubegen/arenamap.js`): the way from the doorway to the
+  way on, the routes, and everything the rest of the game reads off a map, the theme's stamp
+  `biome` above all.
+
+A new arena of its own: a generator taking `{ spec, ctx, role, own, entry, exit, level }` (and
+`{ U, approach, R, frame }` unless it is `bare`, building from the doorway alone), returning
+`finishArena(...)`, named in `OWN_ARENAS` and given to its boss as `BOSS_ARENAS[boss].type`.
+What belongs to the fight rather than the place (lava's glow, ice panes, black holes, runes)
+may have colours of its own.
+
 ## Gusto
 
 ![Gusto's clips](img/model-gusto.jpg)
@@ -460,8 +491,11 @@ generator turns the box every way to check). They all keep clear of each other, 
 middle of each side, and on the floor of the box of the doorway, the well, his spot and the way
 between them.
 
-Clutter is glued to every side (`map.flip.clutter`: the theme's small things and frost crystals,
-none of them blocking), its up the side's, so it is right whichever side is down and turns with the
+The box is in the colours of its depth's theme (`render/flipgeo.js`, see
+[An arena of its own](#an-arena-of-its-own)): every side that can be the floor is the theme's
+paving, a checker of two tiles; the rest is its rock, the island's top its ground.
+Clutter is glued to every side (`map.flip.clutter`: the theme's small things and loose stones
+tinted its rock, none of them blocking), its up the side's, so it is right whichever side is down and turns with the
 box; it goes with a wall that breaks open.
 
 Any side of it can be the floor: an orientation (a rotation of the box about its middle, one of
@@ -598,7 +632,7 @@ walkOnLava`), wherever the floors lead them.
 
 His descent arena is always a caldera (`BOSS_ARENAS.foggery.type`, `cubegen/towerarena.js`): no
 walls, the lava fills the whole cube out to its sides, up to the glass (`map.tide`, its levels
-below), over a floor of ash a level up. Like Flip's box its edge does not match the neighbours'
+below), over the caldera's floor a level up. Like Flip's box its edge does not match the neighbours'
 ground (only the doorway does). The doorway stands eight levels up and in the middle of its face (`BOSS_ARENAS.foggery.door`, `centre`: `world/faces.js` gives the face
 between his arena and the room before it that level and position, so the room before has its
 doorway there too). From it a stone bridge three cells wide leads over the lava to the tower.
@@ -613,11 +647,13 @@ column (but the bridge over the caldera's floor). The ramp's corners follow its 
 middle, so it is a smooth spiral for the physics and the eye; floors meeting edge to edge are
 linked. Low stone parapets run along the bridge where it drops away (`fences`, `style: 'stone'`),
 none up the ramp and none round the top: walking off the ramp stops at its edge over the lava like
-at any such edge, but where a turn below is dry it is a long way down. The tower, the ramp and the bridge are dark basalt
-(`paint: 'basalt'`, drawn with the structures' stone, `render/floors.js`), the caldera's floor a
-crust of ash (`'ash'`). Loose stones, rubble and gravel lie about the tower and the bridge, volcanic
-rocks, pumice and obsidian on the caldera's floor (`arenaPlacements`; under the lava till he is
-beaten), none in the doorway or on the well. The well lies on the caldera's floor in a far corner,
+at any such edge, but where a turn below is dry it is a long way down. The tower, the ramp, the
+bridge, its parapets and his platforms are the theme's masonry (`surface: 'masonry'`, drawn with
+the structures' stone, `render/floors.js`), the caldera's floor its crust (`'crust'`): see
+[An arena of its own](#an-arena-of-its-own). Loose stones, rubble and gravel lie about the tower
+and the bridge, slabs and the small things of the sets his arena brings (`BOSS_ARENAS.foggery.props`:
+the volcanic rocks, pumice and obsidian) on the caldera's floor (`arenaPlacements`; under the lava
+till he is beaten), none in the doorway or on the well. The well lies on the caldera's floor in a far corner,
 under the lava until he is beaten; the way to it from the doorway goes over the bridge, down the
 ramp and across the floor.
 

@@ -22,6 +22,9 @@ const GROUND = {
   slime: [[0, 'slime'], [16, 'stone']],   // slimy moss, bare rock on the highest tops
 };
 
+// a built floor's role (its `surface`, themes/surfaces.js) -> surface
+const BUILT = { masonry: 'stone', paving: 'stone', trim: 'stone', crust: 'gravel' };
+
 function terrain(props, level) {
   const g = GROUND[props] ?? GROUND.meadow;
   if (typeof g === 'string') return g;
@@ -50,6 +53,7 @@ export function surfaceAt(support, map, props, x, z) {
     return r.kind === 'bridge' ? BRIDGE_STYLES[r.style]?.surface ?? 'wood' : r.wood ? 'wood' : 'stone';   // stairs and landings
   }
   if (map?.interior) return 'wood';   // plank floors inside houses
+  if (support.surface) return BUILT[support.surface] ?? 'stone';   // built ground (themes/surfaces.js)
   const paths = (map?.town ?? map?.merchantCamp)?.paths;
   // a path ribbon reaches `width` to either side (render/floors.js buildClearingPaths)
   if (paths?.some(p => polylineDistance(p.points, x, z) <= p.width)) return 'dirt';

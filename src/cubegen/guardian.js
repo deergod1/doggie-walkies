@@ -6,9 +6,9 @@
 import { N, LH, DIRS, MAX_L, WATER } from '../core/constants.js';
 import { idx, edgeKey, clamp, mulberry32, hash32, makeNoise } from '../core/util.js';
 import { floorY } from '../core/surfaces.js';
-import { indexBlockers } from '../core/blockers.js';
 import { population } from '../core/spawns.js';
 import { themeOf } from '../themes/depth.js';
+import { rockTint } from '../themes/surfaces.js';
 import { createContext } from './context.js';
 import { groundHeights } from './ground.js';
 import { placePortals } from './portals.js';
@@ -17,10 +17,20 @@ import { dressArena } from './arenaprops.js';
 import { BOSS_ARENAS } from '../core/bosses.js';
 import { flipArena } from './fliparena.js';
 import { towerArena } from './towerarena.js';
+import { finishArena, reachFrom } from './arenamap.js';
 
 const inner = (x, z) => x > 0 && z > 0 && x < N - 1 && z < N - 1;
 const FLAT = { rel: new Int8Array(N * N), zone: new Uint8Array(N * N).fill(1),
   crisp: new Uint8Array(N * N), ramp: new Uint8Array(N * N), marks: {} };
+
+// The arenas of their own a boss may bring (core/bosses.js BOSS_ARENAS `type`; docs/bosses.md "An
+// arena of its own"), but those drawn from a shape (cubegen/arenashapes.js BOSS_SHAPES): each
+// builds its whole cube and makes its map with finishArena (cubegen/arenamap.js). It is given
+// { spec, ctx, role, own (its BOSS_ARENAS entry), entry, exit, level }; `bare`: that alone (it
+// places its own way on), else also what every arena shape is drawn around, its portals placed:
+// { U (the boss's spot), approach, R, frame }. Its floors name what they are built of
+// (`surface`, themes/surfaces.js), never a colour: they look like the theme of their depth.
+const OWN_ARENAS = { tower: { build: towerArena, bare: true }, flip: { build: flipArena } };
 
 // Floors, links and corner heights for one arena shape.
 function buildFloors(ctx, base, shape, level) {
@@ -93,10 +103,13 @@ export function generateGuardian(spec) {
   const [dx, dz] = DIRS[exit < 4 ? exit ^ 1 : entry.dir], level = entry.level;
   // a boss may have an arena of its own (core/bosses.js BOSS_ARENAS: Squarlo's tidal hills)
   const own = role === 'descent' ? BOSS_ARENAS[spec.guardian.boss] : null;
-  // Foggery's caldera and tower, its well on the caldera's floor (cubegen/towerarena.js)
-  if (own?.type === 'tower') {
+  const custom = own?.type && !BOSS_SHAPES[own.type] ? OWN_ARENAS[own.type] : null;
+  if (own?.type && !BOSS_SHAPES[own.type] && !custom) throw new Error(`No arena of type ${own.type}`);
+  const given = { spec, ctx, role, own, entry, exit, level };
+  // (Foggery's caldera and tower: its well on the caldera's floor, cubegen/towerarena.js)
+  if (custom?.bare) {
     for (let z = 1; z < N - 1; z++) for (let x = 1; x < N - 1; x++) { ctx.lvl0[idx(x, z)] = level; ctx.void0[idx(x, z)] = 0; }
-    return towerArena({ spec, ctx, entry, role });
+    return custom.build(given);
   }
   // Wells sit opposite the entrance; side exits retain their shared face position.
   const gx = dx ? dx > 0 ? 4 : N - 5 : N / 2;
@@ -125,10 +138,10 @@ export function generateGuardian(spec) {
   const frame = { level, need, flat, R, noise: makeNoise(R), noise2: makeNoise(R),
     E: inward([ex, ez], entry.dir), U, G: exit < 4 ? inward([px, pz], exit) : [px, pz] };
 
-  // Flip's box, any side of which can be the floor (cubegen/fliparena.js)
-  if (own?.type === 'flip') return flipArena({ spec, ctx, level, U, approach: [dx, dz], exit, role, R });
+  // (Flip's box, any side of which can be the floor, cubegen/fliparena.js)
+  if (custom) return custom.build({ ...given, U, approach: [dx, dz], R, frame });
   const requested = own?.type ?? (spec.guardian.arena && SHAPES[spec.guardian.arena] ? spec.guardian.arena : 'hills');
-  const theme = themeOf(spec), tint = theme.side[1][1];
+  const tint = rockTint(themeOf(spec));
   // a boss who makes it dark has braziers lit round its arena (core/bosses.js)
   const braziers = own?.braziers ?? 0;
   let arena = null;
@@ -159,14 +172,8 @@ export function generateGuardian(spec) {
   const guardian = { role, bossPlaceholder: role === 'descent' && !boss, boss, exit,
     floor: guardFloor, x: guardFloor.x + .5, z: guardFloor.z + .5,
     y: floorY(guardFloor, .5, .5), yaw: Math.atan2(dx, dz), approach: [dx, dz], portalId: portals[1].id };
-  const prev = new Map([[entrance.floor, null]]), queue = [entrance.floor];
-  for (let i = 0; i < queue.length; i++) for (const g of queue[i].link)
-    if (g && !prev.has(g) && !dress.blocked.has(g.c)) { prev.set(g, queue[i]); queue.push(g); }
-  if (!prev.has(guardFloor) || !prev.has(portals[1].floor)) throw new Error('Disconnected guardian arena');
-  const path = [];
-  for (let f = portals[1].floor; f; f = prev.get(f)) path.unshift(f);
-  const moves = path.slice(1).map((to, i) => ({ kind: 'walk', from: path[i], to, cells: [], cost: 1,
-    d: DIRS.findIndex(([x, z]) => path[i].x + x === to.x && path[i].z + z === to.z) }));
+  const reached = reachFrom(entrance.floor, dress.blocked);
+  if (!reached.has(guardFloor) || !reached.has(portals[1].floor)) throw new Error('Disconnected guardian arena');
   // Rails keep fights out of lower ground beside the zone: perimeter pockets two levels
   // down, and any lower scenery, without altering the neighbouring cube's terrain.
   const fences = new Map(), fenceList = [];
@@ -180,21 +187,11 @@ export function generateGuardian(spec) {
     const ys = pts.map(p => p[1]), rail = { pts, ymin: Math.min(...ys), ymax: Math.max(...ys), layer: 0, show: true };
     fenceList.push(rail); fences.set(edgeKey(f.x, f.z, other.x, other.z), [rail]);
   });
-  const staticBlockers = indexBlockers(dress.blockers);
   ctx.stats.layers = 1; ctx.stats.mode = `guardian arena (${arena.type})`; ctx.stats.fences = fenceList.length;
-  return { seed: spec.seed, attempts: 1, K: 1, B: [0], cols: ctx.cols, floors,
-    pieces: Array.from({ length: N * N }, () => []), runs: [], falls: [], ladders: [],
-    fences, fenceList, stats: ctx.stats, moves, portals, exit, guardian,
+  return finishArena({ spec, ctx, role, cols: ctx.cols, floors, portals, exit, guardian, reached,
     arena: { type: arena.type, requested },
     // the tidal hills' water (game/tide.js): its levels at rest and at high tide, and the box of
     // cells it stands in (inside the bank)
     tide: arena.type === 'tidal' ? { rest: level + TIDAL.low + TIDAL.rest, high: level + TIDAL.high, fluid: WATER, box: [1, 1, N - 1, N - 1] } : null,
-    routeIndex: spec.routeIndex, route: spec.route, gateKeys: spec.gateKeys, trialFaces: spec.trialFaces || [null, null, null, null],
-    safe: Uint8Array.from(floors, f => prev.has(f) ? 1 : 0),
-    kind: spec.kind, archetype: 'arena', roomRole: `${role}-guardian`, biome: spec.biome,
-    key: spec.key, depth: spec.depth, cave: !!spec.cave, walled: !!spec.walled, enemyFree: false,
-    rewardSites: [], siteFailures: [], sitePlacements: [], siteReservations: [], spots: [],
-    arenaPlacements: dress.placements, staticBlockers, blockers: staticBlockers,
-    routes: [path, [...path].reverse()].map(p => p.map(f => ({ x: f.x + .5, y: floorY(f, .5, .5) + .12, z: f.z + .5 }))),
-  };
+    fences, fenceList, placements: dress.placements, blockers: dress.blockers });
 }

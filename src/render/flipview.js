@@ -16,8 +16,6 @@ import { buildFlipGeometry } from './flipgeo.js';
 import { GeoBuilder } from './builder.js';
 import { packParts } from './parts.js';
 import { partMeshes } from './partmeshes.js';
-import { usePalette } from './palette.js';
-import { themeOf } from '../themes/depth.js';
 import { buildProps } from './props.js';
 import { adoptFade } from './fade.js';
 import { ownShadowDepth } from './skinned.js';
@@ -35,8 +33,8 @@ export function flipPivot(group, m) {
   const pivot = new THREE.Group(), inner = new THREE.Group();
   pivot.position.set(MID, MID, MID); inner.position.set(-MID, -MID, -MID);
   pivot.add(inner); group.add(pivot);
-  // each side of the box (and the island) a mesh of its own, drawn like the cube's terrain
-  usePalette(themeOf(m));
+  // each side of the box (and the island) a mesh of its own, drawn like the cube's terrain (in
+  // its theme's colours, render/flipgeo.js)
   const sides = Object.keys(GROUP).map(name => {
     const side = new THREE.Group();
     side.userData.side = name;
