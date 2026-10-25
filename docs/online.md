@@ -39,7 +39,17 @@ being helped up and getting back in. Up to four players, co-op.
   its character (level, bag, gear); the floor loot and opened chests come in the `welcome`
   too (a guest getting back in takes the host's instead of its own). Every world is the
   same for the same seed, whatever the order cubes are visited in (`world/wfc.js`), so no
-  map goes over the wire. Only the host starts new worlds (with the dev tools, N); the guests follow.
+  map goes over the wire. Only the host starts new worlds (with the dev tools, N); the guests follow
+  (`world` brings the seed and the progress there, like the `welcome`).
+- **One clock:** the world's play time (`run.clock`: enemies coming back, the slime marsh's days,
+  nights and meteorites) must be the same in every game. Counting frames it would drift (a slow
+  frame is cut short, a crit's hit pause, a hidden tab, loading), so together the host's runs on
+  real time (`performance.now`) from where it was, and tells it with every `ping` (once a second,
+  also from a background tab) and in the `welcome` and `world`. A guest runs it on, on its own
+  real time, from the word that came quickest of the last 8 s (each is late by its trip): a word
+  ahead of it puts its clock forward at once; up to 2 s behind it waits for the host's; further
+  behind it goes back (`game/worldclock.js`, `core/worldclock.js`). Alone it counts the frames
+  played again, from where it was.
 - Everyone sends `me` 20 times a second: cube, position, the character's 14 bone rotations
   (`render/partner.js capturePose`), weapon model, worn things (armor with its rarity, so it
   shines the same, and whether the shield is on the back: `id@rarity@back`, `net/protocol.js
@@ -98,7 +108,7 @@ being helped up and getting back in. Up to four players, co-op.
   opens for everyone; the XP and loot are only the killer's. An ordinary enemy's `defeated` says
   its cube and life (`cube`, `n`), so it comes back for everyone
   ([progression.md](progression.md#enemies-come-back)). The `welcome` brings the host's play time
-  and kills along, so the guest's clock runs with the host's. Coming into a cube a friend is in
+  and kills along, and the guest's clock follows the host's from then on (**One clock**, above). Coming into a cube a friend is in
   already brings nothing back: it stays as they have it. The roster says each enemy's `respawn`
   and `wave`, so a viewer's kill drops the life it is in.
 

@@ -703,8 +703,9 @@ vents, reeds, and the craters the slime meteorites left. What makes it so, in it
 - **Day and night** (`cycle`, `core/daycycle.js`, `game/daycycle.js`): 45 s of its own light,
   then 45 s of its `dark` (a green moonlight, lit like the deep: stars, fog, the character's full
   lamp, the slime glowing), each turn over the last 4 s of the half it ends. It runs on the world's
-  play time (`state.run.clock`), so it goes on while you are elsewhere and friends see the same
-  sky. `state.night` is how far into the night the cube is, `state.lookNight` follows it (coming
+  play time (`state.run.clock`, `game/worldclock.js`), so it goes on while you are elsewhere, and
+  friends see the same sky: together everyone's clock is the host's ([online.md](online.md)).
+  `state.night` is how far into the night the cube is, `state.lookNight` follows it (coming
   into the marsh at night fades the dark in, `render/look.js`); a word says when it turns, and
   at night glowing spores and a wisp drift (`cycle.motes`, `render/motes.js`).
 - **Slime meteorites** (`meteors`, `core/meteors.js`, `game/meteors.js`, `render/meteors.js`): at
@@ -715,8 +716,10 @@ vents, reeds, and the craters the slime meteorites left. What makes it so, in it
   for 1.7 s with a rim pulsing faster, then falls the last 0.55 s with a whistle and lands with a
   wet boom: whoever is within 1.1 cells is hit (16 at depth 1, growing with the depth like the
   enemies' blows; knocked back, slowed to 55% for 2 s, not knocked over), the enemies too (a bit
-  harder, and slowed; only in the game that runs them). The splat it leaves slows whoever wades
-  through it for 6 s. They land only on floors open to the sky, and under a roof (a slab, an
+  harder, and slowed; only in the game that runs them). One whose shadow showed less than 0.6 s
+  (a long frame together, where the clock runs on real time; coming in late) lands without
+  hitting the player, and one that landed does not come again should the clock go back. The splat
+  it leaves slows whoever wades through it for 6 s. They land only on floors open to the sky, and under a roof (a slab, an
   arch, a tunnel) nothing reaches you. Never in the town and the camp, inside houses, in trial,
   test or boss rooms. Checks: `tests/meteors.test.js`, `tests/browser/meteors.js`.
 

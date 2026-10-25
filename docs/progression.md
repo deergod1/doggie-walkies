@@ -144,8 +144,9 @@ bounties, raiders, summoned minions and dev spawns never come back. So a player 
 can farm: for XP (which the level falloff keeps from paying off far below one's level) and above
 all for loot.
 
-- The clock is the world's play time (`run.clock`, `main.js`), stopped while the game is paused
-  (the inventory, the menu). Closing the game or the computer's clock change nothing.
+- The clock is the world's play time (`run.clock`, `game/worldclock.js`), stopped while the game
+  is paused (the inventory, the menu). Closing the game or the computer's clock change nothing.
+  Playing together it is the host's, on real time ([online.md](online.md)): it does not stop.
 - `run.kills` remembers each such kill: `id -> { n, at, cube }`. `n` is its life (how often it
   came back), `at` when it died. Ids do not change: what is defeated, quests, the co-op roster
   and the chronicle work as before.

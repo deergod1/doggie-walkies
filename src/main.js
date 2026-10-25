@@ -50,6 +50,7 @@ import { tickParticles } from './render/particles.js';
 import { tickPortalCloud } from './render/portalcloud.js';
 import { timeScale } from './game/juice.js';
 import { gameTime, pace } from './game/pace.js';
+import { tickWorldClock } from './game/worldclock.js';
 import { teach, tickTeach } from './game/teach.js';
 import { updatePointer } from './game/pointer.js';
 import { updateMouseLook } from './game/mouselook.js';
@@ -141,7 +142,7 @@ function frame(now = performance.now()) {
   const dt = worldPaused() ? 0 : gameTime(elapsed) * timeScale(elapsed);
   updatePointer();   // the enemy under the cursor (with last frame's camera)
   state.time += dt;
-  if (state.map) state.run.clock += dt;   // the world's play time: when its enemies come back (core/respawn.js)
+  tickWorldClock(dt);   // the world's play time: when its enemies come back, its nights (game/worldclock.js)
   if (dt > 0 && travelling()) updateTravel(dt);
   else if (dt > 0 && state.map && !state.transitioning) {
     updateMovers(dt);   // the platforms round Foggery's tower, before whoever stands on one moves (game/movers.js)
@@ -242,6 +243,7 @@ function menuFrame(dt, start) {
   // portrait behind it, competing with brush input for both CPU and GPU time.
   if (skinEditorOpen()) { requestAnimationFrame(frame); return; }
   state.time += dt;
+  tickWorldClock(0);   // (playing together the world's play time runs on: game/worldclock.js)
   if (character.ready && !portraitShown()) character.group.visible = false;
   if (portraitShown()) { player.yaw = Math.sin(state.time * SWAY_SPEED) * SWAY; animateCharacter(dt, state.time); updateArmor(state.time); }
   updatePlayerBar(); updatePortalBar(); updateCastBar();   // (they hide with no hero)

@@ -4,6 +4,9 @@
 // only in the game that runs them (playing together: net/foes.js; the others are shown what it
 // does to them). Where it landed a splat of slime slows whoever wades through it, the enemies too.
 // Not in the town and the camp, inside houses, in trial rooms, test rooms or a boss's arena.
+// Playing together the world's play time runs on real time (game/worldclock.js), so a long frame
+// can skip much of a warning: one whose shadow showed less than METEOR.notice does not hit the
+// player (it lands all the same), and one that landed does not come again if the clock goes back.
 import { state, player } from './state.js';
 import { allEnemies, mirroring } from './enemies.js';
 import { hitBody } from './enemycombat.js';
@@ -20,6 +23,7 @@ import { meteorFx, statusHurtFx } from './juice.js';
 import { drawMeteors, removeMeteorView, drawSplats, clearMeteorViews } from '../render/meteors.js';
 
 let shown = new Map(), splats = [], cube = null;
+const landed = new Map();   // id -> when, of those that landed in this cube (kept two days and nights)
 // where meteorites may come down in a map: its dry floors open to the sky (cached)
 const spots = new WeakMap();
 function spotsOf(m) {
@@ -53,17 +57,21 @@ export function updateMeteors(dt) {
   if (!theme?.meteors || !allowed(map) || state.transitioning) { for (const v of shown.values()) removeMeteorView(v); shown.clear(); return; }
   const clock = state.run.clock, now = meteorsAt(map.seed ?? 0, state.cubeKey, theme.cycle, clock), ids = new Set(now.map(m => m.id));
   for (const [id, v] of shown) if (!ids.has(id)) { removeMeteorView(v); shown.delete(id); }
+  const period = theme.cycle.day + theme.cycle.night;
+  for (const [id, t] of landed) if (t < clock - 2 * period) landed.delete(id);
   for (const m of now) {
     let v = shown.get(m.id);
     if (!v) {
+      if (landed.has(m.id)) continue;
       const at = place(m, map);
-      shown.set(m.id, v = { m, at, landed: false, view: null });
+      shown.set(m.id, v = { m, at, landed: false, view: null, since: clock });
       if (at) meteorFx(v, 'warn');
     }
     if (!v.at || v.landed) continue;
     if (!v.falling && clock >= m.t - METEOR.fall) { v.falling = true; meteorFx(v, 'fall'); }
     if (clock < m.t) continue;
     v.landed = true;
+    landed.set(m.id, m.t);
     land(v);
   }
 }
@@ -72,8 +80,8 @@ function land(v) {
   const { x, y, z } = v.at, depth = state.map.depth ?? 0;
   meteorFx(v, 'land');
   splats.push({ x, y, z, t: 0 });
-  const p = player, d = Math.hypot(p.x - x, p.z - z);
-  if (d <= METEOR.radius + p.r && Math.abs(p.y - y) < 1.2 && p.hp > 0 && !p.ragdoll && open(p.x, p.y, p.z))
+  const p = player, d = Math.hypot(p.x - x, p.z - z), noticed = v.m.t - v.since >= METEOR.notice;
+  if (noticed && d <= METEOR.radius + p.r && Math.abs(p.y - y) < 1.2 && p.hp > 0 && !p.ragdoll && open(p.x, p.y, p.z))
     hitBody(p, meteorBlow(depth), x, z, d ? (p.x - x) / d : 1, d ? (p.z - z) / d : 0);
   if (mirroring()) return;   // (another runs the enemies: what it does to them is theirs to say)
   for (const e of allEnemies()) {
@@ -103,6 +111,6 @@ export function drawAllMeteors(dt, off) {
   drawMeteors([...shown.values()], state.run.clock, dt, off);
   drawSplats(splats, dt, off);
 }
-export function clearMeteors() { clearMeteorViews([...shown.values()]); shown.clear(); splats = []; }
+export function clearMeteors() { clearMeteorViews([...shown.values()]); shown.clear(); splats = []; landed.clear(); }
 export const meteorsNow = () => [...shown.values()];
 export const splatsNow = () => splats;

@@ -18,6 +18,7 @@ import { msg } from '../i18n/i18n.js';
 export const METEOR = {
   every: [3.5, 6.5],   // s between two in a cube
   warn: 1.7,           // s its shadow shows before it lands
+  notice: 0.6,         // s its shadow must have shown for it to hit the player (game/meteors.js)
   fall: 0.55,          // s it falls (the end of the warning)
   sky: 14,             // how high over its spot it comes from
   aimed: 1 / 3,        // the share that comes down near the player

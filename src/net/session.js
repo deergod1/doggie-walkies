@@ -79,6 +79,7 @@ import { checkTrials } from '../core/save.js';
 import { log } from '../game/log.js';
 import { speech } from '../game/console.js';
 import { detachWorld } from '../game/save.js';
+import { worldClock, heardClock } from '../game/worldclock.js';
 import { takeQuestLog, guestQuestAct, questRewarded, questLogPacked } from '../game/quests.js';
 import { TrialOwner, trialMessage, trialAct } from './trials.js';
 import { takeTrialWord, trialActFrom, shareTrialResolved, shareTrialStage, sealedIn } from '../game/trials.js';
@@ -330,16 +331,20 @@ function welcome(l, slot, name, id, again) {
   if (foes instanceof Runner) foes.forget(slot);
   announced = state.cubes?.seed ?? null;
   const players = [{ slot: 0, name: myName }, ...[...peers.values()].filter(o => o !== p).map(o => ({ slot: o.slot, name: o.name }))];
-  l.send({ t: 'welcome', v: PROTOCOL, slot, players, seed: announced,
-    defeated: [...state.run.defeated], gates: [...state.run.unlockedGates], visited: visitedKeys(), faces: [...state.openedFaces], trials: [...state.run.trials],
-    loot: allLoot(), dropped: [...state.run.dropped], chests: [...state.run.chests], quests: questLogPacked(),
-    clock: state.run.clock, kills: packKills(state.run.kills) });
+  l.send({ t: 'welcome', v: PROTOCOL, slot, players, seed: announced, ...runOf() });
   facesSent = state.openedFaces.size;
   deliver({ t: 'joined', slot, name, from: 0 }, undefined, slot);
   together();
   showPlayers();
   tell(again ? phrase('{name} is back', { name }) : phrase('{name} joined', { name }));
 }
+
+// the host's progress in its world, for a guest (welcome, world): what was defeated, opened
+// and discovered, the loot on its floors, the quest log, its play time (game/worldclock.js) and
+// the kills that come back
+const runOf = () => ({ defeated: [...state.run.defeated], gates: [...state.run.unlockedGates], visited: visitedKeys(), faces: [...state.openedFaces],
+  trials: [...state.run.trials], loot: allLoot(), dropped: [...state.run.dropped], chests: [...state.run.chests], quests: questLogPacked(),
+  clock: worldClock(), kills: packKills(state.run.kills) });
 
 function fromGuest(p, l, m) {
   p.lastHeard = performance.now();
@@ -371,7 +376,7 @@ function fromHost(m) {
   lastHeard = performance.now();
   if (!m || typeof m !== 'object') return;
   m.from = Number.isInteger(m.from) ? m.from : 0;
-  if (m.t === 'ping') return;
+  if (m.t === 'ping') { if (online.slot !== null) heardClock(m.clock); return; }   // (the host's play time: game/worldclock.js)
   if (m.t === 'bye') { const l = link; lost(true); l?.close(); return; }
   if (online.slot === null) {
     if (m.t === 'welcome') welcomed(m);
@@ -391,7 +396,8 @@ function fromHost(m) {
     if (p) { dropPeer(m.slot); showPlayers(); tell(phrase('{name} left', { name: p.name })); }
     return;
   }
-  if (m.from === 0 && m.t === 'world' && Number.isFinite(m.seed)) { pendingSeed = m.seed; return; }
+  // the host went into another world: it and its progress there
+  if (m.from === 0 && m.t === 'world' && Number.isFinite(m.seed)) { pendingSeed = m.seed; pendingRun = readRun(m); heardClock(m.clock, true); return; }
   handle(m);
 }
 
@@ -403,13 +409,10 @@ function welcomed(m) {
   for (const pl of Array.isArray(m.players) ? m.players : [])
     if (Number.isInteger(pl?.slot) && pl.slot >= 0 && pl.slot < MAX_PLAYERS && pl.slot !== m.slot) addPeer(pl.slot, cleanName(pl.name));
   if (rejoin) { clearTimeout(rejoin.timer); rejoin = null; }
-  // the host's world, and its progress so far: what it defeated stays defeated for us too
-  const list = x => Array.isArray(x) ? x.filter(k => typeof k === 'string') : [];
-  const loot = (Array.isArray(m.loot) ? m.loot : []).filter(c => Array.isArray(c) && typeof c[0] === 'string' && Array.isArray(c[1]))
-    .map(([k, items]) => [k, items.filter(p => typeof p?.source === 'string' && validPickup(p))]);
-  const run = { defeated: list(m.defeated), gates: list(m.gates), visited: list(m.visited), faces: list(m.faces), trials: checkTrials(m.trials),
-    loot, dropped: list(m.dropped), chests: list(m.chests), quests: m.quests ?? null,
-    clock: Number.isFinite(m.clock) && m.clock >= 0 ? m.clock : null, kills: unpackKills(m.kills) };
+  // the host's world, and its progress so far: what it defeated stays defeated for us too; its
+  // play time is ours from now on (game/worldclock.js)
+  const run = readRun(m);
+  heardClock(m.clock, true);
   if (Number.isFinite(m.seed) && m.seed !== state.cubes?.seed) { pendingSeed = m.seed; pendingRun = run; }
   else {
     takeRun(run);
@@ -420,6 +423,16 @@ function welcomed(m) {
   together();
   showPlayers();
   tell(peers.get(0)?.name ? phrase("Joined {name}'s world", { name: peers.get(0).name }) : phrase("Joined your friend's world"));
+}
+
+// the host's progress in its world (runOf), as a guest takes it (takeRun)
+function readRun(m) {
+  const list = x => Array.isArray(x) ? x.filter(k => typeof k === 'string') : [];
+  const loot = (Array.isArray(m.loot) ? m.loot : []).filter(c => Array.isArray(c) && typeof c[0] === 'string' && Array.isArray(c[1]))
+    .map(([k, items]) => [k, items.filter(p => typeof p?.source === 'string' && validPickup(p))]);
+  return { defeated: list(m.defeated), gates: list(m.gates), visited: list(m.visited), faces: list(m.faces), trials: checkTrials(m.trials),
+    loot, dropped: list(m.dropped), chests: list(m.chests), quests: m.quests ?? null,
+    clock: Number.isFinite(m.clock) && m.clock >= 0 ? m.clock : null, kills: unpackKills(m.kills) };
 }
 
 // we (a guest) lost the host: it said goodbye (bye), or the connection broke (then we try to
@@ -448,7 +461,7 @@ function pingAll() {
   const now = performance.now();
   if (online.role === 'host') {
     for (const p of [...peers.values()]) {
-      p.link?.send({ t: 'ping' });
+      p.link?.send({ t: 'ping', clock: worldClock(now) });   // (our play time: game/worldclock.js)
       if (now - p.lastHeard > LOST) { const l = p.link; lostGuest(p); l?.close(); }
     }
   } else if (link) {
@@ -830,7 +843,7 @@ export function updateOnline() {
   }
   if (online.role === 'host' && state.cubes && state.cubes.seed !== announced) {
     announced = state.cubes.seed;
-    post({ t: 'world', seed: announced });
+    post({ t: 'world', seed: announced, ...runOf() });
   }
   // faces we opened (crossing, discovering, a gate): the others can walk across there too
   if (state.openedFaces.size < facesSent) facesSent = state.openedFaces.size;   // a new world

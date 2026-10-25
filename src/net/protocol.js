@@ -19,12 +19,14 @@
 //                                      (and what was defeated, opened and discovered in it so
 //                                      far, the loot on its floors: [[cube, pickups]], the
 //                                      sources that dropped, the chests open, the quest log, its
-//                                      play time and the kills that come back: core/respawn.js)
+//                                      play time (game/worldclock.js) and the kills that come
+//                                      back: core/respawn.js)
 //   joined  { slot, name }             host -> guests: someone came (or got back in)
 //   left    { slot }                   host -> guests: someone went
 //   visited { keys }                   to all: I discovered these cubes (yours too now)
 //   faces   { keys }                   to all: the side faces open for me (open for you too)
-//   world   { seed }                   host -> guests: the host started a new world
+//   world   { seed, defeated, ... }    host -> guests: the host went into another world (and its
+//                                      progress there, as in the welcome)
 //   me      { ts, seed, cube, busy, pose, body, ground, swim, down, ko, hp, maxHp, level,
 //             weapon, armed, worn, skin }  to all, about 20 times a second: where I am and how I
 //                                      look (`ts`: the sender's clock, ms; skin: the id of the
@@ -82,7 +84,8 @@
 //                                      (visit, horde, landmark, found, rescued)
 //   questReward { id, rewards, title }  host -> guests: quest `id` was handed in: take your reward
 // and between a guest and the host only:
-//   ping    {}                         both ways, every second, also from a background tab
+//   ping    { clock? }                 both ways, every second, also from a background tab (the
+//                                      host's: its play time now, game/worldclock.js)
 //   full    {}                         host -> a guest too many: this game is full
 //   version { v }                      either way: the other side runs a different version
 //   bye     {}                         either way: leaving
@@ -91,7 +94,7 @@ import { ITEMS } from '../core/items.js';
 import { RARITY } from '../core/gear/rarities.js';
 
 // raised whenever two versions of the game could no longer understand each other
-export const PROTOCOL = 14;
+export const PROTOCOL = 15;
 
 export const MAX_PLAYERS = 4;
 // what the host passes on from one guest to the others

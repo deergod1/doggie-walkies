@@ -2,8 +2,8 @@
 // light for `day` seconds, then by its `dark` for `night` seconds, and so on. Each turn takes the
 // last `fade` seconds of the half it ends, so a day is all day from its start and a night all
 // night. It runs on the world's play time (state.run.clock), so it goes on while you are
-// elsewhere, and friends playing together see the same sky (a guest's clock comes from the host,
-// net/session.js). game/daycycle.js shows it; the slime meteorites fall at night
+// elsewhere, and friends playing together see the same sky (together the clock is the host's,
+// game/worldclock.js). game/daycycle.js shows it; the slime meteorites fall at night
 // (core/meteors.js).
 
 const smooth = x => x * x * (3 - 2 * x);
