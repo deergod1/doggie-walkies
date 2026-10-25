@@ -25,7 +25,8 @@ export const actAt = d => Math.max(0, ACTS.findIndex(a => a && d >= a[0] && d <=
 export const themesAt = d => d === 0 ? [TOWN] : d === MAX_DEPTH ? [CORE] : THEMES.filter(t => t.act === actAt(d));
 
 // the share of an act's themes a world shows: every theme is as likely to be in a world as any
-// other, whichever act it belongs to and however many themes its act has
+// other, whichever act it belongs to and however many themes its act has (but those with a
+// `weight`, themes/index.js)
 export const SHARE = 0.5;
 // the most depths one theme lasts
 export const LONGEST = 3;
@@ -33,7 +34,7 @@ export const LONGEST = 3;
 // the world's theme for every depth, from its seed alone, as stretches. Each act on its own
 // random stream: how many themes it shows (SHARE of them, rounded up or down at random so the
 // share comes out right, at least enough for no stretch to last more than LONGEST depths), which
-// ones (each equally likely), in story order, the act's depths dealt out among them. force: theme
+// ones (each equally likely, but by its `weight`), in story order, the act's depths dealt out among them. force: theme
 // ids that win every depth they may appear at: an act with any of them shows them alone, its
 // depths shared out evenly (dev, tests: ?theme=clouds,forge)
 const picked = new Map();
@@ -54,9 +55,16 @@ export function worldThemes(seed, force = []) {
     } else {
       const share = SHARE * pool.length;
       const n = Math.min(depths, Math.max(Math.ceil(depths / LONGEST), Math.floor(share) + (R() < share % 1 ? 1 : 0)));
-      // which: a shuffle of the act's themes, the first n of it, back in story order
-      const order = [...pool];
-      for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+      // which: a shuffle of the act's themes, the first n of it, back in story order. The shuffle
+      // fills the array from the back, so the themes it puts there first are the ones left out: a
+      // theme with a `weight` (1) is that much less likely to be put there (with every weight 1,
+      // a plain Fisher-Yates shuffle, the same picks as ever)
+      const order = [...pool], skip = t => 1 / (t.weight ?? 1);
+      for (let i = order.length - 1; i > 0; i--) {
+        let r = R() * order.slice(0, i + 1).reduce((s, t) => s + skip(t), 0), j = 0;
+        while (j < i && (r -= skip(order[j])) >= 0) j++;
+        [order[i], order[j]] = [order[j], order[i]];
+      }
       const chosen = new Set(order.slice(0, n));
       shown = pool.filter(t => chosen.has(t));
       // how long: a depth each, the rest one by one to stretches not yet LONGEST

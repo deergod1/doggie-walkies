@@ -36,8 +36,17 @@ test('every world shows half of each act\'s themes, in story order, each about a
       }
     }
   }
-  // every theme comes up about as often as every other, whatever its act
-  for (const t of THEMES) assert.ok(Math.abs(seen.get(t) / N - SHARE) < 0.04, `${t.props}: ${seen.get(t) / N}`);
+  // every theme comes up about as often as every other, whatever its act, but those with a weight:
+  // the slime marsh in about 80% of the worlds, the rest of its act a little less often
+  const often = t => seen.get(t) / N, weighted = THEMES.filter(t => (t.weight ?? 1) !== 1);
+  assert.deepEqual(weighted.map(t => t.props), ['slime']);
+  assert.ok(Math.abs(often(weighted[0]) - 0.8) < 0.04, `slime: ${often(weighted[0])}`);
+  for (const t of THEMES) {
+    if (weighted.includes(t)) continue;
+    const others = weighted.filter(w => w.act === t.act), pool = THEMES.filter(p => p.act === t.act);
+    const expect = (SHARE * pool.length - others.reduce((s, w) => s + often(w), 0)) / (pool.length - others.length);
+    assert.ok(Math.abs(often(t) - expect) < 0.04, `${t.props}: ${often(t)}, not ${expect}`);
+  }
   // the town is always in the meadows, the core in the abyss
   assert.deepEqual(themesAt(0), [TOWN]);
   assert.deepEqual(themesAt(MAX_DEPTH), [CORE]);

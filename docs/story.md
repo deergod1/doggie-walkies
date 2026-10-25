@@ -161,7 +161,8 @@ things happen. Four layers, from fixed to loose:
    the salt flats a trip with her father, the forge her first job. Every theme belongs to one act
    (`act` in `src/themes/`), and a world shows half of each act's themes, picked from its seed,
    in the act's story order ([world.md](world.md#themes-per-world-themesindexjs-themescavesjs-themesdepthjs)),
-   so each world tells a slightly different life, and every theme is as likely as any other.
+   so each world tells a slightly different life, and every theme is as likely as any other
+   (but the slime marsh, at the bottom of act II, in most worlds).
 4. **Memory shards** at landmarks: short scenes (three lines or so) from a pool for each act, so
    different worlds show different ones. The spine is whole in every world; the shards are what
    playing again adds.

@@ -608,7 +608,9 @@ Every theme belongs to one of the story's three acts (`act`; `ACTS`: the depths 
 world draws its themes from its seed (`worldThemes(seed)`, its own random stream per act): an
 act shows `SHARE` (half) of its themes, rounded up or down at random so the share comes out
 right, each equally likely, so every theme is as likely to be in a world as any other, whichever
-act it belongs to and however many themes its act has. They come down the act in their story
+act it belongs to and however many themes its act has. A theme's `weight` (1) makes it likelier
+than the rest of its act: the slime marsh (3.2) is in about 80% of the worlds, the other act II
+themes in about 46%. They come down the act in their story
 order (the order of `THEMES`), the act's depths dealt out among them, a depth each and the rest
 at random, no theme for more than `LONGEST` (3) depths. The town (0) is always in the meadows
 (`TOWN`), the core (20) in the obsidian abyss (`CORE`). The picks are kept as stretches
@@ -767,7 +769,7 @@ dark forest a room gets about 1.2 of them. Checks: `tests/vignettes.test.js`.
   appear at (their acts show them alone). `new World(seed, { themes: ['mines'] })` does the same
   in tests.
 - **Checks:** `tests/themes.test.js`: the picks (stable, each act in story order, no stretch
-  longer than `LONGEST`, every theme in about `SHARE` of the worlds, the town always in the
+  longer than `LONGEST`, every theme in about `SHARE` of the worlds but by its `weight`, the town always in the
   meadows and the core in the abyss), act III walled in, every theme complete (act, structures,
   arenas, site recipes, spans, its own props), the same route whatever the picks, and every
   theme generating its depths dressed from its own set.

@@ -1,7 +1,8 @@
 // What each depth looks like. Every theme belongs to one of the story's three acts (`act`, ACTS:
 // their depths) and may appear at any depth of it; each world shows half of each act's themes,
 // in their story order down the act (themes/depth.js worldThemes), so two worlds can have cloud
-// islands or lagoons under the town, and every theme is as likely to be in a world as any other.
+// islands or lagoons under the town, and every theme is as likely to be in a world as any other
+// (but one with a `weight`: the slime marsh, in most worlds).
 // Palettes, generator settings and the shape of the layout are per theme; the lighting (`light`)
 // is blended between the starts of the stretches of depths sharing a theme, so every step down
 // is a little darker.
@@ -14,6 +15,8 @@
 // A theme's id is its prop set (`props`).
 //   act: 1, 2 or 3 (the town's depth, 0, is always TOWN's, the core's, 20, CORE's); `depths`, the
 //     first and last depth it may appear at, follows from it
+//   weight: how much likelier a world shows it than the rest of its act's themes (1; the act
+//     still shows as many themes, the others a little less often: themes/depth.js worldThemes)
 //   top / side: colour stops by height in levels (grass tops, cliff strata)
 //   fluids: weights [water, lava, acid] for pools and falls; river: fluid of the rivers
 //   soft: the colour of a plunge's soft landing (world/heights.js: hay, sand, snow, moss, web, ash)
@@ -166,9 +169,10 @@ const SALTFLATS = T('Salt flats', {
 // the slime marsh: green moss and pools of toxic slime (acid: falling in is the end), drooping
 // slime trees, mounds of goo with things stuck in them, bubbling vents and the craters the slime
 // meteorites left; low and wet, few holes, lakes and rivers everywhere. Act II's open marsh: no
-// rock walls, under the act's hazy sky, the sun dim through the veils by day
+// rock walls, under the act's hazy sky, the sun dim through the veils by day. Act II's last, at its
+// bottom, Slomo's: in about 80% of the worlds (the rest of act II's themes in about 46%)
 const SLIME = T('Slime marsh', {
-  music: 'swamp',
+  music: 'swamp', weight: 3.2,
   props: 'slime', propDensity: 0.3, mire: 0.88, meteors: true,
   vignettes: [0, 1],
   grove: { trees: ['slime_tree', 'slime_tree', 'bulb_tree', 'dead_slimed_tree'], density: 0.3, scale: [0.95, 1.25] },
