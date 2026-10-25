@@ -162,15 +162,21 @@ function climb(spec) {
 
 // Flat ground (level 2) with every enemy kind standing in it, idle (game/devspawn.js
 // spawnLineup): `enemies` has the species with their kinds and their bosses' minions, a row per
-// species; `guardians` the side guardians, the shorter half in front (the descent guardians,
+// species (shareRows); `guardians` the side guardians, the shorter half in front (the descent guardians,
 // the Temp Bosses, wait for bosses of their own; the bosses have the `boss` room). The shortest
 // stand in front, all face the arrival. lineup: [{ type, x, z, yaw }]
 const KINDS = Object.values(ENEMY_KINDS);
 const tallest = row => Math.max(...row.map(k => k.height));
 const bySpecies = list => [...new Set(list.map(k => k.species))].map(s => list.filter(k => k.species === s));
 const byHeight = list => [...list].sort((a, b) => a.height - b.height);
+// (a species of one or two kinds shares its row with the next: the room is only so deep)
+const shareRows = rows => rows.reduce((out, row) => {
+  const last = out.at(-1);
+  if (last && last.length <= 2 && last.length + row.length <= 7) out[out.length - 1] = [...last, ...row]; else out.push(row);
+  return out;
+}, []);
 const LINEUPS = {
-  enemies: () => bySpecies(KINDS.filter(k => !k.guardian)).sort((a, b) => tallest(a) - tallest(b)),
+  enemies: () => shareRows(bySpecies(KINDS.filter(k => !k.guardian)).sort((a, b) => tallest(a) - tallest(b))),
   guardians: () => {
     const side = byHeight(KINDS.filter(k => k.guardianRole === 'side')), half = Math.ceil(side.length / 2);
     return [side.slice(0, half), side.slice(half)];

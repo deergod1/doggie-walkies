@@ -63,6 +63,7 @@ import { makeFoggeryLook, foggeryLook, disposeFoggeryLook } from './foggeryview.
 import { slomoModel } from './slomomodel.js';
 import { makeSlomoLook, slomoLook } from './slomoview.js';
 import { isFigure, animateFigures, removeFigureViews } from './renewview.js';
+import { isFlimmer, animateFlimmers, removeFlimmerViews, flimmerWarmup } from './flimmerview.js';
 import { STAGE_PROFILES, enemyName } from '../core/enemies.js';
 import { SQUARLO_FIGHT } from '../core/squarlo.js';
 import { standingAt } from '../physics/fluid.js';
@@ -668,6 +669,7 @@ export function animateEnemies(list, dt, off = ZERO) {
   const t0 = performance.now();
   let made = 0;
   for (const e of list) {
+    if (isFlimmer(e)) { animateFlimmers([e], dt, off); continue; }   // (a figure of its own, render/flimmerview.js)
     if (isFigure(e)) { animateFigures([e], dt, off); continue; }   // (Renew: a figure, render/renewview.js)
     const prefab = prefabs[e.profile.species];
     if (!prefab?.ready) { prefab?.load(); continue; }   // not loaded before (a friend's, a dev spawn): shown once it is
@@ -768,11 +770,12 @@ export function enemyWarmup(kinds) {
     for (const p of v.trail?.list ?? []) scene.remove(p.mesh);
     list.push(e);
   }
+  list.push(...flimmerWarmup(kinds));   // (the Flimmers: the hero's figure, blurred)
   return { objects: list.flatMap(e => [e.view.group, ...(e.view.trail?.list ?? []).map(p => p.mesh)]), dispose: () => removeEnemyViews(list) };
 }
 
 export function removeEnemyViews(list) {
-  removeFigureViews(list);
+  removeFigureViews(list); removeFlimmerViews(list);
   for (const e of list) if (e.view) {
     const v = e.view;
     scene.remove(v.group);

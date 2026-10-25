@@ -3,7 +3,10 @@
 // terrain and the per-species placement streams (game/enemyspawn.js) are unaffected.
 //   roster: [species, chance, lo, hi, pack, kinds]
 //     chance: that the species is in a cube at all (1: always, unless `mix` cuts it)
-//     lo..hi: how many when it is; pack: the largest group it spawns in (1: on its own)
+//     lo..hi: how many when it is; pack: the largest group it spawns in (1: on its own). A
+//       species with a `troop` (the Flimmers: three) comes in groups of exactly that many: its
+//       count is rounded to whole troops (at least one), and each pack is one troop
+//       (game/enemyspawn.js)
 //     kinds: which of the species' kinds (ENEMY_KINDS in core/enemies.js) and how often, as
 //       { kind: weight }; each pack draws one (game/enemyspawn.js). Default: the species itself.
 //       Stronger kinds take over deeper down, and each theme leans on the kinds that suit it: a
@@ -32,23 +35,27 @@ export const DEPTH_SPAWNS = [
     ['squirtle', .6, 1, 2, 1, { squirtle: 1 }, ['lagoon']],
     ['spider', .7, 2, 4, 2, { gloomspider: 1 }, ['darkforest']], ['fireface', .3, 1, 1, 1, { lanternface: 1 }, ['darkforest']]),
   /*  2 act I */ D(3, ['snake', 1, 2, 5, 1, { snake: 3, sandviper: 1 }], ['spider', .6, 2, 4, 2, { spider: 1 }, ['!darkforest']],
-    ['stunder', .25, 1, 1], ['wolk', .35, 1, 2], ['tornado', .3, 1, 1], ['squirtle', .6, 1, 3, 1, { squirtle: 1 }, ['lagoon']],
+    ['stunder', .25, 1, 1], ['wolk', .35, 1, 2], ['tornado', .3, 1, 1], ['squirtle', .6, 1, 3, 1, { squirtle: 1 }, ['lagoon']], ['flimmer', .35, 3, 3, 3],
     ['spider', .8, 3, 5, 2, { gloomspider: 3, spider: 1 }, ['darkforest']], ['fireface', .4, 1, 2, 1, { lanternface: 1 }, ['darkforest']]),
   /*  3 act I */ D(3, ['spider', 1, 8, 14, 3, { frostspider: 1 }, ['!darkforest']], ['stunder', .7, 1, 2, 1, { froststunder: 1 }],
     ['shraps', .3, 1, 1], ['wolk', .5, 1, 2, 1, { stormwolk: 2, wolk: 1 }], ['snake', .7, 2, 4, 2, { frostadder: 1 }], ['triangle', .2, 1, 1],
     ['tornado', .35, 1, 2, 1, { frosttornado: 2, tornado: 1 }], ['squirtle', .6, 1, 3, 1, { squirtle: 1 }, ['lagoon']],
+    ['flimmer', .45, 3, 3, 3, { frostflimmer: 1 }],
     ['spider', .8, 4, 6, 2, { gloomspider: 2, spider: 1 }, ['darkforest']], ['fireface', .4, 1, 2, 1, { lanternface: 1 }, ['darkforest']]),
   /*  4 act I */ D(3, ['snake', 1, 3, 6, 2, { sandviper: 1 }], ['spider', .8, 4, 8, 3, { spider: 2, redback: .5 }, ['!darkforest']],
     ['stunder', .6, 1, 2, 1, { stonestunder: 1, stunder: 1 }], ['wolk', .5, 1, 2, 1, { dustwolk: 1 }],
     ['tornado', .4, 1, 2, 1, { dusttornado: 2, tornado: 1 }], ['squirtle', .6, 2, 3, 2, { squirtle: 1 }, ['lagoon']],
+    ['flimmer', .45, 3, 6, 3, { hazeflimmer: 2, flimmer: 1 }, ['!darkforest']], ['flimmer', .35, 3, 3, 3, { shadowflimmer: 1 }, ['darkforest']],
     ['spider', .8, 4, 7, 3, { gloomspider: 2, spider: 1 }, ['darkforest']], ['fireface', .45, 1, 2, 1, { lanternface: 1 }, ['darkforest']]),
   /*  5 act I */ D(3, ['snake', 1, 4, 7, 2, { sandviper: 1 }], ['spider', .8, 5, 9, 3, { spider: 2, redback: .5 }, ['!darkforest']],
     ['stunder', .6, 1, 2, 1, { stonestunder: 1, stunder: 1 }], ['wolk', .4, 1, 2, 1, { dustwolk: 1, stormwolk: 1 }], ['wolla', .3, 1, 2],
     ['tornado', .35, 1, 2, 1, { dusttornado: 1, tornado: 1 }], ['squirtle', .6, 2, 3, 2, { squirtle: 1 }, ['lagoon']],
+    ['flimmer', .45, 3, 6, 3, { hazeflimmer: 2, flimmer: 1 }, ['!darkforest']], ['flimmer', .35, 3, 3, 3, { shadowflimmer: 1 }, ['darkforest']],
     ['spider', .8, 5, 8, 3, { gloomspider: 2, spider: 1 }, ['darkforest']], ['fireface', .5, 1, 2, 1, { lanternface: 1 }, ['darkforest']]),
   /*  6 act I */ D(3, ['snake', 1, 5, 8, 2, { sandviper: 1, bloodviper: 1 }], ['spider', .8, 6, 10, 3, { spider: 2, redback: 1 }, ['!darkforest']],
     ['stunder', .6, 1, 3, 1, { stonestunder: 1, stunder: 1 }], ['wolk', .4, 1, 2, 1, { dustwolk: 1, stormwolk: 1 }], ['wolla', .35, 1, 2],
     ['octonaut', .15, 1, 1], ['mecked', .15, 1, 1], ['tornado', .3, 1, 2, 1, { dusttornado: 1 }], ['squirtle', .6, 2, 4, 2, { squirtle: 1 }, ['lagoon']],
+    ['flimmer', .4, 3, 6, 3, { hazeflimmer: 1 }, ['!darkforest']], ['flimmer', .35, 3, 3, 3, { shadowflimmer: 1 }, ['darkforest']],
     ['spider', .8, 5, 9, 3, { gloomspider: 2, spider: 1 }, ['darkforest']], ['fireface', .5, 1, 2, 1, { lanternface: 1 }, ['darkforest']]),
   /*  7 act II */ D(3, ['spider', 1, 7, 12, 3, { spider: 2, bogspider: 1 }], ['snake', .8, 4, 7, 2, { snake: 1, bloodviper: 1 }],
     ['stunder', .6, 1, 2, 1, { stunder: 1 }], ['mecked', .5, 1, 2], ['wolla', .4, 1, 2], ['octonaut', .2, 1, 1],
@@ -140,13 +147,16 @@ export function population(map) {
   const rolled = [];
   for (const e of row.roster) if (R() < e.chance && livesIn(e, map.biome)) rolled.push({ e, key: e.chance >= 1 ? 1 + R() : R() ** (1 / e.chance) });
   let present = rolled.sort((a, b) => b.key - a.key).slice(0, row.mix).map(r => r.e);
-  if (!present.length) present = [row.roster[0]];
+  // (none rolled: the first that lives here)
+  if (!present.length) present = [row.roster.find(e => livesIn(e, map.biome)) ?? row.roster[0]];
   let w = R() * present.reduce((n, e) => n + e.chance, 0), lead = present[present.length - 1];
   for (const e of present) if ((w -= e.chance) < 0) { lead = e; break; }
   return new Map(present.map(e => {
     const mid = (e.lo + e.hi) / 2, lo = e === lead ? Math.ceil(mid) : e.lo, hi = e === lead ? e.hi : Math.floor(mid);
     const rolledCount = lo + Math.floor(R() * (hi - lo + 1));
-    const count = Math.max(1, Math.round(rolledCount * (map.populationScale ?? 1)));
+    let count = Math.max(1, Math.round(rolledCount * (map.populationScale ?? 1)));
+    const troop = ENEMY_KINDS[e.type]?.troop;
+    if (troop) count = Math.max(1, Math.round(count / troop)) * troop;
     return [e.type, { count: count * (map.guardian ? 2 : 1), pack: e.pack, lead: e === lead, kinds: e.kinds }];
   }));
 }

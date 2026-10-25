@@ -8,7 +8,7 @@ import { SLASH_CLIP, SHOOT_CLIP, CROSSBOW_CLIP, CAST_CLIP, THROW_CLIP, KINDS } f
 import { MUZZLES } from '../src/core/shots.js';
 import { WEAPONS, WEARABLES, OUTFIT_SLOTS, POTIONS } from '../src/core/items.js';
 import { SPIDER, STUNDER, SNAKE, OCTONAUT, FIREFACE, TRIANGLE, FIRECAT, SHRAPS, FIRE_SHRAPS, SPICY, WOLK, GUSTO, GUSTO_SPLIT, TOTNAR, SNAP_SKULL,
-  SQUARLO, SQUARLO_GIANT, SQUIRTLE, MECKED, TORNADO, SLUG, BOLIME, FLIP, FOGGERY, FOGGERY_BALL, SLOMO, SLOMO_LEGS, SLOMO_SLUG, fireAt } from '../src/core/enemies.js';
+  SQUARLO, SQUARLO_GIANT, SQUIRTLE, MECKED, TORNADO, SLUG, BOLIME, FLIMMER, FLIP, FOGGERY, FOGGERY_BALL, SLOMO, SLOMO_LEGS, SLOMO_SLUG, fireAt } from '../src/core/enemies.js';
 import { CHAR_SCALE } from '../src/core/constants.js';
 
 await decoderReady;
@@ -67,6 +67,14 @@ test('player is unarmed, retains both hand sockets and exports only its own clip
   assert.equal(slash.extras.active_start, SLASH_CLIP.activeStart);
   assert.equal(slash.extras.active_end, SLASH_CLIP.activeEnd);
   assert.equal(j.images?.length || 0, 0);
+});
+test('the hero\'s Pummel is the Flimmer\'s beating: its fists land on the attack\'s blows', () => {
+  const { json: j, duration } = glb('character'), clip = j.animations.find(a => a.name === 'Pummel'), [a] = FLIMMER.attacks;
+  assert.ok(clip);
+  assert.ok(Math.abs(duration(clip) - a.attackTime) < 1e-5);
+  const hits = [a.hitAt, ...a.more.map(m => m.at)];
+  assert.equal(clip.extras.hits.length, hits.length);
+  clip.extras.hits.forEach((t, i) => assert.ok(Math.abs(t - hits[i]) < 1e-9, `blow ${i + 1}`));
 });
 test('the bow, crossbow, staff and throw clips match the attack timing, shoot from the profile muzzles and come with hold poses', () => {
   const { json: j, duration } = glb('character');

@@ -27,6 +27,7 @@ click. It runs at 44.1 kHz whatever the speakers run at (the browser resamples),
 | `laser`, `zapburst`, `fizzle` | the Spicy's laser shining, bursting, put out (`game/juice.js`) |
 | `thunder`, `gust` | the Wolla's storm cloud flashing, its blow (`game/juice.js`) |
 | `grab`, `chomp` | caught in a grab, and a Mecked biting down on you while it holds you (`game/grab.js`) |
+| `blur` | a blow, a shot or a flask's burst going right through a shimmering Flimmer (`game/juice.js evadedFx`) |
 | `whirl`, `twirl` | a Tornado's twister spinning up (over its hands, under its feet), and catching you and spinning you round (`game/juice.js`) |
 | `charge`, `lightning`, `rumble` | the Wolk's lightning gathering, striking, and its thunder rolling in later, the later the further away (`sfx`'s `delay`, `game/juice.js`) |
 | `draw`, `twang`, `crossbow`, `reload`, `spell`, `thunk`, `burst` | the player's bow, crossbow and staff: drawing, loosing, a crossbow's shot and reload, a spell leaving, a shot striking a wall, a spell bursting (`game/juice.js`) |

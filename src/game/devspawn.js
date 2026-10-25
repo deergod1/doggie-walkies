@@ -40,10 +40,12 @@ function spotsNear(kind, x, y, z, n) {
 }
 
 // spawn n enemies of kind `type` around at = { x, y, z } (default: the cursor, else in front of
-// the player); level: a whole number, else the level this depth gives the kind. Returns them.
-export function spawnEnemies(type, { level = null, n = 1, at = null } = {}) {
+// the player); level: a whole number, else the level this depth gives the kind. A kind that comes
+// in troops (the Flimmers) comes n troops strong, unless `single`. Returns them.
+export function spawnEnemies(type, { level = null, n = 1, at = null, single = false } = {}) {
   const kind = ENEMY_KINDS[type];
   if (!kind) throw Error('Unknown enemy kind: ' + type);
+  if (kind.troop && !single) n *= kind.troop;
   if (!state.map || state.transitioning) return [];
   at ??= (pointer.inside && pickFloor()) || { x: player.x + Math.sin(player.yaw) * 2.5, y: player.y, z: player.z + Math.cos(player.yaw) * 2.5 };
   const x = Math.min(N - 0.5, Math.max(0.5, at.x)), z = Math.min(N - 0.5, Math.max(0.5, at.z));

@@ -52,23 +52,24 @@ export function enemySpots(map, profile) {
   for (let i = cand.length - 1; i > 0; i--) {
     const j = Math.floor(R() * (i + 1)); [cand[i], cand[j]] = [cand[j], cand[i]];
   }
-  const spots = [], used = new Set();
+  const spots = [], used = new Set(), troop = profile.troop;
   const clear = (f, d) => spots.every(g => Math.hypot(g.x - f.x, g.z - f.z) >= d || Math.abs(g.top - f.top) >= 6);
   for (const a of cand) {
     if (spots.length >= count) break;
     if (used.has(a) || !clear(a, profile.spacing)) continue;
-    spots.push(a); used.add(a);
-    const kind = pickKind(spec.kinds, K()) ?? profile;
-    kinds.push(kind);
-    // the rest of the pack: ceil(pack / 2)..pack in all, within reach of the first on its level
-    const size = Math.min(count - spots.length + 1, Math.ceil(pack / 2) + Math.floor(R() * (Math.floor(pack / 2) + 1)));
-    const reach = 1.5 + Math.sqrt(size);
-    for (let n = 1; n < size;) {
-      const f = cand.find(f => !used.has(f) && Math.abs(f.top - a.top) < 1
-        && Math.hypot(f.x - a.x, f.z - a.z) <= reach && clear(f, CLOSE));
+    // the rest of the pack: ceil(pack / 2)..pack in all (a troop: exactly that many), within
+    // reach of the first on its level
+    const size = Math.min(count - spots.length, troop ?? Math.ceil(pack / 2) + Math.floor(R() * (Math.floor(pack / 2) + 1)));
+    const reach = 1.5 + Math.sqrt(size), members = [a];
+    for (let n = 1; n < size; n++) {
+      const f = cand.find(f => !used.has(f) && !members.includes(f) && Math.abs(f.top - a.top) < 1
+        && Math.hypot(f.x - a.x, f.z - a.z) <= reach && clear(f, CLOSE) && members.every(g => Math.hypot(g.x - f.x, g.z - f.z) >= CLOSE));
       if (!f) break;
-      spots.push(f); used.add(f); kinds.push(kind); n++;
+      members.push(f);
     }
+    if (troop && members.length < size) continue;   // no room here for a whole troop: elsewhere
+    const kind = pickKind(spec.kinds, K()) ?? profile;
+    for (const f of members) { spots.push(f); used.add(f); kinds.push(kind); }
   }
   return spots.map((f, i) => ({ ...enemyRoll(map, kinds[i], f.id), respawn: map.key, kind: kinds[i], f, x: f.x + 0.5, z: f.z + 0.5, y: groundY(f, f.x + 0.5, f.z + 0.5), yaw: R() * Math.PI * 2 }));
 }

@@ -8,12 +8,12 @@ import { clearLine } from '../physics/enemynav.js';
 import { weaponHit } from '../core/combat.js';
 import { launchShot, stepShot, burstTargets, aimPoint, BURST_SHARE, MUZZLES, SHOTS } from '../core/shots.js';
 import { hitEnemy, rolls } from './sword.js';
-import { shotFx } from './juice.js';
+import { shotFx, evadedFx } from './juice.js';
 import { drawShots, removeShotViews } from '../render/shots.js';
 import { relay } from '../net/online.js';
 import { enchantHit } from './enchants.js';
 import { tr } from '../i18n/i18n.js';
-import { enemyName } from '../core/enemies.js';
+import { enemyName, evades } from '../core/enemies.js';
 
 export let shots = [];
 const solid = (x, y, z) => insideSolid(x, z, y);
@@ -39,9 +39,11 @@ export function ghostShot(s) {
   shotFx(shot, 'launch');
 }
 
-function strike(shot, e, share = 1) {
-  const before = e.hp, hit = weaponHit(player, shot.stats, e, rolls.crit(), share);
+// (dodge: the roll to go through a blurry one; 1 for a shot that already went at it, stepShot)
+function strike(shot, e, share = 1, dodge = rolls.evade()) {
+  const before = e.hp, hit = weaponHit(player, shot.stats, e, rolls.crit(), share, dodge);
   if (!hit) return;
+  if (hit.evaded) { evadedFx(e, e.x - shot.x, e.z - shot.z); return; }
   // knocked back along the flight (a burst: away from where it went off)
   const [dx, dz] = share < 1 ? [e.x - shot.x, e.z - shot.z] : [shot.vx, shot.vz];
   hitEnemy(e, hit, before, dx, dz, shot.stats.knockback ?? 1);
@@ -52,8 +54,10 @@ function strike(shot, e, share = 1) {
 export function updateShots(dt, enemies) {
   if (state.inventoryOpen || state.transitioning || !shots.length) return;
   shots = shots.filter(shot => {
-    const { hits, end } = stepShot(shot, dt, enemies, solid);
-    if (!shot.ghost) for (const e of hits) strike(shot, e);
+    // (our own shots may go through a blurry Flimmer; a friend's rolled for theirs on their side)
+    const { hits, misses, end } = stepShot(shot, dt, enemies, solid, shot.ghost ? null : e => evades(e, rolls.evade()));
+    if (!shot.ghost) for (const e of hits) strike(shot, e, 1, 1);
+    for (const e of misses) evadedFx(e, shot.vx, shot.vz);
     if (!end) return true;
     if (shot.stats.burst && !shot.ghost) for (const e of burstTargets(shot, enemies)) strike(shot, e, BURST_SHARE);
     shotFx(shot, end);

@@ -120,6 +120,14 @@ const SOUNDS = {
     noise(t, 0.2, filter('bandpass', 320 * p, 3, amp(t, 0.002, 0.7, 0.18, out)));
     noise(t, 0.05, filter('highpass', 3000, 0.7, amp(t, 0.001, 0.35, 0.04, out)));
   },
+  blur(t, out, p) {    // a blow through a blurry Flimmer: an airy flutter sweeping past, a faint wobbling ring
+    sweep(t, 0.26, 1800 * p, 5200 * p, 1400 * p, 1.4, 0.55, out, 0.02);
+    for (let i = 0; i < 4; i++) {
+      const at = t + i * 0.045;
+      noise(at, 0.03, filter('bandpass', (2600 + i * 500) * p, 5, amp(at, 0.002, 0.18, 0.025, out)));
+    }
+    tone('sine', 1400 * p, 1250 * p, t + 0.03, 0.22, amp(t + 0.03, 0.01, 0.08, 0.2, out));
+  },
   hurt(t, out, p) {    // a dull grunt-like buzz over a thud
     tone('sawtooth', 260 * p, 120 * p, t, 0.18, filter('lowpass', 1000, 1, amp(t, 0.005, 0.3, 0.18, out)));
     tone('sine', 90 * p, 50 * p, t, 0.15, amp(t, 0.003, 0.7, 0.15, out));

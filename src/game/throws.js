@@ -12,9 +12,9 @@ import { damageEnemy, readiedFlask } from '../core/combat.js';
 import { launchFlask, stepFlask, releasePoint, clampTarget, arcOf, burstVictims, inArea } from '../core/throws.js';
 import { slotOf, removeItem, readiedItem } from '../core/inventory.js';
 import { startCooldown } from '../core/potions.js';
-import { hitEnemy } from './sword.js';
+import { hitEnemy, rolls } from './sword.js';
 import { afflictEnemy } from './statuses.js';
-import { flaskFx } from './juice.js';
+import { flaskFx, evadedFx } from './juice.js';
 import { pickFloor, aimPoint, hoveredEnemy, pointer } from './pointer.js';
 import { syncEquippedWeapon } from './equipment.js';
 import { controls } from './inputstate.js';
@@ -23,7 +23,7 @@ import { douses } from '../core/douse.js';
 import { screenToWorld, aimReach } from '../core/stick.js';
 import { relay } from '../net/online.js';
 import { drawFlasks, removeFlaskViews, drawAreas, removeAreaViews, drawArc } from '../render/throws.js';
-import { absent, hurtBy } from '../core/enemies.js';
+import { absent, hurtBy, evades } from '../core/enemies.js';
 import { tr } from '../i18n/i18n.js';
 
 export let flasks = [], areas = [];
@@ -72,11 +72,13 @@ export function throwFlask(p, stats, target, yaw) {
 }
 
 // the flask bursts where it is: it hurts, burns or poisons the enemies around (in sight of the
-// burst), and a fire or toxic one leaves its patch or cloud on the floor below
+// burst; a blurry Flimmer may shimmer out of its way, core/enemies.js evades), and a fire or toxic
+// one leaves its patch or cloud on the floor below
 function burst(f, enemies) {
   const s = f.stats, at = { x: f.x, y: f.y, z: f.z };
   for (const { e, share } of f.ghost ? [] : burstVictims(at, s.radius, enemies)) {
     if (!clearLine(at.x, at.y + 0.25, at.z, e.x, e.y + e.profile.bodyHeight * 0.5, e.z)) continue;
+    if (evades(e, rolls.evade())) { evadedFx(e, e.x - at.x, e.z - at.z); continue; }
     if (s.blast) {
       const before = e.hp, damage = Math.max(1, Math.round(s.blast * share * hurtBy(e)));
       if (damageEnemy(e, damage)) hitEnemy(e, { damage, crit: false }, before, e.x - at.x, e.z - at.z, s.burn ? 0.4 : 1.8);

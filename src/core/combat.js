@@ -14,7 +14,7 @@ import { equippedItem, readiedItem } from './inventory.js';
 import { levelDamage } from './progression.js';
 import { itemStats } from './gear/stats.js';
 import { effectMod, flaskStats } from './potions.js';
-import { absent, exposedBy, hurtBy, steadyNow, wardedNow } from './enemies.js';
+import { absent, exposedBy, hurtBy, steadyNow, wardedNow, evades } from './enemies.js';
 
 // the clips' own timing (s): character.glb extras (blender/character.py)
 export const SLASH_CLIP = { duration: 32 / 30, activeStart: 15 / 30, activeEnd: 21 / 30 };
@@ -214,18 +214,22 @@ export function damageEnemy(enemy, amount, stagger = true) {
   return true;
 }
 // a blade hit: { damage, crit } (false for none). roll: the crit roll in 0..1. A crit
-// multiplies the damage; life on hit (leech) heals, never above the maximum
+// multiplies the damage; life on hit (leech) heals, never above the maximum. dodge: the roll
+// for a blurry enemy to let it through (weaponHit)
 // learn: architecture.html#swing-journey, checks.html#try-test, code.html#whole (see learn/README.md)
-export function swordHit(p, enemy, roll = Math.random()) {
+export function swordHit(p, enemy, roll = Math.random(), dodge = Math.random()) {
   if (!inSwordArc(p, enemy)) return false;
   p.sword.hits.add(enemy);
-  return weaponHit(p, p.sword.stats || SWORD, enemy, roll);
+  return weaponHit(p, p.sword.stats || SWORD, enemy, roll, 1, dodge);
 }
 // any weapon's hit on enemy with the attack stats `stats` (a swing's, or a shot's snapshot of
 // them), for `share` of its damage (a spell's burst: less): { damage, crit } or false. An enemy
-// lying helpless (core/enemies.js exposedBy) takes more, an armoured one less (hurtBy).
+// lying helpless (core/enemies.js exposedBy) takes more, an armoured one less (hurtBy). A blurry
+// one (a Flimmer) that shimmers lets it go right through it now and then (core/enemies.js evades,
+// with the roll `dodge`: 1 never): { evaded: true }, nothing done.
 // learn: code.html#whole (see learn/README.md)
-export function weaponHit(p, stats, enemy, roll = Math.random(), share = 1) {
+export function weaponHit(p, stats, enemy, roll = Math.random(), share = 1, dodge = Math.random()) {
+  if (evades(enemy, dodge)) return { evaded: true, damage: 0, crit: false };
   const crit = roll < (stats.crit ?? 0);
   const damage = Math.max(1, Math.round(stats.damage * share * (crit ? stats.critDamage ?? 1.5 : 1) * hurtBy(enemy)));
   if (!damageEnemy(enemy, damage)) return false;

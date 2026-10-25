@@ -185,6 +185,18 @@ export function voices({ amp, noise, filter, tone, sweep }) {
         for (let i = 0; i < 6; i++) { const at = t + 0.6 + i * 0.13, hz = (1760 - i * 180) * p; tone('sine', hz, hz * 0.98, at, 0.25, amp(at, 0.003, 0.1, 0.22, out)); }
       },
     },
+    flimmer: {   // a blurry little person: a wobbly, breathy giggle, a sharp zing as it comes into focus, a shimmer fizzing away
+      alert: (t, out, p) => {
+        for (let i = 0; i < 4; i++) { const at = t + i * 0.07; bend(at, 0.08, (520 + 40 * i) * p, 640 * p, 480 * p, 1600 * p, 0.18, out); }
+        noise(t, 0.3, filter('bandpass', 3000 * p, 2, amp(t, 0.05, 0.1, 0.25, out)));
+      },
+      windup: (t, out, p) => { tone('triangle', 700 * p, 1800 * p, t, 0.16, amp(t, 0.01, 0.16, 0.15, out)); clicks(t + 0.14, 2, 0.04, 3200 * p, 0.25, out); },
+      death: (t, out, p) => {
+        bend(t, 0.5, 600 * p, 420 * p, 200 * p, 1400 * p, 0.25, out);
+        for (let i = 0; i < 7; i++) { const at = t + 0.1 + i * 0.09, hz = (2400 - i * 220) * p; tone('sine', hz, hz * 1.04, at, 0.12, amp(at, 0.003, 0.07, 0.11, out)); }
+        noise(t + 0.1, 0.8, filter('highpass', 4000 * p, 0.7, amp(t + 0.1, 0.1, 0.12, 0.65, out)));
+      },
+    },
     flip: {   // the ring boss: glassy chimes ringing round, a rising shimmer, rings clattering down
       alert: (t, out, p) => {
         for (const [i, hz] of [880, 1175, 988, 1319].entries()) { const at = t + i * 0.08; tone('triangle', hz * p, hz * 1.02 * p, at, 0.35, amp(at, 0.005, 0.12, 0.35, out)); }

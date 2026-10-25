@@ -304,6 +304,13 @@ function leap(e, lunge, t0, dx, dz) {
   const step = (lungeAt(lunge, e.t) - lungeAt(lunge, t0)) * e.leap;
   if (step > 0) stepEnemy(e, fx * step, fz * step);
 }
+// Pressing on (a Flimmer beating you): between press.from and press.to it steps after the player
+// at press.speed, up to press.stop short of them.
+function pressOn(e, press, dt, dx, dz, d) {
+  if (e.t < press.from || e.t > press.to || d <= press.stop) return;
+  const step = Math.min(press.speed * dt, d - press.stop);
+  stepEnemy(e, dx / d * step, dz / d * step);
+}
 // A retreat: it rolls straight back from its heading by retreat.dist over the retreat's window.
 function backOff(e, retreat, t0) {
   const step = retreatAt(retreat, e.t) - retreatAt(retreat, t0);
@@ -470,6 +477,13 @@ function act(e, dt) {
     }
     // a blow that strikes twice (Renew's twin morning star): again at its `twice`
     if (a.twice && e.bit && e.again !== e.attacks && e.t >= a.twice) { e.again = e.attacks; strikePlayer(e); }
+    // a beating (a Flimmer's): blow after blow at each of its `more` times (each its own power and
+    // shove, else the attack's), stepping after the player meanwhile (`press`)
+    if (a.more && e.bit) {
+      if (e.beat?.attacks !== e.attacks) e.beat = { attacks: e.attacks, n: 0 };
+      while (e.beat.n < a.more.length && e.t >= a.more[e.beat.n].at) strikePlayer(e, a.more[e.beat.n++]);
+    }
+    if (a.press) pressOn(e, a.press, dt, dx, dz, d);
     if (e.t >= a.attackTime) { e.mode = 'chase'; e.cool = (a.recover ?? cfg.cooldown) * (0.8 + Math.random() * 0.4); e.side = side(); }
     return;
   }

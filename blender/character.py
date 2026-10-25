@@ -16,6 +16,8 @@ end in the neutral standing pose so they can be cross-faded from anything):
     GetUpFront   -- lying face down -> push up, knees under, sit back on the feet, stand (extras: move_time)
     Kick         -- right front kick
     Punch        -- right straight punch from a guard
+    Pummel       -- a beating: five quick straight punches, right and left in turn, the last
+                    the hardest (extras: hits, the times each fist lands; the Flimmer's)
     Slash        -- right-handed overhead diagonal slash (extras: weapon_socket)
     Throw        -- a flask lobbed overhand from the right fist (extras: weapon_socket,
                     active_start: it lets go, muzzle: where)
@@ -979,6 +981,63 @@ def punch_params():
     return one_shot(0.95, fn)
 
 
+# the frames the Pummel's fists land on: right, left, right, left and the last, hardest one
+# with the right (the game's FLIMMER_PUMMEL in src/core/enemies.js strikes on them)
+PUMMEL_HITS = (15, 20, 25, 30, 37)
+PUMMEL_FRAMES = 48
+
+
+def pummel_params():
+    """A beating: fists up, then five quick straight punches, right and left in turn, the
+    last one the hardest (twisting further, leaning in), and back to standing."""
+    na = neutral_arms()
+    guard = {"L": Vector((0.25, -0.45, -0.85, D(125))), "R": Vector((-0.25, -0.45, -0.85, D(125)))}
+    pull = {"L": Vector((0.30, -0.30, -0.90, D(130))), "R": Vector((-0.30, -0.30, -0.90, D(130)))}
+    turn_of = {"R": 1.0, "L": -1.0}   # a right punch twists the shoulders to the left, and back
+    hits = [(f / FPS, "R" if i % 2 == 0 else "L", i == len(PUMMEL_HITS) - 1) for i, f in enumerate(PUMMEL_HITS)]
+    t_guard, t_end = 0.30, PUMMEL_FRAMES / FPS
+
+    def straight(side, turn):
+        h = rot_z(-turn_of[side] * turn) @ Vector((0, -1, 0.10))   # straight ahead in world space
+        return Vector((h.x, h.y, h.z, D(4)))
+
+    def arm(side):
+        keys = [(0.04, na[side]), (t_guard, guard[side])]
+        for t, s, last in hits:
+            if s == side:
+                hold = 0.08 if last else 0.03
+                keys += [(t - 0.07, guard[side]), (t, straight(side, D(40) if last else D(28))),
+                         (t + hold, straight(side, D(38) if last else D(26))), (t + hold + 0.09, guard[side])]
+            else:
+                keys.append((t, pull[side]))
+        keys += [(hits[-1][0] + 0.24, guard[side]), (t_end - 0.02, na[side])]
+        keys.sort(key=lambda k: k[0])
+        return keyframes(*keys)
+
+    arms = {"L": arm("L"), "R": arm("R")}
+    tw, yw = [(0.04, 0.0), (t_guard, 0.0)], [(0.04, 0.0), (t_guard, 0.0)]
+    for i, (t, s, last) in enumerate(hits):
+        k = turn_of[s]
+        tw += [(t, k * D(30 if last else 20)), (t + (0.1 if last else 0.04), k * D(28 if last else 18))]
+        yw += [(t, k * D(12 if last else 7)), (t + (0.1 if last else 0.04), k * D(11 if last else 6))]
+    tw += [(hits[-1][0] + 0.3, 0.0)]
+    yw += [(hits[-1][0] + 0.3, 0.0)]
+    twist, yaw = keyframes(*tw), keyframes(*yw)
+    lean = keyframes((0.04, 0.0), (t_guard, D(6)), (hits[0][0], D(9)), (hits[-2][0], D(9)), (hits[-1][0], D(14)),
+                     (hits[-1][0] + 0.1, D(13)), (t_end - 0.05, 0.0))
+    hz = keyframes((0.04, STAND_Z), (t_guard, STAND_Z - 0.05), (hits[-1][0] + 0.1, STAND_Z - 0.06), (t_end - 0.05, STAND_Z))
+
+    def fn(t):
+        return pose_params(
+            hips_pos=Vector((0, 0, hz(t))),
+            hips_rot=(0.0, 0.0, yaw(t)),
+            spine_lean=lean(t), spine_twist=twist(t),
+            head_pitch=-lean(t) * 0.8, head_twist=-(twist(t) + yaw(t)) * 0.8,
+            arms={"L": arms["L"](t), "R": arms["R"](t)},
+        )
+    return one_shot(t_end, fn)
+
+
 def slash_params():
     """Right-handed diagonal overhead slash (weapon goes on the hand.R socket)."""
     na = neutral_arms()
@@ -1568,6 +1627,8 @@ def make_animations(rig, ob):
     one("Kick", kick_params(), 260.0, 0.45, 360.0, 0.5)
     one("Punch", punch_params(), {"L": 320.0, "R": 750.0}, {"L": 0.5, "R": 0.6},
         {"L": 420.0, "R": 950.0}, {"L": 0.5, "R": 0.65})
+    one("Pummel", pummel_params(), 760.0, 0.6, 960.0, 0.65,
+        {"hits": [f / FPS for f in PUMMEL_HITS]})
     one("Slash", slash_params(), {"L": 220.0, "R": 480.0}, {"L": 0.45, "R": 0.5},
         {"L": 300.0, "R": 650.0}, {"L": 0.45, "R": 0.55},
         {"weapon_socket": "hand.R", "contact_frame": 16, "hit_time": 16 / FPS,
@@ -1635,7 +1696,7 @@ def main(scene=None, export_path=None, active_action="Walk"):
 
     make_animations(rig, ob)
     register_actions(rig, ("Walk", "Run", "Swim", "SwimIdle", "Skid", "Climb", "Jump", "JumpLandSit",
-                           "GetUpBack", "GetUpFront", "Kick", "Punch", "Slash", "Shoot", "CrossbowShot",
+                           "GetUpBack", "GetUpFront", "Kick", "Punch", "Pummel", "Slash", "Shoot", "CrossbowShot",
                            "Cast", "Throw", "HoldBow", "HoldCrossbow", "HoldStaff", "HoldThrow",
                            *("Hold" + k.capitalize() for k in CARRIES), "Roll", "Flex"))
     act = bpy.data.actions[active_action]

@@ -193,7 +193,7 @@ async function kinds() {
   let html = '';
   points = [];
   for (const [species, list] of bySpecies) {
-    const mats = await materialsOf(species);
+    const mats = await materialsOf(ENEMY_KINDS[species].model ?? species);   // (the Flimmers: the hero's figure)
     const rows = list.map(k => { const roles = rolesOf(mats, k); return { k, roles, body: Object.values(roles)[0][0].lch }; });
     html += `<h2>${ENEMY_KINDS[species].label}</h2>` + strip(rows) + '<div class="species">';
     for (const r of rows) {

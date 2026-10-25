@@ -17,6 +17,7 @@ chests, combat stats) and prints where the player stands on arrival at every dep
   |---|---:|---:|
   | Spiders (every kind) | 1 | 5–8 |
   | Snakes | 1–2 | 4–7 |
+  | Flimmers (in threes) | 1 (but 40% of blows go through one while it shimmers) | 6.5–8 beatings of five punches |
   | Octonauts | 2–3 | 3.5–5 |
   | Shraps | 3 | 5–5.5 |
   | Spicy | 3 | 4–4.5 |

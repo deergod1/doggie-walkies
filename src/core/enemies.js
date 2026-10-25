@@ -430,7 +430,36 @@ export const BOLIME = {
   style: 'brute',
   seedSalt: 0xb011e, spacing: 4,
 };
-export const ENEMY_PROFILES = [SPIDER, STUNDER, SNAKE, OCTONAUT, FIREFACE, TRIANGLE, FIRECAT, SHRAPS, SPICY, WOLLA, WOLK, SQUIRTLE, MECKED, TORNADO, SLUG, BOLIME];
+// A Flimmer (the kids' idea): a small person, two thirds of the hero's height, and all blurry: a
+// shimmering smudge wherever it runs (render/flimmerview.js draws it with the hero's own figure,
+// rig and clips: `figure`, `model`). Flimmers come in threes (`troop`: every pack exactly that
+// many, core/spawns.js, game/enemyspawn.js). While it shimmers (whenever it is not beating you
+// or reeling from a blow: shimmerOf) a blow, a shot or a flask's burst may go right through it
+// (`blur.evade`: the chance, evades). It comes into focus to beat you: fists up (the warning),
+// then five quick punches, right and left in turn (the Pummel clip, blender/character.py; `more`:
+// the four after the first, the last one the hardest), stepping after you as you back away
+// (`press`). Killed, it dissolves away completely: no body is left.
+const PUMMEL_HITS = [15, 20, 25, 30, 37].map(f => f / 30);
+const FLIMMER_PUMMEL = {
+  name: 'pummel', clip: 'pummel', weight: 1, reach: 0.8, hitAt: PUMMEL_HITS[0], trackUntil: PUMMEL_HITS[4] - 0.1, attackTime: 48 / 30,
+  hitReach: 0.95, arc: 0.4, power: 0.28, knock: 1, knockDown: false, hop: 2.5, reason: 'Beaten up by a Flimmer!',
+  more: [...PUMMEL_HITS.slice(1, 4).map(at => ({ at })), { at: PUMMEL_HITS[4], power: 0.55, knock: 4.5 }],
+  press: { from: PUMMEL_HITS[0] - 0.1, to: PUMMEL_HITS[4], speed: 1.6, stop: 0.55 },
+};
+export const FLIMMER = {
+  type: 'flimmer', species: 'flimmer', label: 'Flimmer', hp: 28, damage: 12, knock: 1,
+  xp: 22, coins: [4, 8], troop: 3, blur: { evade: 0.4 },
+  radius: 0.2, height: 0.72, bodyHeight: 0.65, mass: 0.8, figure: true, model: 'character', size: 0.65,
+  aggro: 3.8, giveUp: 7, chase: 2.4, wander: 0.7, homeSpeed: 1.2,
+  ...FLIMMER_PUMMEL, cooldown: 1.4, ichor: ['#eef2fa', '#9aa6bf'], pitch: 1.3,
+  attacks: [FLIMMER_PUMMEL],
+  poise: 0, hitStun: 0.2, deathTime: 0.9, corpseTime: 1.2,
+  parts: { skin: ['Clay'] },
+  colors: paints({ skin: 'ink.light' }),
+  style: 'skirmish', circle: 1.5, strafe: true,
+  seedSalt: 0xf1133e, spacing: 3,
+};
+export const ENEMY_PROFILES = [SPIDER, STUNDER, SNAKE, OCTONAUT, FIREFACE, TRIANGLE, FIRECAT, SHRAPS, SPICY, WOLLA, WOLK, SQUIRTLE, MECKED, TORNADO, SLUG, BOLIME, FLIMMER];
 
 // Gusto, the first real boss (blender/gusto.py), in place of the first descent guardian
 // (core/bosses.js). A round white-grey head with red eyes and jagged teeth, two long arms with
@@ -1241,6 +1270,25 @@ export const FIRE_TORNADO = enemyKind(TORNADO, {
   colors: paints({ body: 'ember.mid', wind: 'ember.glow', eyes: 'eyes.sun' }), light: '#ff7a2a', sparks: ['#ffd25a', '#ff8a2a', '#ff4a17'],
   ichor: ['#ffc07a', '#a0480f'], pitch: 1, mods: { hp: 1.5, damage: 1.45, speed: 1.1, size: 1.08 },
 });
+// The Flimmers: the plain grey one, a pale one in the snow, an ochre one like the heat shimmering
+// over the badlands, and the dark forest's own, almost black, the strongest. They keep to the first
+// act (core/spawns.js), and every one stays well below the hero's height.
+const flimmerAttacks = reason => [{ ...FLIMMER_PUMMEL, reason }];
+export const FROST_FLIMMER = enemyKind(FLIMMER, {
+  type: 'frostflimmer', label: 'Frost flimmer', reason: 'Beaten up by a Frost flimmer!', attacks: flimmerAttacks('Beaten up by a Frost flimmer!'),
+  colors: paints({ skin: 'frost.pale' }), ichor: ['#e0f4ff', '#6aa0c8'],
+  mods: { hp: 1.3, damage: 1.1, speed: 0.95 },
+});
+export const HAZE_FLIMMER = enemyKind(FLIMMER, {
+  type: 'hazeflimmer', label: 'Haze flimmer', reason: 'Beaten up by a Haze flimmer!', attacks: flimmerAttacks('Beaten up by a Haze flimmer!'),
+  colors: paints({ skin: 'ochre.light' }), ichor: ['#f4e6b8', '#a08040'],
+  mods: { hp: 1.25, damage: 1.2, speed: 1.05, size: 1.05 },
+});
+export const SHADOW_FLIMMER = enemyKind(FLIMMER, {
+  type: 'shadowflimmer', label: 'Shadow flimmer', reason: 'Beaten up by a Shadow flimmer!', attacks: flimmerAttacks('Beaten up by a Shadow flimmer!'),
+  colors: paints({ skin: 'ink.dark' }), ichor: ['#b8b4d8', '#2a2838'],
+  mods: { hp: 1.15, damage: 1.15, speed: 1.1, size: 1.1 },
+});
 // from half his health on: a giant, six cells tall (the model at `size`), who stomps, jumps, kicks
 // and blasts; he walks over the hills on the floors like any enemy, but keeps clear of the bank
 // (game/squarlo.js); nothing staggers him and blows hurt him less, unless he is exposed
@@ -1260,9 +1308,11 @@ export function attackCycle(profile) {
   const list = profile.attacks ?? [profile], w = list.reduce((n, a) => n + (a.weight ?? 1), 0);
   return list.reduce((n, a) => n + a.attackTime * (a.weight ?? 1), 0) / w + profile.cooldown;
 }
+// (a beating counts every one of its blows: its `more`)
 export function attackDamage(profile) {
   const list = profile.attacks ?? [profile], w = list.reduce((n, a) => n + (a.weight ?? 1), 0);
-  return list.reduce((n, a) => n + (Math.round(profile.damage * (a.power ?? 1)) + (a.projectile?.burn?.damage ?? 0)) * (a.weight ?? 1), 0) / w;
+  const blows = a => [a, ...(a.more ?? []).map(m => ({ ...a, ...m }))].reduce((n, b) => n + Math.round(profile.damage * (b.power ?? 1)), 0);
+  return list.reduce((n, a) => n + (blows(a) + (a.projectile?.burn?.damage ?? 0)) * (a.weight ?? 1), 0) / w;
 }
 export const threat = profile => attackDamage(profile) / attackCycle(profile);
 
@@ -1427,13 +1477,24 @@ export const SLIME_SQUIRTLE = enemyKind(SQUIRTLE, {
 export const ENEMY_KINDS = Object.fromEntries([...ENEMY_PROFILES, ...Object.values(GUARDIAN_KINDS), ...Object.values(DESCENT_GUARDIAN_KINDS), SAND_VIPER, BLOOD_VIPER, FROST_ADDER, VENOM_ADDER, SHADOW_MAMBA, FROST_SPIDER, BOG_SPIDER,
   GLOOM_SPIDER, REDBACK, FROST_STUNDER, STONE_STUNDER, MAGMA_STUNDER, BOG_OCTONAUT, CORAL_OCTONAUT, EMERALD_TRIANGLE, CRIMSON_TRIANGLE, FIRE_SHRAPS,
   BOG_WOLLA, STORM_WOLLA, EMBER_WOLLA, CORAL_SQUIRTLE, BLAZE_FACE, LANTERN_FACE, WISP_FACE, ASH_CAT, VOID_CAT, AMETHYST_SHRAPS, HABANERO,
-  NIGHTSHADE, DUST_WOLK, STORM_WOLK, MOSS_SQUIRTLE, FROST_MECKED, BOG_MECKED, BONE_MECKED, DUST_TORNADO, FROST_TORNADO, FIRE_TORNADO, SPOTTED_SLUG, BLACK_SLUG, TOXIC_BOLIME, GLOW_BOLIME, ...BOSS_PROFILES, CUSTO_TRIANGLE, SNAP_SKULL, TOT_SPIDER, TOT_STUNDER,
+  NIGHTSHADE, DUST_WOLK, STORM_WOLK, MOSS_SQUIRTLE, FROST_MECKED, BOG_MECKED, BONE_MECKED, DUST_TORNADO, FROST_TORNADO, FIRE_TORNADO, SPOTTED_SLUG, BLACK_SLUG, TOXIC_BOLIME, GLOW_BOLIME, FROST_FLIMMER, HAZE_FLIMMER, SHADOW_FLIMMER, ...BOSS_PROFILES, CUSTO_TRIANGLE, SNAP_SKULL, TOT_SPIDER, TOT_STUNDER,
   TIDE_SQUIRTLE, SKY_WOLLA, FOG_FACE, FOG_CAT, REN_SPIDER, REN_FACE, ARM_SLUG, OOZE_SLUG, OOZE_BOLIME, SLIME_SQUIRTLE].map(k => [k.type, k]));
 // gone: not here for now (Gusto between his vanishing and his coming back, game/gusto.js), or
 // under the floor (a burrowing Squirtle, game/enemyai.js): it cannot be seen, hit or touched,
 // like the dead
 // (and an Arm slug latched on to a player, core/slomo.js: it sits on their head, mode 'split')
 export const absent = e => e.mode === 'dead' || e.mode === 'gone' || !!e.under || (e.mode === 'split' && !!e.profile.latches);
+// How much a blurry one (a Flimmer's `blur`) shimmers now, 0..1: all the time, but not while it
+// beats you (it comes into focus for that) nor while a blow or a bolt stuns it, nor once it is
+// gone. render/flimmerview.js draws it as blurry as this says; while it shimmers, blows and shots
+// may go through it (evades). A friend's game knows this from the mode the runner sends (net/foes.js).
+export function shimmerOf(e) {
+  if (!e.profile?.blur || absent(e) || e.mode === 'attack' || e.stun > 0) return 0;
+  return 1;
+}
+// does a blow or a shot go right through e? (roll: 0..1; the one who strikes rolls, so a friend's
+// hit that lands is applied as it is: net/session.js)
+export const evades = (e, roll = Math.random()) => roll < (e.profile?.blur?.evade ?? 0) * shimmerOf(e);
 
 // the attack e is performing (or about to perform): one of profile.attacks, else the profile
 export const attackOf = e => e.profile.attacks?.[e.attack] ?? e.profile;

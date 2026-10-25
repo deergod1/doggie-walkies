@@ -537,6 +537,7 @@ export default {
   'Music off': 'Musik aus',
   'Respawned where you came in': 'Zurück, wo du hereingekommen bist',
   'Poof!': 'Puff!',
+  'Missed!': 'Daneben!',
   'Zapped!': 'Gezappt!',
   'Zap!': 'Zap!',
   'Squashed!': 'Zerquetscht!',

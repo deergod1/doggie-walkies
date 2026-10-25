@@ -90,9 +90,10 @@ export function hitBody(p, blow, fx, fz, nx, nz) {
   if (p.remote) p.hurt(blow, fx, fz, nx, nz);
   else hitPlayer(blow, fx, fz, nx, nz);
 }
-// e's blow lands on its target if it is in reach and in front of it; true: it did
-export function strikePlayer(e) {
-  const p = e.target?.here ? e.target : player, a = attackOf(e), dx = p.x - e.x, dz = p.z - e.z, d = Math.hypot(dx, dz);
+// e's blow lands on its target if it is in reach and in front of it; true: it did. over: what this
+// blow has of its own (one of a beating's `more`: its power, its shove)
+export function strikePlayer(e, over = null) {
+  const p = e.target?.here ? e.target : player, a = over ? { ...attackOf(e), ...over } : attackOf(e), dx = p.x - e.x, dz = p.z - e.z, d = Math.hypot(dx, dz);
   if (p.ragdoll || p.held || p.hp <= 0 || d > a.hitReach || Math.abs(p.y - e.y) > 0.85) return false;
   if (d > 0.01 && Math.cos(Math.atan2(dx, dz) - e.yaw) < a.arc) return false;
   const blow = { ...blowOf(e.profile, a), by: attacker(e), ...a.grab && { grab: e.id } };   // a grab catches (game/grab.js)

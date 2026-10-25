@@ -85,6 +85,10 @@ lists its recolourable materials by role in `parts`:
 parts: { skin: ['SnakeBody', 'SnakeRibs'], eyes: ['SnakeEyes_glow'] }
 ```
 
+The Flimmers have no model of their own: they are the hero's figure (`assets/character.glb`),
+whose one material, `Clay`, is their `skin`; `render/flimmerview.js` paints it in the kind's colour
+(and their blur in shades of it).
+
 The first material of a role is its **anchor**. Teeth, fangs, pupils and mouths are left out,
 so they never change. The Stunder's green mouth is the exception: it moves with the skin.
 
@@ -115,7 +119,7 @@ Two dev test rooms (`?dev=1`, then `/testroom enemies` or `/testroom guardians`,
 [console.md](console.md)) line up every kind in the game itself, recoloured and lit as
 everywhere else and dressed as the depth you came from (or `/testroom enemies 17` for
 another). `enemies` has a row per species: the base kind, its kinds and the bosses' minions of
-it. `guardians` has the side guardians, in two rows. The shortest stand in front, all facing
+it (a species of one or two kinds shares the next one's row: the room is only so deep). `guardians` has the side guardians, in two rows. The shortest stand in front, all facing
 you. The descent guardians (the Temp Bosses) wait for bosses of their own; each boss has a test
 room of his own, in his arena (`/testroom boss gusto`, [bosses.md](bosses.md#dev)).
 
@@ -187,6 +191,10 @@ again. The lineup is planned with the room (`cubegen/testrooms.js` `lineUp`), so
 | Toxic bolime | Bolime | `ochre.light`, `crimson.deep` core | ×1.2 | ×1.15 | 1 | 1 | ×1.17 | 7–13 (Slime marsh; its digesting poisons) |
 | Glow bolime | Bolime | `jade.glow`, `jade.pale` core | ×1.45 | ×1.35 | ×1.1 | ×1.08 | ×1.4 | 7–13 (Slime marsh; it glows) |
 | Black slug | Slug | `ink.dark`, `moss.mid` stripes | ×1.45 | ×1.35 | ×0.85 | ×1.12 | ×1.4 | 7–13 (Slime marsh; its slime slows to 45% for 3 s) |
+| Flimmer | (base) | `ink.light` | | | | | | 2, 4–5 (troops of three) |
+| Frost flimmer | Flimmer | `frost.pale` | ×1.3 | ×1.1 | ×0.95 | 1 | ×1.2 | 3 |
+| Haze flimmer | Flimmer | `ochre.light` | ×1.25 | ×1.2 | ×1.05 | ×1.05 | ×1.22 | 4–6 (not the Dark forest) |
+| Shadow flimmer | Flimmer | `ink.dark` | ×1.15 | ×1.15 | ×1.1 | ×1.1 | ×1.15 | 4–6 (Dark forest) |
 
 The base kinds are painted from the palette too (their `colors`); the other columns are theirs.
 Depths are those whose rosters draw the kind (`src/core/spawns.js`, [depths.md](depths.md)).

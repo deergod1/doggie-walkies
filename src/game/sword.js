@@ -7,7 +7,7 @@
 import { player, state, setStatus } from './state.js';
 import { startSwing, advanceSwing, cancelSwing, inSwordArc, swordHit, combatStats, shotDue, reloadTime, KINDS } from '../core/combat.js';
 import { clearLine } from '../physics/enemynav.js';
-import { enemyHitFx, swingFx, shotFx } from './juice.js';
+import { enemyHitFx, swingFx, shotFx, evadedFx } from './juice.js';
 import { fireShot } from './shots.js';
 import { throwFlask } from './throws.js';
 import { cooldownLeft } from '../core/potions.js';
@@ -18,8 +18,9 @@ import { tr } from '../i18n/i18n.js';
 import { weaponFactor } from '../core/status.js';
 
 const BUFFER = 0.3;   // s a queued attack waits for the current swing to allow the next
-// the critical-hit roll of each blade hit, in 0..1 (browser checks pin it to keep numbers exact)
-export const rolls = { crit: () => Math.random() };
+// the critical-hit roll of each blade hit, and a blurry enemy's roll to let a blow or shot through
+// (core/enemies.js evades), in 0..1 (browser checks pin them to keep numbers exact)
+export const rolls = { crit: () => Math.random(), evade: () => Math.random() };
 
 export function queueAttack(target = null) {
   const s = player.sword;
@@ -84,8 +85,9 @@ export function hitWithSword(list) {
     if (!inSwordArc(p, e)) continue;
     const y = Math.max(e.y + 0.1, Math.min(p.y + 0.4, e.y + e.profile.bodyHeight - 0.05));
     if (!clearLine(p.x, p.y + 0.4, p.z, e.x, y, e.z)) continue;
-    const before = e.hp, hit = swordHit(p, e, rolls.crit());
+    const before = e.hp, hit = swordHit(p, e, rolls.crit(), rolls.evade());
     if (!hit) continue;
+    if (hit.evaded) { evadedFx(e, e.x - p.x, e.z - p.z); continue; }
     hitEnemy(e, hit, before, e.x - p.x, e.z - p.z, p.sword.stats?.knockback ?? 1);
     enchantHit(e, hit, p.sword.stats);
     if (e.hp) setStatus(tr('Slashed Lv {level} {name} ({hp}/{max})', { level: e.level, name: enemyName(e.profile), hp: e.hp, max: e.profile.hp }));

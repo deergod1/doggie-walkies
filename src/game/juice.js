@@ -67,6 +67,15 @@ export function enemyHitFx(e, dmg, killed, dx, dz, crit = false, felt = true) {
   sfx(killed ? 'kill' : 'hit', { at: e, pitch: e.profile.pitch ?? 1.1 });
 }
 
+// a blow or shot went right through a blurry Flimmer (core/enemies.js evades), coming along (dx, dz):
+// "Missed!" over it, an airy whoosh, and its blur flickers aside (render/flimmerview.js)
+export function evadedFx(e, dx, dz) {
+  floatText(tr('Missed!'), { x: e.x, y: e.y + e.profile.bodyHeight + 0.25, z: e.z }, { color: '#cfd8e8', size: 0.24, life: 0.8,
+    rise: 0.8, drift: rand(-0.3, 0.3), pop: 0.6 });
+  sfx('blur', { at: e, pitch: e.profile.pitch ?? 1 });
+  e.flinch = { t: 0, side: Math.random() < 0.5 ? -1 : 1, dx, dz };
+}
+
 // an attack starts: a sword's whoosh, a flail's deeper one with its chain, a bow's draw, a staff's
 // wind-up (a crossbow is quiet until it shoots)
 export function swingFx(kind = 'sword') {

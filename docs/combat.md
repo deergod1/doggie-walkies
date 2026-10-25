@@ -300,6 +300,33 @@ The controls are the same for all.
   dies spinning round and round, slower and slower, and topples over onto its side. Kinds: Dust
   tornado (ochre), Frost tornado (pale blue), Fire tornado (on fire: its twisters and its slam
   burn).
+- Flimmer (the kids' idea; act I, depths 2–6): a small person, the hero's own figure (rig and
+  clips: `figure`, `model: 'character'`) at 0.65 of the hero's size (0.72 for the biggest kind),
+  tinted its kind's colour and all blurry (`render/flimmerview.js`). There is no screen filter:
+  the body is drawn see-through, with four more copies of it on its skeleton, each wandering a
+  little way round it and a shade off in colour (red, green, blue, plain), a puffed-up shell round
+  it that fades towards its outline, and a soft haze of its colour over all of it (one shader for
+  every part, moving them in the vertex shader). Running, the copies trail behind it (up to
+  0.1 s of its way) and it leaves shimmering smudges. Flimmers come in threes (`troop`: every
+  pack exactly three of one kind; the count is rounded to whole troops, `core/spawns.js`, and a
+  troop is placed only where all three fit, `game/enemyspawn.js`; `/spawn flimmer` brings a
+  troop). It fights like a spider (`style: 'skirmish'`, circling at 1.5 cells, sidestepping),
+  fast (2.4 cells/s) and light (28 health at level 1, one hit of a decent weapon). Its attack is
+  a beating (from 0.8 cells): it comes into focus, fists up (the warning, 0.5 s), then five quick
+  punches right and left in turn (the hero's `Pummel` clip, `blender/character.py`), at 0.5,
+  0.67, 0.83, 1.0 and 1.23 s (`hitAt`, then its `more`: blows of their own power and shove,
+  `game/enemyai.js`), 0.28 of its damage each and a gentle shove, the last 0.55 and a shove that
+  sends you back; meanwhile it steps after you at 1.6 cells/s (`press`) and turns with you.
+  While it shimmers (`core/enemies.js shimmerOf`: always, but not while it beats you nor while a
+  blow or a bolt stuns it) every blow, shot and flask burst has a 40% chance to go right through
+  it (`blur.evade`, `evades`): "Missed!", an airy whoosh (`blur`), its blur flickers aside
+  (`game/juice.js evadedFx`); an arrow or a bolt flies on to what is behind it (`core/shots.js
+  stepShot`'s `dodges`). The one who strikes rolls (`game/sword.js rolls.evade`): playing
+  together, a friend's hit that lands is applied as it is. So: wait until it is sharp, then hit
+  it. Killed, it dissolves: the copies fly apart, it fades and breaks into specks of its colour
+  that drift up (0.9 s), and no body is left. Kinds: Flimmer (grey, depths 2, 4 and 5), Frost
+  flimmer (pale frost, depth 3), Haze flimmer (ochre like heat haze, depths 4–6), Shadow flimmer
+  (almost black, the dark forest's at depths 4–6).
 - The glow lives in `render/enemies.js`: each of the three (and the Fire shraps) carries a light from the
   shared light pool (`trackLight`), bones named `flame*` keep flickering over any clip,
   the Triangle's emissive materials pulse with its hover beat, fire sheds embers, and
@@ -345,8 +372,8 @@ times a second (0.2 s, jittered so a pack does not decide in lockstep) and acts 
   where it saw you, moves on when you come where you see it again, comes back out once it sees
   a way to you, and else goes home. Hit again, it picks cover anew.
 - **Between blows**, by the profile's `style`:
-  - `skirmish` (spiders, snakes, Fire-cats): backs off after a blow, circles at `circle` cells
-    (spiders scuttle sideways facing you, `strafe`; the others walk round), switching sides
+  - `skirmish` (spiders, snakes, Fire-cats, Flimmers): backs off after a blow, circles at `circle` cells
+    (spiders and Flimmers sidestep facing you, `strafe`; the others walk round), switching sides
     when blocked and now and then, and darts in once the cooldown is over.
   - `ranged` (Fire-face, Triangle, Spicy, Wolla, Wolk, Tornado, Slug): backs away while closer than `keep[0]`, sidesteps while the
     throw recovers, and moves for a clear shot when it has none.

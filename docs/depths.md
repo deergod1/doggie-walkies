@@ -106,14 +106,16 @@ A roster entry is `species chance count (packs) [kinds]`:
 - **chance**: how likely a cube is to have the species at all. No percentage means always.
 - **count**: how many spawn when it is there.
 - **packs**: the biggest group it spawns in. No value means each one spawns on its own.
+  **troops of 3**: always exactly three together, all of one kind (the Flimmers: their count is
+  rounded to whole troops).
 - **kinds**: which kinds of the species spawn, and how often. Each pack draws one kind, so a
   pack is all Redbacks or all plain spiders. No value means the species' base kind.
 - **(... only)**: the species keeps to some of the depth's themes (`where`: the Squirtles to the
   waters of the Lagoon isles, the Sunken grotto and the Jungle cenote; the Dark forest's Gloom
-  spiders and Lantern-faces to the forest; the Slugs and the Bolimes to the Slime marsh), at
+  spiders, Lantern-faces and Shadow flimmers to the forest; the Slugs and the Bolimes to the Slime marsh), at
   every depth of the theme's act, since a theme may appear anywhere in its act. **(not ...)**:
-  everywhere but there (`'!theme'`: the ordinary spiders of depths 2 to 6 leave the forest to its
-  own).
+  everywhere but there (`'!theme'`: the ordinary spiders of depths 2 to 6 and the Flimmers of
+  depths 4 to 6 leave the forest to its own).
 
 `mix` is the most species a single cube can hold.
 
@@ -121,11 +123,11 @@ A roster entry is `species chance count (packs) [kinds]`:
 |---:|---:|---|
 | 0 | 1 | snakes 1–2 |
 | 1 | 2 | snakes 2–4, Stunders 20% 1, Wolks 25% 1, Squirtles 60% 1–2 (Lagoon isles only), spiders 70% 2–4 (packs ≤2) [Gloom spider] (Dark forest only), Fire-faces 30% 1 [Lantern-face] (Dark forest only) |
-| 2 | 3 | snakes 2–5 [75% Grass snake, 25% Sand viper], spiders 60% 2–4 (packs ≤2) (not the Dark forest), Stunders 25% 1, Wolks 35% 1–2, Tornados 30% 1, Squirtles 60% 1–3 (Lagoon isles only), spiders 80% 3–5 (packs ≤2) [75% Gloom spider, 25% Spider] (Dark forest only), Fire-faces 40% 1–2 [Lantern-face] (Dark forest only) |
-| 3 | 3 | spiders 8–14 (packs ≤3) [Frost spider] (not the Dark forest), Stunders 70% 1–2 [Frost stunder], Shraps 30% 1, Wolks 50% 1–2 [67% Storm wolk, 33% Wolk], snakes 70% 2–4 (packs ≤2) [Frost adder], Triangles 20% 1, Tornados 35% 1–2 [67% Frost tornado, 33% Tornado], Squirtles 60% 1–3 (Lagoon isles only), spiders 80% 4–6 (packs ≤2) [67% Gloom spider, 33% Spider] (Dark forest only), Fire-faces 40% 1–2 [Lantern-face] (Dark forest only) |
-| 4 | 3 | snakes 3–6 (packs ≤2) [Sand viper], spiders 80% 4–8 (packs ≤3) [80% Spider, 20% Redback] (not the Dark forest), Stunders 60% 1–2 [50% Stone stunder, 50% Stunder], Wolks 50% 1–2 [Dust wolk], Tornados 40% 1–2 [67% Dust tornado, 33% Tornado], Squirtles 60% 2–3 (packs ≤2) (Lagoon isles only), spiders 80% 4–7 (packs ≤3) [67% Gloom spider, 33% Spider] (Dark forest only), Fire-faces 45% 1–2 [Lantern-face] (Dark forest only) |
-| 5 | 3 | snakes 4–7 (packs ≤2) [Sand viper], spiders 80% 5–9 (packs ≤3) [80% Spider, 20% Redback] (not the Dark forest), Stunders 60% 1–2 [50% Stone stunder, 50% Stunder], Wolks 40% 1–2 [50% Dust wolk, 50% Storm wolk], Wollas 30% 1–2, Tornados 35% 1–2 [50% Dust tornado, 50% Tornado], Squirtles 60% 2–3 (packs ≤2) (Lagoon isles only), spiders 80% 5–8 (packs ≤3) [67% Gloom spider, 33% Spider] (Dark forest only), Fire-faces 50% 1–2 [Lantern-face] (Dark forest only) |
-| 6 | 3 | snakes 5–8 (packs ≤2) [50% Sand viper, 50% Blood viper], spiders 80% 6–10 (packs ≤3) [67% Spider, 33% Redback] (not the Dark forest), Stunders 60% 1–3 [50% Stone stunder, 50% Stunder], Wolks 40% 1–2 [50% Dust wolk, 50% Storm wolk], Wollas 35% 1–2, Octonauts 15% 1, Meckeds 15% 1, Tornados 30% 1–2 [Dust tornado], Squirtles 60% 2–4 (packs ≤2) (Lagoon isles only), spiders 80% 5–9 (packs ≤3) [67% Gloom spider, 33% Spider] (Dark forest only), Fire-faces 50% 1–2 [Lantern-face] (Dark forest only) |
+| 2 | 3 | snakes 2–5 [75% Grass snake, 25% Sand viper], spiders 60% 2–4 (packs ≤2) (not the Dark forest), Stunders 25% 1, Wolks 35% 1–2, Tornados 30% 1, Squirtles 60% 1–3 (Lagoon isles only), Flimmers 35% 3 (troops of 3), spiders 80% 3–5 (packs ≤2) [75% Gloom spider, 25% Spider] (Dark forest only), Fire-faces 40% 1–2 [Lantern-face] (Dark forest only) |
+| 3 | 3 | spiders 8–14 (packs ≤3) [Frost spider] (not the Dark forest), Stunders 70% 1–2 [Frost stunder], Shraps 30% 1, Wolks 50% 1–2 [67% Storm wolk, 33% Wolk], snakes 70% 2–4 (packs ≤2) [Frost adder], Triangles 20% 1, Tornados 35% 1–2 [67% Frost tornado, 33% Tornado], Squirtles 60% 1–3 (Lagoon isles only), Flimmers 45% 3 (troops of 3) [Frost flimmer], spiders 80% 4–6 (packs ≤2) [67% Gloom spider, 33% Spider] (Dark forest only), Fire-faces 40% 1–2 [Lantern-face] (Dark forest only) |
+| 4 | 3 | snakes 3–6 (packs ≤2) [Sand viper], spiders 80% 4–8 (packs ≤3) [80% Spider, 20% Redback] (not the Dark forest), Stunders 60% 1–2 [50% Stone stunder, 50% Stunder], Wolks 50% 1–2 [Dust wolk], Tornados 40% 1–2 [67% Dust tornado, 33% Tornado], Squirtles 60% 2–3 (packs ≤2) (Lagoon isles only), Flimmers 45% 3–6 (troops of 3) [67% Haze flimmer, 33% Flimmer] (not the Dark forest), Flimmers 35% 3 (troops of 3) [Shadow flimmer] (Dark forest only), spiders 80% 4–7 (packs ≤3) [67% Gloom spider, 33% Spider] (Dark forest only), Fire-faces 45% 1–2 [Lantern-face] (Dark forest only) |
+| 5 | 3 | snakes 4–7 (packs ≤2) [Sand viper], spiders 80% 5–9 (packs ≤3) [80% Spider, 20% Redback] (not the Dark forest), Stunders 60% 1–2 [50% Stone stunder, 50% Stunder], Wolks 40% 1–2 [50% Dust wolk, 50% Storm wolk], Wollas 30% 1–2, Tornados 35% 1–2 [50% Dust tornado, 50% Tornado], Squirtles 60% 2–3 (packs ≤2) (Lagoon isles only), Flimmers 45% 3–6 (troops of 3) [67% Haze flimmer, 33% Flimmer] (not the Dark forest), Flimmers 35% 3 (troops of 3) [Shadow flimmer] (Dark forest only), spiders 80% 5–8 (packs ≤3) [67% Gloom spider, 33% Spider] (Dark forest only), Fire-faces 50% 1–2 [Lantern-face] (Dark forest only) |
+| 6 | 3 | snakes 5–8 (packs ≤2) [50% Sand viper, 50% Blood viper], spiders 80% 6–10 (packs ≤3) [67% Spider, 33% Redback] (not the Dark forest), Stunders 60% 1–3 [50% Stone stunder, 50% Stunder], Wolks 40% 1–2 [50% Dust wolk, 50% Storm wolk], Wollas 35% 1–2, Octonauts 15% 1, Meckeds 15% 1, Tornados 30% 1–2 [Dust tornado], Squirtles 60% 2–4 (packs ≤2) (Lagoon isles only), Flimmers 40% 3–6 (troops of 3) [Haze flimmer] (not the Dark forest), Flimmers 35% 3 (troops of 3) [Shadow flimmer] (Dark forest only), spiders 80% 5–9 (packs ≤3) [67% Gloom spider, 33% Spider] (Dark forest only), Fire-faces 50% 1–2 [Lantern-face] (Dark forest only) |
 | 7 | 3 | spiders 7–12 (packs ≤3) [67% Spider, 33% Bog spider], snakes 80% 4–7 (packs ≤2) [50% Grass snake, 50% Blood viper], Stunders 60% 1–2, Meckeds 50% 1–2, Wollas 40% 1–2, Octonauts 20% 1, Squirtles 70% 2–3 (packs ≤2) [50% Moss squirtle, 50% Squirtle] (Sunken grotto, Jungle cenote only), Slugs 90% 1–3 [40% Spotted slug, 40% Black slug, 20% Slug] (Slime marsh only), Bolimes 95% 2–3 (packs ≤2) [40% Toxic bolime, 40% Glow bolime, 20% Bolime] (Slime marsh only) |
 | 8 | 3 | spiders 8–13 (packs ≤3) [57% Spider, 29% Bog spider, 14% Redback], snakes 80% 4–8 (packs ≤2) [Blood viper], Stunders 60% 1–3 [50% Stunder, 50% Stone stunder], Meckeds 60% 1–3 (packs ≤2), Wollas 45% 1–2, Octonauts 25% 1–2, Squirtles 70% 2–3 (packs ≤2) [50% Moss squirtle, 50% Squirtle] (Sunken grotto, Jungle cenote only), Slugs 90% 1–3 [40% Spotted slug, 40% Black slug, 20% Slug] (Slime marsh only), Bolimes 95% 2–3 (packs ≤2) [40% Toxic bolime, 40% Glow bolime, 20% Bolime] (Slime marsh only) |
 | 9 | 3 | Octonauts 3–4, Shraps 80% 1–3, spiders 80% 6–10 (packs ≤3) [Frost spider], Stunders 70% 1–2 [Frost stunder], snakes 80% 3–5 (packs ≤2) [Frost adder], Meckeds 60% 1–2 [Frost mecked], Tornados 25% 1 [Frost tornado], Squirtles 80% 2–4 (packs ≤2) [50% Moss squirtle, 50% Coral squirtle] (Sunken grotto, Jungle cenote only), Slugs 90% 1–3 [40% Spotted slug, 40% Black slug, 20% Slug] (Slime marsh only), Bolimes 95% 2–3 (packs ≤2) [40% Toxic bolime, 40% Glow bolime, 20% Bolime] (Slime marsh only) |
@@ -147,7 +149,9 @@ The design rules behind the table:
   Squirtles in the lagoons. Depth 2 adds a few spiders and now and then a Tornado. Depth 3 is the first spider-heavy
   depth, with more Stunders, Frost adders and a rare Triangle as a mini-boss. Depth 4 mixes
   snakes, spiders and Stunders, and the canyon (5–6) goes on with them, Sand vipers and Stone
-  stunders first, Dust wolks in the wind and the first Wollas.
+  stunders first, Dust wolks in the wind and the first Wollas. Troops of three blurry Flimmers
+  turn up from depth 2 to 6, where act I had the fewest species: frosty at 3, like heat haze over
+  the badlands and the canyon from 4, almost black in the Dark forest.
 - **Each theme has one or two signature species:** Wolks and Tornados under the open sky of the
   meadows, the snowy peaks, the badlands and the canyon, Octonauts and Shraps in the frozen caves,
   snakes and Spicies in the swamp and the cenote, Meckeds (by kind) from the root caves to the ossuary, Wollas (by kind) from the canyon down, spiders in the nests, Triangles in the mines and ruins, Fire-faces,
@@ -265,6 +269,7 @@ and coins by `1 + 0.25 (L − 1)`, and round.
 |---|---|---:|---:|---:|---|---:|
 | Spider | weak, swarms | 32 | 15 | 20 | 4–8 | – |
 | Snake | weak | 48 | 16 | 30 | 6–12 | – |
+| Flimmer | weak, in threes, blurry (40% of blows go through it while it shimmers) | 28 | 12 (a beating: four punches of 3, then 7) | 22 | 4–8 | – |
 | Octonaut | medium | 90 | 20 (spin 28) | 55 | 12–22 | 0.8 s |
 | Shraps | medium, throws | 110 | 22 (ice ball 20, chills) | 70 | 16–28 | 0.8 s |
 | Spicy | medium, laser | 100 | 26 (laser burst) | 72 | 16–30 | 0.6 s |

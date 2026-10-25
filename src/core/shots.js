@@ -66,25 +66,29 @@ export function touchesEnemy(shot, e) {
     && shot.y > e.y - r && shot.y < e.y + e.profile.bodyHeight + r;
 }
 
-// Advance by dt in small steps. Returns { hits: enemies hit in this step, end: null or 'hit'
-// (an enemy stopped it), 'blocked' (solid(x, y, z) says it ran into the level), 'spent' (out of
-// range) }. Hits are recorded on the shot; it never hits the same enemy twice.
+// Advance by dt in small steps. Returns { hits: enemies hit in this step, misses: those it went
+// right through, end: null or 'hit' (an enemy stopped it), 'blocked' (solid(x, y, z) says it ran
+// into the level), 'spent' (out of range) }. Hits are recorded on the shot; it never hits the same
+// enemy twice. dodges(e): does it go through e (a blurry Flimmer, core/enemies.js evades)? It
+// flies on then, as if e was not there.
 // learn: combat.html#shoot (see learn/README.md)
-export function stepShot(shot, dt, enemies, solid) {
-  const n = Math.max(1, Math.ceil(shot.spec.speed * dt / 0.08)), h = dt / n, hits = [];
+export function stepShot(shot, dt, enemies, solid, dodges = null) {
+  const n = Math.max(1, Math.ceil(shot.spec.speed * dt / 0.08)), h = dt / n, hits = [], misses = [];
   shot.t += dt;
   for (let i = 0; i < n; i++) {
     shot.x += shot.vx * h; shot.y += shot.vy * h; shot.z += shot.vz * h;
     shot.travelled += shot.spec.speed * h;
     for (const e of enemies) {
       if (absent(e) || shot.hits.has(e) || !touchesEnemy(shot, e)) continue;
-      shot.hits.add(e); hits.push(e);
-      if (shot.left-- <= 0) return { hits, end: 'hit' };
+      shot.hits.add(e);
+      if (dodges?.(e)) { misses.push(e); continue; }
+      hits.push(e);
+      if (shot.left-- <= 0) return { hits, misses, end: 'hit' };
     }
-    if (solid(shot.x, shot.y, shot.z)) return { hits, end: 'blocked' };
-    if (shot.travelled >= shot.stats.range) return { hits, end: 'spent' };
+    if (solid(shot.x, shot.y, shot.z)) return { hits, misses, end: 'blocked' };
+    if (shot.travelled >= shot.stats.range) return { hits, misses, end: 'spent' };
   }
-  return { hits, end: null };
+  return { hits, misses, end: null };
 }
 
 // the enemies a spell's burst hurts where it ended: within `burst` cells of their body, not
