@@ -3,7 +3,8 @@
 One unit = one game cell; character height is about 1.1. Z up, fronts face
 -Y (glTF +Z), origin at ground-centred building footprint. Single joined mesh
 per asset, flat normals, linear vertex colours, no textures/UVs/modifiers.
-Emissive lanterns / forge are a second material. Signs use geometry, not text.
+Emissive lanterns / forge are a second material, the windows' panes a third
+("<name>_window": the game lights them at night only). Signs use geometry, not text.
 
 Headless:
     Blender -b --python blender/town.py -- [output-directory]
@@ -186,6 +187,7 @@ def door(m, x, y, z=.22, w=.72, h=1.35):
 def window(m, x, y, z, w=.58, h=.65, flower=False):
     m.box((x, y - .045, z), (w + .14, .11, h + .14), TIMBER)
     m.box((x, y - .108, z), (w, .03, h), GLASS)
+    m.glows[-4] = 2   # (its outer pane, the box's -Y face: lit at night)
     for dx in (-w * .27, w * .27):
         m.box((x + dx, y - .13, z), (.035, .04, h), CREAM)
     m.box((x, y - .13, z), (w, .04, .04), CREAM)
@@ -483,6 +485,10 @@ def build_pet_shop(m, v):
     front = -d / 2
     door(m, -.53, front, w=.63, h=1.25)
     window(m, .65, front, 1.20, .65, .68, flower=True)
+    # A side window on -X, behind the bird perch.
+    start = len(m.vertices)
+    window(m, 0, 0, 1.25, .5, .56)
+    move_part(m, start, (-w / 2, .62, 0), -math.pi / 2)
     sign(m, (.10, front - .24, 2.20), 'paw', '#637650', .92)
     # Canvas porch over the pet pen: simple chunky striped green/cream lean-to.
     for i in range(6):
@@ -529,6 +535,10 @@ def build_blacksmith(m, v):
     front = -d / 2
     door(m, -1.30, front, w=.65, h=1.28)
     window(m, -.25, front, 1.25, .48, .56)
+    # A side window on -X, over the crate.
+    start = len(m.vertices)
+    window(m, 0, 0, 1.25, .48, .56)
+    move_part(m, start, (-.75 - w / 2, -.05, 0), -math.pi / 2)
     sign(m, (-1.26, front - .30, 2.21), 'anvil', '#65574c', .95)
     # Lean-to workshop on +X: front open, stone forge against back wall.
     x0, x1, yf, yb = .5, 2.55, -.35, 1.25
@@ -628,7 +638,11 @@ def validate(objects):
         for tri in mesh.loop_triangles:
             a, b, c = (mesh.vertices[i].co for i in tri.vertices)
             assert (b - a).cross(c - a).length > 1e-10, obj.name
-        assert len(mesh.materials) == 2 and any(p.material_index == 1 for p in mesh.polygons)
+        assert len(mesh.materials) in (2, 3) and any(p.material_index == 1 for p in mesh.polygons)
+        # the houses' windows: their panes the third material (lit at night)
+        assert (len(mesh.materials) == 3) == any(p.material_index == 2 for p in mesh.polygons), obj.name
+        if len(mesh.materials) == 3:
+            assert mesh.materials[2].name == obj.name + '_window', obj.name
         # Collision/placement hints include props; not a replacement for proper colliders.
         obj['footprint'] = [round(hi[0] - lo[0], 4), round(hi[1] - lo[1], 4)]
         obj['height'] = round(hi[2], 4)

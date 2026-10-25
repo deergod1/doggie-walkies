@@ -87,17 +87,27 @@ but only the trunks block movement. Tree species and scale/yaw vary deterministi
 The existing cutaway includes building and canopy occlusion volumes, independently
 of body colliders, so foreground roofs/foliage reveal the player as the camera turns.
 
-Both clearings are then dressed with ~140 small catalog props (`put`/`group`/`scatter`
-in `world/town.js`), all reusing `props/`/`clutter/` models: authored set pieces
-(a gate signpost, lamp posts, barrels/crates/sacks by each trade, the blacksmith's
-planks and coal, a wheelbarrow at the stable, reeds/stones/lily pads around the pond,
-the traders' campfire with log seats) followed by seeded meadow ground cover that
-thins out towards the open centre. Candidates that do not fit are skipped. Every
-prop avoids the oriented building footprints, trunks, other clutter, the pond (except
-water/shore props) and the path ribbons; blocking props (barrels, crates, logs …) get
-circle colliders and also keep clear of gates, the spawn plaza and doorsteps by a full
-character width, so the reachability validation is unaffected. Lamp posts are
-marked `unlit` because the town is in daylight.
+Both clearings are then dressed with ~150 small catalog props (`put`/`group`/`scatter`
+in `world/town.js`), reusing `props/`/`clutter/` models and the town's own
+(`assets/town_clutter.glb`, docs/assets/town.md): authored set pieces (a gate signpost,
+street lamps along the street and round the plaza, a well where the inn's lane ends,
+benches facing the plaza, a notice board, flower pots by the doors, hay bales and a hand
+cart at the stable, barrels/crates/sacks by each trade, the blacksmith's planks and coal, a
+wheelbarrow at the stable, reeds/stones/lily pads around the pond, the traders' campfire
+with log seats and a woodpile) followed by seeded meadow ground cover that thins out
+towards the open centre. A set piece tries its candidates in order (`near`: the spots round
+a place, nearest first) and is skipped if none fits. Every prop avoids the oriented
+building footprints, trunks, other clutter, the pond (except water/shore props) and the
+path ribbons; blocking props (barrels, crates, logs, the well, benches …) get circle
+colliders and also keep clear of gates, the spawn plaza and doorsteps by a full character
+width, so the reachability validation is unaffected.
+
+**At night** (the world's days and nights below) the town lights up: the street lamps
+(placed with `night`) and the houses' windows (their panes' own material) come on through
+the dusk, each house and lamp at its own moment, and go out again through the dawn; the
+windows' candlelight glimmers a little (`render/night.js`, docs/lighting.md). Fireflies
+drift over the meadow, a few of them bright enough to light the grass (the meadow's
+`nightMotes`).
 
 `enemyFree` is generation metadata, retained on cached maps and checked before any
 species-specific spawn selection. The town and the one-cube-wide **surface** buffer

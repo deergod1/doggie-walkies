@@ -137,7 +137,7 @@
       "name": "town_pet_shop_a",
       "service": "pet_shop",
       "stock": "pets",
-      "triangles": 3688,
+      "triangles": 3832,
       "size": [
         4.263,
         3.608,
@@ -163,7 +163,7 @@
       "name": "town_blacksmith_a",
       "service": "blacksmith",
       "stock": "equipment",
-      "triangles": 2622,
+      "triangles": 2766,
       "size": [
         5.021,
         3.293,

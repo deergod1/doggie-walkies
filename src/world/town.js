@@ -58,6 +58,7 @@ export const BUILDINGS = [
       { circle: [1.25, .76, .3], top: .75 },                             // anvil
       { circle: [2.17, .45, .26], top: .55 },                            // quench tub
       { box: [-2.45, -.89, -1.99, -.43], top: .46 },                    // crate
+      { box: [-2.3, -.4, -2.07, .5], top: 1.6 },                         // side window's sill and shutters
       { box: [.5, -1.32, 2.6, .4], bottom: 1.6, top: 2.05, solid: false },     // lean-to roof
     ] },
   { name: 'town_pet_shop_a', x: 12.6, z: 12.03, yaw: -Math.PI / 2, bounds: [-1.771, -1.489, 2.494, 2.122], height: 3.333,
@@ -69,6 +70,7 @@ export const BUILDINGS = [
       { circle: [1.82, .75, .16], top: .55 },                            // cat
       { box: [.14, 1.33, 1.41, 2.12], top: .6 },                        // rabbit pen
       { circle: [-1.52, -.14, .1], top: 1.6 },                           // bird perch
+      { box: [-1.6, -1.1, -1.36, -.15], top: 1.6 },                      // side window's sill and shutters
       { box: [-1.47, 1.2, 1.47, 2.06], bottom: 1.6, top: 1.95, solid: false },  // canvas porch
     ] },
 ];
@@ -213,7 +215,7 @@ function clearingPlan(exit, seed, buildings, gates) {
       : kind === 'cover' || c.kind === 'cover' ? .7 : 1));
   };
   // Places at the first candidate (town-local coordinates) that fits, or nowhere.
-  const put = (name, candidates, { yaw: localYaw, s = .9 + R() * .2, water = false, world = false, unlit = false } = {}) => {
+  const put = (name, candidates, { yaw: localYaw, s = .9 + R() * .2, water = false, world = false, night = false } = {}) => {
     const m = propMetadata.get(name);
     if (!m) throw new Error('Unknown clutter prop ' + name);
     const kind = clutterKind(m), r = m.radius * s, py = water ? (TOWN_LEVEL - 1) * LH : y + (kind === 'cover' ? .008 : -.02);
@@ -221,7 +223,7 @@ function clearingPlan(exit, seed, buildings, gates) {
     for (const [lx, lz] of candidates) {
       const [x, z] = world ? [lx, lz] : rotateTownPoint(lx, lz, yaw);
       if (!fits(x, z, r, kind, { water, shore: !!m.shore })) continue;
-      const p = { name, x, y: py, z, yaw: turn + yaw, s, tint: null, ...(unlit ? { unlit } : {}) };
+      const p = { name, x, y: py, z, yaw: turn + yaw, s, tint: null, ...(night ? { night } : {}) };
       placements.push(p); clutter.push({ x, z, r, kind });
       if (kind === 'solid') colliders.push({ name, x, z, r: m.radius * s * .8, bottom: y, top: py + m.height * s });
       return p;
@@ -276,6 +278,22 @@ function groundCover(R, scatter, scale = 1) {
   scatter(n(70), () => variant(R, 'meadow_grass_tuft'), .3, [1, 1.45]);
 }
 
+// The street lamps, lit at night (render/night.js): [name, candidates] each.
+function lamps(put, list) {
+  for (const [name, candidates] of list) put(name, candidates, { s: 1, night: true });
+}
+// candidates round (x, z) (town-local), nearest first, as far as r
+function near(x, z, r) {
+  const out = [];
+  for (let dz = -r; dz <= r + 1e-9; dz += .25) for (let dx = -r; dx <= r + 1e-9; dx += .25)
+    if (Math.hypot(dx, dz) <= r + 1e-9) out.push([x + dx, z + dz, Math.hypot(dx, dz)]);
+  return out.sort((a, b) => a[2] - b[2]).map(([x, z]) => [x, z]);
+}
+// at the first of the candidates (town-local) that fits, its front turned towards `to`
+function facing(put, name, candidates, [tx, tz]) {
+  for (const [x, z] of candidates) if (put(name, [[x, z]], { yaw: Math.atan2(tx - x, tz - z) })) return;
+}
+
 // Where the town end of a town portal stands (town-local; the plan rotates it with the exit):
 // east of the plaza, between the stable's and the pet shop's paths. Nothing is put on it.
 export const TOWN_PORTAL_SPOT = [12, 8.5];
@@ -302,17 +320,29 @@ export function townPlan(exit, seed) {
   leadTo(plan, path, 2, [[8.5, 12.5]]);
   leadTo(plan, path, 3, [[8.5, 11.5]]);
 
-  // Set pieces: a waymark at the gate, lamps on the plaza, and each trade's leftovers.
+  // Set pieces: a waymark at the gate, street lamps along the street and round the plaza (lit at
+  // night), the well, benches and the notice board, and each trade's leftovers.
   put('relics_signpost_a', [[7.3, 1.3], [7.4, 2.0], [9.9, 1.4]], { yaw: Math.PI / 2 + .3, s: 1 });
-  put('mines_lantern_a', [[10.3, 9.9], [10.6, 10.3]], { s: 1, unlit: true });
-  put('mines_lantern_b', [[6.6, 7.9], [6.2, 8.0]], { s: 1, unlit: true });
-  put('mines_lantern_a', [[9.9, 4.2], [9.8, 5.0], [7.7, 6.4]], { s: 1, unlit: true });
+  // (the well where the inn's lane ends; else east of the plaza, or south of it)
+  facing(put, 'town_well_a', [...near(1.6, 7, 1), ...near(14.4, 7.2, 1), ...near(9.5, 14, 1)], [8.5, 7]);
+  facing(put, 'town_bench_a', near(6, 10.3, 1), [8.5, 8.5]);
+  facing(put, 'town_bench_b', [...near(14.2, 8.8, 1.2), ...near(7.2, 14.1, 1)], [12, 8.5]);
+  facing(put, 'town_notice_board_a', [...near(7.3, 14.2, 1.2), ...near(1.6, 8, 1.5)], [8.5, 12]);
+  lamps(put, [['town_street_lamp_a', near(9.6, 1.8, .75)], ['town_street_lamp_a', [[9.9, 4.2], ...near(9.8, 5, .75)]],
+    ['town_street_lamp_b', [[10.3, 9.9], ...near(10.6, 10.3, .75)]], ['town_street_lamp_a', [[6.6, 7.9], ...near(6.2, 8, .75)]],
+    ['town_street_lamp_a', near(5.2, 6.1, .75)], ['town_street_lamp_a', near(11.2, 6.1, .75)],
+    ['town_street_lamp_a', [...near(7.6, 12.9, .75), ...near(9.4, 12.4, .75)]]]);
+  // flower pots by the doors and round the plaza
+  for (const [x, z] of [[2.6, 6.3], [4.5, 6.3], [10.4, 12.4], [10.5, 10.6], [5.2, 13.6], [6, 8.3]])
+    put(variant(R, 'town_flower_pots'), near(x, z, .8), { s: .9 + R() * .25 });
   // Inn: deliveries by the side door, a cask by the porch.
   group([[6.2, 1.8]], ['mines_barrel_a', 'mines_barrel_b', 'mines_crate_a', 'mines_sacks_a'], .7);
   group([[1.2, 6.8]], ['mines_barrel_b', 'mines_crate_b'], .5);
-  // Stable: feed sacks along the wall and a barrow by the paddock.
+  // Stable: hay and feed sacks along the wall, a barrow by the paddock, a hand cart to fetch more.
+  put(variant(R, 'town_hay_bales'), near(14.8, 6.4, 1.2));
   group([[14.6, 6.3], [9.6, 6.0]], ['mines_sacks_a', 'mines_sacks_b', 'mines_crate_a'], .7);
   put('mines_wheelbarrow_a', [[14.6, 7.3], [14.4, 6.8], [15.0, 9.8]], { yaw: -.6 });
+  put(variant(R, 'town_handcart'), [...near(14.4, 7.2, .75), ...near(9.5, 14, .75)], { yaw: Math.PI / 2 + R() * .4 - .2, s: .85 });
   // Blacksmith: timber and fuel for the forge, a coal spill, a finished cart wheel.
   group([[7.4, 14.1], [6.6, 13.4]], ['mines_plank_stack_a', 'mines_barrel_a', 'mines_crate_b', 'mines_sacks_b'], .8);
   put('mines_coal_scatter_a', [[5.4, 13.6], [5.9, 13.9], [5.5, 9.4]]);
@@ -345,8 +375,8 @@ export function merchantCampPlan(exit, seed) {
   // Waymarks at both ends and lamps where the traders set up.
   put('relics_signpost_b', [[7.2, 1.2], [9.8, 1.4]], { yaw: Math.PI / 2 - .2, s: 1 });
   put('relics_signpost_a', [[9.9, 14.8], [7.1, 14.7]], { yaw: -Math.PI / 2 + .3, s: 1 });
-  put('mines_lantern_a', [[7.0, 9.4], [6.8, 8.8]], { s: 1, unlit: true });
-  put('mines_lantern_b', [[10.0, 6.0], [10.2, 5.2]], { s: 1, unlit: true });
+  lamps(put, [['town_street_lamp_a', [[7.0, 9.4], [6.8, 8.8]]], ['town_street_lamp_a', [[10.0, 6.0], [10.2, 5.2]]],
+    ['town_street_lamp_b', [[9.9, 13.2], [7.1, 13.0]]], ['town_street_lamp_a', [[7.1, 2.6], [9.9, 2.8]]]]);
   // Traders' camp: a fire ring with log seats, and stock stacked behind the stalls.
   const fire = put('relics_old_campfire_b', [[11.9, 3.4], [12.3, 4.0], [11.6, 2.6]], { s: 1 });
   if (fire) {
@@ -354,7 +384,11 @@ export function merchantCampPlan(exit, seed) {
     // Seats lie tangentially; the log mesh is long along its X axis.
     [[-1.0, .25], [.75, -.75], [.55, .9]].forEach(([dx, dz]) =>
       put(variant(R, 'meadow_fallen_log'), [[fx + dx, fz + dz]], { yaw: Math.atan2(dx, dz), s: .9 }));
+    put('town_woodpile_a', [[fx + 1.6, fz + .4], [fx - .4, fz + 1.7], [fx + 1.5, fz - 1.2]], { yaw: R() * Math.PI });
   }
+  put(variant(R, 'town_handcart'), [...near(3.4, 13.4, 1), ...near(2.4, 4.4, 1), ...near(13.8, 9, 1)], { yaw: R() * Math.PI * 2, s: .85 });
+  put(variant(R, 'town_hay_bales'), [[1.4, 3.4], [14.6, 13.2], [3.4, 6.6]]);
+  for (const [x, z] of [[6.2, 10.4], [10.6, 7.3], [6.4, 4.6]]) put(variant(R, 'town_flower_pots'), [[x, z]], { s: .9 + R() * .2 });
   group([[1.6, 9.4], [2.0, 10.2]], ['mines_barrel_a', 'mines_barrel_b', 'mines_crate_a'], .7);
   group([[14.6, 6.2], [14.4, 9.6]], ['mines_crate_b', 'mines_crate_a', 'mines_barrel_a', 'mines_sacks_a'], .8);
   group([[2.6, 1.0], [7.0, 2.4]], ['mines_sacks_b', 'mines_crate_b', 'mines_barrel_b'], .7);

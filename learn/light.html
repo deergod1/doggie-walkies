@@ -380,8 +380,8 @@ vec4 v = clamp((s - 0.5) / fwidth(s) + 0.5, 0.0, 1.0);</code></pre>
     <pre data-code="src/render/bake.js#assignChannels"></pre>
     <div>
       <ul class="small">
-        <li lang="en"><code>order</code>: the lamps sorted, brightest first (how bright, times how far it reaches, squared).</li>
-        <li lang="de"><code>order</code>: die Lampen sortiert, die hellste zuerst (wie hell, mal wie weit sie reicht, zum Quadrat).</li>
+        <li lang="en"><code>order</code>: the lamps sorted, brightest first (how bright, times how far it reaches, squared). <code>peak</code> is how bright a lamp gets: the town's windows and street lamps are dark by day and only light up at night.</li>
+        <li lang="de"><code>order</code>: die Lampen sortiert, die hellste zuerst (wie hell, mal wie weit sie reicht, zum Quadrat). <code>peak</code> ist, wie hell eine Lampe wird: Die Fenster und Straßenlaternen der Stadt sind am Tag dunkel und leuchten erst in der Nacht.</li>
         <li lang="en"><code>taken</code>: a <code>Set</code> of the pots the lamp's neighbours already have. A neighbour is a lamp closer than their two reaches together (times <code>REACH</code>).</li>
         <li lang="de"><code>taken</code>: ein <code>Set</code> der Töpfe, die die Nachbarn der Lampe schon haben. Ein Nachbar ist eine Lampe, die näher ist als ihre beiden Reichweiten zusammen (mal <code>REACH</code>).</li>
         <li lang="en">The loop over <code>c</code> takes the first free pot. The pots are counted from 1: pot 0 is the sun's.</li>

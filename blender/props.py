@@ -76,6 +76,10 @@ def linear(hex_color):
     return tuple(v / 12.92 if v <= 0.04045 else ((v + 0.055) / 1.055) ** 2.4 for v in rgb)
 
 
+# the warm light of a lit window at night (a "_window" material; the game lights it after dusk)
+WINDOW_LIGHT = "#ffbd6b"
+
+
 def material(name, glow=None, strength=1):
     mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
     mat.use_nodes = True
@@ -1044,6 +1048,11 @@ def finish(m, name, attach, hints, collection):
         if not light:
             raise ValueError(f"Emissive geometry without light hint: {name}")
         mesh.materials.append(material(name + "_glow", light, max(1, min(3, hints.get("intensity", 1)))))
+    # glow 2: a window's pane, lit at night only (render/props.js: the third material, "_window")
+    if any(g == 2 for g in glows):
+        if not any(g is True or g == 1 for g in glows):
+            raise ValueError(f"Window panes without a glowing material before them: {name}")
+        mesh.materials.append(material(name + "_window", WINDOW_LIGHT, 1))
     attr = mesh.color_attributes.new(name=COLOR_ATTRIBUTE, type="FLOAT_COLOR", domain="CORNER")
     mesh.color_attributes.active_color = attr
     for poly, color, glow in zip(mesh.polygons, colors, glows):

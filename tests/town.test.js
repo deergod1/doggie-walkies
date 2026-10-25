@@ -281,7 +281,7 @@ function checkClutter(m, min) {
     if (meta.attach === 'water') assert.equal(p.y, (TOWN_LEVEL - 1) * LH);
     else assert.ok(Math.abs(p.y - y) < .03, p.name);
     assert.ok(!inside(p.x, p.z), p.name + ' inside a building');
-    if (meta.light) assert.equal(p.unlit, true, 'daytime lamps should not add point lights');
+    if (meta.light) assert.equal(p.night, true, 'the lamps are lit at night only');
     if (meta.blocking) {
       assert.ok(m.staticBlockers[c].some(b => b.name === p.name && b.x === p.x && b.z === p.z), p.name + ' needs a collider');
     }

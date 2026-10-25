@@ -51,7 +51,9 @@ def check_glb(path, reports):
         assert extras['front'] == '+Z' and extras['units'] == 'cells'
         assert extras['cube_crawler_town'] is True
         primitives = gltf['meshes'][node['mesh']]['primitives']
-        assert len(primitives) == 2
+        # vertex colour, emissive lantern/forge, and for the houses with windows their panes
+        windows = node['name'] in ('town_inn_a', 'town_pet_shop_a', 'town_blacksmith_a')
+        assert len(primitives) == (3 if windows else 2), node['name']
         triangle_count, min_y, max_y = 0, float('inf'), -float('inf')
         for primitive in primitives:
             assert primitive.get('mode', 4) == 4
@@ -66,7 +68,8 @@ def check_glb(path, reports):
         assert abs(min_y) < 1e-6 and abs(max_y - report['size'][2]) < .001
         glowing = [gltf['materials'][p['material']] for p in primitives
                    if any(gltf['materials'][p['material']].get('emissiveFactor', []))]
-        assert len(glowing) == 1 and glowing[0]['name'] == node['name'] + '_glow'
+        names = sorted(m['name'] for m in glowing)
+        assert names == [node['name'] + '_glow'] + ([node['name'] + '_window'] if windows else []), names
 
 
 def main():

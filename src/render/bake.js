@@ -110,11 +110,13 @@ export function addBakedLight(bake, light, group, holder = group) {
   return true;
 }
 
+// how bright a light gets (`peak`: one lit at night only is dark by day, render/night.js)
+const peak = l => l.userData.peak ?? l.intensity;
 // which fixed lights each cell of the cube takes (core/lightcells.js), in its table by their place
 // in the cube's list (the row each has in uBakeT)
 function lightCells(bake) {
   const t = bake.u.uBakeC.value;
-  t.image.data.set(cellsOf(bake.lights.map(s => ({ x: s.at.x, z: s.at.z, reach: s.light.distance || 6, intensity: s.light.intensity })),
+  t.image.data.set(cellsOf(bake.lights.map(s => ({ x: s.at.x, z: s.at.z, reach: s.light.distance || 6, intensity: peak(s.light) })),
     { cells: CELLS, from: CELL0, max: CELL_MAX }));
   t.needsUpdate = true;
   bake.cells = bake.lights.length;
@@ -352,7 +354,7 @@ function restoreState(s) {
 const REACH = 0.85, TWIN = 1.2;
 // learn: light.html#pots #pots-code (see learn/README.md)
 function assignChannels(lights) {
-  const order = [...lights].sort((a, b) => b.light.intensity * b.light.distance ** 2 - a.light.intensity * a.light.distance ** 2);
+  const order = [...lights].sort((a, b) => peak(b.light) * b.light.distance ** 2 - peak(a.light) * a.light.distance ** 2);
   for (const s of order) { s.channel = -1; s.twin = null; }
   for (const s of order) {
     const taken = new Set();

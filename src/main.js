@@ -168,7 +168,7 @@ function frame(now = performance.now()) {
   tickParticles(dt);
   tickPortalCloud(dt);
   tickNeighbors(dt);
-  tickProps(state.time);
+  tickProps(state.time, state.night);   // (the wind; the town's windows and lamps lit at night: render/night.js)
   tickFlames(dt, state.time, focusPoint(player.x, player.visY, player.z));   // the fires: flames, embers, smoke (render/flames.js)
   tickMotes(dt, state.map?.biome && themeById(state.map.biome), player.x, player.visY, player.z, state.night);   // what drifts in the air (render/motes.js)
   tickFootprints(dt, state.cubeKey);   // wet prints on the slime dry up (render/footprints.js)

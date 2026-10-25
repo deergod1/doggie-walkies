@@ -76,6 +76,9 @@ const MEADOW = T('Meadow islands', {
   side: [[0, '#4e382a'], [6, '#7a5638'], [11, '#7a6d62'], [20, '#9a948c']],
   soft: '#d8c070', lip: '#3f6b2e', under: '#3a2f28', bed: ['#2a2a31', '#23232a'], fluids: [0.85, 0.05, 0.1], river: WATER,
   light: { sky: ['#163640', '#081218', '#4a6966', '#3b3656'], stars: 1, hemi: ['#dfeaff', '#3a3020', 1.1], sun: ['#fff1dd', 2.4], fog: 0 },
+  // fireflies at night (the town's meadow too), a few of them bright enough to light the grass
+  nightMotes: { colors: ['#e6ff7a', '#fff3a0', '#c8ff70'], rate: 3, drift: 0.18, rise: [-0.04, 0.08], life: [1.5, 3.5], size: [0.025, 0.045],
+    wisps: 3, wisp: '#e0ff80' },
 });
 // cloud kingdom: puffy islands over a lot of open sky
 const CLOUDS = T('Cloud kingdom', {

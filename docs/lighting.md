@@ -21,6 +21,15 @@ own baked shadow (a shed's walls, a furnace, a tree's trunk). A prop with severa
 brightness out between them. A fixed light shines only while what it hung on shows (a portal's
 gate, hidden once its face opens).
 
+**Lit at night only** (`render/night.js`): the town's street lamps (a placement's `night`,
+`world/town.js`) and the houses' windows (a prop's `_window` material: a light out of each
+window, 0.35 out of its wall). They are fixed lights like the others, baked with their shadows
+and dark by day (intensity 0: they reach nothing); through the dusk each house and lamp comes
+on at its own moment (`litAt`, by where it stands), its glowing parts in the shader and its
+lights alike, and goes out through the dawn. A window's candlelight glimmers a little; a lamp
+flickers like any lantern. The channels and the cells go by how bright a light gets
+(`userData.peak`), not by how bright it is when the cube is baked.
+
 **The fixed parts** cast the baked shadows: the cube's solids (terrain, stone, wood) and its props
 that cast shadows. They stay out of three.js's shadow map of the sun (`render/bake.js
 keepFixedOutOfSun`), which then only holds what moves.

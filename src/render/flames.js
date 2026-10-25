@@ -17,12 +17,15 @@ import { makeFadable } from './fade.js';
 import { doused } from '../core/douse.js';
 import { FIRES } from '../core/propcatalog.js';
 import { sfx } from '../audio/sfx.js';
+import { nightGlow, litAt } from './night.js';
 
 export const FIRE_COLORS = ['#fff0a0', '#ffd25a', '#ff8a2a', '#ff4a17'];
 // how a fire flickers (seed: its own phase): the flame's height and brightness and its light
 export const flicker = (t, seed) => 0.8 + 0.2 * Math.sin(t * 13 + seed * 7) * Math.sin(t * 7.3 + seed * 3);
 // how a glowing mushroom's (a rune's) light breathes: slowly, each in its own time
 export const breathe = (t, seed) => 0.72 + 0.28 * Math.sin(t * (0.9 + seed * 0.08) + seed * 5);
+// how a candle behind a window glimmers (props.js glowMaterial 'window': its pane alike)
+const glimmer = (t, seed) => 0.9 + 0.1 * Math.sin(t * 4.3 + seed) * Math.sin(t * 2.1 + seed * 0.7);
 const FLICKER = '(0.8 + 0.2 * sin(uTime * 13.0 + s * 7.0) * sin(uTime * 7.3 + s * 3.0))';
 
 // the props that burn (core/propcatalog.js FIRES) and the trials' flame pieces
@@ -151,8 +154,10 @@ export function flameWarmup() {
   return [pinned];
 }
 // A cube's flames (specs: [{ x, y, z, w, h }] in its group; lights: the point lights they give,
-// [{ light, gain, i, seed, pulse }], flickering with flame i (-1: none, a lantern's light flickers
-// on its own; pulse: it breathes instead, a glowing mushroom's)): one instanced mesh to add to the
+// [{ light, gain, i, seed, pulse, steady, candle, night }], flickering with flame i (-1: none, a
+// lantern's light flickers on its own; pulse: it breathes instead, a glowing mushroom's; steady: it
+// does not; candle: it glimmers, a lit window's; night: lit at night only, render/night.js, its
+// seed there)): one instanced mesh to add to the
 // group. power(i, v): a flame lit (1) or out (0) (and on the way: it flares up, it dies down).
 export function flameSet(specs, lights = []) {
   // (a quad from a little below the root, -0.15, to the top, 1, in heights; the shader's y)
@@ -223,8 +228,9 @@ export function tickFlames(dt, time, focus) {
       if (d < 100) near.push({ f, power, d, x: at.x, y: at.y, z: at.z });
     });
     if (changed) set.attr.needsUpdate = true;
-    for (const { light, gain, i = 0, seed = 0, pulse } of set.lights)
-      light.intensity = gain * (pulse ? breathe(time, seed) : flicker(time, seed)) * (set.attr.array[i * 4 + 3] ?? 1);
+    for (const { light, gain, i = 0, seed = 0, pulse, steady, candle, night = null } of set.lights)
+      light.intensity = gain * (pulse ? breathe(time, seed) : steady ? 1 : candle ? glimmer(time, seed) : flicker(time, seed))
+        * (set.attr.array[i * 4 + 3] ?? 1) * (night === null ? 1 : litAt(nightGlow.value, night));
   }
   near.sort((a, b) => a.d - b.d);
   for (const { f, power, x, y, z } of near.slice(0, 6)) {

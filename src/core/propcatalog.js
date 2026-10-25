@@ -31,7 +31,7 @@ const words = s => s.split(' ');
 export const FLICKER = Object.fromEntries([
   ...words('lantern hanging_lantern wall_lantern headframe hanging_censer luminaria crucible furnace butter_lamps chorten_great'
     + ' sang_burner wax_candles stone_lantern wall_shrine bone_chandelier bone_lantern candelabra candle_niche candle_stubs'
-    + ' crypt_shrine witch_hut').map(b => [b, 'flame']),
+    + ' crypt_shrine witch_hut street_lamp').map(b => [b, 'flame']),
   ...words('rune_stone ritual_circle void_crystal wall_runes chained_obelisk void_throne ice_crystal ice_throne crystal_cluster'
     + ' ore_vein giant_geode glow_mushroom mushroom_shelf spore_pod acid_foam fungal_tree swamp_lilies tiny_glowcaps'
     + ' giant_toadstool magma_rock cinders fire_crystal lava_crust lava_stalactite magma_seep fumarole glowworm_threads'

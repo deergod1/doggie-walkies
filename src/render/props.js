@@ -3,7 +3,8 @@
 // cube. The catalog (core/propcatalog.js) knows every prop from the start; a set's geometry is
 // loaded when a cube shows it (loadPropSets, before the cube is entered: render/cubeassets.js).
 // Materials are cloned per cube (cubes fade and get cut on their own); props with `sway` move
-// in the wind; glowing props add light sources.
+// in the wind; glowing props add light sources. The town's windows and lamp posts are lit at
+// night only (render/night.js).
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { cutMaterial } from './section.js';
@@ -15,10 +16,16 @@ import { splitFlames, flameSet } from './flames.js';
 
 import { props } from '../core/propcatalog.js';
 import { glowSpots } from '../core/glowspots.js';
+import { nightGlow, setNight, LIT_GLSL } from './night.js';
 export { props } from '../core/propcatalog.js';
 
 const wind = { value: 0 };
-export const tickProps = t => { wind.value = t; };
+// every frame: the game's clock (t) and how far into the night the cube played in is (night)
+export const tickProps = (t, night = 0) => { wind.value = t; setNight(night); };
+
+// a lit window: its warm light, how bright, how far it reaches; and a lamp post's glass by day
+const WINDOW = { color: '#ffb866', gain: 1.5, reach: 3.6 }, LAMP_BY_DAY = 0.12;
+const isWindow = m => m.name.endsWith('_window');
 
 // a loaded library: its props' parts (and an animated prop's node tree and clips) into their catalog entries
 export function registerProps(gltf) {
@@ -31,8 +38,11 @@ export function registerProps(gltf) {
     if (!p) { console.warn('prop without metadata (tools/prop-metadata.mjs):', o.name); continue; }
     p.parts = parts; delete p.flames; delete p.wholeParts;
     // where its light comes from: its glowing geometry (core/glowspots.js), a fire's flames too
-    const glow = parts.filter(x => x.material.name.endsWith('_glow'));
-    p.lightSpots = glow.length ? glowSpots(glow.map(x => ({ pos: x.geometry.attributes.position.array, index: x.geometry.index?.array }))) : null;
+    const glow = parts.filter(x => x.material.name.endsWith('_glow')), panes = parts.filter(x => isWindow(x.material));
+    const spots = list => glowSpots(list.map(x => ({ pos: x.geometry.attributes.position.array, index: x.geometry.index?.array })));
+    p.lightSpots = glow.length ? spots(glow) : null;
+    // (a house's windows, lit at night: a light out of each)
+    p.windowSpots = panes.length ? spots(panes) : null;
     splitFlames(p);   // a fire's flames are drawn as flames (render/flames.js)
     // an animated prop (the treasure chest) keeps its whole node tree and clips (render/chests.js)
     if (o.userData.clips) Object.assign(p, { template: o, clips: gltf.animations });
@@ -77,22 +87,29 @@ function swayMaterial(mat, sway) {
 // a glowing part of a prop whose light lives (`flicker`): its glow flickers like a flame ('flame',
 // render/flames.js flicker) or breathes ('pulse', breathe), each instance in its own time and in
 // step with its light (both seeded by where it stands: fireSeed below; wind is the game's clock)
-function glowMaterial(mat, kind) {
+// night: lit at night only (render/night.js; by day a lamp's glass faintly, LAMP_BY_DAY); kind
+// 'steady': it does not live (a night lamp's that does not flicker); 'window': a house's window, candlelight inside flickering a little, each window in its own time
+// (by where on the house it is), the house's all coming on together
+function glowMaterial(mat, kind, night = false) {
   const prev = mat.onBeforeCompile, key = mat.customProgramCacheKey();
   mat.onBeforeCompile = (sh, r) => {
     prev.call(mat, sh, r);
-    sh.uniforms.uWind = wind;
-    sh.vertexShader = 'uniform float uWind;\nvarying float vGlowK;\n' + sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
-      float glowSeed = 0.0;
+    sh.uniforms.uWind = wind; sh.uniforms.uNight = nightGlow;
+    const k = kind === 'pulse' ? '0.72 + 0.28 * sin(uWind * (0.9 + glowSeed * 0.08) + glowSeed * 5.0)'
+      : kind === 'window' ? '0.9 + 0.1 * sin(uWind * 4.3 + paneSeed) * sin(uWind * 2.1 + paneSeed * 0.7 + glowSeed)'
+      : kind === 'steady' ? '1.0'
+      : '0.8 + 0.2 * sin(uWind * 13.0 + glowSeed * 7.0) * sin(uWind * 7.3 + glowSeed * 3.0)';
+    const lit = !night ? '' : kind === 'window' ? ' * litAt(uNight, glowSeed)' : ` * mix(${LAMP_BY_DAY}, 1.0, litAt(uNight, glowSeed))`;
+    sh.vertexShader = `uniform float uWind, uNight;\nvarying float vGlowK;\n${LIT_GLSL}\n` + sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
+      float glowSeed = 0.0, paneSeed = position.x * 1.2 + position.y * 0.8 + position.z;   // (slowly across the house: a window shimmers as one)
       #ifdef USE_INSTANCING
         glowSeed = mod(instanceMatrix[3].x * 1.7 + instanceMatrix[3].z * 2.3, 6.28);
       #endif
-      vGlowK = ${kind === 'pulse' ? '0.72 + 0.28 * sin(uWind * (0.9 + glowSeed * 0.08) + glowSeed * 5.0)'
-        : '0.8 + 0.2 * sin(uWind * 13.0 + glowSeed * 7.0) * sin(uWind * 7.3 + glowSeed * 3.0)'};`);
+      vGlowK = (${k})${lit};`);
     sh.fragmentShader = 'varying float vGlowK;\n' + sh.fragmentShader.replace('#include <emissivemap_fragment>',
       '#include <emissivemap_fragment>\n  totalEmissiveRadiance *= vGlowK;');
   };
-  mat.customProgramCacheKey = () => key + '|glow-' + kind;
+  mat.customProgramCacheKey = () => key + '|glow-' + kind + (night ? '-night' : '');
   return mat;
 }
 
@@ -113,7 +130,8 @@ export function propBatchGeometry(p, glow) {
   const parts = (p.wholeParts ?? p.parts).map(({ geometry, material }) => {
     const g = geometry.index ? geometry.toNonIndexed() : geometry.clone(), n = g.attributes.position.count;
     const base = material.color || new THREE.Color(1, 1, 1);
-    const light = (material.emissive || new THREE.Color(0, 0, 0)).clone().multiplyScalar((material.emissiveIntensity ?? 1) * glow);
+    // (a window is lit at night only: dark in the surroundings)
+    const light = (material.emissive || new THREE.Color(0, 0, 0)).clone().multiplyScalar(isWindow(material) ? 0 : (material.emissiveIntensity ?? 1) * glow);
     const src = g.attributes.color, color = new Float32Array(n * 3), lit = new Float32Array(n * 3);
     for (let i = 0; i < n; i++) {
       color[i * 3] = (src ? src.getX(i) : 1) * base.r; color[i * 3 + 1] = (src ? src.getY(i) : 1) * base.g; color[i * 3 + 2] = (src ? src.getZ(i) : 1) * base.b;
@@ -136,21 +154,23 @@ export function propBatchGeometry(p, glow) {
 
 const LOWEST = 0.3;   // a ground prop's light at least this high over its foot
 const fireSeed = q => (q.x * 1.7 + q.z * 2.3) % 6.28;   // (a fire's flame and light flicker as one)
-// placed: [{ name, x, y, z, yaw, s, tint }] -> instanced meshes (and light sources) in group;
-// water: the cube's (render/wet.js waterUniforms): what lies all under it wavers with the bed
-// (render/underwater.js)
+// placed: [{ name, x, y, z, yaw, s, tint, night }] -> instanced meshes (and light sources) in
+// group (night: a lamp lit at night only, render/night.js); water: the cube's (render/wet.js
+// waterUniforms): what lies all under it wavers with the bed (render/underwater.js)
 export function buildProps(placed, group, water = null) {
+  // (the night lamps apart from the same prop lit all the time: their glass has its own material)
   const byName = new Map();
-  for (const q of placed) { if (!byName.has(q.name)) byName.set(q.name, []); byName.get(q.name).push(q); }
+  for (const q of placed) { const k = q.night ? q.name + '|night' : q.name; if (!byName.has(k)) byName.set(k, []); byName.get(k).push(q); }
   const m4 = new THREE.Matrix4(), col = new THREE.Color(), flames = [], fireLights = [], glowing = [];
-  for (const [name, list] of byName) {
-    const p = props.byName.get(name);
+  for (const list of byName.values()) {
+    const p = props.byName.get(list[0].name), night = !!list[0].night;
     if (p?.template) { buildChests(p, list, group); continue; }
     if (!p?.parts) continue;
     for (const part of p.parts) {
-      const c = cutMaterial(part.material.clone(), 'self', true);
+      const c = cutMaterial(part.material.clone(), 'self', true), glow = part.material.name.endsWith('_glow'), pane = isWindow(part.material);
       if (water) underwaterMaterial(c, water, p.maxY ?? p.height ?? 0);
-      if (p.flicker && part.material.name.endsWith('_glow')) glowMaterial(c, p.flicker);
+      if (pane) glowMaterial(c, 'window', true);
+      else if (glow && (p.flicker || night)) glowMaterial(c, p.flicker ?? 'steady', night);
       const mesh = new THREE.InstancedMesh(part.geometry, p.sway ? swayMaterial(c, p.sway) : c, list.length);
       mesh.name = p.name;
       mesh.userData.sharedGeo = true;   // the catalog owns the geometry
@@ -158,8 +178,9 @@ export function buildProps(placed, group, water = null) {
         mesh.setMatrixAt(i, placeMatrix(q, m4));
         mesh.setColorAt(i, col.set(q.tint || '#ffffff'));
       });
-      // glowing parts (windows, lantern glass) are light, not matter: no shadow
-      mesh.castShadow = (p.blocking || p.height > 0.8) && !part.material.name.endsWith('_glow');
+      // glowing parts (lantern glass, a forge's coals) are light, not matter: no shadow (a window's
+      // pane lies in its frame)
+      mesh.castShadow = (p.blocking || p.height > 0.8) && !glow && !pane;
       mesh.receiveShadow = true;
       group.add(mesh);
     }
@@ -170,13 +191,24 @@ export function buildProps(placed, group, water = null) {
       const at = new THREE.Vector3(f.x, f.y, f.z).applyMatrix4(placeMatrix(q, m4)), s = q.s ?? 1;
       flames.push({ x: at.x, y: at.y, z: at.z, w: f.w * s, h: f.h * s, seed: fireSeed(q) });
     }
-    if (p.light && !p.cover) for (const [qi, q] of list.entries()) if (!q.unlit)   // (unlit: e.g. daytime lamp posts in the town clearings)
+    if (p.light && !p.cover) for (const [qi, q] of list.entries()) if (!q.unlit)   // (unlit: a lamp that never shines)
       glowing.push({ p, q, flame: p.flames?.length ? first0 + qi : -1 });
+    // a house's windows: a light out of each, lit at night (flames.js: with the house's panes)
+    if (p.windowSpots) for (const q of list) {
+      placeMatrix(q, m4);
+      p.windowSpots.forEach((spot, k) => {
+        const l = new THREE.PointLight(WINDOW.color, 0, WINDOW.reach, 2);
+        l.position.set(spot.x, Math.max(spot.y, LOWEST), spot.z).applyMatrix4(m4);
+        l.userData.peak = WINDOW.gain;   // (render/bake.js: as bright as it gets, whatever it is now)
+        fireLights.push({ light: l, gain: WINDOW.gain, seed: fireSeed(q) + k, i: -1, candle: true, night: fireSeed(q) });
+        group.add(l);
+      });
+    }
   }
   // every glowing prop lights its surroundings, all the time (render/lightpool.js: the cube's fixed
   // lights; the big ones first, then the brightest, should a cube ever have more than it takes); a
   // fire's light flickers with its flame, a lantern's like a flame (`flicker` 'flame'), a glowing
-  // mushroom's breathes ('pulse')
+  // mushroom's breathes ('pulse'); a night lamp's at night only
   const big = g => g.p.landmark || g.p.vignette ? 1 : 0;
   glowing.sort((a, b) => big(b) - big(a) || b.p.intensity - a.p.intensity);
   // a light where each spot of its glow is (core/glowspots.js: inside the prop it would be shut
@@ -187,10 +219,12 @@ export function buildProps(placed, group, water = null) {
     const gain = p.intensity * 2 / Math.sqrt(spots.length);
     placeMatrix(q, m4);
     for (const spot of spots) {
-      const l = new THREE.PointLight(p.light, gain, p.landmark || p.vignette ? 5 : 4, 2);
+      const l = new THREE.PointLight(p.light, q.night ? 0 : gain, p.landmark || p.vignette ? 5 : 4, 2);
+      l.userData.peak = gain;
       // (a ground prop's light not down in the grass: from there it lights a puddle round it)
       l.position.copy(spotAt.set(spot.x, p.attach === 'ground' ? Math.max(spot.y, LOWEST) : spot.y, spot.z).applyMatrix4(m4));
-      if (p.flames || p.flicker) fireLights.push({ light: l, gain, seed: fireSeed(q), i: flame, pulse: p.flicker === 'pulse' });
+      if (p.flames || p.flicker || q.night) fireLights.push({ light: l, gain, seed: fireSeed(q), i: flame, pulse: p.flicker === 'pulse',
+        steady: !p.flames && !p.flicker, night: q.night ? fireSeed(q) : null });
       group.add(l);
     }
   }
