@@ -120,6 +120,7 @@ export function projectileFx(pr, what) {
   const fire = pr.kind === 'fireball', ice = pr.kind === 'iceball', { x, y, z } = pr;
   if (pr.kind === 'skull') { skullFx(pr, what); return; }
   if (pr.kind === 'water') { waterFx(pr, what); return; }
+  if (pr.kind === 'slimeball') { slimeFx(pr, what); return; }
   if (pr.kind === 'eye') { eyeFx(pr, what); return; }
   if (pr.kind === 'orb') { orbFx(pr, what); return; }
   if (pr.kind === 'arrow') { arrowFx(pr, what); return; }
@@ -200,6 +201,19 @@ function waterFx(pr, what) {
       size: rand(0.05, 0.1), color: DROPS[i % 3], alpha: 0.9, gravity: 9, drag: 1 });
   emit(soft, x, y, z, { life: 0.25, size: 0.4, grow: 1.4, color: '#e8fbff', alpha: 0.5 });
   sfx('drip', { at: pr, volume: what === 'spent' ? 0.5 : 0.9 });
+}
+
+// a Slug's ball of slime: spat with a wet hork, and where it ends a splat of goo
+const GOO = ['#d8ff9a', '#8ae048', '#3e7a2a'];
+function slimeFx(pr, what) {
+  if (what === 'launch') { sfx('spit', { at: pr, pitch: 0.6 }); return; }
+  const { x, y, z } = pr, n = what === 'spent' ? 8 : 18;
+  for (let i = 0; i < n; i++)
+    emit(soft, x, y, z, { v: [rand(-1.5, 1.5) - pr.vx * 0.08, rand(0.3, 2), rand(-1.5, 1.5) - pr.vz * 0.08], life: rand(0.4, 0.7),
+      size: rand(0.06, 0.12), color: GOO[i % 3], alpha: 0.95, gravity: 9, drag: 1 });
+  emit(soft, x, y, z, { life: 0.3, size: 0.45, grow: 1.3, color: '#b8ff5a', alpha: 0.5 });
+  sfx('drip', { at: pr, pitch: 0.6, volume: what === 'spent' ? 0.5 : 0.9 });
+  if (what !== 'spent') sfx('whump', { at: pr, pitch: 1.6, volume: 0.5 });
 }
 
 // the Spicy's laser (game/beams.js) switched on ('start'), went off ('burst') or was put out

@@ -8,7 +8,7 @@ import { SLASH_CLIP, SHOOT_CLIP, CROSSBOW_CLIP, CAST_CLIP, THROW_CLIP, KINDS } f
 import { MUZZLES } from '../src/core/shots.js';
 import { WEAPONS, WEARABLES, OUTFIT_SLOTS, POTIONS } from '../src/core/items.js';
 import { SPIDER, STUNDER, SNAKE, OCTONAUT, FIREFACE, TRIANGLE, FIRECAT, SHRAPS, FIRE_SHRAPS, SPICY, WOLK, GUSTO, GUSTO_SPLIT, TOTNAR, SNAP_SKULL,
-  SQUARLO, SQUARLO_GIANT, SQUIRTLE, MECKED, TORNADO, FLIP, FOGGERY, FOGGERY_BALL, fireAt } from '../src/core/enemies.js';
+  SQUARLO, SQUARLO_GIANT, SQUIRTLE, MECKED, TORNADO, SLUG, FLIP, FOGGERY, FOGGERY_BALL, fireAt } from '../src/core/enemies.js';
 import { CHAR_SCALE } from '../src/core/constants.js';
 
 await decoderReady;
@@ -35,7 +35,7 @@ const BUDGETS = {
   firecat: { FireCat: 8000 }, shraps: { Shraps: 8000, ShrapsIceBall: 1500 }, spicy: { Spicy: 6000 }, wolla: { Wolla: 8000 }, wolk: { Wolk: 6000 },
   gusto: { Gusto: 8000 }, totnar: { Totnar: 10000, TotnarSkull: 1500 }, snapskull: { SnapSkull: 3000 },
   squarlo: { Squarlo: 8000 }, squirtle: { Squirtle: 5000, SquirtleDrop: 800 }, flip: { Flip: 10000, FlipBall: 1200 },
-  foggery: { Foggery: 12000, FoggeryEye: 1500 }, mecked: { Mecked: 7000 }, tornado: { Tornado: 7000, TornadoTwister: 1500 },
+  foggery: { Foggery: 12000, FoggeryEye: 1500 }, mecked: { Mecked: 7000 }, tornado: { Tornado: 7000, TornadoTwister: 1500 }, slug: { Slug: 6000, SlugBall: 800 },
 };
 test('characters and enemies keep to their triangle budgets', () => {
   for (const [file, budget] of Object.entries(BUDGETS)) {
@@ -539,6 +539,19 @@ test('the Tornado shuffles, spins up its twisters over its hands, rides them and
   // the skirts turn (render/enemies.js waves), and the tips of its hands are where twisters stand
   for (const bone of ['wave0', 'wave1', 'head', 'tip.L', 'tip.R', 'leg.FL', 'leg.BR']) assert.ok(j.nodes.some(n => n.name === bone), bone);
   assert.ok(j.nodes.some(n => n.name === 'TornadoTwister'));
+});
+test('the Slug crawls, spits from its mouth at its hit frame and sags flat', () => {
+  const { json: j, duration } = glb('slug'), a = Object.fromEntries(j.animations.map(c => [c.name, c]));
+  assert.deepEqual(Object.keys(a).sort(), ['SlugCrawl', 'SlugDeath', 'SlugSpit']);
+  assert.equal(a.SlugCrawl.extras.loop, true); assert.equal(a.SlugCrawl.extras.speed, SLUG.wander);
+  assert.equal(a.SlugSpit.extras.hit_frame / 30, SLUG.hitAt);
+  assert.ok(Math.abs(duration(a.SlugSpit) - SLUG.attackTime) < 1e-5);
+  assert.ok(Math.abs(duration(a.SlugDeath) - SLUG.deathTime) < 1e-5); assert.equal(a.SlugDeath.extras.hold_last_frame, true);
+  assert.deepEqual(a.SlugSpit.extras.muzzle, SLUG.projectile.muzzle);
+  const names = new Set(j.materials.map(m => m.name));
+  for (const m of Object.values(SLUG.parts).flat()) assert.ok(names.has(m), m);
+  for (const bone of ['tail', 'head', 'stalk.L', 'stalk.R', 'leg.FL', 'leg.BR']) assert.ok(j.nodes.some(n => n.name === bone), bone);
+  assert.ok(j.nodes.some(n => n.name === 'SlugBall'));
 });
 test('the snapping skull hops, bites at its hit frame and crumbles', () => {
   const { json: j, duration } = glb('snapskull'), a = Object.fromEntries(j.animations.map(c => [c.name, c]));

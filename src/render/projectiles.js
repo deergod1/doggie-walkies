@@ -1,4 +1,4 @@
-// Projectiles in flight: the fireball / Triangle punch / ice ball / Totnar's skull / water ball / Foggery's eye meshes exported
+// Projectiles in flight: the fireball / Triangle punch / ice ball / Totnar's skull / water ball / slime ball / Foggery's eye meshes exported
 // (Renew's spells and the echoes' shots: orbs of light, no model; his arrows: the game's arrow)
 // beside their thrower (enemymodel.js props), turned along the flight (a `tumble`ing one end over
 // end), each with a light and a particle trail.
@@ -14,6 +14,7 @@ import { triangleModel } from './trianglemodel.js';
 import { shrapsModel } from './shrapsmodel.js';
 import { totnarModel } from './totnarmodel.js';
 import { squirtleModel } from './squirtlemodel.js';
+import { slugModel } from './slugmodel.js';
 import { flipModel } from './flipmodel.js';
 import { foggeryModel } from './foggerymodel.js';
 import { kindColors, recolor } from './recolor.js';
@@ -27,6 +28,8 @@ const LOOKS = {
   skull: { model: totnarModel, prop: () => totnarModel.props?.TotnarSkull, light: [0xff5a1e, 1.4, 2.5], trail: ['#efe6cf', '#ff8a3a', '#bfb49a'], rate: 30, gravity: 1.5 },
   // a Squirtle's ball of water, wobbling, dripping as it flies
   water: { model: squirtleModel, prop: () => squirtleModel.props?.SquirtleDrop, light: [0x8fdcff, 0.8, 2], trail: ['#ffffff', '#c8f0ff', '#7fcaf0'], rate: 40, gravity: 6 },
+  // a Slug's ball of slime, wobbling, goo dripping off it as it flies
+  slimeball: { model: slugModel, prop: () => slugModel.props?.SlugBall, light: [0x9aff5a, 0.9, 2.2], trail: ['#d8ff9a', '#8ae048', '#3e7a2a'], rate: 35, gravity: 6 },
   // Flip's ball of light, its little ring spinning, sparkles streaming off it
   ball: { model: flipModel, prop: () => flipModel.props?.FlipBall, light: [0x8fdcff, 2.2, 3], trail: ['#ffffff', '#bfeaff', '#6fcbff'], rate: 55 },
   // one of Foggery's eyes, looking where it flies, burning like a fireball, its flames trailing

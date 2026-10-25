@@ -376,7 +376,29 @@ export const TORNADO = {
   style: 'ranged', keep: [2.2, 4.2],
   seedSalt: 0x70a4d0, spacing: 4,
 };
-export const ENEMY_PROFILES = [SPIDER, STUNDER, SNAKE, OCTONAUT, FIREFACE, TRIANGLE, FIRECAT, SHRAPS, SPICY, WOLLA, WOLK, SQUIRTLE, MECKED, TORNADO];
+// A big dark green slug of the slime marsh (blender/slug.py, after the kids' sketch): a long, low
+// body striped across its back on four short curly legs, two eye stalks with an eye on each tip.
+// It crawls very slowly, leaving a trail of slime (`trail`, render/trails.js), and from afar rears
+// up and spits balls of slime (clip frame 24) that slow what they hit: the projectile's `slow`
+// (core/status.js: how fast the body moves, not the weapon). It is the slime's own (`slimeborn`:
+// the marsh's slime does not hold it, core/footing.js).
+const SLUG_BALL = { kind: 'slimeball', speed: 6, radius: 0.17, range: 7, spin: 3,
+  muzzle: [0, 0.228, 0.651], slow: { time: 2.5, slow: 0.55, source: 'slime' } };
+export const SLUG = {
+  type: 'slug', species: 'slug', label: 'Slug', hp: 120, damage: 18, knock: 2,
+  xp: 62, coins: [12, 24],
+  radius: 0.38, height: 0.95, bodyHeight: 0.6, mass: 2.6, slimeborn: true, trail: '#3e7a2a',
+  aggro: 6, giveUp: 9, chase: 0.7, wander: 0.35, homeSpeed: 0.5,
+  reach: 5.5, hitReach: 0, hitAt: 24 / 30, trackUntil: 0.6, attackTime: 42 / 30, cooldown: 1.8,
+  arc: 0.5, knockDown: false, hop: 2.5, reason: 'Slimed by a Slug!', ichor: ['#8ae048', '#2e5a22'], pitch: 0.75,
+  projectile: SLUG_BALL,
+  poise: 0.8, hitStun: 0.25, deathTime: 1.6, corpseTime: 4,
+  parts: { body: ['SlugBody', 'SlugFoot'], stripes: ['SlugStripes'], eyes: ['SlugEyes_glow'] },
+  colors: paints({ body: 'moss.deep', stripes: 'moss.dark', eyes: 'eyes.bone' }),
+  style: 'ranged', keep: [2.2, 4.5],
+  seedSalt: 0x51a6e5, spacing: 4,
+};
+export const ENEMY_PROFILES = [SPIDER, STUNDER, SNAKE, OCTONAUT, FIREFACE, TRIANGLE, FIRECAT, SHRAPS, SPICY, WOLLA, WOLK, SQUIRTLE, MECKED, TORNADO, SLUG];
 
 // Gusto, the first real boss (blender/gusto.py), in place of the first descent guardian
 // (core/bosses.js). A round white-grey head with red eyes and jagged teeth, two long arms with
@@ -1047,6 +1069,19 @@ export const BONE_MECKED = enemyKind(MECKED, {
   colors: paints({ skin: 'stone.pale', belly: 'stone.light', eyes: 'eyes.ember' }), ichor: ['#efe6cf', '#8a8070'],
   mods: { hp: 1.5, damage: 1.45, speed: 1.15, size: 1.1 },
 });
+// The Slugs of the slime marsh: the plain dark green one, a spotted one, and the black one, the
+// strongest and the slowest, whose slime holds you longer.
+const slugBall = (slow, time) => ({ ...SLUG_BALL, slow: { ...SLUG_BALL.slow, slow, time } });
+export const SPOTTED_SLUG = enemyKind(SLUG, {
+  type: 'spottedslug', label: 'Spotted slug', reason: 'Slimed by a Spotted slug!',
+  colors: paints({ body: 'ochre.mid', stripes: 'ink.dark', eyes: 'eyes.sun' }), ichor: ['#e8e070', '#6a5a2a'], trail: '#7a7a3a',
+  mods: { hp: 1.2, damage: 1.15 },
+});
+export const BLACK_SLUG = enemyKind(SLUG, {
+  type: 'blackslug', label: 'Black slug', reason: 'Slimed by a Black slug!', projectile: slugBall(0.45, 3),
+  colors: paints({ body: 'ink.dark', stripes: 'moss.mid', eyes: 'eyes.ember' }), ichor: ['#b8ff5a', '#1e2a14'], trail: '#2a3a20',
+  mods: { hp: 1.45, damage: 1.35, speed: 0.85, size: 1.12 },
+});
 // The Tornados: an ochre one over the badlands and the canyon, a pale blue one in the snow and the
 // frozen caves, and a burning one in the volcanic depths, whose twisters set you on fire.
 const tornadoAttacks = (caught, slammed, more = {}) => [{ ...TORNADO_TWIN, reason: caught, ...more }, { ...TORNADO_HOP, reason: caught, ...more },
@@ -1223,7 +1258,7 @@ export const TOT_STUNDER = enemyKind(STUNDER, {
 export const ENEMY_KINDS = Object.fromEntries([...ENEMY_PROFILES, ...Object.values(GUARDIAN_KINDS), ...Object.values(DESCENT_GUARDIAN_KINDS), SAND_VIPER, BLOOD_VIPER, FROST_ADDER, VENOM_ADDER, SHADOW_MAMBA, FROST_SPIDER, BOG_SPIDER,
   GLOOM_SPIDER, REDBACK, FROST_STUNDER, STONE_STUNDER, MAGMA_STUNDER, BOG_OCTONAUT, CORAL_OCTONAUT, EMERALD_TRIANGLE, CRIMSON_TRIANGLE, FIRE_SHRAPS,
   BOG_WOLLA, STORM_WOLLA, EMBER_WOLLA, CORAL_SQUIRTLE, BLAZE_FACE, LANTERN_FACE, WISP_FACE, ASH_CAT, VOID_CAT, AMETHYST_SHRAPS, HABANERO,
-  NIGHTSHADE, DUST_WOLK, STORM_WOLK, MOSS_SQUIRTLE, FROST_MECKED, BOG_MECKED, BONE_MECKED, DUST_TORNADO, FROST_TORNADO, FIRE_TORNADO, ...BOSS_PROFILES, CUSTO_TRIANGLE, SNAP_SKULL, TOT_SPIDER, TOT_STUNDER,
+  NIGHTSHADE, DUST_WOLK, STORM_WOLK, MOSS_SQUIRTLE, FROST_MECKED, BOG_MECKED, BONE_MECKED, DUST_TORNADO, FROST_TORNADO, FIRE_TORNADO, SPOTTED_SLUG, BLACK_SLUG, ...BOSS_PROFILES, CUSTO_TRIANGLE, SNAP_SKULL, TOT_SPIDER, TOT_STUNDER,
   TIDE_SQUIRTLE, SKY_WOLLA, FOG_FACE, FOG_CAT, REN_SPIDER, REN_FACE].map(k => [k.type, k]));
 // gone: not here for now (Gusto between his vanishing and his coming back, game/gusto.js), or
 // under the floor (a burrowing Squirtle, game/enemyai.js): it cannot be seen, hit or touched,

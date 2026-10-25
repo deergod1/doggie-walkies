@@ -224,6 +224,15 @@ export function voices({ amp, noise, filter, tone, sweep }) {
         sweep(t + 0.1, 1.2, 1600 * p, 700 * p, 150 * p, 2.5, 0.35, out, 0.05);
       },
     },
+    slug: {   // a Slug: a low wet gurgle, a slurp drawing breath, a long deflating sigh
+      alert: (t, out, p) => { bend(t, 0.4, 110 * p, 150 * p, 95 * p, 500 * p, 0.4, out); gloops(t + 0.2, 4, 150 * p, 300 * p, 0.07, 0.18, out, false); },
+      windup: (t, out, p) => {
+        const f = filter('bandpass', 500 * p, 3, amp(t, 0.05, 0.35, 0.3, out));
+        f.frequency.setValueAtTime(400 * p, t); f.frequency.exponentialRampToValueAtTime(1400 * p, t + 0.35);
+        noise(t, 0.4, f);
+      },
+      death: (t, out, p) => { bend(t, 1.1, 160 * p, 110 * p, 50 * p, 450 * p, 0.45, out); gloops(t + 0.4, 6, 90 * p, 200 * p, 0.12, 0.2, out, false); },
+    },
     snapskull: {   // a skull come to life: chattering teeth, a hollow clack, a crack
       alert: (t, out, p) => clicks(t, 7, 0.04, 2600 * p, 0.45, out),
       windup: (t, out, p) => { clicks(t, 3, 0.05, 2000 * p, 0.35, out); tone('sine', 520 * p, 300 * p, t, 0.08, amp(t, 0.002, 0.2, 0.08, out)); },

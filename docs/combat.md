@@ -243,6 +243,14 @@ The controls are the same for all.
   mecked's bites poison), then shoved away on your feet at 1.9 s, stunned for 0.3 s. A stagger
   (a friend's blow, a heavy one) or its death makes it let go early: you drop. It dies reeling
   back and toppling over onto its side.
+- Slug (`blender/slug.py`, after the kids' sketch; the Slime marsh only): a big dark green slug, a
+  long, low body striped across its back on four short curly legs, two eye stalks with a round
+  eye on each tip. It crawls very slowly (0.7 cells/s at most), rippling, and leaves a trail of
+  slime (`trail`); the marsh's slime does not hold it (`slimeborn`). It fights from afar
+  (`style: 'ranged'`, 2.2–4.5 cells, reach 5.5): it rears up and swells, then lunges and spits a
+  ball of slime at frame 24 (`slimeball`, 6 cells/s). One that hits slows you (`slow`: to 55% for
+  2.5 s, the Black slug's to 45% for 3 s; only the body, not the weapon). It dies sagging flat,
+  its eye stalks drooping.
 - Tornado (`blender/tornado.py`, after the kids' sketch): a little wind spirit, light purple, a
   floating face with angry V brows over a thin body whose two arms rise up either side of it
   like a U, a round, scalloped overskirt over a long A-line skirt, both swirl-striped, and four
@@ -324,7 +332,7 @@ times a second (0.2 s, jittered so a pack does not decide in lockstep) and acts 
   - `skirmish` (spiders, snakes, Fire-cats): backs off after a blow, circles at `circle` cells
     (spiders scuttle sideways facing you, `strafe`; the others walk round), switching sides
     when blocked and now and then, and darts in once the cooldown is over.
-  - `ranged` (Fire-face, Triangle, Spicy, Wolla, Wolk, Tornado): backs away while closer than `keep[0]`, sidesteps while the
+  - `ranged` (Fire-face, Triangle, Spicy, Wolla, Wolk, Tornado, Slug): backs away while closer than `keep[0]`, sidesteps while the
     throw recovers, and moves for a clear shot when it has none.
   - `brute` (Stunder, Octonaut, Shraps, Mecked): holds its ground. The Stunder `charge`s: it runs the
     last 1.5–5 cells at 1.8× its chase speed when it can strike again (the Mecked at 1.4×).

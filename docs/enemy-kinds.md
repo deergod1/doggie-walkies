@@ -181,6 +181,9 @@ again. The lineup is planned with the room (`cubegen/testrooms.js` `lineUp`), so
 | Dust tornado | Tornado | `ochre.light` | ×1.2 | ×1.15 | 1 | 1 | ×1.17 | 4–6 |
 | Frost tornado | Tornado | `frost.pale@-4` | ×1.3 | ×1.1 | ×0.9 | 1 | ×1.2 | 3, 9–10 |
 | Fire tornado | Tornado | `ember.mid` | ×1.5 | ×1.45 | ×1.1 | ×1.08 | ×1.47 | 18–19 |
+| Slug | (base) | `moss.deep` | | | | | | 4–5 (Slime marsh) |
+| Spotted slug | Slug | `ochre.mid`, `ink.dark` stripes | ×1.2 | ×1.15 | 1 | 1 | ×1.17 | 4–5 (Slime marsh) |
+| Black slug | Slug | `ink.dark`, `moss.mid` stripes | ×1.45 | ×1.35 | ×0.85 | ×1.12 | ×1.4 | 5 (Slime marsh; its slime slows to 45% for 3 s) |
 
 The base kinds are painted from the palette too (their `colors`); the other columns are theirs.
 Depths are those whose rosters draw the kind (`src/core/spawns.js`, [depths.md](depths.md)).

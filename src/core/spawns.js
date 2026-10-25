@@ -10,7 +10,8 @@
 //       species' kinds take turns down the depths, so that each turns up about as often as the
 //       others (tools/palette.html measures it), each where its look and name fit.
 //     where: the themes (map.biome, the theme's prop set) the species lives in, if not all of the
-//       depth's (the Squirtles keep to the waters: the lagoons, the sunken grotto, the cenote);
+//       depth's (the Squirtles keep to the waters: the lagoons, the sunken grotto, the cenote; the
+//       Slugs to the slime marsh);
 //       '!theme': everywhere but there (the dark forest has spiders of its own)
 //   mix: the most species one cube holds. If more roll present, the extra ones are dropped:
 //     always-present species are kept first, the others in a random order weighted by chance.
@@ -35,12 +36,12 @@ export const DEPTH_SPAWNS = [
   /*  3 snowy peaks */ D(3, ['spider', 1, 8, 14, 3, { frostspider: 1 }], ['stunder', .7, 1, 2, 1, { froststunder: 1 }],
     ['shraps', .3, 1, 1], ['wolk', .5, 1, 2, 1, { stormwolk: 2, wolk: 1 }], ['snake', .7, 2, 4, 2, { frostadder: 1 }], ['triangle', .2, 1, 1],
     ['tornado', .35, 1, 2, 1, { frosttornado: 2, tornado: 1 }]),
-  /*  4 badlands */ D(3, ['snake', 1, 3, 6, 2, { sandviper: 1 }], ['spider', .8, 4, 8, 3, { spider: 2, redback: .5 }],
+  /*  4 badlands, salt flats, slime marsh */ D(3, ['snake', 1, 3, 6, 2, { sandviper: 1 }], ['spider', .8, 4, 8, 3, { spider: 2, redback: .5 }],
     ['stunder', .6, 1, 2, 1, { stonestunder: 1, stunder: 1 }], ['wolk', .5, 1, 2, 1, { dustwolk: 1 }],
-    ['tornado', .4, 1, 2, 1, { dusttornado: 2, tornado: 1 }]),
-  /*  5 deep canyon */ D(3, ['snake', 1, 4, 7, 2, { sandviper: 1 }], ['spider', .8, 5, 9, 3, { spider: 2, redback: .5 }],
+    ['tornado', .4, 1, 2, 1, { dusttornado: 2, tornado: 1 }], ['slug', .8, 1, 2, 1, { slug: 2, spottedslug: 1 }, ['slime']]),
+  /*  5 deep canyon, slime marsh */ D(3, ['snake', 1, 4, 7, 2, { sandviper: 1 }], ['spider', .8, 5, 9, 3, { spider: 2, redback: .5 }],
     ['stunder', .6, 1, 2, 1, { stonestunder: 1, stunder: 1 }], ['wolk', .4, 1, 2, 1, { dustwolk: 1, stormwolk: 1 }], ['wolla', .3, 1, 2],
-    ['tornado', .35, 1, 2, 1, { dusttornado: 1, tornado: 1 }]),
+    ['tornado', .35, 1, 2, 1, { dusttornado: 1, tornado: 1 }], ['slug', .85, 1, 3, 1, { spottedslug: 2, blackslug: 2, slug: 1 }, ['slime']]),
   /*  6 deep canyon */ D(3, ['snake', 1, 5, 8, 2, { sandviper: 1, bloodviper: 1 }], ['spider', .8, 6, 10, 3, { spider: 2, redback: 1 }],
     ['stunder', .6, 1, 3, 1, { stonestunder: 1, stunder: 1 }], ['wolk', .4, 1, 2, 1, { dustwolk: 1, stormwolk: 1 }], ['wolla', .35, 1, 2],
     ['octonaut', .15, 1, 1], ['mecked', .15, 1, 1], ['tornado', .3, 1, 2, 1, { dusttornado: 1 }]),

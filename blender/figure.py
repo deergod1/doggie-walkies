@@ -159,6 +159,7 @@ TRIANGLE_BUDGET = {
     "Tornado": 7000,                                                     # (two skirts with scalloped hems)
     "Totnar": 10000, "SnapSkull": 3000,                                  # (Totnar: three skulls and a ball of sticks)
     "Squarlo": 8000, "Squirtle": 5000,                                   # (Squarlo: drawn huge as a giant)
+    "Slug": 6000, "SlugBall": 800,
     "Flip": 10000,                                                       # (41 little loops)
     "Foggery": 12000,                                                    # (a frog and his ball, both on fire)
     "FireFaceBall": 1500, "ShrapsIceBall": 1500, "TrianglePunch": 1500, "TotnarSkull": 1500, "SquirtleDrop": 800, "FlipBall": 1200, "FoggeryEye": 1500,   # projectiles

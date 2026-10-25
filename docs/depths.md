@@ -79,7 +79,7 @@ A roster entry is `species chance count (packs) [kinds]`:
   pack is all Redbacks or all plain spiders. No value means the species' base kind.
 - **(... only)**: the species keeps to some of the depth's themes (`where`: the Squirtles to the
   waters of the Lagoon isles, the Sunken grotto and the Jungle cenote; the Dark forest's Gloom
-  spiders and Lantern-faces to the forest). **(not ...)**: everywhere but there (`'!theme'`: the
+  spiders and Lantern-faces to the forest; the Slugs to the Slime marsh). **(not ...)**: everywhere but there (`'!theme'`: the
   ordinary spiders of depth 2 leave the forest to its own).
 
 `mix` is the most species a single cube can hold.
@@ -90,8 +90,8 @@ A roster entry is `species chance count (packs) [kinds]`:
 | 1 | 2 | snakes 2–4, Stunders 20% 1, Wolks 25% 1, Squirtles 60% 1–2 (Lagoon isles only), spiders 70% 2–4 (packs ≤2) [Gloom spider] (Dark forest only), Fire-faces 30% 1 [Lantern-face] (Dark forest only) |
 | 2 | 3 | snakes 2–5 [75% Grass snake, 25% Sand viper], spiders 60% 2–4 (packs ≤2) (not the Dark forest), Stunders 25% 1, Wolks 35% 1–2, Tornados 30% 1, Squirtles 60% 1–3 (Lagoon isles only), spiders 80% 3–5 (packs ≤2) [75% Gloom spider, 25% Spider] (Dark forest only), Fire-faces 40% 1–2 [Lantern-face] (Dark forest only) |
 | 3 | 3 | spiders 8–14 (packs ≤3) [Frost spider], Stunders 70% 1–2 [Frost stunder], Shraps 30% 1, Wolks 50% 1–2 [67% Storm wolk, 33% Wolk], snakes 70% 2–4 (packs ≤2) [Frost adder], Triangles 20% 1, Tornados 35% 1–2 [67% Frost tornado, 33% Tornado] |
-| 4 | 3 | snakes 3–6 (packs ≤2) [Sand viper], spiders 80% 4–8 (packs ≤3) [80% Spider, 20% Redback], Stunders 60% 1–2 [50% Stone stunder, 50% Stunder], Wolks 50% 1–2 [Dust wolk], Tornados 40% 1–2 [67% Dust tornado, 33% Tornado] |
-| 5 | 3 | snakes 4–7 (packs ≤2) [Sand viper], spiders 80% 5–9 (packs ≤3) [80% Spider, 20% Redback], Stunders 60% 1–2 [50% Stone stunder, 50% Stunder], Wolks 40% 1–2 [50% Dust wolk, 50% Storm wolk], Wollas 30% 1–2, Tornados 35% 1–2 [50% Dust tornado, 50% Tornado] |
+| 4 | 3 | snakes 3–6 (packs ≤2) [Sand viper], spiders 80% 4–8 (packs ≤3) [80% Spider, 20% Redback], Stunders 60% 1–2 [50% Stone stunder, 50% Stunder], Wolks 50% 1–2 [Dust wolk], Tornados 40% 1–2 [67% Dust tornado, 33% Tornado], Slugs 80% 1–2 [67% Slug, 33% Spotted slug] (Slime marsh only) |
+| 5 | 3 | snakes 4–7 (packs ≤2) [Sand viper], spiders 80% 5–9 (packs ≤3) [80% Spider, 20% Redback], Stunders 60% 1–2 [50% Stone stunder, 50% Stunder], Wolks 40% 1–2 [50% Dust wolk, 50% Storm wolk], Wollas 30% 1–2, Tornados 35% 1–2 [50% Dust tornado, 50% Tornado], Slugs 85% 1–3 [40% Spotted slug, 40% Black slug, 20% Slug] (Slime marsh only) |
 | 6 | 3 | snakes 5–8 (packs ≤2) [50% Sand viper, 50% Blood viper], spiders 80% 6–10 (packs ≤3) [67% Spider, 33% Redback], Stunders 60% 1–3 [50% Stone stunder, 50% Stunder], Wolks 40% 1–2 [50% Dust wolk, 50% Storm wolk], Wollas 35% 1–2, Octonauts 15% 1, Meckeds 15% 1, Tornados 30% 1–2 [Dust tornado] |
 | 7 | 3 | spiders 7–12 (packs ≤3) [67% Spider, 33% Bog spider], snakes 80% 4–7 (packs ≤2) [50% Grass snake, 50% Blood viper], Stunders 60% 1–2, Meckeds 50% 1–2, Wollas 40% 1–2, Octonauts 20% 1 |
 | 8 | 3 | spiders 8–13 (packs ≤3) [57% Spider, 29% Bog spider, 14% Redback], snakes 80% 4–8 (packs ≤2) [Blood viper], Stunders 60% 1–3 [50% Stunder, 50% Stone stunder], Meckeds 60% 1–3 (packs ≤2), Wollas 45% 1–2, Octonauts 25% 1–2 |
@@ -233,6 +233,7 @@ and coins by `1 + 0.25 (L − 1)`, and round.
 | Wolk | medium, lightning | 85 | 20 (bolt, stuns 0.9 s) | 60 | 12–24 | 0.5 s |
 | Mecked | medium, grabs and bites | 105 | 20 (a grab: two bites of 12) | 66 | 14–26 | 0.6 s |
 | Tornado | medium, twisters | 95 | 22 (twister, knocks down; slam 26) | 66 | 14–26 | 0.5 s |
+| Slug | medium, slow, spits slime | 120 | 18 (slime ball, slows) | 62 | 12–24 | 0.8 s |
 | Stunder | heavy | 140 | 30 | 80 | 20–35 | 1.5 s |
 | Fire-face | strong, ranged | 120 | 22 (+6 burn) | 90 | 24–40 | 0.8 s |
 | Fire-cat | strong | 130 | 26 | 95 | 22–38 | 0.4 s |
