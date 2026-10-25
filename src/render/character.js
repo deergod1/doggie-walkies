@@ -28,8 +28,9 @@ export const character = { ready: false };
 // It hangs over the hero and a little towards the camera, like a lantern held up: in the body
 // (it once was, at the chest) every face of the figure looks away from it, and the hero stood
 // dark in a pool of light. It casts shadows (a cube of shadow maps, drawn every frame it
-// shines), so walls, trees and the hero itself stand dark against it; it stays out of ceilings
-// and walls all the same, where it would light their far side.
+// shines), so walls, trees and enemies stand dark against it, but not the hero, and none where
+// the sun outshines it (render/shadows.js); it stays out of ceilings and walls all the same,
+// where it would light their far side.
 const light = new THREE.PointLight(0xffd9a0, 1.2, 3.5, 2);
 light.castShadow = true;   // (always: one coming or going recompiles every lit shader; how much it casts: render/shadows.js)
 light.shadow.mapSize.set(512, 512);

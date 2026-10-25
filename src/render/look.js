@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import { scene, hemi, sun } from './scene.js';
 import { setSkyLook } from './sky.js';
 import { character } from './character.js';
+import { setLampShare } from './shadows.js';
 import { lightAt, lampAt } from '../themes/depth.js';
 import { TOWN } from '../themes/index.js';
 
@@ -116,5 +117,22 @@ export function applyLook(depth, camDist, themes = NO_WORLD, dark = 0, mist = 0,
     // was at the chest, for about the same light on the floor around, less at the feet)
     character.light.intensity = lerp(2.1, 5.2, lamp);
     character.light.distance = lerp(4.5, 10, lamp);
+    setLampShare(1 - smoothstep(SUN_SHARE[0], SUN_SHARE[1], sunShare()));
   }
+}
+
+// The lamp's shadows go where the sun outshines it (render/shadows.js setLampShare): its share of
+// the light on the ground at the hero's feet, the sun's against the lamp's (three.js's falloff),
+// from facing up. By day under an open sky (0.75 to 0.9) and in act II's sunlit caves (~0.7) the
+// lamp casts none; in the dark forest by day (~0.4), by night (~0.3) and in the deep it casts
+// them all; through the dusk and the dawn they come and go.
+const SUN_SHARE = [0.5, 0.68];
+const toSun = new THREE.Vector3();
+function sunShare() {
+  const L = character.light, d = L.position.distanceTo(character.group.position);
+  const up = d > 1e-3 ? (L.position.y - character.group.position.y) / d : 1;
+  const reach = L.distance > 0 ? Math.max(0, 1 - (d / L.distance) ** 4) ** 2 : 1;
+  const lampE = L.intensity * reach / Math.max(d * d, 0.01) * Math.max(0, up);
+  const sunE = sun.intensity * Math.max(0, toSun.subVectors(sun.position, sun.target.position).normalize().y);
+  return sunE + lampE > 1e-6 ? sunE / (sunE + lampE) : 0;
 }
