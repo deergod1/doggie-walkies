@@ -22,6 +22,7 @@ import { tornados, resetTornados, updateTornados, detachTornados } from './torna
 import { slugs, resetSlugs, updateSlugs, detachSlugs } from './slugs.js';
 import { bolimes, resetBolimes, updateBolimes, detachBolimes } from './bolimes.js';
 import { passEngulfers } from './engulf.js';
+import { drawAllMeteors, clearMeteors } from './meteors.js';
 import { updateTide, resetTide, drownEnemies, floatSwimmers, walkOnLava } from './tide.js';
 import { flips, resetFlips, updateFlips, detachFlips } from './flip.js';
 import { foggerys, resetFoggerys, updateFoggerys, detachFoggerys } from './foggery.js';
@@ -104,7 +105,7 @@ export function mirrorEnemies(m) {
 export const allEnemies = () => mirror ? mirror.list : [...spiders, ...stunders, ...snakes, ...octonauts, ...fireFaces, ...triangles, ...fireCats, ...shraps, ...spicies, ...wollas, ...wolks, ...squirtles, ...meckeds, ...tornados, ...slugs, ...bolimes, ...gustos, ...totnars, ...squarlos, ...flips, ...foggerys, ...renews, ...spawned];
 export function resetEnemies() {
   resetFlipWorld(); clearBlackHoles();   // (Flip's box the right way up again: game/flipworld.js)
-  resetEnemyCombat(); clearProjectiles(); clearBeams(); clearQuakes(); clearTwisters(); clearJets(); clearShots(); clearThrows(); resetCalls();
+  resetEnemyCombat(); clearProjectiles(); clearBeams(); clearQuakes(); clearTwisters(); clearJets(); clearShots(); clearThrows(); clearMeteors(); resetCalls();
   state.dark = 0; state.mist = 0; resetTide(); resetMovers();   // (Foggery's platforms back under his lava, game/movers.js)
   resetRewind();   // (Renew's time: the hero's tape and echoes, game/rewind.js)
   removeEnemyViews(spawned); spawned = [];
@@ -251,7 +252,7 @@ function followEnemies(dt) {
 }
 export function drawEnemies(dt, off = { x: 0, y: 0, z: 0 }) {
   animateEnemies(allEnemies(), dt, off); drawAllProjectiles(dt, off); drawAllBeams(dt, off); drawQuakes(dt, off); drawTwisters(twisters, dt, off); drawJets(dt);
-  drawAllShots(dt, off); drawThrows(dt, off); drawRewind(dt, off);
+  drawAllShots(dt, off); drawThrows(dt, off); drawRewind(dt, off); drawAllMeteors(dt, off);
 }
 function detachSpawned() { const list = spawned; spawned = []; return list; }
 // projectiles and shots in flight do not travel along

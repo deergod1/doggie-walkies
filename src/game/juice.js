@@ -216,6 +216,23 @@ function slimeFx(pr, what) {
   if (what !== 'spent') sfx('whump', { at: pr, pitch: 1.6, volume: 0.5 });
 }
 
+// a slime meteorite (game/meteors.js) whose shadow starts to show ('warn'), that starts to fall
+// ('fall': a whistle), and lands ('land': a wet boom, goo flying, the ground shaking near it)
+export function meteorFx(v, what) {
+  const { x, y, z } = v.at, near = Math.max(0, 1 - Math.hypot(player.x - x, player.z - z) / 14);
+  if (what === 'warn') return;
+  if (what === 'fall') { if (near > 0) sfx('fall', { at: v.at, pitch: 1.6, volume: 0.25 + 0.5 * near }); return; }
+  for (let i = 0; i < 26; i++)
+    emit(soft, x, y + 0.2, z, { v: [rand(-3, 3), rand(1.5, 4.5), rand(-3, 3)], life: rand(0.5, 0.9), size: rand(0.08, 0.16),
+      color: GOO[i % 3], alpha: 0.95, gravity: 9, drag: 0.6 });
+  emit(glow, x, y + 0.3, z, { life: 0.35, size: 1.4, grow: 1.5, color: '#b8ff5a', alpha: 0.8 });
+  for (let i = 0; i < 4; i++)
+    emit(soft, x + rand(-0.5, 0.5), y + 0.2, z + rand(-0.5, 0.5), { v: [rand(-0.4, 0.4), rand(0.5, 1), rand(-0.4, 0.4)], life: rand(0.9, 1.4),
+      size: rand(0.3, 0.5), grow: 1, color: '#6a8a4a', alpha: 0.35, drag: 0.6 });
+  sfx('whump', { at: v.at, pitch: 0.7, volume: 0.4 + 0.6 * near }); sfx('splorch', { at: v.at, volume: 0.3 + 0.5 * near });
+  if (near > 0.6) cameraKick(0, 0, 0.05 * near, 0.06 * near);
+}
+
 // the Spicy's laser (game/beams.js) switched on ('start'), went off ('burst') or was put out
 // because its enemy was staggered or killed ('fizzle')
 export function beamFx(b, what) {
@@ -653,7 +670,7 @@ export function poisonHurtFx(dmg) {
   sfx('poison', { at: player, volume: 0.6 });
 }
 // a burn or poison tick on enemy e (game/statuses.js); killed: that was the last of its health
-const STATUS_COLOR = { burning: '#ffa040', toxic: '#9be05a' };
+const STATUS_COLOR = { burning: '#ffa040', toxic: '#9be05a', meteor: '#c8ff6a' };
 export function statusHurtFx(e, dmg, status, killed) {
   if (e.proxy) return;
   const top = { x: e.x, y: e.y + e.profile.bodyHeight + 0.2, z: e.z };

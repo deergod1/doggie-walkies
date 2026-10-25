@@ -712,6 +712,18 @@ vents, reeds, and the craters the slime meteorites left. What makes it so, in it
   sky. `state.night` is how far into the night the cube is, `state.lookNight` follows it (coming
   into the marsh at night fades the dark in, `render/look.js`); a word says when it turns, and
   at night glowing spores and a wisp drift (`cycle.motes`, `render/motes.js`).
+- **Slime meteorites** (`meteors`, `core/meteors.js`, `game/meteors.js`, `render/meteors.js`): at
+  night lumps of glowing slime fall out of the sky, every 3.5–6.5 s a cube. When and where is the
+  cube's and the night's (from the cube's seed and the world's play time), so every game playing
+  together sees the same ones; a third of them come down near the player instead (each game near
+  its own: a friend does not see those). Each first shows where it will land, a shadow growing
+  for 1.7 s with a rim pulsing faster, then falls the last 0.55 s with a whistle and lands with a
+  wet boom: whoever is within 1.1 cells is hit (16 at depth 1, growing with the depth like the
+  enemies' blows; knocked back, slowed to 55% for 2 s, not knocked over), the enemies too (a bit
+  harder, and slowed; only in the game that runs them). The splat it leaves slows whoever wades
+  through it for 6 s. They land only on floors open to the sky, and under a roof (a slab, an
+  arch, a tunnel) nothing reaches you. Never in the town and the camp, inside houses, in trial,
+  test or boss rooms. Checks: `tests/meteors.test.js`, `tests/browser/meteors.js`.
 
 ### Vignettes (`cubegen/vignettes.js`)
 

@@ -72,6 +72,7 @@ import { meckeds } from './game/mecked.js';
 import { tornados } from './game/tornado.js';
 import { slugs } from './game/slugs.js';
 import { bolimes } from './game/bolimes.js';
+import { updateMeteors } from './game/meteors.js';
 import { twisters } from './game/twisters.js';
 import { projectiles } from './game/projectiles.js';
 import { beams } from './game/beams.js';
@@ -146,6 +147,7 @@ function frame(now = performance.now()) {
     updateMovers(dt);   // the platforms round Foggery's tower, before whoever stands on one moves (game/movers.js)
     updatePlayer(dt);
     if (!state.transitioning) updateEnemies(dt);
+    if (!state.transitioning) updateMeteors(dt);   // the slime meteorites at night (game/meteors.js)
     if (!state.transitioning) updateTrial(dt);   // a trial room's clock, its rising fluid (game/trials.js)
   }
 

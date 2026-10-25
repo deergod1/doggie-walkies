@@ -249,6 +249,8 @@ export default {
   '{name} swallowed you! Jump to break free!': '{name} hat dich verschluckt! Spring, um dich zu befreien!',
   'Poisoned by a Bolime': 'Von einem Bolime vergiftet',
   'You broke free!': 'Du hast dich befreit!',
+  // the slime marsh's meteorites at night (game/meteors.js)
+  'Hit by a slime meteorite!': 'Von einem Schleimmeteoriten getroffen!',
   '{name} draws his sword': '{name} zieht sein Schwert',
   '{name}: "Not yet." He turns back time!': '{name}: „Noch nicht.“ Er dreht die Zeit zurück!',
   '{name}: "One more time..."': '{name}: „Noch ein letztes Mal …“',
