@@ -68,6 +68,39 @@ Guidelines:
 - Write a mood's voices so they sound good together, and check the moods one by one
   (see the checklist).
 
+## A boss's own song
+
+A boss may have a song of his own (`core/bossmusic.js`, `music/gusto.scrim`): it plays in his
+arena from the moment you come in, as long as he lives, and its moods are his fight's phases,
+not the six above. The score names them, the first being the one before he fights:
+
+```
+# moods: lurk phase1 split phase2 gone
+# mood lurk:   choir tuba box bell heart
+# mood phase1: ost tuba choir horn organ kick snare taiko timp crash
+```
+
+The game switches at once when the phase changes. A phase can be short (Gusto's split lasts
+1.8 s, his vanishing 1.3 s): write those moods from voices that sound all the time (held
+chords, a cluster, a timpani roll), so they are heard the moment they join.
+
+A **sting** marks the moment a mood begins: a pattern of its own, played once from the next
+sixteenth, over the loop. Its voices play only in stings, never in a mood (their channel
+stays open):
+
+```
+# sting phase2: three
+voice hitgong gong vol=0.45
+pattern three
+hitgong | X... .... .... .... |
+```
+
+Use stings for what the loop can't do on cue: a gong when three of him appear, a brass hit
+when the fight starts, a whoosh when he vanishes. Keep them to a bar.
+
+A boss song can be faster than the rest (Gusto's is 150), and its fiercer phases can double
+the drums (snare on every beat, sixteenth hats) instead of changing the tempo.
+
 ## Keep it simple
 
 - Up to about 20 voices in a score, but at most about 12 in any one mood. One drum sound
@@ -149,14 +182,15 @@ ignored (`x.o. x.oo x.o. xoxo`).
 Melodic instruments: steeldrum marimba vibes celesta glock xylophone musicbox bell organ
 pipe strings pad choir voices brass trumpet horn tuba flute clarinet oboe bassoon accordion
 fiddle harp guitar banjo harpsichord pizz upright fretless synbass timpani chip sine square
-saw triangle, and the game's glass instruments: glassharp crystal bowl.
+saw triangle, the game's glass instruments: glassharp crystal bowl, and its theremin.
 
 Drums: kick snare rim hat ohat ride crash shaker tamb conga tumba bongo bongolo clave block
 cowbell guiro tomlo tommid tomhi bodhran timbale tri clap gong thunder surf, and the game's
 glass drums: glasstap chimes shatter.
 
-The glass instruments are the game's own (added to `vendor/scrimshaw/`), for a world inside
-glass cubes. The Scrimshaw Jukebox does not know them; listen in `tools/player.html`.
+The glass instruments and the theremin are the game's own (added to `vendor/scrimshaw/`), the
+glass ones for a world inside glass cubes. The Scrimshaw Jukebox does not know them; listen in
+`tools/player.html`.
 
 - `glassharp`: a glass harmonica, a pure tone that swells in and slowly wavers, with a faint
   rub. Sustained: chords (`att=` 0.3 or so) or a slow counter-line.
@@ -168,6 +202,9 @@ glass cubes. The Scrimshaw Jukebox does not know them; listen in `tools/player.h
 - `chimes`: a few glass wind chimes (C pentatonic, so keys around C, F, G and A, D, E minor),
   different each hit; every few bars.
 - `shatter`: breaking glass, a crash for `fight` and `boss` accents.
+- `theremin`: a near-pure tone with a wide, slow vibrato from the start, a ghost singing. Give
+  the voice a long `glide=` (0.2 to 0.3) and `~` its notes so it slides between them; half
+  notes and slower, in octaves 5 and 6.
 
 Good fits for this game: flute, oboe, clarinet, horn, trumpet, brass, strings, pad, choir,
 harp, pizz, glock, musicbox, bell, celesta, tuba, fretless, timpani, kick, snare, tomlo,
@@ -276,7 +313,7 @@ loop A A2 B A2
 2. Every voice plays in nearly every bar. `explore` alone sounds finished, and each mood
    sounds different from the one below it.
 3. `npm test`: every score has to compile with no errors, use every voice it declares, and
-   put every voice in some mood. Errors name the line and bar (usually a bar with the wrong
+   put every voice in some mood (or a sting). Errors name the line and bar (usually a bar with the wrong
    number of steps).
 4. Listen: open `/tools/player.html` (`npm run serve`), which plays the score with the game's
    synth and switches moods and voices; or paste it into the
@@ -285,5 +322,6 @@ loop A A2 B A2
    mood from the devtools console with `__game.musicMood('sense')` (`__game.musicMood()`
    lets go, `__game.musicInfo()` shows what plays).
 5. A new song: set it as a theme's `music:` in `src/themes/` (or add a special case to
-   `songFor` in `src/game/music.js` and `SONGS` in `src/themes/index.js`), and add it to the
-   song table in `docs/music.md`. `npm test` fails on a score in `music/` that no place plays.
+   `songFor` in `src/game/music.js` and `SONGS` in `src/themes/index.js`; a boss's goes in
+   `src/core/bossmusic.js`), and add it to the song table in `docs/music.md`. `npm test`
+   fails on a score in `music/` that no place plays.

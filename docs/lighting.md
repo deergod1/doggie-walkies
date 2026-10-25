@@ -136,7 +136,8 @@ canyon, whose sun stays higher). Each place has its own bake, kept with the cube
   place takes over from it halfway through the dawn, while neither shines (`sunAt` `light`).
 - **Not on the lowest level** (`movingSun`, `game/quality.js`): there the sun stays at noon and
   only the light turns. Nor under the hazy skies of act II, in a night theme, the caves, or a
-  boss's arena (always noon).
+  boss's arena (always noon; but Gusto's has the world's days and nights like any cube,
+  `core/bosses.js` BOSS_ARENAS `days`).
 
 ## One edge rule (`render/lighthook.js EDGE`)
 

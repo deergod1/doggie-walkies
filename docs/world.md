@@ -654,7 +654,8 @@ depth they may appear at: an act with any of them shows them alone.
   - `night` (the dark forest): always night, a little lighter by day (`light.day`).
   - `none` (the caves, act III, the core): no days and nights. Neither indoors, in trial and
     test rooms, nor in a boss's arena, where it is always noon (the bosses' own light: Totnar's
-    dark, Renew's dusk).
+    dark, Renew's dusk), but for a boss whose arena keeps the days and nights of its theme's sky
+    like any cube (`core/bosses.js` BOSS_ARENAS `days`: Gusto's).
   `state.night` is how far into the night the cube is; the look follows the time of day eased
   (`render/look.js`), so coming out of a cave at night fades the dark in; a word says when it
   turns. On the lowest lighting level the sun stays at noon everywhere (`movingSun`,

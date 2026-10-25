@@ -8,6 +8,7 @@ import { ITEMS, WEARABLES } from '../core/items.js';
 import { ENEMY_KINDS } from '../core/enemies.js';
 import { RARITIES } from '../core/gear/rarities.js';
 import { MOODS } from '../audio/score.js';
+import { BOSS_MUSIC } from '../core/bossmusic.js';
 import { MAX_DEPTH, themeAt, themesAt } from '../themes/depth.js';
 import { online } from '../net/online.js';
 import { state } from './state.js';
@@ -32,7 +33,10 @@ addType(commands, { name: 'enemy', values: once(() => Object.values(ENEMY_KINDS)
   .map(k => ({ value: k.type, label: k.label, hint: k.guardian ? `guardian (${k.guardianRole})` : k.species }))) });
 addType(commands, { name: 'rarity', values: () => RARITIES.map(r => ({ value: r.id, label: r.name, color: r.css })) });
 addType(commands, { name: 'depth', values: () => Array.from({ length: MAX_DEPTH + 1 }, (_, d) => ({ value: String(d), label: String(d), hint: state.cubes ? themeAt(d, state.cubes.layout.themes).name : themesAt(d).map(t => t.name).join(' / ') })) });
-addType(commands, { name: 'mood', values: () => [...MOODS.map(m => ({ value: m, label: m })), { value: 'auto', label: 'auto', hint: 'the game picks again' }] });
+// the moods of every song, a boss's own after them (core/bossmusic.js)
+addType(commands, { name: 'mood', values: () => [...MOODS.map(m => ({ value: m, label: m })),
+  ...Object.entries(BOSS_MUSIC).flatMap(([boss, m]) => m.moods.map(mood => ({ value: mood, label: mood, hint: `${boss}'s music` }))),
+  { value: 'auto', label: 'auto', hint: 'the game picks again' }] });
 const choice = (name, list) => addType(commands, { name, values: () => list.map(([value, hint]) => ({ value, label: value, hint })) });
 choice('toggle', [['on'], ['off']]);
 choice('way', [['down', 'the way down'], ['up', 'the way up']]);

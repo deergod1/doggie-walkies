@@ -1,0 +1,47 @@
+# Before writing or changing music, read music/README.md (style, moods, format).
+# Not a song: the jingle a beaten boss gets (src/audio/fanfare.js plays it once, as a sound).
+title    Victory
+composer Claude
+about    A boss falls and his power breaks like glass: a shatter, wind chimes, a singing bowl and a timpani stroke, a crystal sweep rising. Then a crystal lead and its echo play the game's motif in C major (1 2 3 5, then 4 3 4 5) over glass harmonica chords, F and G, glass taps rolling in, and it lands on the high C, broadening, with chimes, the bowl and a last crystal sweep.
+tempo    144
+beats    4
+steps    4
+reverb   0.55
+
+# mood explore: lead echo sweep harm bowl timpani shatter taps chimes
+
+voice lead     crystal    vol=0.8  pan=0.1
+voice echo     crystal    vol=0.28 pan=-0.4 rev=0.7
+voice sweep    crystal    vol=0.32 pan=0.35 rev=0.6
+voice harm     glassharp  vol=0.32 pan=-0.2 center=G4 att=0.15 rel=1.2
+voice bowl     bowl       vol=0.6  pan=-0.1
+voice timpani  timpani    vol=0.4
+voice shatter  shatter    vol=0.6  pan=0.15
+voice taps     glasstap   vol=0.5  pan=0.3
+voice chimes   chimes     vol=0.55 pan=-0.3
+
+# the fall and the motif: C | F G
+pattern rise
+lead    | .------- C5- D5- E5- G5- | F5!--- E5- F5- G5!------- |
+echo    | .-------- C5- D5- E5- G5 | - F5!--- E5- F5- G5!------ |
+sweep   | . C4 E4 G4 C5 E5 G5 C6 E6- .----- | F4 A4 C5 F5 .--- G4 B4 D5 G5 .--- |
+harm    | .--- [C]?----------- | [F]------- [G]------- |
+bowl    | C3!--------------- | _ |
+timpani | C2!--- .------- G1 G1 G1 G1 | C2!--- .--- G1!--- G1 G1 G1! G1! |
+shatter | X... .... .... .... | _ |
+taps    | .... .... x.x. x.x. | x.x. x.x. xoxo XXXX |
+chimes  | X... .... .... .... | _ |
+
+# the octave lands, held and broadening
+pattern land tempo=112
+lead    | C6!----------- .--- |
+echo    | - C6!----------- .-- |
+sweep   | C5 E5 G5 C6 E6 G6 C7--------- |
+harm    | [C]!------------- .- |
+bowl    | C3!--------------- |
+timpani | C2!----------- .--- |
+shatter | _ |
+taps    | X... .... .... .... |
+chimes  | X... .... X... .... |
+
+loop rise land

@@ -15,8 +15,10 @@ defenders, it brings its own (`game/enemyspawn.js` `bossSpot`). It is a guardian
 way: the descent guardian's level, id, gate, seal, amber HP bar and drops; its death alone opens
 the well, for good. Its label shows its name (`♛ Gusto · Lv 1`), the locked well says
 "Defeat Gusto to unlock this descent", and the music turns to the boss mood like for any
-guardian. Once hurt, or once it has struck, it no longer keeps to its post (`game/defence.js`);
-out of his arena (a dev spawn, the boss test room) he fights on the same (`relentless`,
+guardian, unless the boss has a song of his own (Gusto: `music/gusto.scrim`, its moods his
+fight's phases, `docs/music.md`). Beating any boss plays a fanfare (`src/audio/fanfare.js`,
+`docs/sound.md`). Once hurt, or once it has struck, it no longer keeps to its post
+(`game/defence.js`); out of his arena (a dev spawn, the boss test room) he fights on the same (`relentless`,
 `game/enemyai.js decide`).
 Like every guardian's arena, leaving it while the boss lives asks first, and being pushed against
 the entrance never takes you out ([guardians.md](guardians.md#encounter-and-persistence)).
@@ -73,7 +75,12 @@ tentacle bone on top of whatever clip plays (`flail`, `render/enemies.js`). Abou
 tall. Its eyes flare up while it winds up an attack.
 
 Profiles: `GUSTO` and `GUSTO_SPLIT` (phase 2) in `src/core/enemies.js`; the fight's rules in
-`src/core/gusto.js` (`GUSTO_FIGHT`); the fight itself in `src/game/gusto.js`.
+`src/core/gusto.js` (`GUSTO_FIGHT`); the fight itself in `src/game/gusto.js`. His arena has
+his own song (`music/gusto.scrim`, 150 bpm): a music box and a heartbeat while he waits, the
+full band from his first move, a held cluster while he splits, doubled drums and a theremin
+for the three of him, a hush when he vanishes (`gustoMusic`, `docs/music.md`). Unlike the
+other bosses' arenas, his has the world's days and nights (`BOSS_ARENAS.gusto.days`,
+`game/daycycle.js`): his fight has no light of its own.
 
 | | Level 1 |
 |---|---|

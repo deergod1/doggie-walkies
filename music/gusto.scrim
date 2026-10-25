@@ -1,0 +1,138 @@
+# Before writing or changing music, read music/README.md (style, moods, format).
+title    Gusto
+composer Claude
+about    The first boss, a floating head with a jagged grin. While he waits, a music box picks out the motif over a low choir, a tolling bell and a heartbeat. When he comes for you, a horn carries the tune over driving low strings, organ stabs, taiko drums and a kit at 150. When he splits, everything falls to a held cluster and a timpani roll. Then three of him fight, with doubled drums, brass and a theremin, his own ghostly voice, which is all that stays in the hush when he vanishes.
+tempo    150
+beats    4
+steps    4
+reverb   0.4
+
+# His fight's phases, not the usual moods (core/bossmusic.js, core/gusto.js gustoMusic):
+# lurk before he fights, phase1 down to half his health, split while he shudders, phase2 three
+# of him, gone while he vanishes and comes back somewhere else.
+# moods: lurk phase1 split phase2 gone
+# mood lurk:   choir tuba box bell heart
+# mood phase1: ost tuba choir horn organ kick snare taiko timp crash
+# mood split:  choir cluster roll tuba bell
+# mood phase2: phase1 -organ -snare dsnare hat brass ghost
+# mood gone:   choir ghost heart bell tuba
+# Played once as the phase begins, over the loop:
+# sting phase1: engage
+# sting split:  shudder
+# sting phase2: three
+# sting gone:   vanish
+
+voice horn     horn      vol=0.62 pan=-0.1
+voice organ    organ     vol=0.32 pan=0.3 gate=0.45 center=A4 rev=0.3
+voice ost      strings   vol=0.3  pan=0.25 gate=0.4 att=0.01 rel=0.06 rev=0.2
+voice tuba     tuba      vol=0.6  gate=0.9
+voice choir    choir     vol=0.28 center=D4 att=0.4 rel=0.8
+voice box      musicbox  vol=0.4  pan=0.4 rev=0.6
+voice bell     bell      vol=0.16 pan=-0.4 rev=0.6
+voice ghost    theremin  vol=0.32 pan=-0.3 glide=0.28 rev=0.55
+voice cluster  strings   vol=0.22 pan=0.2 att=0.6 rel=0.6
+voice roll     timpani   vol=0.28 pan=-0.15
+voice brass    brass     vol=0.4  pan=-0.2 gate=0.5 center=A3 att=0.015 rel=0.08 rev=0.22
+voice timp     timpani   vol=0.42 pan=-0.1
+voice kick     kick      vol=0.42
+voice snare    snare     vol=0.36 pan=0.1
+voice dsnare   snare     vol=0.36 pan=0.1
+voice taiko    tomlo     vol=0.45 pan=-0.25
+voice hat      hat       vol=0.35 pan=0.3
+voice crash    crash     vol=0.26 pan=0.2
+voice heart    tomlo     vol=0.45 rev=0.4
+
+# the stings' voices (in no mood)
+voice hitbrass brass     vol=0.5  center=A3 gate=0.9 att=0.01 rel=0.25
+voice hitcrash crash     vol=0.35 pan=-0.2
+voice hitgong  gong      vol=0.45
+voice rumble   thunder   vol=0.3
+voice whoosh   surf      vol=0.5
+
+# Dm Dm Bb A | Dm Eb Gm A7: the motif with the flat second (D Eb F A G)
+pattern A
+horn    | D4--- Eb4--- F4--- A4--- | G4------- .--- A4--- | Bb4------- A4--- G4--- | A4----------- .--- |
+horn    | D5--- C5--- A4--- F4--- | G4------- Bb4------- | Bb4--- A4--- G4--- D4--- | C#4------- E4------- |
+ost     | D3!- D3- A3- D3!- D3- Bb3- D3!- A3- | % | Bb2!- Bb2- F3- Bb2!- Bb2- G3- Bb2!- F3- | A2!- A2- E3- A2!- A2- F3- A2!- E3- |
+ost     | D3!- D3- A3- D3!- D3- Bb3- D3!- A3- | Eb3!- Eb3- Bb3- Eb3!- Eb3- C4- Eb3!- Bb3- | G2!- G2- D3- G2!- G2- Eb3- G2!- D3- | A2!- A2- E3- A2!- A2- G3- A2!- C#3- |
+organ   | [Dm]!----- [Dm]----- [Dm]!--- | % | [Bb]!----- [Bb]----- [Bb]!--- | [A]!----- [A]----- [A]!--- |
+organ   | [Dm]!----- [Dm]----- [Dm]!--- | [Eb]!----- [Eb]----- [Eb]!--- | [Gm]!----- [Gm]----- [Gm]!--- | [A7]!----- [A7]----- [A7]!--- |
+brass   | [Dm]!----- [Dm]----- [Dm]!--- | % | [Bb]!----- [Bb]----- [Bb]!--- | [A]!----- [A]----- [A]!--- |
+brass   | [Dm]!----- [Dm]----- [Dm]!--- | [Eb]!----- [Eb]----- [Eb]!--- | [Gm]!----- [Gm]----- [Gm]!--- | [A7]!----- [A7]----- [A7]!--- |
+tuba    | D2------- A1------- | % | Bb1------- F1------- | A1------- E1------- |
+tuba    | D2------- A1------- | Eb2------- Bb1------- | G1------- D2------- | A1------- C#2------- |
+choir   | [Dm]--------------- | % | [Bb]--------------- | [A]--------------- |
+choir   | [Dm]--------------- | [Eb]--------------- | [Gm]--------------- | [A7]--------------- |
+box     | D6- .- Eb6- .- F6- .- A6- .- | G6- .- F6- .- Eb6- .- D6- .- | D6- .- F6- .- Bb6- .- A6- .- | C#6- .- E6- .- A5- .- E6- .- |
+box     | D6- .- Eb6- .- F6- .- A6- .- | Eb6- .- G6- .- Bb6- .- G6- .- | D6- .- G6- .- Bb5- .- D6- .- | C#6- .- G6- .- E6- .- C#6- .- |
+bell    | D4--------------- | % | Bb3--------------- | A3--------------- |
+bell    | D4--------------- | Eb4--------------- | G3--------------- | A3--------------- |
+ghost   | ~A5------- ~Bb5------- | ~A5--------------- | ~F5------- ~G5------- | ~E5--------------- |
+ghost   | ~D6------- ~C#6------- | ~C6------- ~Bb5------- | ~D6--------------- | ~C#6------- ~E6------- |
+cluster | D4+Eb4+Ab4--------------- | % | % | % |
+cluster | % | % | % | % |
+roll    | D2? D2? D2? D2? D2 D2 D2 D2 D2 D2 D2 D2 D2! D2! D2! D2! | % | % | % |
+roll    | % | % | % | % |
+timp    | D2!--- .--- A1--- .--- | % | Bb1!--- .--- F1--- .--- | A1!--- .--- E2--- .--- |
+timp    | D2!--- .--- A1--- .--- | Eb2!--- .--- Bb1--- .--- | G1!--- .--- D2--- .--- | A1- A1- A1- A1- A1!- A1!- A1!- A1!- |
+kick    | X... ..x. X... ..x. | % | % | X... ..x. X.X. X.X. |
+kick    | X... ..x. X... ..x. | % | % | X... ..x. X.X. X.X. |
+snare   | .... X..o .... X... | % | % | .... X... X.xx XXXX |
+snare   | .... X..o .... X... | % | % | .... X... X.xx XXXX |
+dsnare  | x.oo X.oo x.oo X.oo | % | % | x.oo X.oo XxXx XXXX |
+dsnare  | x.oo X.oo x.oo X.oo | % | % | x.oo X.oo XxXx XXXX |
+taiko   | X.x. ..X. x... X.x. | % | % | X.x. ..X. XXXX XXXX |
+taiko   | X.x. ..X. x... X.x. | % | % | X.x. ..X. XXXX XXXX |
+hat     | Xoxo xoxo Xoxo xoxo | % | % | Xoxo xoxo XxXx XxXx |
+hat     | Xoxo xoxo Xoxo xoxo | % | % | Xoxo xoxo XxXx XxXx |
+crash   | X... .... .... .... | .... .... .... .... | % | % |
+crash   | X... .... .... .... | .... .... .... .... | % | % |
+heart   | X.o. .... x.o. .... | % | % | % |
+heart   | % | % | % | % |
+
+# the horn more urgent in the first half
+pattern A2 from A
+horn    | D4!- D4- Eb4- Eb4- F4!- F4- A4- A4- | G4------- .--- A4--- | Bb4!- Bb4- Bb4- Bb4- A4--- G4--- | A4----------- .--- |
+horn    | D5--- C5--- A4--- F4--- | G4------- Bb4------- | Bb4--- A4--- G4--- D4--- | C#4------- E4------- |
+
+# Gm Eb Bb A | Gm Eb Ab A7: up a fourth, and the Ab a tritone from home
+pattern B from A
+horn    | G4--- Bb4--- D5------- | Eb5--- D5--- Bb4------- | D5--- F5--- D5--- Bb4--- | C#5----------- .--- |
+horn    | G4--- Bb4--- D5--- G5--- | G5------- F5- Eb5- D5--- | Eb5------- C5------- | C#5--- E5--- A4------- |
+ost     | G2!- G2- D3- G2!- G2- Eb3- G2!- D3- | Eb3!- Eb3- Bb3- Eb3!- Eb3- C4- Eb3!- Bb3- | Bb2!- Bb2- F3- Bb2!- Bb2- G3- Bb2!- F3- | A2!- A2- E3- A2!- A2- F3- A2!- E3- |
+ost     | G2!- G2- D3- G2!- G2- Eb3- G2!- D3- | Eb3!- Eb3- Bb3- Eb3!- Eb3- C4- Eb3!- Bb3- | Ab2!- Ab2- Eb3- Ab2!- Ab2- F3- Ab2!- Eb3- | A2!- A2- E3- A2!- A2- G3- A2!- C#3- |
+organ   | [Gm]!----- [Gm]----- [Gm]!--- | [Eb]!----- [Eb]----- [Eb]!--- | [Bb]!----- [Bb]----- [Bb]!--- | [A]!----- [A]----- [A]!--- |
+organ   | [Gm]!----- [Gm]----- [Gm]!--- | [Eb]!----- [Eb]----- [Eb]!--- | [Ab]!----- [Ab]----- [Ab]!--- | [A7]!----- [A7]----- [A7]!--- |
+brass   | [Gm]!----- [Gm]----- [Gm]!--- | [Eb]!----- [Eb]----- [Eb]!--- | [Bb]!----- [Bb]----- [Bb]!--- | [A]!----- [A]----- [A]!--- |
+brass   | [Gm]!----- [Gm]----- [Gm]!--- | [Eb]!----- [Eb]----- [Eb]!--- | [Ab]!----- [Ab]----- [Ab]!--- | [A7]!----- [A7]----- [A7]!--- |
+tuba    | G1------- D2------- | Eb2------- Bb1------- | Bb1------- F1------- | A1------- E1------- |
+tuba    | G1------- D2------- | Eb2------- Bb1------- | Ab1------- Eb2------- | A1------- C#2------- |
+choir   | [Gm]--------------- | [Eb]--------------- | [Bb]--------------- | [A]--------------- |
+choir   | [Gm]--------------- | [Eb]--------------- | [Ab]--------------- | [A7]--------------- |
+box     | G5- .- Bb5- .- D6- .- Bb5- .- | G5- .- Bb5- .- Eb6- .- D6- .- | F5- .- Bb5- .- D6- .- F6- .- | E5- .- A5- .- C#6- .- E6- .- |
+box     | G5- .- Bb5- .- D6- .- G6- .- | G5- .- Bb5- .- Eb6- .- G6- .- | Eb6- .- C6- .- Ab5- .- C6- .- | C#6- .- G6- .- E6- .- C#6- .- |
+bell    | G3--------------- | Eb4--------------- | Bb3--------------- | A3--------------- |
+bell    | G3--------------- | Eb4--------------- | Ab3--------------- | A3--------------- |
+ghost   | ~D6------- ~Eb6------- | ~G5--------------- | ~F5------- ~Gb5------- | ~E5--------------- |
+ghost   | ~Bb5------- ~A5------- | ~G5--------------- | ~Ab5------- ~C6------- | ~C#6------- ~E6------- |
+timp    | G1!--- .--- D2--- .--- | Eb2!--- .--- Bb1--- .--- | Bb1!--- .--- F1--- .--- | A1!--- .--- E2--- .--- |
+timp    | G1!--- .--- D2--- .--- | Eb2!--- .--- Bb1--- .--- | Ab1!--- .--- Eb2--- .--- | A1- A1- A1- A1- A1!- A1!- A1!- A1!- |
+
+# the stings, a bar each
+pattern engage
+hitbrass | D3+A3+D4!--- .- D3+A3+D4!- .------- |
+hitcrash | X... .... .... .... |
+
+pattern shudder
+hitbrass | D3+Eb3+Ab3!------------- .- |
+rumble   | X... .... .... .... |
+
+pattern three
+hitgong  | X... .... .... .... |
+hitcrash | X... .... .... .... |
+hitbrass | D3+A3+D4!--- .--- .------- |
+
+pattern vanish
+whoosh   | X... .... .... .... |
+
+loop A B A2 B

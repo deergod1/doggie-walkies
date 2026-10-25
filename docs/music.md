@@ -5,8 +5,10 @@ Songs are plain-text [Scrimshaw](https://tools.simonwillison.net/scrimshaw-jukeb
 game fetches the score and compiles it when it is first needed. The parser and synth are
 vendored in `vendor/scrimshaw/` (Apache-2.0, from Simon Willison's tools), with the game's own
 glass instruments added (`glassharp`, `crystal`, `bowl` and the drums `glasstap`, `chimes`,
-`shatter`: `music/README.md`). The jukebox page does not know those, so a score using them only
-plays in the game and `tools/player.html`.
+`shatter`: `music/README.md`), and a `theremin`. The jukebox page does not know those, so a score
+using them only plays in the game and `tools/player.html`. Two more changes there: `compile`
+also gives one pattern on its own (for the stings), and a `~` glide comes from the note before
+it (the jukebox only glided the first one of a pattern).
 
 **Writing a song?** Start with `music/README.md`: the game's musical style, how to build the
 layers, a format cheat sheet and a full example score.
@@ -35,6 +37,7 @@ plays, at once, if it is at most 150 ms late; a later one is dropped.
 | `src/audio/music.js` | the player: schedules notes ahead, loops, switches songs, fades voices between moods |
 | `src/audio/drumkit.js` | the drum hits a song uses, rendered once and played as samples |
 | `src/game/music.js` | picks the song (`songFor`) and the mood from the game state; `forceMood` holds one (`__game.musicMood`) |
+| `src/core/bossmusic.js` | the bosses with a song of their own, its moods and how his fight picks one (Gusto's: `gustoMusic` in `src/core/gusto.js`) |
 
 ## Editing
 
@@ -67,6 +70,38 @@ levels: a calmer-sounding set can replace a fuller one, so a mood can take voice
 The highest mood that applies wins and takes over at once; a calmer one takes over only
 after the current one's hold time.
 
+## A boss's own song
+
+A boss in `BOSS_MUSIC` (`src/core/bossmusic.js`) has a song of his own. While he lives in the
+cube (`bossHere` in `src/game/music.js`: the boss himself, not a proxy, not dead), his song
+plays, from the moment you come into his arena (a dev spawn too), and its moods are his fight's
+phases instead of the six above: the score names them (`# moods:`, `music/README.md`), the first
+the one before he fights. They come from what every game sees of him, so a friend shown his
+fight hears the same. A phase takes over at once; only going back to the first waits 3 s (he
+went home). Once he is dead the place's own song comes back, from `explore`.
+
+| Gusto's mood | When (`gustoMusic`, `src/core/gusto.js`) | Voices |
+|---|---|---|
+| `lurk` | he has not noticed you, unhurt | choir, tuba drone, music box motif, bell toll, a tom heartbeat |
+| `phase1` | after you, or hurt, above half his health | horn tune, low string ostinato, organ stabs, tuba, choir, kick, snare, taiko, timpani, crash |
+| `split` | he shudders (`split`) | choir, a held cluster (D Eb Ab), a timpani roll, tuba, bell |
+| `phase2` | his proxies stand, or he is below half, or he has split | phase1 without organ, with brass stabs, the theremin, a snare on every beat and sixteenth hats |
+| `gone` | he vanished (`gone`) | choir, theremin, heartbeat, bell, tuba |
+
+A **sting** is a pattern a score plays once as a mood begins (`# sting MOOD: PATTERN`), from the
+next sixteenth, over the loop; its voices play in no mood, so their channels stay open
+(`audio/music.js` `playSting`). Gusto's: a brass hit and crash as he comes for you, thunder and
+a dissonant brass chord as he splits, gong, crash and brass as the three of him appear (again
+each time he comes back), a whoosh as he vanishes.
+
+Beating a boss (a real one or a Temp Boss) plays a fanfare (`src/audio/fanfare.js`,
+`music/jingles/victory.scrim`, `docs/sound.md`), and the music ducks under it (`duckMusic`); a
+boss with his own song is gone by then, and the place's song comes back after it. The jingle is
+a score in `music/jingles/` (with its `index.json`), which `tools/player.html` lists under
+Jingles; it is no song, so it is in no `SONGS`.
+
+## Scheduling
+
 Voices that are out are not scheduled at all. A joining voice comes in on the first sixteenth
 at least 40 ms away. Its notes from there up to what the scheduler has already done (1 s
 ahead) are scheduled at once (except those it still had scheduled from before it left, which
@@ -78,7 +113,8 @@ so a switch is heard within about 0.2 s. A leaving voice fades out from the next
 Each theme names its song (`music:` in `src/themes/`); the town and the merchant camp
 (`map.enemyFree`) play `town` and depth 20 plays `core` (`songFor` in `src/game/music.js`). The
 main menu plays `title` (`openMainMenu` in `src/game/menu.js`), always in `explore`.
-`SONGS` in `src/themes/index.js` lists them all, for the test and `tools/player.html`; the
+A boss with a song of his own plays it in his arena (above). `SONGS` in `src/themes/index.js`
+lists them all, for the test and `tools/player.html`; the
 test also checks that every score in `music/` is one of them.
 
 | Song | Themes (act) | Key, tempo, meter | Sound | `sense` drums |
@@ -97,8 +133,9 @@ test also checks that every score in `music/` is one of them.
 | `volcanic` | volcanic depths (III) | C Phrygian, 84 | horn over a hammering pizz ostinato, tuba, an anvil bell; thunder for a guardian | taiko toms, timpani |
 | `abyss` | obsidian abyss (III) | minor chords a tritone apart over an E pedal, 60 | choir, bell tolls, a broken music box | heartbeat, thunder, timpani, toms |
 | `core` | the core (20) | E harmonic minor, 70 | the overworld's tune in minor, harp, organ, tuba, bell | timpani, toms |
+| `gusto` | Gusto's arena (depth 0's descent), while he lives | D minor with a Phrygian Eb, Bb A Eb Gm and an Ab a tritone off, 150 | horn tune, short low strings in 3+3+2, organ and brass stabs, choir, music box motif, bell, theremin; his fight's own moods and stings (above) | taiko and a tom heartbeat |
 
-Every song but the title and the town has all six moods. Combat keeps the exploration tempo and meter,
+Every song but the title, the town and the bosses' own has all six moods. Combat keeps the exploration tempo and meter,
 but replaces gentle motion with two combat-only voices: `drive` (an accented, short-gated
 ostinato) and `war` (denser battle drums with four-bar fills). Horns re-articulate the tune,
 brass attacks on the downbeat, and crashes have more weight. These layers also stay in

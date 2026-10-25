@@ -16,5 +16,8 @@ export const bossAt = (depth, role = 'descent') => role === 'descent' ? BOSSES[d
 // An arena of its own looks like the theme of its depth (its floors name their `surface`,
 // themes/surfaces.js; docs/bosses.md "An arena of its own"); `props`: prop sets whose small
 // things it strews about besides its theme's (Foggery's volcanic rocks by his lava).
-export const BOSS_ARENAS = Object.freeze({ totnar: { braziers: 5 }, squarlo: { type: 'tidal' }, flip: { type: 'flip' },
+// `days`: his arena has the world's days and nights under its theme's sky like any cube (Gusto's);
+// the others stay at noon, the light being their fight's (Totnar's darkness, Squarlo's mist,
+// Flip's void, Renew's dusk).
+export const BOSS_ARENAS = Object.freeze({ gusto: { days: true }, totnar: { braziers: 5 }, squarlo: { type: 'tidal' }, flip: { type: 'flip' },
   foggery: { type: 'tower', door: 8, centre: 7, props: ['volcanic'] }, renew: { braziers: 4 } });

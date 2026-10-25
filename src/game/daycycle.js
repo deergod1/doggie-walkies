@@ -1,6 +1,7 @@
 // The world's days and nights in the cube being played (core/daycycle.js): what its sky shows of
 // them (skyOf: its theme's `sky`, themes/index.js; none indoors, in trial and test rooms, and in a
-// boss's arena, where it is always noon), how far into the night it is (state.night), the light
+// boss's arena, where it is always noon, but in one with days and nights like any cube, `days`:
+// Gusto's, core/bosses.js BOSS_ARENAS), how far into the night it is (state.night), the light
 // the look blends in (lookCycle: render/look.js eases it, so coming into a cube or out of one
 // fades it), where the sun stands for the bakes (render/bake.js setSunPlan: under an open sky it
 // goes round, its shadows baked again as it goes; elsewhere, and on the lowest lighting level,
@@ -12,6 +13,7 @@ import { nightLight, dayLight, SUNSET } from '../themes/skies.js';
 import { nightAt, glowAt, sunAt } from '../core/daycycle.js';
 import { setSunPlan } from '../render/bake.js';
 import { movingSun } from './quality.js';
+import { BOSS_ARENAS } from '../core/bosses.js';
 import { tr } from '../i18n/i18n.js';
 
 // how much of the warm light of a low sun mornings and evenings take on, by sky
@@ -19,7 +21,8 @@ const GLOW = { open: 0.5, hazy: 0.25 };
 
 // what the days and nights do in map: 'open', 'hazy', 'night' or 'none' (themes/index.js `sky`)
 export function skyOf(map) {
-  if (!map || map.interior || map.testRoom || map.trialRoom || map.guardian?.boss || !map.biome) return 'none';
+  if (!map || map.interior || map.testRoom || map.trialRoom || !map.biome) return 'none';
+  if (map.guardian?.boss && !BOSS_ARENAS[map.guardian.boss]?.days) return 'none';
   return themeOf(map).sky ?? 'none';
 }
 // the time of day's clock: the world's play time (and the dev's shift)

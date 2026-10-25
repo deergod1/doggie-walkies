@@ -9,6 +9,7 @@ click. It runs at 44.1 kHz whatever the speakers run at (the browser resamples),
 | File | What |
 |---|---|
 | `src/audio/sfx.js` | one-shot effects: `sfx(name, { at, pitch, volume })`; `at` pans by screen position |
+| `src/audio/fanfare.js` | the fanfare of a beaten boss: a jingle score (`music/jingles/victory.scrim`) played once by a synth of its own |
 | `src/audio/voices.js` | the enemies' voices, registered with sfx.js as `<species>_alert/_windup/_death` |
 | `src/audio/footsteps.js` | footsteps per surface and gait (the slime marsh's slime squelches and lets go with a gloop), pre-rendered into variants when audio starts |
 | `src/audio/loops.js` | continuous sounds: the charge and cast drones, the ambient beds, drips and lava pops |
@@ -42,6 +43,19 @@ click. It runs at 44.1 kHz whatever the speakers run at (the browser resamples),
 | `drink`, `buff`, `chest` | drinking a potion and a buff or cure taking hold (`game/quickbar.js`), opening a treasure chest (`game/chests.js`) |
 | `lob`, `glass`, `boom`, `hiss`, `poison` | a flask thrown, breaking, a blast, a toxic cloud, a poison tick (`game/juice.js`) |
 | `<species>_alert/_windup/_death` | an enemy starts chasing you (at most every 0.3 s), winds up an attack, dies |
+
+## The boss fanfare
+
+A boss falling (a real one or a Temp Boss: a descent guardian) plays a fanfare instead of
+`unlock` (`game/enemies.js`): a jingle written as a score like the songs,
+`music/jingles/victory.scrim` (listen in `tools/player.html`, under Jingles), played once by a
+synth of its own into the sounds' bus (`src/audio/fanfare.js`). So it is a sound, heard with the
+music off too, and every boss gets it, whatever song plays. Glass, the game's own instruments: his
+power breaks with a shatter, wind chimes, a singing bowl and a timpani stroke, a crystal sweep
+rises, a crystal lead and its echo play the game's motif in C major (1 2 3 5, 4 3 4 5) over
+glass harmonica chords, glass taps roll in, and it lands on the high C, slowing, with chimes and
+the bowl. About 5.5 s; the music ducks under it (`duckMusic`, `audio/music.js`) and a level
+gained with the kill chimes after it.
 
 ## Continuous sounds
 

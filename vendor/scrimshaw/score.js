@@ -1,13 +1,15 @@
 // Scrimshaw score format: parser + compiler (no audio; runs in browser or node).
 // Vendored from https://tools.simonwillison.net/scrimshaw-jukebox (github.com/simonw/tools, scrimshaw-jukebox.html @ d97b73d).
 // Apache-2.0, see LICENSE. Changed: IIFE/UMD wrapper replaced by ES module exports; the glass
-// instruments and drums of synth.js added to MELODIC and DRUMS.
+// instruments and drums and the theremin of synth.js added to MELODIC and DRUMS; compile() also
+// gives one pattern on its own (`pattern`), and a glide comes from the note before it, not from the
+// last note of the pattern before.
 
 const MELODIC = ['steeldrum', 'marimba', 'vibes', 'celesta', 'glock', 'xylophone', 'musicbox', 'bell',
   'organ', 'pipe', 'strings', 'pad', 'choir', 'voices', 'brass', 'trumpet', 'horn', 'tuba',
   'flute', 'clarinet', 'oboe', 'bassoon', 'accordion', 'fiddle',
   'harp', 'guitar', 'banjo', 'harpsichord', 'pizz', 'upright', 'fretless', 'synbass', 'timpani',
-  'chip', 'sine', 'square', 'saw', 'triangle', 'glassharp', 'crystal', 'bowl'];
+  'chip', 'sine', 'square', 'saw', 'triangle', 'glassharp', 'crystal', 'bowl', 'theremin'];
 const DRUMS = ['kick', 'snare', 'rim', 'hat', 'ohat', 'ride', 'crash', 'shaker', 'tamb',
   'conga', 'tumba', 'bongo', 'bongolo', 'clave', 'block', 'cowbell', 'guiro',
   'tomlo', 'tommid', 'tomhi', 'bodhran', 'timbale', 'tri', 'clap', 'gong', 'thunder', 'surf',
@@ -373,12 +375,13 @@ function compile(text) {
               ev.m = e.notes.map(n => n + voice.trans + ref.trans);
               ev.d = Math.max(0.02, d * voice.gate);
               if (e.glide && lastMidi[vi] != null) ev.g = lastMidi[vi] + 0;
+              lastMidi[vi] = ev.m[ev.m.length - 1];   // (Cube Crawler: per note, so a glide inside a pattern has its note to come from)
             }
             evs.push(ev);
           }
         }
         evs.sort((a, b) => a.t - b.t || a.v - b.v);
-        for (const ev of evs) { if (ev.m) lastMidi[ev.v] = ev.m[ev.m.length - 1]; events.push(ev); }
+        for (const ev of evs) events.push(ev);
         t += total * stepDur;
       }
     }
@@ -397,7 +400,9 @@ function compile(text) {
   return {
     title: song.title, composer: song.composer, about: song.about, tempo: song.tempo,
     beats: song.beats, steps: song.steps, reverb: song.reverb,
-    voices, intro, loop, errors, patternCount: song.patternOrder.length
+    voices, intro, loop, errors, patternCount: song.patternOrder.length,
+    // (Cube Crawler) one pattern on its own, as a timeline: the game's stings (src/audio/score.js)
+    pattern: (name, ln = 0) => timeline([{ name, trans: 0, times: 1, ln }])
   };
 }
 

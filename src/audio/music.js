@@ -2,7 +2,9 @@
 // synth (vendor/scrimshaw). One song at a time: switching fades the old one out and starts
 // the new one from the top. The mood (explore, treasure, sense, rise, fight, boss; picked by
 // game/music.js) decides which voices play: joining ones come in on the next step (a
-// sixteenth), picking up notes already under way, leaving ones fade out from the next beat.
+// sixteenth), picking up notes already under way, leaving ones fade out from the next beat. A
+// boss's song has moods of its own (its fight's phases, game/music.js), and may have stings: a
+// pattern played once, over the loop, from the next step as its mood begins (audio/score.js).
 // Off until turned on (game/settings.js keeps that: the settings menu, or M). Turned on, the
 // song starts from the top. It plays into the music bus (context.js), with its own volume.
 // The synth (compressors, a long reverb) is built for the first song and only hangs on the bus
@@ -13,7 +15,7 @@
 // shader, building a cube) must not starve the audio. A note that comes late all the same
 // still plays if it is at most LATE behind, at once; one later than that is dropped.
 import { createSynth } from '../../vendor/scrimshaw/synth.js';
-import { loadScore } from './score.js';
+import { loadScore, voicesIn } from './score.js';
 import { onAudioStart } from './context.js';
 import { prepareDrums, playDrum } from './drumkit.js';
 
@@ -25,6 +27,7 @@ const GAP = 0.8;                            // seconds between one song fading a
 const JOIN_MARGIN = 0.04;                   // s: a joining voice comes in on the first step after this
 const MIN_HELD = 0.15;                      // s: a held note joined with less than this left stays out
 
+const DUCK = 0.3;                           // the music's level under a fanfare (duckMusic)
 const RING_OUT = 4;                         // s after a song stops before the synth leaves the bus (the reverb's tail)
 
 let ctx = null, syn = null, output = null, attached = false, idleAt = 0;
@@ -75,7 +78,19 @@ export function playSong(name) {
 export function setMood(name) {
   if (name === mood) return;
   mood = name;
-  if (cur) retarget();
+  if (!cur) return;
+  retarget();
+  const sting = cur.score.stings[mood];
+  if (sting) playSting(sting);
+}
+
+// hold the music down for a moment (s), under a fanfare (audio/fanfare.js), then bring it back
+export function duckMusic(seconds) {
+  if (!syn) return;
+  const g = syn.out.gain, now = ctx.currentTime;
+  g.cancelScheduledValues(now);
+  g.setTargetAtTime(VOLUME * DUCK, now, 0.08);
+  g.setTargetAtTime(VOLUME, now + seconds, 0.6);
 }
 
 export const musicEnabled = () => enabled;
@@ -100,7 +115,7 @@ function tick() {
 }
 
 function startSong(score) {
-  const { song, moods } = score;
+  const { song, stingVoices } = score, playing = voicesIn(score, mood);
   attach();
   const sess = syn.session(song);
   syn.warm(song);
@@ -108,8 +123,9 @@ function startSong(score) {
   // gain: the voice's level; on: in the mood; at: when it last joined or leaves; scheduled:
   // how far its notes were scheduled when it last left (they still play, unheard, and are
   // heard again if it comes back before then)
-  const voices = sess.ch.map((c, i) => ({ gain: c.input.gain.value, on: moods[mood].has(i), at: 0, scheduled: 0 }));
-  voices.forEach((vc, i) => { if (!vc.on) sess.ch[i].input.gain.value = 0; });
+  // (a sting's voices are in no mood: they stay open, and play only when a sting does)
+  const voices = sess.ch.map((c, i) => ({ gain: c.input.gain.value, on: playing.has(i), at: 0, scheduled: 0 }));
+  voices.forEach((vc, i) => { if (!vc.on && !stingVoices.has(i)) sess.ch[i].input.gain.value = 0; });
   const startAt = ctx.currentTime + 0.1;
   cur = { score, sess, voices, startAt, list: 'intro', i: 0, offset: 0, until: startAt };
 }
@@ -194,8 +210,9 @@ function catchUp(i, at, held) {
 function retarget() {
   const now = ctx.currentTime;
   const step = nextBoundary(now + JOIN_MARGIN, 'step'), beat = nextBoundary(now + JOIN_MARGIN, 'beat');
-  const playing = cur.score.moods[mood];
+  const playing = voicesIn(cur.score, mood);
   cur.voices.forEach((vc, i) => {
+    if (cur.score.stingVoices.has(i)) return;
     const on = playing.has(i);
     if (on === vc.on) return;
     const g = cur.sess.ch[i].input.gain;
@@ -213,4 +230,10 @@ function retarget() {
     // back before its scheduled notes ran out: those play again, the rest is caught up
     if (on) catchUp(i, Math.max(step, vc.scheduled), step >= vc.scheduled);
   });
+}
+
+// a sting: its notes from the next step on, all scheduled at once (a bar or so)
+function playSting(tl) {
+  const at = nextBoundary(ctx.currentTime + JOIN_MARGIN, 'step');
+  for (const ev of tl.events) play(ev, at + ev.t);
 }

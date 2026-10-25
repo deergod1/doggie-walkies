@@ -57,6 +57,8 @@ import { createHordeGroups, coordinateHordes } from './hordes.js';
 import { setGuardianGate } from '../render/world.js';
 import { refreshOpenFaces } from './flow.js';
 import { sfx } from '../audio/sfx.js';
+import { duckMusic } from '../audio/music.js';
+import { fanfare } from '../audio/fanfare.js';
 import { party, nearestTo } from './party.js';
 import { relay, online } from '../net/online.js';
 import { log } from './log.js';
@@ -131,7 +133,7 @@ function hordeBroken() {
 // (droppedHere). Truthy (the guardian's name): a guardian's gate opened.
 // learn: architecture.html#swing-journey, code.html#loops (see learn/README.md)
 function awardKills(list) {
-  let xp = 0, levels = 0, killed = 0, unlocked = false;
+  let xp = 0, levels = 0, killed = 0, unlocked = false, boss = false;
   for (const e of list) {
     const reward = awardKill(player, state.run, e);
     if (reward) {
@@ -139,6 +141,7 @@ function awardKills(list) {
       if (droppedHere(e)) dropLoot(e, reward.coins);
       if (e.guardianGate) {
         unlocked = enemyName(e.profile);
+        boss ||= e.guardianRole === 'descent';   // a boss (a real one or a Temp Boss): the fanfare
         log('guardian', { label: enemyWords(e.profile), level: e.level, depth: state.map.depth, boss: !!e.boss }, { share: true });
       }
       relay.defeated?.(e);
@@ -151,8 +154,11 @@ function awardKills(list) {
   }
   if (levels) log('level', { level: player.level }, { share: true });
   if (killed) hordeBroken();
-  if (unlocked) { setGuardianGate(state.world, false); refreshOpenFaces(); sfx('unlock'); }
-  if (levels) sfx('levelUp');
+  if (unlocked) { setGuardianGate(state.world, false); refreshOpenFaces(); }
+  // a boss's fanfare (audio/fanfare.js), the music held down under it, a level gained after it
+  const played = boss ? fanfare() : 0;
+  if (played) duckMusic(played + 0.5); else if (unlocked) sfx('unlock');
+  if (levels) sfx('levelUp', { delay: played });
   return unlocked;
 }
 // Does this game drop e's loot? Its killer's does: whoever hit it last (game/sword.js; null:

@@ -1,7 +1,8 @@
 // Scrimshaw synth: Web Audio instruments in the spirit of early-90s sound modules.
 // Vendored from https://tools.simonwillison.net/scrimshaw-jukebox (github.com/simonw/tools, scrimshaw-jukebox.html @ d97b73d).
 // Apache-2.0, see LICENSE. Changed: IIFE/UMD wrapper replaced by ES module exports; the glass
-// instruments (glassharp, crystal, bowl) and drums (glasstap, chimes, shatter) added for Cube Crawler.
+// instruments (glassharp, crystal, bowl), the theremin and drums (glasstap, chimes, shatter) added
+// for Cube Crawler.
 
 const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
 const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
@@ -424,6 +425,16 @@ const INST = {
     [[1, 1, 2.6, .9], [2.71, .45, 1.4, 1.7], [5.15, .18 * p.bright, .6, 2.6]]
       .forEach(([r, a, tau, beat]) => { for (const s of [-.5, .5]) partial(S, out, t, f * r + s * beat, { a: .004, tau, peak: v * a * .3, damp, dampTau: .45 }); });
     noise(S, out, t, { f: f * 4, q: 1.5, tau: .012, peak: v * .05 });
+  } },
+  // --- Cube Crawler ---
+  // theremin: a near-pure tone (a sine and a little of its octave) that swells in, wavers wide
+  // and slow from the start and slides from note to note (give the voice a long glide=): a ghost
+  theremin: { rev: 0.55, level: 0.95, play(S, out, t, d, f, v, p) {
+    const g = G(S); const lp = F(S, 'lowpass', 3200 * p.bright, .5); lp.connect(g).connect(out);
+    const end = adsr(g.gain, t, d, { a: p.att || .12, dc: .3, s: .9, r: p.rel || .3, peak: v * .42 });
+    const o1 = O(S, 'sine', f, t, end, p); o1.connect(lp);
+    const o2 = O(S, 'triangle', f, t, end, p, 2); const g2 = G(S, .12 * p.bright); o2.connect(g2).connect(lp);
+    vibrato(S, t, end, [o1, o2], { rate: 5.6, depth: 28, delay: .06, rise: .35 });
   } }
 };
 ['sine', 'square', 'saw', 'triangle'].forEach(w => {

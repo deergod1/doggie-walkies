@@ -69,11 +69,11 @@
 </main>
 <script type="module">
 import { createSynth } from './vendor/scrimshaw/synth.js';
-import { loadScore, MOODS } from './src/audio/score.js';
+import { loadScore, voicesIn } from './src/audio/score.js';
 import { SONGS } from './src/themes/index.js';
 
 const GAME = SONGS;                           // music/<name>.scrim, as src/game/music.js plays them
-const FOLDERS = {};   // music/<dir>: label, for reference scores the game doesn't play
+const FOLDERS = { jingles: 'Jingles' };   // music/<dir>: label, for scores that are not songs (the boss fanfare, audio/fanfare.js) or that the game doesn't play
 const LOOKAHEAD = 0.3, HIDDEN_LOOKAHEAD = 1.6;
 const $ = id => document.getElementById(id);
 
@@ -134,7 +134,8 @@ function cursorAt(pos) {
 
 function voiceOn(i) {
   if (solo.size) return solo.has(i);
-  return cur.score.moods[mood].has(i) && !muted.has(i);
+  // (a sting's voices are in no mood: open, they play when a sting does)
+  return (voicesIn(cur.score, mood).has(i) || cur.score.stingVoices.has(i)) && !muted.has(i);
 }
 function applyGains(fade = 0.03) {
   if (!play) return;
@@ -154,6 +155,12 @@ function start(pos = pausedAt) {
   const origin = ctx.currentTime + 0.08 - pos;
   play = { sess, origin, ...cursorAt(pos) };
   $('play').textContent = 'Pause';
+}
+// a sting (a mood's, as it begins): its notes from the next sixteenth on, over the loop
+function sting(tl) {
+  const { tempo, steps } = cur.song, step = 60 / tempo / steps;
+  const at = play.origin + Math.ceil((ctx.currentTime + 0.04 - play.origin) / step) * step;
+  for (const ev of tl.events) { play.sess.play(ev, at + ev.t); lit[ev.v] = Math.max(lit[ev.v] ?? 0, at + ev.t); }
 }
 function stop(keep = false) {
   if (!play) return;
@@ -209,7 +216,7 @@ async function open(id) {
   const score = loadScore(text);
   cur = { id: s.id, score, song: score.song, total: score.song.intro.dur + score.song.loop.dur };
   muted.clear(); solo.clear(); lit.length = 0;
-  if (!score.given.includes(mood)) mood = 'explore';
+  if (!score.given.includes(mood)) mood = score.base;
   $('title').textContent = score.song.title;
   $('about').textContent = [score.song.composer, score.song.about].filter(Boolean).join(' · ');
   $('errors').textContent = score.errors.join('\n');
@@ -223,12 +230,17 @@ const COLORS = ['#e76f51', '#f4a261', '#e9c46a', '#2a9d8f', '#8ab17d', '#60a5fa'
 const colorOf = i => COLORS[i % COLORS.length];
 
 function renderMoods() {
-  $('moods').replaceChildren(...MOODS.map(m => {
+  $('moods').replaceChildren(...cur.score.names.map(m => {
     const b = document.createElement('button');
-    b.textContent = m;
-    b.title = cur.score.given.includes(m) ? `${cur.score.moods[m].size} voices` : 'not in this score: falls back to a calmer mood';
+    b.textContent = m + (cur.score.stings[m] ? ' ♪' : '');
+    b.title = (cur.score.given.includes(m) ? `${cur.score.moods[m].size} voices` : 'not in this score: falls back to a calmer mood')
+      + (cur.score.stings[m] ? ', and a sting as it begins' : '');
     b.className = (m === mood ? 'on ' : '') + (cur.score.given.includes(m) ? '' : 'fallback');
-    b.onclick = () => { mood = m; renderMoods(); renderVoices(); applyGains(0.15); };
+    b.onclick = () => {
+      const was = mood;
+      mood = m; renderMoods(); renderVoices(); applyGains(0.15);
+      if (play && m !== was && cur.score.stings[m]) sting(cur.score.stings[m]);
+    };
     return b;
   }));
 }

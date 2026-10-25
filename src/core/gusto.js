@@ -43,3 +43,16 @@ export function gripAt(grab, hitAt, t) {
   const j = Math.min(g.length - 1, i + 1), k = Math.min(1, u - i);
   return g[i].map((v, n) => v + (g[j][n] - v) * k);
 }
+
+// The music of his fight (music/gusto.scrim, core/bossmusic.js): its moods, the first before he
+// fights, and the one playing now, from what every game sees of him (the runner's fight or a
+// friend's shown copy): him, his live proxies and the moods his fight has had (`seen`), so the
+// second phase holds while he is back alone at his split's health.
+export const GUSTO_MUSIC = Object.freeze(['lurk', 'phase1', 'split', 'phase2', 'gone']);
+export function gustoMusic(e, proxies, seen) {
+  if (e.mode === 'split') return 'split';
+  if (e.mode === 'gone') return 'gone';
+  if (proxies > 0 || seen.has('split') || e.hp < splitHp(e.profile.hp)) return 'phase2';
+  if (e.mode === 'chase' || e.mode === 'attack' || e.mode === 'alert' || e.hp < e.profile.hp) return 'phase1';
+  return 'lurk';
+}

@@ -63,7 +63,7 @@ async function render(ctx, song) {
   const seen = new Set();
   song.voices.forEach((v, vi) => {
     if (!v.drum || !DRUM[v.inst]) return;
-    for (const tl of [song.intro, song.loop]) for (const e of tl.events) {
+    for (const tl of [song.intro, song.loop, ...Object.values(song.stings ?? {})]) for (const e of tl.events) {
       const key = keyOf(v.inst, e.vel);
       if (e.v !== vi || seen.has(key) || takes.has(key)) continue;
       seen.add(key);

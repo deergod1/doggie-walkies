@@ -59,6 +59,7 @@
 //     floors beside it), back (from the floor's middle, 0.36), foot (its collider, 0.06) }
 import { WATER, ACID } from '../core/constants.js';
 import { SUNLIT_THEMES, DEEP_THEMES, CORE } from './caves.js';
+import { BOSS_MUSIC } from '../core/bossmusic.js';
 
 const T = (name, o) => ({ name, tiles: {}, cave: false, spans: null, ...o });
 
@@ -242,6 +243,6 @@ for (const t of THEMES) {
 export const TOWN = MEADOW;
 export { CORE };
 
-// every song the game plays: the main menu's, the town (and the merchant camp), one per theme, and
-// the core (depth 20)
-export const SONGS = ['title', 'town', ...new Set(THEMES.map(t => t.music)), 'core'];
+// every song the game plays: the main menu's, the town (and the merchant camp), one per theme, the
+// core (depth 20) and the bosses' own (core/bossmusic.js)
+export const SONGS = ['title', 'town', ...new Set(THEMES.map(t => t.music)), 'core', ...Object.values(BOSS_MUSIC).map(m => m.song)];
