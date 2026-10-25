@@ -241,7 +241,7 @@ From depth 13 down no theme has a room without lights of its own, about 15–30 
 
 ## Quality levels (`game/quality.js`)
 
-The settings' **Lighting: Auto / High / Medium / Low / Lowest** (`game/settings.js graphics`;
+The settings' **Lighting: Auto / Lowest / Low / Medium / High** (`game/settings.js graphics`;
 Auto at first; a stored Full is Auto, a stored Simple is Low). Every level looks the same in kind:
 every fixed light with its baked shadow, the hero's lamp and the sun casting shadows. What
 changes is how much is drawn for that:
@@ -271,7 +271,7 @@ changes is how much is drawn for that:
   second: enemies' shadows drop out and come back one by one at the edge), the fixed lights a
   point takes eased (`uBakeK`, a float: the last light fades); the fluids' patterns and the sun's
   map size simply switch.
-- **Auto** (`core/resolution.js`, with the resolution): too slow, a step down: the level first,
+- **Auto** (`core/resolution.js`, with the resolution, unless the settings pin that): too slow, a step down: the level first,
   then the resolution; CPU-bound slow frames take only the level down. A second's hitches (frames
   over 3× its median: a shader compiling, a cube built) are not counted. A level's step is judged
   a second later than the others (its fades). Up after a calm spell: the resolution, then the

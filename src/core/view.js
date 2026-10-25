@@ -3,7 +3,7 @@
 // game/camerakey.js.
 import { DEFAULT_ZOOM } from './zoom.js';
 
-export const OVERVIEW_FOV = 28, CLOSE_FOV = 60;   // vertical field of view (degrees)
+export const OVERVIEW_FOV = 28, CLOSE_FOV = 60;   // vertical field of view (degrees; the close view's at first: the settings)
 export const BLEND_TIME = 0.4;                    // s from one view to the other
 
 // The overview looks from one of four sides, diagonally over the cube (the yaw the game starts

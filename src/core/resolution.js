@@ -18,6 +18,8 @@
 //     that are CPU-bound take only the level down (fewer shadow maps drawn is less work for the
 //     CPU too). Up: the resolution first, then the level. A level's step is judged a second
 //     later than the others (QUALITY_SETTLE): what it changes fades in over half a second.
+//   - The settings may pin the resolution (game/settings.js resolution): `setRange` with min = max,
+//     and only the quality level still steps.
 
 export const SLOW = 1000 / 50;       // ms between frames: slower than 50 fps is too slow
 const SMOOTH = 1000 / 57;            // ms between frames: faster than ~57 fps (vsync at 60 or more)
@@ -82,7 +84,15 @@ export function resolutionController(max, min = Math.min(max, Math.max(0.6, max 
     return null;
   }
   function set(r) { if (r === ratio) return null; ratio = r; return r; }
+  // the ratios it goes between from now (the same: pinned); it starts again at the highest, and
+  // returns it
+  function setRange(hi, lo = Math.min(hi, Math.max(0.6, hi / 2))) {
+    max = hi; min = Math.min(lo, hi); ratio = max;
+    trial = null; smooth = 0; calm = CALM; rest = 0;
+    return ratio;
+  }
   // the quality levels to step through (0: none, the lighting is not on Auto), the level now
   function setQuality(n, now = n) { levels = n; level = Math.max(0, Math.min(n, now)); if (trial) trial.level = level; }
-  return { tick, setQuality, get ratio() { return ratio; }, get level() { return level; }, get levels() { return levels; }, min, max };
+  return { tick, setQuality, setRange, get ratio() { return ratio; }, get level() { return level; }, get levels() { return levels; },
+    get min() { return min; }, get max() { return max; } };
 }

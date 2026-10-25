@@ -2,18 +2,19 @@
 // the camera key: game/camerakey.js). The overview: a fixed ~45 degree perspective camera that
 // frames the whole cube; zooming in follows the player. The close view: behind the hero on an
 // arm that gets shorter where something is in the way, with a wide lens. Going from one to the
-// other blends where the camera is, where it looks and its lens.
+// other blends where the camera is, where it looks and its lens (the close view's field of view is
+// a setting).
 import * as THREE from 'three';
 import { N, CUBE_H, BASE, LH } from '../core/constants.js';
 import { clamp } from '../core/util.js';
-import { OVERVIEW_FOV, CLOSE_FOV, BLEND_TIME, ANCHOR, AHEAD, closeDistance, snapYaw } from '../core/view.js';
+import { OVERVIEW_FOV, BLEND_TIME, ANCHOR, AHEAD, closeDistance, snapYaw } from '../core/view.js';
 import { camera } from '../render/scene.js';
 import { character } from '../render/character.js';
 import { insideSolid, ceilingAt, cellAt } from '../physics/collide.js';
 import { standingAt } from '../physics/fluid.js';
 import { viewBlockedAt } from '../core/blockers.js';
 import { player, state, view } from './state.js';
-import { cameraMode } from './settings.js';
+import { cameraMode, closeFov } from './settings.js';
 import { kick, tremor } from './juice.js';
 
 // learn: drawing.html#camera (see learn/README.md)
@@ -154,7 +155,7 @@ export function updateCamera(dt) {
   else if (t >= 1) { camera.position.copy(closePos); camera.quaternion.copy(closeQuat); }
   else { camera.position.lerpVectors(overPos, closePos, t); camera.quaternion.slerpQuaternions(overQuat, closeQuat, t); }
   shake(dt);
-  const fov = OVERVIEW_FOV + (CLOSE_FOV - OVERVIEW_FOV) * t;
+  const fov = OVERVIEW_FOV + (closeFov() - OVERVIEW_FOV) * t;   // (the close view's: the settings)
   if (camera.fov !== fov) { camera.fov = fov; camera.updateProjectionMatrix(); }
   camera.updateMatrixWorld();
   fadeHero();

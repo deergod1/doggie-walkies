@@ -12,6 +12,7 @@ import { runCommand } from '../../src/game/commands.js';
 import { WEAPONS, ITEMS } from '../../src/core/items.js';
 import { lootHere, updateLoot, requestCollect, dropLoot, dropFromBag, floorItems, takeNow } from '../../src/game/loot.js';
 import { updateLootLabels } from '../../src/game/lootlabels.js';
+import { itemNames, setItemNames } from '../../src/game/settings.js';
 import { lootView } from '../../src/render/loot.js';
 import { orderPickup, followOrder, order } from '../../src/game/orders.js';
 import { combatStats } from '../../src/core/combat.js';
@@ -147,7 +148,7 @@ export async function runInventoryChecks() {
 
 const steps = (n, f) => { for (let i = 0; i < n; i++) f(i); };
 export async function runWeaponLootChecks() {
-  const results = [];
+  const results = [], names = itemNames();   // (a setting: as it was afterwards)
   await newWorld(3); clearInput();
   try {
     await paused(async () => {
@@ -172,9 +173,9 @@ export async function runWeaponLootChecks() {
       results.push('guardian weapon and potion drops / walk-over and C ignore weapons');
 
       for (let i = 0; i < 100 && !weapons().every(lootView); i++) { await delay(30); updateLoot(0, 4); }   // models load
-      state.showLabels = true; updateLootLabels();
+      setItemNames(true); updateLootLabels();
       check(document.querySelectorAll('.loot-label').length >= 2, 'X shows a label per weapon');
-      state.showLabels = false; updateLootLabels();
+      setItemNames(false); updateLootLabels();
       check(document.querySelectorAll('.loot-label').length === 0 || document.querySelector('.loot-label.hovered'), 'Without X only the hovered item has a label');
       orderPickup(w);
       steps(30, i => { followOrder(1 / 60); updateLoot(1 / 60, 4 + i / 60); });
@@ -205,5 +206,5 @@ export async function runWeaponLootChecks() {
       results.push('deaths keep dropped items');
     });
     return results;
-  } finally { setInventoryOpen(false); clearInput(); state.showLabels = false; await newWorld(3); }
+  } finally { setInventoryOpen(false); clearInput(); setItemNames(names); await newWorld(3); }
 }

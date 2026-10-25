@@ -26,6 +26,7 @@ import { TRIALS } from '../core/trials.js';
 import { DISPLAY, BODY } from '../render/fonts.js';
 import { tr } from '../i18n/i18n.js';
 import { uiScale } from './uiscale.js';
+import { minimapSize } from './settings.js';
 
 // R: the map's radius in cubes; REACH: the cubes around ours that can show inside it
 const R = 3.5, CELL = 24, PAD = 6, SIZE = 2 * R * CELL + PAD * 2, C = SIZE / 2, REACH = Math.ceil(R + 0.5);
@@ -96,8 +97,8 @@ function whereabouts(b, Y) {
 }
 
 export function drawMinimap() {
-  const inside = state.map?.interior, W = state.cubes;
-  if (!W || !state.cubeKey) return;
+  const inside = state.map?.interior, W = state.cubes, size = minimapSize();
+  if (!W || !state.cubeKey || !size) return;   // (hidden: the settings)
   const [X0, Y, Z0] = parse(inside ? inside.outside : state.cubeKey);
   // the centre: where we stand, in a house its door outside
   const door = inside && W.cubes.get(inside.outside)?.map.doors?.find(d => d.building === inside.building);
@@ -107,7 +108,7 @@ export function drawMinimap() {
   const seen = [state.cubeKey, px(me.x), px(me.z), Math.round(view.yaw * 200), Math.round(player.yaw * 20),
     ...online.buddies.map(b => `${b.cube} ${px(b.x)} ${px(b.z)} ${Math.round(b.yaw * 20)}`)].join('|');
   const now = performance.now();
-  const scale = Math.min(Math.max(devicePixelRatio || 1, 1), 3) * uiScale();   // (style.css zooms it by the UI scale)
+  const scale = Math.min(Math.max(devicePixelRatio || 1, 1), 3) * uiScale() * size;   // (style.css zooms it by the UI scale, and sizes it by the settings)
   if (seen === drawn && scale === drawnScale && now - drawnAt < 1000 / REFRESH) return;
   drawn = seen; drawnAt = now; drawnScale = scale;
   const fx = inside ? (door ? door.x / N : 0.5) : me.x / N, fz = inside ? (door ? door.z / N : 0.5) : me.z / N;

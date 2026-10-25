@@ -36,9 +36,14 @@ function layer(blending) {
 }
 export const glow = layer(THREE.AdditiveBlending), soft = layer(THREE.NormalBlending);
 
+// the share of the particles made (the settings, game/settings.js particles: main.js): fewer, at
+// random, so a burst of twenty is still one of five
+let share = 1;
+export function setParticleShare(s) { share = s; }
+
 const col = new THREE.Color();
 export function emit(target, x, y, z, { v = [0, 0, 0], spread = 0, life = 1, size = .1, grow = 0, color, alpha = 1, gravity = 0, drag = 0 }) {
-  if (target.list.length >= MAX) return;
+  if (target.list.length >= MAX || share < 1 && Math.random() >= share) return;
   col.set(color);
   target.list.push({ x, y, z, vx: v[0] + (Math.random() - .5) * spread, vy: v[1], vz: v[2] + (Math.random() - .5) * spread,
     age: 0, life, size: size * SIZE, grow, r: col.r, g: col.g, b: col.b, alpha, gravity, drag });

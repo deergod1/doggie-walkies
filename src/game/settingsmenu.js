@@ -2,14 +2,19 @@
 // pages, picked from the tabs on the left (Up and Down go through them too; the menu opens on the
 // last one shown):
 //   General   the language (a dropdown, game/dropdown.js), the UI scale (game/uiscale.js: taken
-//             when the slider is let go, as the panel itself grows or shrinks with it), the music
-//             on or off, the music's and the sounds' volume
-//   Graphics  the frame rate cap and the anti-aliasing, the lighting's quality level (Auto or
-//             pinned, game/quality.js), the camera (overview or close view)
-//   Input     the mouse look's speed and inverting it up and down, and the keys: each control's
-//             primary and secondary key (core/keybinds.js)
-// The pages keep the size of the largest, so the panel does not jump between them. Everything is
-// kept as it changes (game/settings.js).
+//             when the slider is let go, as the panel itself grows or shrinks with it), the
+//             minimap's size, the item names on the floor, the damage numbers, fullscreen (where
+//             the browser can: game/display.js); the music on or off, the volume of everything,
+//             the music's and the sounds', and being quiet in the background
+//   Graphics  the frame rate cap, the render resolution, the anti-aliasing, the lighting's quality
+//             level (Auto or pinned, game/quality.js), the particles, the brightness, reducing
+//             motion (System: as the system says); the camera (overview or close view), the zoom a
+//             game starts at, the close view's field of view
+//   Input     the mouse look's speed and inverting it up and down, clicking the floor to walk,
+//             inverting the wheel's zoom, and the keys: each control's primary and secondary key
+//             (core/keybinds.js)
+// What each one does: game/settings.js. The pages keep the size of the largest, so the panel does
+// not jump between them. Everything is kept as it changes.
 //
 // The keys come in tabs, one per kind of control (core/keybinds.js GROUPS; Left and Right go
 // through them too). A click on a key waits for the new one: the next key pressed takes the place (taken from the
@@ -18,14 +23,20 @@
 import { ACTIONS, ACTION, GROUPS, UNBINDABLE } from '../core/keybinds.js';
 import {
   FRAME_RATES, frameRate, setFrameRate, antialias, setAntialias, cameraMode, setCameraMode, uiScale, setUiScale, graphics, setGraphics,
-  lookSpeed, setLookSpeed, invertLook, setInvertLook,
-  musicOn, setMusic, musicVolume, setMusicVolume, soundVolume, setSoundVolume,
+  RESOLUTIONS, resolution, setResolution, particles, setParticles, brightness, setBrightness, MOTIONS, motion, setMotion,
+  systemReducesMotion, closeFov, setCloseFov, minimap, setMinimap, itemNames, setItemNames, damageNumbers, setDamageNumbers,
+  lookSpeed, setLookSpeed, invertLook, setInvertLook, clickMove, setClickMove, invertZoom, setInvertZoom,
+  startZoomStep, setStartZoomStep, startZoom,
+  musicOn, setMusic, masterVolume, setMasterVolume, musicVolume, setMusicVolume, soundVolume, setSoundVolume, quietBehind, setQuietBehind,
   keysOf, bindKey, unbindKey, resetKeys, nameOf, onSettingsChange, languageNow, chooseLanguage,
 } from './settings.js';
 import { tr, tc, LANGUAGES, onLanguageChange } from '../i18n/i18n.js';
 import { sfx } from '../audio/sfx.js';
 import { MSAA_LEVELS, msaaLevel } from '../render/msaa.js';
+import { ZOOM_LEVELS, DEFAULT_ZOOM } from '../core/zoom.js';
 import { dropdown } from './dropdown.js';
+import { canFullscreen, isFullscreen, setFullscreen, onFullscreenChange } from './display.js';
+import { state, view } from './state.js';
 
 const $ = id => document.getElementById(id);
 const overlay = $('settings-overlay'), keysBox = $('settings-keys'), tabs = $('settings-tabs'), feedback = $('settings-feedback');
@@ -61,15 +72,72 @@ export function closeSettings() {
 
 // --- drawing ------------------------------------------------------------------------------------
 
-// a row of buttons, one pressed: [value, label] pairs
+// The rows of buttons, one pressed: what each offers ([value, label] pairs), which is pressed, and
+// what a press does. The values come back from the page as text: the one pressed is found again
+// among the options.
+// The graphics' levels all go the same way: Auto first where there is one, then from the least to
+// the most.
+const CHOICES = {
+  'settings-fps': [() => FRAME_RATES.map(f => [f, f ? String(f) : tr('Unlimited')]), frameRate, setFrameRate],
+  'settings-resolution': [() => [['auto', tc('resolution', 'Auto')], ...RESOLUTIONS.filter(r => r !== 'auto').sort((a, b) => a - b).map(r => [r, `${r * 100}%`])],
+    resolution, setResolution],
+  // Auto (by the screen), then the levels this GPU can do; one asked for beyond them shows as the one used
+  'settings-msaa': [() => [['auto', tc('antialias', 'Auto')], ...MSAA_LEVELS.map(n => [n, n ? `${n}x` : tc('toggle', 'Off')])],
+    () => antialias() === 'auto' ? 'auto' : msaaLevel(antialias()), setAntialias],
+  'settings-graphics': [() => [['auto', tc('lighting', 'Auto')], ['lowest', tc('lighting', 'Lowest')], ['low', tc('lighting', 'Low')],
+    ['medium', tc('lighting', 'Medium')], ['high', tc('lighting', 'High')]], graphics, setGraphics],
+  'settings-particles': [() => [['low', tc('particles', 'Few')], ['medium', tc('particles', 'Some')], ['high', tc('particles', 'Many')]], particles, setParticles],
+  // System says what the system asks for now
+  'settings-motion': [() => MOTIONS.map(m => [m, m === 'system' ? `${tc('motion', 'System')} (${systemReducesMotion() ? tc('toggle', 'On') : tc('toggle', 'Off')})`
+    : tc('toggle', m === 'reduce' ? 'On' : 'Off')]), motion, setMotion],
+  'settings-camera': [() => [['overview', tr('Overview')], ['close', tc('camera', 'Close')]], cameraMode, setCameraMode],
+  'settings-minimap': [() => [['off', tc('toggle', 'Off')], ['small', tc('minimap', 'Small')], ['normal', tc('minimap', 'Normal')], ['large', tc('minimap', 'Large')]],
+    minimap, setMinimap],
+  'settings-names': [() => [[false, tr('Hovered')], [true, tr('Always')]], itemNames, setItemNames],
+};
 function choice(box, options, current) {
-  box.innerHTML = options.map(([v, label]) => `<button data-value="${v}" aria-pressed="${v === current}" class="${v === current ? 'on' : ''}">${esc(label)}</button>`).join('');
+  box.innerHTML = options.map(([v, label]) => `<button data-value="${esc(v)}" aria-pressed="${v === current}" class="${v === current ? 'on' : ''}">${esc(label)}</button>`).join('');
 }
+// the switches: on or off
+const TOGGLES = {
+  'settings-numbers': [damageNumbers, setDamageNumbers],
+  'settings-fullscreen': [isFullscreen, setFullscreen],
+  'settings-music': [musicOn, setMusic],
+  'settings-quiet': [quietBehind, setQuietBehind],
+  'settings-invert': [invertLook, setInvertLook],
+  'settings-click-move': [clickMove, setClickMove],
+  'settings-invert-zoom': [invertZoom, setInvertZoom],
+};
+function toggle(button, on) {
+  button.textContent = on ? tc('toggle', 'On') : tc('toggle', 'Off');
+  button.setAttribute('aria-pressed', String(on));
+  button.classList.toggle('on', on);
+}
+// The sliders: the value on the slider, what it shows beside it, and what moving it does. `live`:
+// the setting follows while it is dragged (else when it is let go, the number following);
+// `done`: after it is let go.
+const percent = v => `${v}%`;
+// the starting zoom by how much it magnifies, against the usual (closest at the right)
+const zoomStep = v => ZOOM_LEVELS.length - 1 - v;
+const SLIDERS = {
+  // while dragged only the number follows: the panel growing under the pointer would move the slider away from it
+  'settings-ui-scale': { out: 'settings-ui-level', get: () => Math.round(uiScale() * 100), show: percent, set: v => setUiScale(v / 100) },
+  'settings-master-volume': { out: 'settings-master-level', get: () => Math.round(masterVolume() * 100), show: percent,
+    set: v => setMasterVolume(v / 100), live: true, done: () => sfx('coin') },   // (how loud it is now)
+  'settings-music-volume': { out: 'settings-music-level', get: () => Math.round(musicVolume() * 100), show: percent, set: v => setMusicVolume(v / 100), live: true },
+  'settings-sound-volume': { out: 'settings-sound-level', get: () => Math.round(soundVolume() * 100), show: percent,
+    set: v => setSoundVolume(v / 100), live: true, done: () => sfx('coin') },
+  'settings-brightness': { out: 'settings-brightness-level', get: () => Math.round(brightness() * 100), show: percent, set: v => setBrightness(v / 100), live: true },
+  // the zoom changes at once while playing, to see it
+  'settings-start-zoom': { out: 'settings-start-zoom-level', get: () => zoomStep(startZoomStep()),
+    show: v => percent(Math.round(DEFAULT_ZOOM / ZOOM_LEVELS[zoomStep(v)] * 100)),
+    set: v => { setStartZoomStep(zoomStep(v)); if (state.mode === 'play') view.zoomTarget = startZoom(); }, live: true },
+  'settings-fov': { out: 'settings-fov-level', get: closeFov, show: v => `${v}\u00b0`, set: setCloseFov, live: true },
+  'settings-look-speed': { out: 'settings-look-level', get: () => Math.round(lookSpeed() * 100), show: percent, set: v => setLookSpeed(v / 100), live: true },
+};
+
 // each language by its own name, so whoever reads it finds theirs
 const languages = dropdown($('settings-language'), { labelledBy: 'settings-language-label', choose: chooseLanguage });
-function renderLanguage() {
-  languages.set(LANGUAGES.map(l => ({ value: l.code, label: l.name, lang: l.code })), languageNow());
-}
 function renderPages() {
   for (const b of pages.children) {
     const on = b.dataset.page === page;
@@ -79,34 +147,16 @@ function renderPages() {
     $(`settings-page-${b.dataset.page}`).classList.toggle('shown', on);
   }
 }
-function renderGraphics() {
-  choice($('settings-fps'), FRAME_RATES.map(f => [f, f ? String(f) : tr('Unlimited')]), frameRate());
-  // Auto (by the screen), then the levels this GPU can do; one asked for beyond them shows as the one used
-  const msaa = antialias();
-  choice($('settings-msaa'), [['auto', tc('antialias', 'Auto')], ...MSAA_LEVELS.map(n => [n, n ? `${n}x` : tc('toggle', 'Off')])], msaa === 'auto' ? msaa : msaaLevel(msaa));
-  choice($('settings-graphics'), [['auto', tc('lighting', 'Auto')], ['high', tc('lighting', 'High')], ['medium', tc('lighting', 'Medium')], ['low', tc('lighting', 'Low')], ['lowest', tc('lighting', 'Lowest')]], graphics());
-  choice($('settings-camera'), [['overview', tr('Overview')], ['close', tc('camera', 'Close')]], cameraMode());
-  const scale = Math.round(uiScale() * 100);
-  $('settings-ui-scale').value = String(scale);
-  $('settings-ui-level').textContent = `${scale}%`;
-}
-function renderMouse() {
-  const inverted = invertLook(), speed = Math.round(lookSpeed() * 100);
-  $('settings-look-speed').value = String(speed);
-  $('settings-look-level').textContent = `${speed}%`;
-  $('settings-invert').textContent = inverted ? tc('toggle', 'On') : tc('toggle', 'Off');
-  $('settings-invert').setAttribute('aria-pressed', String(inverted));
-  $('settings-invert').classList.toggle('on', inverted);
-}
-function renderSound() {
-  const on = musicOn();
-  $('settings-music').textContent = on ? tc('toggle', 'On') : tc('toggle', 'Off');
-  $('settings-music').setAttribute('aria-pressed', String(on));
-  $('settings-music').classList.toggle('on', on);
-  for (const [bar, out, v] of [['settings-music-volume', 'settings-music-level', musicVolume()], ['settings-sound-volume', 'settings-sound-level', soundVolume()]]) {
-    $(bar).value = String(Math.round(v * 100));
-    $(out).textContent = `${Math.round(v * 100)}%`;
+function renderSettings() {
+  languages.set(LANGUAGES.map(l => ({ value: l.code, label: l.name, lang: l.code })), languageNow());
+  for (const [id, [options, now]] of Object.entries(CHOICES)) choice($(id), options(), now());
+  for (const [id, [now]] of Object.entries(TOGGLES)) toggle($(id), now());
+  for (const [id, s] of Object.entries(SLIDERS)) {
+    const v = s.get();
+    $(id).value = String(v);
+    $(s.out).textContent = s.show(v);
   }
+  for (const el of document.querySelectorAll('.settings-fullscreen')) el.hidden = !canFullscreen();
 }
 function keyButton(a, slot) {
   const k = keysOf(a.id)[slot], on = waiting?.id === a.id && waiting.slot === slot;
@@ -134,7 +184,7 @@ function render() {
   const onPage = document.activeElement?.closest?.('#settings-pages');
   const pressed = document.activeElement?.closest?.('.settings-choice [data-value]');
   const chosen = pressed && { box: pressed.parentElement.id, value: pressed.dataset.value };
-  renderPages(); renderLanguage(); renderGraphics(); renderMouse(); renderSound(); renderKeys();
+  renderPages(); renderSettings(); renderKeys();
   // the focus stays on the key place, the tab or the choice it was on (they were drawn anew)
   if (chosen) $(chosen.box).querySelector(`[data-value="${chosen.value}"]`)?.focus();
   else if (place) keysBox.querySelector(`[data-id="${place.id}"][data-slot="${place.slot}"]`)?.focus();
@@ -221,31 +271,22 @@ keysBox.addEventListener('click', e => {
 });
 $('settings-close').onclick = () => closeSettings();
 overlay.addEventListener('pointerdown', e => { if (e.target === overlay) closeSettings(); });
-$('settings-fps').addEventListener('click', e => {
-  const b = e.target.closest('[data-value]');
-  if (b) setFrameRate(Number(b.dataset.value));
-});
-$('settings-camera').addEventListener('click', e => {
-  const b = e.target.closest('[data-value]');
-  if (b) setCameraMode(b.dataset.value);
-});
-$('settings-graphics').addEventListener('click', e => {
-  const b = e.target.closest('[data-value]');
-  if (b) setGraphics(b.dataset.value);
-});
-$('settings-msaa').addEventListener('click', e => {
-  const b = e.target.closest('[data-value]');
-  if (b) setAntialias(b.dataset.value === 'auto' ? 'auto' : Number(b.dataset.value));
-});
-// while dragged only the number follows: the panel growing under the pointer would move the slider away from it
-$('settings-ui-scale').addEventListener('input', e => { $('settings-ui-level').textContent = `${e.target.value}%`; });
-$('settings-ui-scale').addEventListener('change', e => setUiScale(e.target.value / 100));
-$('settings-look-speed').addEventListener('input', e => setLookSpeed(e.target.value / 100));
-$('settings-invert').onclick = () => setInvertLook(!invertLook());
-$('settings-music').onclick = () => setMusic(!musicOn());
-$('settings-music-volume').addEventListener('input', e => setMusicVolume(e.target.value / 100));
-$('settings-sound-volume').addEventListener('input', e => setSoundVolume(e.target.value / 100));
-$('settings-sound-volume').addEventListener('change', () => sfx('coin'));   // how loud it is now
+for (const [id, [options, , set]] of Object.entries(CHOICES)) {
+  $(id).addEventListener('click', e => {
+    const b = e.target.closest('[data-value]');
+    const o = b && options().find(([v]) => String(v) === b.dataset.value);
+    if (o) set(o[0]);
+  });
+}
+for (const [id, [now, set]] of Object.entries(TOGGLES)) $(id).onclick = () => set(!now());
+for (const [id, s] of Object.entries(SLIDERS)) {
+  $(id).addEventListener('input', e => {
+    const v = Number(e.target.value);
+    if (s.live) s.set(v); else $(s.out).textContent = s.show(v);
+  });
+  $(id).addEventListener('change', e => { if (!s.live) s.set(Number(e.target.value)); s.done?.(); });
+}
+onFullscreenChange(render);
 $('settings-reset').onclick = () => {
   if (performance.now() >= resetUntil) {
     resetUntil = performance.now() + CONFIRM_MS;

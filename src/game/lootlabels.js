@@ -1,6 +1,6 @@
-// Name labels over the items on the floor, Diablo style, in their rarity's colour. X shows
-// them for everything in the cube but coins; otherwise only the item under the cursor gets
-// one. A label (or the item itself) is clicked to walk there and pick it up (game/orders.js).
+// Name labels over the items on the floor, Diablo style, in their rarity's colour. X (or the
+// settings: game/settings.js itemNames, which X switches and which is kept) shows them for
+// everything in the cube but coins; otherwise only the item under the cursor gets one. A label (or the item itself) is clicked to walk there and pick it up (game/orders.js).
 // Closed treasure chests are hovered and labelled the same way (coloured by how grand the site
 // is), and clicked to go and open them (game/chests.js); so are villagers with something to say
 // (named in gold, with their trade, core/shops.js), clicked to go and talk to them. A villager
@@ -31,6 +31,7 @@ import { peopleHere } from './npcs.js';
 import { closedChests } from './chests.js';
 import { RARITY } from '../core/gear/rarities.js';
 import { tr, say, onLanguageChange } from '../i18n/i18n.js';
+import { itemNames, setItemNames } from './settings.js';
 
 const layer = document.getElementById('loot-labels'), canvas = renderer.domElement;
 const labels = new Map();   // pickup id (or 'chest:' + site id) -> { el, p, w, h }
@@ -66,7 +67,7 @@ function villagerText(v) {
   const name = v.title ? say(v.title) : GIVERS[v.name] ? tr(GIVERS[v.name].title) : shop ? tr(shop.title) : v.name;
   return `${mark ? `${mark} ` : ''}${name}${shop ? ` · ${tr(shop.trade)}` : ''}`;
 }
-export function toggleLabels() { state.showLabels = !state.showLabels; }
+export function toggleLabels() { setItemNames(!itemNames()); }
 
 function label(p) {
   let l = labels.get(keyOf(p));
@@ -121,7 +122,7 @@ export function updateLootLabels() {
       if (d < Math.min(1, best)) { best = d; hovered = p; }
     }
   }
-  const show = [...spots.keys()].filter(p => state.showLabels || p === hovered || p.questItem || isVillager(p) && villagerText(p).match(/^[!?] /));
+  const show = [...spots.keys()].filter(p => itemNames() || p === hovered || p.questItem || isVillager(p) && villagerText(p).match(/^[!?] /));
   // nearest to the camera first; each label goes up past any it would cover
   show.sort((a, b) => spots.get(b).y - spots.get(a).y);
   const placed = [], keep = new Set();

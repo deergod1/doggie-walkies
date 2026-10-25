@@ -15,7 +15,9 @@ layers, a format cheat sheet and a full example score.
 
 Music is off by default; the settings (in the Esc menu and the main menu) or M turn it on and
 off, and set its volume apart from the sound effects' (`src/game/settings.js`, kept in
-`crawler.settings`; the music plays into its own bus of `src/audio/context.js`). The synth is
+`crawler.settings`; the music plays into its own bus of `src/audio/context.js`). Both buses go
+into a master with the volume of everything, which is quiet while the game is behind another tab
+or window (a setting: on at first, but not in the guide's game window). The synth is
 built for the first song and leaves the bus a few seconds after the music stops, so with the
 music off its compressors and reverb cost nothing.
 

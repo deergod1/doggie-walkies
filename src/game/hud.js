@@ -7,6 +7,7 @@ import { state } from './state.js';
 import { population } from '../core/spawns.js';
 import { renderer } from '../render/scene.js';
 import { baked } from '../render/bake.js';
+import { reduceMotion } from './settings.js';
 
 const $ = id => document.getElementById(id);
 const shown = {};
@@ -46,9 +47,10 @@ export function updateHud(player, map) {
   }
 }
 
+// the screen flashing red (hurt); a faint one where motion is reduced (the settings)
 export function flash() {
   const f = $('flash');
-  f.style.transition = 'none'; f.style.opacity = 0.45;
+  f.style.transition = 'none'; f.style.opacity = reduceMotion() ? 0.15 : 0.45;
   requestAnimationFrame(() => { f.style.transition = 'opacity .5s'; f.style.opacity = 0; });
 }
 

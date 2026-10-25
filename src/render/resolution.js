@@ -1,12 +1,15 @@
 // The render resolution follows the frame rate (core/resolution.js): main.js hands over when each
 // frame began, after it rendered. With the lighting on Auto the quality level (game/quality.js)
 // goes down before the resolution; the anti-aliasing stays as set (render/msaa.js).
-// ?res=<pixel ratio> pins the resolution (1: CSS pixels), e.g. to compare.
+// The settings (game/settings.js resolution) may pin it too: a share of the screen's own pixels
+// (main.js setResolution). ?res=<pixel ratio> pins it over both (1: CSS pixels), e.g. to compare.
 import { requestFit } from './scene.js';
 import { resolutionController } from '../core/resolution.js';
 
 const pinned = Number(new URLSearchParams(location.search).get('res'));
-const control = pinned > 0 ? null : resolutionController(Math.min(devicePixelRatio, 2));
+const native = () => Math.min(devicePixelRatio, 2);
+const control = pinned > 0 ? null : resolutionController(native());
+let share = 'auto';
 let last = 0;
 
 // the canvas takes the new ratio right before the next frame is drawn (scene.js fitView): resized
@@ -23,6 +26,14 @@ export function tickResolution(start, fps = 0, drawn = true) {
   if (!control || !drawn) return;
   const ratio = control.tick(interval, performance.now() - start, fps ? 1000 / fps : 0);
   if (ratio) apply(ratio);
+}
+
+// 'auto': it follows the frame rate, between the screen's pixels and half of them (at least 0.6);
+// a number: that share of the screen's pixels, always
+export function setResolution(s) {
+  if (!control || s === share) return;
+  share = s;
+  apply(s === 'auto' ? control.setRange(native()) : control.setRange(native() * s, native() * s));
 }
 
 // the quality levels Auto steps through (levels above the lowest; 0: not on Auto) and the one

@@ -29,7 +29,9 @@ body.rewinding #rewind { opacity: 1; animation: rewind-lines .6s linear infinite
   color: #eafcff; text-shadow: 0 0 18px #7fd8ff, 0 0 4px #ffffff; letter-spacing: -8px; animation: rewind-blink 1s steps(2) infinite; }
 @keyframes rewind-lines { to { background-position: 0 12px, 0 0; } }
 @keyframes rewind-blink { 50% { opacity: .3; } }
-#minimap { position: absolute; top: calc(14px + var(--safe-t)); right: calc(16px + var(--safe-r)); pointer-events: none; width: 180px; height: auto; }
+#minimap { position: absolute; top: calc(14px + var(--safe-t)); right: calc(16px + var(--safe-r)); pointer-events: none; width: calc(180px * var(--map, 1)); height: auto; }
+/* the minimap's size (the settings, game/display.js): --map times its width, the quest under it follows; 0 hides it */
+body.no-map #minimap { display: none; }
 #loading { position: absolute; left: 50%; bottom: 90px; transform: translateX(-50%); display: flex; align-items: center; gap: 8px;
   color: #e6e9ef; font: 13px var(--font-display); letter-spacing: 1px; background: #0b0d12cc; border: 1px solid #444c5c; border-radius: 4px;
   padding: 6px 12px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 10; }
@@ -188,18 +190,19 @@ body.touch :is(#leave-panel, #death-panel) kbd { display: none; }
 #settings-close { margin-left: auto; color: #8a96a8 !important; background: none !important; border: none !important; padding: 0 !important; font-size: 11px !important; }
 #settings-reset { margin-left: auto; padding: 2px 8px !important; font-size: 11px !important; color: #aab3c2 !important; }
 #settings-reset.confirm { color: #ffd0c4 !important; border-color: #b0563f !important; background: #3a2420 !important; }
-.settings-graphics { display: grid; grid-template-columns: 9em 1fr; align-items: center; gap: 8px 12px; color: #e6e9ef; }
 /* the mouse turning the view (game/camerakey.js) */
 body.orbiting, body.orbiting * { cursor: none !important; }
-.settings-choice { display: flex; flex-wrap: wrap; gap: 4px; }
+/* a page's rows: the name, then a choice (both columns), a toggle or a slider and its number */
+.settings-rows { display: grid; grid-template-columns: 11em 1fr 3.5em; align-items: center; gap: 8px 12px; color: #e6e9ef; }
+.settings-choice { display: flex; flex-wrap: wrap; gap: 4px; grid-column: span 2; }
 .settings-choice button { min-width: 4em; }
 #settings-panel .settings-choice button.on { color: #ffe4ae; border-color: #8a7a52; background: #2f3020; }
-.settings-sound { display: grid; grid-template-columns: 9em 1fr 3.5em; align-items: center; gap: 8px 12px; color: #e6e9ef; }
-.settings-sound button { justify-self: start; min-width: 5em; }
+.settings-rows .settings-toggle { justify-self: start; min-width: 5em; }
 #settings-language { justify-self: start; width: min(12em, 100%); }
-#settings-music.on, #settings-invert.on { color: #ffe4ae; border-color: #8a7a52; background: #2f3020; }
-.settings-sound input[type=range] { width: 100%; margin: 0; accent-color: #ffcf7a; }
-.settings-sound output { color: #aab3c2; text-align: right; }
+#settings-panel .settings-toggle.on { color: #ffe4ae; border-color: #8a7a52; background: #2f3020; }
+.settings-rows input[type=range] { width: 100%; margin: 0; accent-color: #ffcf7a; }
+.settings-rows output { color: #aab3c2; text-align: right; }
+.settings-rows [hidden] { display: none; }
 .settings-note { margin: 0 0 4px; color: #6f7a8c; font-size: 14px; }
 .settings-key { display: grid; grid-template-columns: 1fr 8.5em 8.5em; align-items: center; gap: 6px; height: 26px; color: #e6e9ef; }
 .settings-key span { color: #aab3c2; }
@@ -345,7 +348,8 @@ body.look #loot-labels .loot-label { pointer-events: none; }
   42.9% { color: #5cf07a; --rarity: #5cf07a; } 57.1% { color: #4ad8ff; --rarity: #4ad8ff; } 71.4% { color: #8a7aff; --rarity: #8a7aff; }
   85.7% { color: #ff6ad5; --rarity: #ff6ad5; } }
 .rainbow { animation: rainbow 2.5s linear infinite; }
-@media (prefers-reduced-motion: reduce) { .rainbow { animation: none; } }
+/* reducing motion (the settings: the system's choice at first, game/display.js): nothing blinks, flows or pops */
+body.calm :is(.rainbow, #rewind, #rewind *, #quickbar.assigning.ready, #effects .fx.ending, #touch-use) { animation: none !important; }
 #inventory-panel footer { font-size: 14px; color: #9ea9b6; }
 /* the tabs: the bag or the quests (game/inventory.js, game/questpanel.js) */
 #inventory-tabs { flex: none; display: flex; gap: 4px; }
@@ -526,10 +530,10 @@ body.touch #quickbar .qb-menu { border-color: #444c5c; }
 body.touch #quickbar .qb-menu svg { fill: #c5cdbc; }
 body.touch #effects { top: calc(72px + env(safe-area-inset-top)); bottom: auto; }
 body.touch #teleport-menu { top: calc(112px + env(safe-area-inset-top)); bottom: auto; }
-body.touch #minimap { width: 120px; height: auto; top: calc(8px + env(safe-area-inset-top)); right: calc(8px + env(safe-area-inset-right)); }
+body.touch #minimap { width: calc(120px * var(--map, 1)); height: auto; top: calc(8px + env(safe-area-inset-top)); right: calc(8px + env(safe-area-inset-right)); }
 body.touch #loading { bottom: auto; top: 110px; }
 body.touch #inventory-overlay { padding: calc(70px + env(safe-area-inset-top)) 12px 12px; }
-body.touch.ui-w640 #minimap { top: calc(70px + env(safe-area-inset-top)); width: 96px; }
+body.touch.ui-w640 #minimap { top: calc(70px + env(safe-area-inset-top)); width: calc(96px * var(--map, 1)); }
 body.touch #chat { width: min(420px, 44%); min-width: 0; }
 /* a tablet (not a phone; at the UI scale, game/uiscale.js): the quick bar back at the bottom, centred but always left of the
    jump button (the touch bar is 423px wide: 6 + 2 buttons of 46px, gaps, margins, padding); the chat lifted over it, the
@@ -641,11 +645,11 @@ body.in-menu :is(#quickbar, #teleport-menu, #chat, #minimap, #effects, #touch, #
 .cart-bar b { display: block; height: 100%; background: #e6c35a; transition: width .2s; }
 .cart-bar[data-phase="countdown"] span::after, .cart-bar[data-phase="between"] span::after { content: ' · get ready'; }
 /* the quest followed (game/questpanel.js Track): its title and what to do now, under the minimap */
-#quest-track { position: fixed; top: calc(260px + var(--safe-t)); right: calc(16px + var(--safe-r)); width: 200px; z-index: 3; pointer-events: none;
+#quest-track { position: fixed; top: calc(38px + 222px * var(--map, 1) + var(--safe-t)); right: calc(16px + var(--safe-r)); width: 200px; z-index: 3; pointer-events: none;
   padding: 6px 9px; background: #0b0e14b8; border: 1px solid #ffffff1f; border-radius: 4px; font: 15px/1.3 var(--font-body); color: #c9d2dc; }
 #quest-track[hidden] { display: none; }
 #quest-track b { display: block; color: #e6c35a; font: 13px/1.5 var(--font-display); }
-body.touch #quest-track { top: calc(150px + env(safe-area-inset-top)); width: 150px; font-size: 14px; }
+body.touch #quest-track { top: calc(2px + 148px * var(--map, 1) + env(safe-area-inset-top)); width: 150px; font-size: 14px; }
 /* a trial room (game/trials.js): its name and what it needs while it runs, the banner as it arms */
 #trial-hud { position: fixed; top: calc(14px + var(--safe-t)); left: 50%; transform: translateX(-50%); z-index: 3; pointer-events: none;
   min-width: 220px; padding: 6px 12px 8px; background: #0b0e14c8; border: 1px solid #ffffff26; border-radius: 4px; font: 15px/1.35 var(--font-body);

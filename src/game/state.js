@@ -45,7 +45,6 @@ export const state = {
   menuOpen: false,   // the Esc menu (game/escmenu.js)
   leaveAsk: null,   // "Leave the fight?" asked: { key, dir } (game/leavefight.js)
   deathAsk: null,   // "You died" asks what next: { back } (game/deathask.js)
-  showLabels: false,   // X: name labels over every item on the floor (game/lootlabels.js)
   run: createRun(),
   statusMsg: '', statusUntil: 0,
   // the world of cubes and where we are in it; lookDepth: the depth the lighting shows

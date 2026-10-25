@@ -2,7 +2,7 @@
 
 The game has two views. The **overview** (the default) looks down at 44° from far away with a
 narrow lens (28°), so the whole cube shows like a model on a table; zoomed in it follows the
-hero. The **close view** sits behind the hero with a wide lens (60°), the mouse looking around
+hero. The **close view** sits behind the hero with a wide lens (60°; 50° to 90° in the settings), the mouse looking around
 (captured, as in other third-person games). It is meant for finding the way through tunnels,
 caves and the deep, where the overview's cutaway gets busy, and it works everywhere: cubes,
 tunnels, house interiors, while travelling.
@@ -33,6 +33,9 @@ Tab is taken anyway.
 
 Q / E still turn by a quarter in both views; the zoom keys and the wheel keep their six
 presets, which in the close view set the arm's length (`closeDistance`: about 1.2 to 4.7 units).
+The settings can turn the wheel round and pick the preset a game starts at (the fourth at first).
+Where motion is reduced (the settings; at first as the system says) hits do not kick the camera
+and the ground does not shake it.
 WASD always moves relative to the camera, so in the close view W runs away from it.
 
 ## Mouse look (`game/mouselook.js`)

@@ -3,7 +3,9 @@
 The game plays with the mouse alone, Diablo style (`src/game/orders.js`): click the floor to walk
 there, an enemy to go and hit it, an item, chest, villager or trial part to go and use it, a
 portal or a door to go through it. Holding
-the button keeps walking towards the cursor. WASD (or the touch stick) takes over at once. Taps
+the button keeps walking towards the cursor. The settings can turn walking to the floor off
+(Input, "Click the floor to walk": `game/input.js`): a click then only goes for what is under the
+cursor, as a tap on a touch screen does. WASD (or the touch stick) takes over at once. Taps
 on a touch screen are the same orders.
 
 ## Ways out

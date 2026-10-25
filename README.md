@@ -56,14 +56,28 @@ docs that explain how the game works, from the big ideas down to the real code:
     on the hero; Cancel leaves it unchanged. Playing together the others see it (sent once, in
     pieces). See `docs/skins.md`.
   - Settings (`src/game/settings.js`, the menu in `src/game/settingsmenu.js`, from the Esc menu
-    and the main menu; pages General, Graphics and Input in tabs on the left): the language (English,
-    German or Indonesian, in a dropdown: `src/game/dropdown.js`; at first the browser's), the frame rate cap (30, 60 or unlimited, `src/main.js`; 30 at first on touch screens), the lighting's quality level (Auto, or High to Lowest: `src/game/quality.js`, `docs/lighting.md`), the anti-aliasing (Auto: 2x MSAA on high-DPI
-    screens, 4x elsewhere, picked once; or off to 8x, `src/render/msaa.js`), the camera (the overview or the close view behind the hero; Tab or C
-    taps between them: `src/game/camera.js`, `docs/camera.md`), the close view's mouse look
-    (speed, invert up / down: `src/game/mouselook.js`), music on / off,
-    the music's and the sounds' volume, and the keys. Every
-    control is an action with a primary and a secondary key (`src/core/keybinds.js`: codes, so
-    WASD keeps its place on any layout); kept in `localStorage` as `crawler.settings`.
+    and the main menu; pages in tabs on the left):
+    - General: the language (English, German or Indonesian, in a dropdown: `src/game/dropdown.js`;
+      at first the browser's), the UI scale, the minimap's size (or none), the item names on the
+      floor when hovered or always (X switches it too), the damage numbers, fullscreen; music on /
+      off, the volume of everything, the music's and the sounds', and quiet in the background
+      (another tab or window in front; on at first, but not in the guide's game window).
+    - Graphics: the frame rate cap (30, 60 or unlimited, `src/main.js`; 30 at first on touch
+      screens), the render resolution (Auto: it follows the frame rate, or 50% to 100% of the
+      screen's pixels: `src/render/resolution.js`), the anti-aliasing (Auto: 2x MSAA on high-DPI
+      screens, 4x elsewhere, picked once; or off to 8x, `src/render/msaa.js`), the lighting's
+      quality level (Auto, or Lowest to High: `src/game/quality.js`, `docs/lighting.md`), the
+      particles; the camera (the overview or the close view behind the hero; Tab or C taps
+      between them: `src/game/camera.js`, `docs/camera.md`), the zoom a game starts at, the close
+      view's field of view; for comfort the brightness of the world and reducing motion (no camera
+      kicks or shaking, a fainter red flash, nothing blinking; at first as the system says:
+      `src/game/display.js`). Levels show Auto first, then from the least to the most.
+    - Input: the close view's mouse look (speed, invert up / down: `src/game/mouselook.js`),
+      clicking the floor to walk, inverting the wheel's zoom, and the keys. Every control is an
+      action with a primary and a secondary key (`src/core/keybinds.js`: codes, so WASD keeps its
+      place on any layout).
+
+    Kept in `localStorage` as `crawler.settings`.
   - Languages (`src/i18n/`, `docs/i18n.md`): the English text in the code is the message
     (`tr('Resume')`), each other language a catalog from it (`src/i18n/de/`, `src/i18n/id/`; which
     languages the game and the guide want: `src/i18n/languages.js`), with the grammar a

@@ -33,7 +33,7 @@ import { throwTarget } from './throws.js';
 import { lineOfFire } from './shots.js';
 import { clearLine } from '../physics/enemynav.js';
 import { allEnemies } from './enemies.js';
-import { toggleMusic, keysOf, bindings, actionsOf } from './settings.js';
+import { toggleMusic, keysOf, bindings, actionsOf, clickMove, invertZoom } from './settings.js';
 import { settingsOpen } from './settingsmenu.js';
 import { actionsFor, isChar, isModifier, BAR_ACTIONS, MOVE_ACTIONS } from '../core/keybinds.js';
 import { barKey } from './quickbar.js';
@@ -188,7 +188,7 @@ addEventListener('pointerdown', e => {
   if (e.button !== 0 || state.transitioning || state.inventoryOpen) return;
   e.preventDefault();
   pointer.down = true;
-  click(true);
+  click(clickMove());   // (the settings: off, the floor does not walk)
 });
 // a tap on the game at (x, y) px (game/touch.js): a click there, except that the floor does not
 // walk; nothing stays hovered afterwards
@@ -201,7 +201,7 @@ export function tapGame(x, y) {
 }
 // what a click on the game does: with a flask in hand, throw it there; else go for the enemy,
 // villager, item, chest, trial part or way out (a portal, a door) under the cursor, or (walk) walk
-// to the floor there
+// to the floor there (a mouse's click, unless the settings turn that off)
 function click(walk) {
   if (readiedFlask(player)) {
     pointer.mode = null; clearOrder();
@@ -288,7 +288,7 @@ export function lookAttack(click = false) {
 export const lookHeld = () => pointer.down && pointer.mode === 'look' && mouseLook();
 
 addEventListener('wheel', e => {
-  if (!state.inventoryOpen && !state.menuOpen && state.mode === 'play') view.zoomTarget = stepZoom(view.zoomTarget, Math.sign(e.deltaY));
+  if (!state.inventoryOpen && !state.menuOpen && state.mode === 'play') view.zoomTarget = stepZoom(view.zoomTarget, Math.sign(e.deltaY) * (invertZoom() ? -1 : 1));
 }, { passive: true });
 
 // desired direction in world space (WASD or the touch stick, relative to the camera)

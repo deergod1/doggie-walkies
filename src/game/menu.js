@@ -34,7 +34,7 @@ import { rigReady } from '../render/figure.js';
 import { renderer } from '../render/scene.js';
 import { skinNameKey, MAX_SKINS } from '../core/skin.js';
 import { isInterior } from '../world/town.js';
-import { DEFAULT_ZOOM } from '../core/zoom.js';
+import { startZoom } from './settings.js';
 import { store, play, playAsGuest, stopSaving, newHero, newSavedWorld, forget } from './save.js';
 import { cleanName, heroLevel, heroStats, savedWorldName, MAX_HEROES, MAX_WORLDS } from '../core/save.js';
 import { readSeed } from '../core/names.js';
@@ -101,7 +101,7 @@ function closeMainMenu() {
   closeSettings();
   stopShowcase();
   showPortrait(false); $('title-hero').hidden = true;
-  view.yaw = view.yawTarget = -Math.PI / 4; view.zoom = view.zoomTarget = DEFAULT_ZOOM;
+  view.yaw = view.yawTarget = -Math.PI / 4; view.zoom = view.zoomTarget = startZoom();   // (the settings')
   state.mode = 'play';
 }
 

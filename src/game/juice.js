@@ -10,6 +10,10 @@ import { cannonJet, jetSplash } from '../render/giantfx.js';
 import { groundAt } from '../physics/collide.js';
 import { N } from '../core/constants.js';
 import { tr } from '../i18n/i18n.js';
+import { reduceMotion, damageNumbers } from './settings.js';
+
+// a damage number rising over whoever took it, unless the settings turn them off
+const number = (...args) => { if (damageNumbers()) floatText(...args); };
 
 let stop = 0;
 // world-space camera offset that springs back (camera.js)
@@ -24,12 +28,13 @@ export function timeScale(elapsed) {
   return 0.03;
 }
 export function cameraKick(dx, dz, amount, dy = 0) {
+  if (reduceMotion()) return;   // (the settings)
   const l = Math.hypot(dx, dz) || 1;
   kick.x += dx / l * amount; kick.z += dz / l * amount; kick.y += dy;
 }
 // the ground shaking (camera.js trembles the view): `amount` rad at its strongest, dying away
 export const tremor = { a: 0, t: 0 };
-export function quake(amount) { tremor.a = Math.min(0.05, Math.max(tremor.a, amount)); }
+export function quake(amount) { if (!reduceMotion()) tremor.a = Math.min(0.05, Math.max(tremor.a, amount)); }
 // a quake at (x, z) felt by our player: `amount` right there, nothing from `far` cells away
 export function quakeAt(x, z, amount, far) {
   const d = Math.hypot(x - player.x, z - player.z);
@@ -61,7 +66,7 @@ export function enemyHitFx(e, dmg, killed, dx, dz, crit = false, felt = true) {
       size: rand(0.08, 0.14), color: i % 2 ? c1 : c2, alpha: 0.95, gravity: 11 });
   }
   const top = { x: e.x, y: e.y + e.profile.bodyHeight + 0.25, z: e.z };
-  floatText(crit ? dmg + '!' : String(dmg), top, { color: crit ? '#ffd23a' : killed ? '#ffb347' : '#ffffff',
+  number(crit ? dmg + '!' : String(dmg), top, { color: crit ? '#ffd23a' : killed ? '#ffb347' : '#ffffff',
     size: crit ? 0.36 : killed ? 0.3 : 0.24, life: 0.8, rise: 0.9, drift: rand(-0.35, 0.35), pop: crit ? 1.1 : 0.7 });
   if (felt) { if (crit) hitstop(killed ? 0.09 : 0.055); cameraKick(nx, nz, killed ? 0.16 : 0.08); }
   sfx(killed ? 'kill' : 'hit', { at: e, pitch: e.profile.pitch ?? 1.1 });
@@ -112,14 +117,14 @@ export function shotFx(shot, what) {
 
 // the player took dmg from something at (fx, fz)
 export function playerHurtFx(dmg, fx, fz) {
-  floatText('-' + Math.ceil(dmg), q => q.set(player.x, player.visY + 1.3, player.z), { color: '#ff6a5a', size: 0.24, life: 0.9, rise: 0.7, pop: 0.6 });
+  number('-' + Math.ceil(dmg), q => q.set(player.x, player.visY + 1.3, player.z), { color: '#ff6a5a', size: 0.24, life: 0.9, rise: 0.7, pop: 0.6 });
   cameraKick(player.x - fx, player.z - fz, 0.12, -0.05);
   sfx('hurt', { at: player });
 }
 
 // burn damage ticking while the player is on fire
 export function burnHurtFx(dmg) {
-  floatText('-' + Math.ceil(dmg), q => q.set(player.x, player.visY + 1.15, player.z), { color: '#ffa040', size: 0.2, life: 0.7, rise: 0.8,
+  number('-' + Math.ceil(dmg), q => q.set(player.x, player.visY + 1.15, player.z), { color: '#ffa040', size: 0.2, life: 0.7, rise: 0.8,
     drift: rand(-0.3, 0.3), pop: 0.4 });
   sfx('sizzle', { at: player, volume: 0.7 });
 }
@@ -684,7 +689,7 @@ export function summonFx(mouth, list, look = 'triangles') {
 
 // poison ticking while the player is poisoned (core/status.js)
 export function poisonHurtFx(dmg) {
-  floatText('-' + Math.ceil(dmg), q => q.set(player.x, player.visY + 1.15, player.z), { color: '#9be05a', size: 0.2, life: 0.7, rise: 0.8,
+  number('-' + Math.ceil(dmg), q => q.set(player.x, player.visY + 1.15, player.z), { color: '#9be05a', size: 0.2, life: 0.7, rise: 0.8,
     drift: rand(-0.3, 0.3), pop: 0.4 });
   sfx('poison', { at: player, volume: 0.6 });
 }
@@ -693,7 +698,7 @@ const STATUS_COLOR = { burning: '#ffa040', toxic: '#9be05a', meteor: '#c8ff6a' }
 export function statusHurtFx(e, dmg, status, killed) {
   if (e.proxy) return;
   const top = { x: e.x, y: e.y + e.profile.bodyHeight + 0.2, z: e.z };
-  floatText(String(dmg), top, { color: STATUS_COLOR[status], size: killed ? 0.26 : 0.19, life: 0.7, rise: 0.8, drift: rand(-0.3, 0.3), pop: 0.4 });
+  number(String(dmg), top, { color: STATUS_COLOR[status], size: killed ? 0.26 : 0.19, life: 0.7, rise: 0.8, drift: rand(-0.3, 0.3), pop: 0.4 });
   if (killed) sfx('kill', { at: e, pitch: e.profile.pitch ?? 1.1 });
 }
 

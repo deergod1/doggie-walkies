@@ -30,7 +30,7 @@ import { tickFluidDeath } from './render/fluiddeath.js';
 import { applyLook } from './render/look.js';
 import { updateDayCycle, lookCycle } from './game/daycycle.js';
 import { tickSky } from './render/sky.js';
-import { tickResolution } from './render/resolution.js';
+import { tickResolution, setResolution } from './render/resolution.js';
 import { keepPrograms } from './render/programs.js';
 import { updatePlayerBar } from './render/playerbar.js';
 import { updatePortalBar } from './render/portalbar.js';
@@ -46,7 +46,7 @@ import './game/uiscale.js';  // the HUD and the menus at the UI scale of the set
 import { updateLoot } from './game/loot.js';
 import { updateLootLabels } from './game/lootlabels.js';
 import { tickFloatText } from './render/floattext.js';
-import { tickParticles } from './render/particles.js';
+import { tickParticles, setParticleShare } from './render/particles.js';
 import { tickPortalCloud } from './render/portalcloud.js';
 import { timeScale } from './game/juice.js';
 import { gameTime, pace } from './game/pace.js';
@@ -99,7 +99,8 @@ import { musicInfo } from './audio/music.js';
 import { travelling, updateTravel, drawTravelEnemies } from './game/travel.js';
 import { updateOnline, hostGame, joinGame, leaveGame, sessionStatus } from './net/session.js';
 import { online } from './net/online.js';
-import { frameRate, antialiasSamples, onSettingsChange, chooseLanguage } from './game/settings.js';
+import { frameRate, antialiasSamples, resolution, particleShare, onSettingsChange, chooseLanguage } from './game/settings.js';
+import './game/display.js';   // the brightness, the minimap's size, reducing motion (the settings)
 import { setMsaa, beginFrame, endFrame } from './render/msaa.js';
 import { updateSaves, store, play, saveAs, saveNow, savedHero, savedWorld } from './game/save.js';
 import { openMainMenu, updateMenu, quitToMenu, heroBox } from './game/menu.js';
@@ -274,9 +275,11 @@ function menuFrame(dt, start) {
   requestAnimationFrame(frame);
 }
 
-// the anti-aliasing follows the settings (render/msaa.js), and nothing else
-setMsaa(antialiasSamples());
-onSettingsChange(() => setMsaa(antialiasSamples()));
+// the anti-aliasing (render/msaa.js: nothing else changes it), the render resolution and the
+// particles follow the settings
+const graphicsSettings = () => { setMsaa(antialiasSamples()); setResolution(resolution()); setParticleShare(particleShare()); };
+graphicsSettings();
+onSettingsChange(graphicsSettings);
 
 // the dev tools and ?seed= start in a world, everyone else in the main menu (game/state.js mode)
 if (state.mode === 'play') {
