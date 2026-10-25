@@ -121,28 +121,38 @@ test also checks that every score in `music/` is one of them.
 
 | Song | Themes (act) | Key, tempo, meter | Sound | `sense` drums |
 |---|---|---|---|---|
-| `title` | main menu | F major, then D minor and back, 92, 3/4 | crystal lead and echo, harp, glass harmonica chords and line, singing bowl, glass taps, wind chimes; explore only | — |
-| `town` | town, merchant camp | G major, 100, 3/4 | clarinet and echo, guitar, accordion off-beats, upright bass; explore and treasure only | — |
-| `overworld` | the meadows, cloud kingdom, lagoon isles, karst terraces, dark forest (I) | E Dorian, 80 | marimba ostinato against the bar, music box echo, flute, bassoon | timpani, toms, shaker |
-| `peaks` | snowy peaks, prayer highlands (I) | B Dorian, 56, 6/8 | oboe and echo, harp with added seconds, high pad, bell | timpani, triangle, bodhran |
-| `badlands` | salt flats, badlands, deep canyon (I) | A minor, Andalusian (Am G F E), 84 | whistled flute with a dotted-eighth echo, guitar, trumpet in the fight | woodblock gallop, low tom, shaker |
-| `roots` | root caves (II) | D Dorian, 76 | clarinet and echo, pizz ostinato in 3+3+2, fretless bass, music box drips | timpani, bodhran, woodblock |
-| `frozen` | sunken grotto, frozen caves (II) | F# minor, 72, 3/4 | low flute and echo, celesta arpeggios, vibes, a Phrygian G | timpani, rim, triangle |
-| `swamp` | honey hive, fungal swamp, slime marsh (II) | G minor sevenths, 84, swung | oboe, bassoon, bubbling marimba, sliding fretless bass | conga, tumba, guiro |
-| `nests` | spider nests, ossuary (III) | C minor with Db and Bdim, 100 | fiddle, scurrying harpsichord, low wordless choir | hi-hat ticking, tom heartbeat, timpani |
-| `mines` | dwarven forge (II), crystal mines (III) | C Lydian, then A minor, 90 | flute and echo, vibes arpeggios, glockenspiel, hammering fretless bass | woodblock pickaxe, triangle, toms |
-| `ruins` | jungle cenote (II), buried ruins (III) | D Phrygian dominant, 70 | oboe and echo, harp, a choir drone on D and A; organ for a guardian | timpani, bodhran, rim |
-| `volcanic` | volcanic depths (III) | C Phrygian, 84 | horn over a hammering pizz ostinato, tuba, an anvil bell; thunder for a guardian | taiko toms, timpani |
-| `abyss` | obsidian abyss (III) | minor chords a tritone apart over an E pedal, 60 | choir, bell tolls, a broken music box | heartbeat, thunder, timpani, toms |
-| `core` | the core (20) | E harmonic minor, 70 | the overworld's tune in minor, harp, organ, tuba, bell | timpani, toms |
+| `title` | main menu | A minor (Westworld's, with Bb and G#), 67, 6/8 | The Glass Bird: a kid's toy tune on crystal over a rocking crystal ostinato, the bird's calls and answers, glass harmonica, singing bowl, glass heartbeat, fretless bass; it cracks and shatters like the splash screen's bird (knock, ring, shatter, a swell onto D), then the pieces ring; explore only | — |
+| `town` | town, merchant camp | D minor, 92, 3/4 | a dark waltz: clarinet opening on the toy tune (D E F A G), accordion off-beats, music box picking high; explore and treasure only | — |
+| `overworld` | the meadows, cloud kingdom, lagoon isles, karst terraces, dark forest (I) | A minor, 76 | flute opening on the toy tune (A B C, E D, C), marimba rocking on the step above each root, bassoon line | low toms, shaker |
+| `peaks` | snowy peaks, prayer highlands (I) | E Phrygian (A minor's notes on E), 60 | a theremin sliding like wind, crystal quarters, low harp | bodhran, triangle |
+| `badlands` | salt flats, badlands, deep canyon (I) | A minor, Andalusian (Am G F E), 60, 6/8 | lonely fiddle, strummed guitar, harp high | woodblock gallop, low tom |
+| `roots` | root caves (II) | D minor, 58, 6/8 | vibraphone tune like water, rocking pizzicato, crystal drips | bodhran, woodblock |
+| `frozen` | sunken grotto, frozen caves (II) | E Phrygian, 72, 3/4 | low flute opening on the toy tune (E F G B A), celesta arpeggios with added seconds, vibes on the second beat | rim, triangle |
+| `swamp` | honey hive, fungal swamp, slime marsh (II) | D minor, a Phrygian Eb, 58, 6/8 | low clarinet, a marimba ostinato with the crack's half step in it, pizzicato off-beats; the calls are half steps (the bird broke here) | conga, guiro |
+| `nests` | spider nests, ossuary (III) | A Phrygian (the title's Bb), 96 | thin fiddle with pieces of the toy tune (A Bb C, then E), harpsichord scurrying in sixteenths, low choir | hi-hat ticking, low tom |
+| `mines` | dwarven forge (II), crystal mines (III) | A minor, 60, 6/8 | crystal tune over rocking vibes, a glockenspiel spark, ending on the toy tune | woodblock pickaxe, triangle |
+| `ruins` | jungle cenote (II), buried ruins (III) | E Phrygian dominant (A harmonic minor on E), 70 | oboe opening on the toy tune (E F G# B A), harp, a choir drone on E | bodhran, rim |
+| `volcanic` | volcanic depths (III) | D Phrygian, 66 | crystal tune in single notes like shards, low crystal ostinato on the half step, organ chords | deep toms, timbale |
+| `abyss` | obsidian abyss (III) | minor chords a tritone apart over an E pedal, 56 | a theremin singing the toy tune a note a bar, a bell tolling, low choir | far thunder, low tom |
+| `core` | the core (20) | A minor, 67, 6/8 (the title's) | the title's toy tune whole again on crystal, the rocking crystal, harp; its Bb turns to B the second time (mended) | low tom, triangle |
 | `gusto` | Gusto's arena (depth 0's descent), while he lives | D minor with a Phrygian Eb, Bb A Eb Gm and an Ab a tritone off, 150 | horn tune, short low strings in 3+3+2, organ and brass stabs, choir, music box motif, bell, theremin; his fight's own moods and stings (above) | taiko and a tom heartbeat |
 
 Every song but the title, the town and the bosses' own has all six moods. Combat keeps the exploration tempo and meter,
 but replaces gentle motion with two combat-only voices: `drive` (an accented, short-gated
-ostinato) and `war` (denser battle drums with four-bar fills). Horns re-articulate the tune,
-brass attacks on the downbeat, and crashes have more weight. These layers also stay in
-`boss`, under its choir, organ or gong; no combat arrangement exceeds 12 active voices.
-The exploration, treasure, sense and rise arrangements are unchanged, and town stays peaceful.
+ostinato) and `war` (denser battle drums with four-bar fills). The horn re-articulates the tune,
+an octave down, accenting each bar, and glass breaking (`shatter`) is the crash. These layers also
+stay in `boss`, under its choir and gong; no combat arrangement exceeds 12 active voices.
 
-The tunes share the game's motif, scale degrees 1 2 3 5 4 (the overworld's E F# G B A), in
-each song's own mode.
+The songs grew out of the title song (`title`, The Glass Bird) and share its frame: a glass core
+under each place's own instruments. The glass bird's call (a crystal grace note falling onto two
+notes a step apart) answers the tune's phrases; glass harmonica chords and a low fretless bass that
+harmonizes the tune rather than doubling it. `treasure` sparkles on crystal; `sense` drops the
+tune for a cracked crystal ostinato (the half step above each root) over a glass heartbeat
+(`glasstap`), the place's drums and a singing bowl. The keys stay near the title's A minor
+(A or D minor, or its notes on E or F), except the volcanic depths and the abyss.
+
+The tunes share the game's motif, scale degrees 1 2 3 5 4: the opening of the title's toy tune
+(A B C E D), in each song's own mode. It follows the story (`docs/story.md`): whole in the town
+and act I, varied in act II, where the calls narrow to half steps at its bottom (the swamp, where
+the bird broke); in act III only pieces of it are left and the calls are half steps; at the core
+it is whole again, its cracked Bb mended to B.

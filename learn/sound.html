@@ -76,26 +76,28 @@
       <p lang="de">Die Musik ist auch nicht aufgenommen. Jedes der 13 Lieder ist eine <b>Textdatei</b> im Ordner <code>music/</code>, geschrieben in einem Format namens <i>Scrimshaw</i>. Ein winziger Synthesizer im Browser spielt sie.</p>
       <p lang="en">Each line belongs to one instrument (a <b>voice</b>). Notes are letters and numbers: <code>G5</code> is the note G, high up. Dashes make a note last longer, a dot is a rest, <code>|</code> separates bars.</p>
       <p lang="de">Jede Zeile gehört zu einem Instrument (einer <b>Stimme</b>). Noten sind Buchstaben und Zahlen: <code>G5</code> ist der Ton G, weit oben. Striche machen einen Ton länger, ein Punkt ist eine Pause, <code>|</code> trennt Takte.</p>
-      <p lang="en">Every depth has its own song: a waltz for the town, a marimba tune for the meadows, an oboe for the snowy peaks, taiko drums for the volcanic depths, a choir for the abyss.</p>
-      <p lang="de">Jede Tiefe hat ihr eigenes Lied: einen Walzer für die Stadt, eine Marimba-Melodie für die Wiesen, eine Oboe für die Schneegipfel, Taiko-Trommeln für die Vulkantiefen, einen Chor für den Abgrund.</p>
-      <p lang="en">All songs share a little tune, the game's <b>motif</b>: the notes 1 2 3 5 4 of their scale. Listen for it!</p>
-      <p lang="de">Alle Lieder teilen eine kleine Melodie, das <b>Motiv</b> des Spiels: die Töne 1 2 3 5 4 ihrer Tonleiter. Hör mal genau hin!</p>
+      <p lang="en">Every depth has its own song: a dark waltz for the town, a flute and a marimba for the meadows, a theremin like wind on the snowy peaks, a fiddle in the canyon, a slow theremin and a tolling bell for the abyss.</p>
+      <p lang="de">Jede Tiefe hat ihr eigenes Lied: einen dunklen Walzer für die Stadt, eine Flöte und eine Marimba für die Wiesen, ein Theremin wie Wind auf den Schneegipfeln, eine Geige im Canyon, ein langsames Theremin und eine läutende Glocke für den Abgrund.</p>
+      <p lang="en">They all come from the song of the main menu, <b>The Glass Bird</b>: a child plays with a glass bird, and it breaks. Every song has glass in it, and the bird calls in all of them: a high note falling onto two notes side by side. Where the bird is broken, the two notes move closer together and sound sharper.</p>
+      <p lang="de">Sie kommen alle vom Lied des Hauptmenüs, <b>Der Glasvogel</b>: Ein Kind spielt mit einem Glasvogel, und er zerbricht. In jedem Lied ist Glas, und in allen ruft der Vogel: ein hoher Ton, der auf zwei Töne direkt nebeneinander fällt. Wo der Vogel zerbrochen ist, rücken die zwei Töne näher zusammen und klingen schärfer.</p>
+      <p lang="en">The child's little tune is in the songs too, the game's <b>motif</b>: the notes 1 2 3 5 4 of their scale. Deep down only pieces of it are left. Listen for it!</p>
+      <p lang="de">Die kleine Melodie des Kindes steckt auch in den Liedern, das <b>Motiv</b> des Spiels: die Töne 1 2 3 5 4 ihrer Tonleiter. Tief unten sind nur noch Stücke davon übrig. Hör mal genau hin!</p>
     </div>
     <pre data-src="music/town.scrim"><code>title    Town
-tempo    100
+tempo    92
 beats    3
 
-# mood explore:  lead echo guitar accordion bass tamb glock
-# mood treasure: guitar accordion glock wonder
+# mood explore:  lead accordion ost pad bass bird
+# mood treasure: ost pad bird wonder
 
-voice lead      clarinet   vol=0.75 pan=-0.15
-voice guitar    guitar     vol=0.5  pan=0.3
-voice bass      upright    vol=0.75
+voice lead      clarinet   vol=0.62 pan=-0.1
+voice ost       musicbox   vol=0.3  pan=0.45
+voice bird      crystal    vol=0.5  pan=0.4
 
 pattern A
-lead   | G5------- A5--- | B5----- D6----- | C6------- B5--- | A5------- .--- |
-guitar | G3- B3- D4- G4- D4- B3- | C3- G3- C4- E4- C4- G3- | ...
-bass   | G2--- .------- | C3--- .------- | G2--- .------- | D2--- .------- |</code></pre>
+lead   | D5----- E5- F5--- | A5------- G5--- | F5----------- | .----------- |
+ost    | D5--- A5--- F5--- | D5--- A5--- F5--- | Bb5--- F6--- D6--- | ...
+bird   | _ | _ | _ | A6 D6+E6---------- |</code></pre>
   </div>
 </section>
 

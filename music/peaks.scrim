@@ -1,117 +1,127 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
+# Built after the title song (music/title.scrim). E Phrygian (A minor's notes on E), a theremin
+# sliding slowly like wind over the summit, crystal quarters, a harp low.
 title    Peaks
 composer Claude
-about    Thin air above the clouds: an oboe in B Dorian, echoed an eighth later across the valley, over harp arpeggios with added seconds, a high string pad and a bell. In 6/8. When something is near, timpani, triangle and a bodhran take over; horns call for a fight, choir and gong for a guardian.
-tempo    56
-beats    2
-steps    6
+about    Thin air above the clouds, eerie: a theremin sliding slowly like wind in E Phrygian (the title's notes, on E), crystal quarters picking out the chords, a low harp, glass harmonica chords and a low fretless bass; the glass bird calls into the gaps. When something is near, a cracked crystal ostinato ticks over a glass heartbeat, a bodhran and a triangle; a kit and the tune come back as it comes for you, a horn, pizzicato drive and breaking glass for a fight, choir and gong for a guardian.
+tempo    60
+beats    4
+steps    4
 reverb   0.45
 
 # moods (music/README.md)
-# mood explore:  lead echo harp pad bass bell
-# mood treasure: harp pad bell wonder
-# mood sense:    timpani tri bodhran pad bass bell
-# mood rise:     sense lead echo harp snare
-# mood fight:    rise -echo -bell -harp -tri horn brass drive war crash
+# mood explore:  lead harp ost pad bass bird
+# mood treasure: ost pad bird wonder
+# mood sense:    crack heart bodhran tri pad bass bowl
+# mood rise:     sense -bowl lead kick snare
+# mood fight:    rise -heart -tri horn drive war smash
 # mood boss:     fight -lead choir gong
 
-voice lead     oboe      vol=0.6  pan=-0.15
-voice echo     oboe      vol=0.22 pan=0.45 rev=0.6
-voice horn     horn      vol=0.65  pan=0.2  oct=-1 att=0.025 rel=0.12 rev=0.3
-voice harp     harp      vol=0.5  pan=0.25
-voice pad      strings   vol=0.26 pan=-0.25 center=F#4 att=0.6 rel=1
-voice bass     upright   vol=0.7
-voice bell     bell      vol=0.2  pan=0.35 rev=0.7
-voice wonder   celesta   vol=0.38 pan=-0.3 rev=0.6
-voice timpani  timpani   vol=0.55 pan=-0.1
-voice tri      tri       vol=0.3  pan=0.4
-voice bodhran  bodhran   vol=0.55 pan=-0.2
-voice snare    snare     vol=0.3  pan=0.1
-voice brass    brass     vol=0.42 pan=-0.25 gate=0.65 center=F#4 att=0.018 rel=0.09 rev=0.22
-voice crash    crash     vol=0.28 pan=0.2
-voice choir    choir     vol=0.3  center=B3 att=0.5 rel=0.8
-voice gong     gong      vol=0.3  pan=-0.3
+voice lead     theremin   vol=0.45 pan=-0.1 glide=0.25
+voice harp     harp       vol=0.42 pan=0.25
+voice ost      crystal    vol=0.34 pan=-0.3
+voice pad      glassharp  vol=0.2  pan=-0.25 center=A3 att=0.4 rel=0.8
+voice bass     fretless   vol=0.7  glide=0.08
+voice bird     crystal    vol=0.5  pan=0.4  rev=0.7
+voice wonder   crystal    vol=0.28 pan=-0.35 rev=0.6
+voice crack    crystal    vol=0.4  pan=-0.3
+voice heart    glasstap   vol=0.3  pan=0.1
+voice bodhran  bodhran    vol=0.5  pan=-0.2
+voice tri      tri        vol=0.28 pan=0.4
+voice bowl     bowl       vol=0.28 pan=0.15 rev=0.6
+voice kick     kick       vol=0.5
+voice snare    snare      vol=0.36 pan=0.1
+voice horn     horn       vol=0.7  pan=0.2  oct=-1 att=0.025 rel=0.12 rev=0.3 glide=0.08
+voice drive    pizz       vol=0.52 pan=-0.35 gate=0.65 rev=0.3
+voice war      tommid     vol=0.5  pan=0.15 rev=0.2
+voice smash    shatter    vol=0.35 pan=-0.2
+voice choir    voices     vol=0.28 center=D3 att=0.5 rel=0.8
+voice gong     gong       vol=0.3  pan=-0.3
 
-# Combat-only motion: tight low ostinato and accented battle drums, at the same tempo.
-voice drive    pizz      vol=0.52 pan=-0.35 gate=0.65 rev=0.3
-voice war      tommid    vol=0.5  pan=0.15 rev=0.25
-
-# Bm E Bm A | G A Bm Bm: the motif (B C# D F# E), the E major chord is the Dorian colour
+# Em Em F F Em Em Dm Em
 pattern A
-lead    | B4------- C#5--- | D5----- F#5----- | E5--- D5- C#5- B4--- | C#5----------- |
-lead    | D5--- F#5- B5----- | A5----- E5----- | F#5--- E5- D5----- | B4------- .--- |
-echo    | .- B4------- C#5- | -- D5----- F#5--- | -- E5--- D5- C#5- B4- | -- C#5--------- |
-echo    | -- D5--- F#5- B5--- | -- A5----- E5--- | -- F#5--- E5- D5--- | -- B4------- .- |
-horn    | B4!--- B4--- C#5--- | D5!----- F#5----- | E5!--- D5- C#5- B4--- | C#5!--- C#5--- C#5--- |
-horn    | D5!--- F#5- B5----- | A5!----- E5----- | F#5!--- E5- D5----- | B4!--- B4--- .--- |
-harp    | B2- F#3- B3- C#4- D4- F#4- | E3- B3- E4- F#4- G#4- B4- | B2- F#3- B3- C#4- D4- F#4- | A2- E3- A3- B3- C#4- E4- |
-harp    | G2- D3- G3- A3- B3- D4- | A2- E3- A3- B3- C#4- E4- | B2- F#3- B3- C#4- D4- F#4- | B2- F#3- B3- C#4- D4- F#4- |
-pad     | [Bm]?----------- | [E]?----------- | [Bm]?----------- | [A]?----------- |
-pad     | [G]?----------- | [A]?----------- | [Bm]?----------- | [Bm]?----------- |
-drive   | B3!- F#4- D4- B3!- D4- F#4- | E3!- B3- G#3- E3!- G#3- B3- | B3!- F#4- D4- B3!- D4- F#4- | A3!- E4- C#4- A3!- C#4- E4- |
-drive   | G3!- D4- B3- G3!- B3- D4- | A3!- E4- C#4- A3!- C#4- E4- | B3!- F#4- D4- B3!- D4- F#4- | B3!- F#4- D4- B3!- D4- F#4- |
-war     | X.x.x.X.x.xx | X.x.x.X.x.xx | X.x.x.X.x.xx | XxxXxxXxxXXX |
-war     | X.x.x.X.x.xx | X.x.x.X.x.xx | X.x.x.X.x.xx | XxxXxxXxxXXX |
-bass    | B1----- F#2----- | E2----- B1----- | B1----- F#2----- | A1----- E2----- |
-bass    | G1----- D2----- | A1----- E2----- | B1----- F#2----- | B1----- F#2----- |
-bell    | B5----------- | E5----------- | B5----------- | A5----------- |
-bell    | G5----------- | A5----------- | B5----------- | F#5----------- |
-wonder  | B5--- D6- F#6--- B6- | E6--- G#6- B6--- E7- | B5--- D6- F#6--- B6- | A5--- C#6- E6--- A6- |
-wonder  | G5--- B5- D6--- G6- | A5--- C#6- E6--- A6- | B5--- D6- F#6--- B6- | F#6--- D6- B5--- F#5- |
-timpani | B1!----- B1--- F#2- | E2!----- E2--- B1- | B1!----- B1--- F#2- | A1!----- A1--- E2- |
-timpani | G1!----- G1--- D2- | A1!----- A1--- E2- | B1!----- B1--- F#2- | B1- B1- B1- B1- B1!- B1!- |
-tri     | x.o.o.x.o.o. | % | % | % |
-tri     | % | % | % | x.o.o.x.x.x. |
-bodhran | X...x.X...x. | % | % | % |
-bodhran | % | % | % | X..x.xX..x.x |
-snare   | ..o...x...o. | % | % | % |
-snare   | % | % | % | ..o...x.x.xx |
-brass   | [Bm]!--- .- [Bm]!--- .- | [E]!--- .- [E]!--- .- | [Bm]!--- .- [Bm]!--- .- | [A]!--- .- [A]!--- .- |
-brass   | [G]!--- .- [G]!--- .- | [A]!--- .- [A]!--- .- | [Bm]!--- .- [Bm]!--- .- | [Bm]!--- .- [Bm]!--- .- |
-crash   | X........... | ............ | % | % |
-crash   | x........... | ............ | % | % |
-choir   | [Bm]----------- | [E]----------- | [Bm]----------- | [A]----------- |
-choir   | [G]----------- | [A]----------- | [Bm]----------- | [Bm]----------- |
-gong    | X........... | ............ | % | % |
-gong    | x........... | ............ | % | % |
+lead    | E5--------------- | ~G5------- ~F5------- | ~E5--------------- | .--------------- |
+lead    | B4--------------- | ~D5------- ~E5------- | ~F5------- ~D5------- | ~E5--------------- |
+horn    | E5!--------------- | ~G5------- ~F5------- | ~E5--------------- | .--------------- |
+horn    | B4!--------------- | ~D5------- ~E5------- | ~F5------- ~D5------- | ~E5--------------- |
+bird    | _ | _ | _ | B6 E6+F#6-------------- |
+bird    | _ | _ | _ | .------- A6 D6+E6------ |
+harp    | E2- B2- G3- B2- E3- B2- G3- B2- | E2- B2- G3- B2- E3- B2- G3- B2- | F2- C3- A3- C3- F3- C3- A3- C3- | F2- C3- A3- C3- F3- C3- A3- C3- |
+harp    | E2- B2- G3- B2- E3- B2- G3- B2- | E2- B2- G3- B2- E3- B2- G3- B2- | D2- A2- F3- A2- D3- A2- F3- A2- | E2- B2- G3- B2- E3- B2- G3- B2- |
+ost     | E4!--- F4--- B4--- F4--- | E4!--- F4--- B4--- F4--- | F4!--- G4--- C5--- G4--- | F4!--- G4--- C5--- G4--- |
+ost     | E4!--- F4--- B4--- F4--- | E4!--- F4--- B4--- F4--- | D4!--- E4--- A4--- E4--- | E4!--- F4--- B4--- F4--- |
+bass    | G1--------------- | A1------- C2------- | A1--------------- | A1--------------- |
+bass    | G1--------------- | A1------- F1------- | F1--------------- | G1--------------- |
+pad     | [Em]?--------------- | [Em]?--------------- | [F]?--------------- | [F]?--------------- |
+pad     | [Em]?--------------- | [Em]?--------------- | [Dm]?--------------- | [Em]?--------------- |
+crack   | E3!- E3- F3- E3- E3!- E3- F3- E3- | E3!- E3- F3- E3- E3!- E3- F3- E3- | F3!- F3- F#3- F3- F3!- F3- G3- F3- | F3!- F3- F#3- F3- F3!- F3- G3- F3- |
+crack   | E3!- E3- F3- E3- E3!- E3- F3- E3- | E3!- E3- F3- E3- E3!- E3- F3- E3- | D3!- D3- Eb3- D3- D3!- D3- E3- D3- | E3!- E3- F3- E3- E3!- E3- F3- E3- |
+drive   | E2!- E2- B2- E2- E2!- E2- B2- E3- | E2!- E2- B2- E2- E2!- E2- B2- E3- | F2!- F2- C3- F2- F2!- F2- C3- F3- | F2!- F2- C3- F2- F2!- F2- C3- F3- |
+drive   | E2!- E2- B2- E2- E2!- E2- B2- E3- | E2!- E2- B2- E2- E2!- E2- B2- E3- | D2!- D2- A2- D2- D2!- D2- A2- D3- | E2!- E2- B2- E2- E2!- E2- B2- E3- |
+war     | X.x. xxX. X.x. xxXx | X.x. xxX. X.x. xxXx | X.x. xxX. X.x. xxXx | X.x. X.xx xxxx XXXX |
+war     | X.x. xxX. X.x. xxXx | X.x. xxX. X.x. xxXx | X.x. xxX. X.x. xxXx | X.x. X.xx xxxx XXXX |
+heart   | x.o. .... .... .... | x.o. .... .... .... | x.o. .... .... .... | x.o. .... .... .... |
+heart   | x.o. .... .... .... | x.o. .... .... .... | x.o. .... .... .... | x.o. .... .... .... |
+kick    | X... .... x... .... | X... .... x... .... | X... .... x... .... | X... .... x... .... |
+kick    | X... .... x... .... | X... .... x... .... | X... .... x... .... | X... .... X... X.x. |
+snare   | .... x..o .... x.o. | .... x..o .... x.o. | .... x..o .... x.o. | .... x..o .... x.o. |
+snare   | .... x..o .... x.o. | .... x..o .... x.o. | .... x..o .... x.o. | o... x..o x.x. XxXx |
+smash   | X... .... .... .... | _ | _ | _ |
+smash   | X... .... .... .... | _ | _ | _ |
+gong    | X... .... .... .... | _ | _ | _ |
+gong    | X... .... .... .... | _ | _ | _ |
+bowl    | E3--------------- | _ | F3--------------- | _ |
+bowl    | E3--------------- | _ | D3--------------- | _ |
+choir   | [Em]--------------- | [Em]--------------- | [F]--------------- | [F]--------------- |
+choir   | [Em]--------------- | [Em]--------------- | [Dm]--------------- | [Em]--------------- |
+wonder  | E5--- G5--- B5--- E6--- | E5--- G5--- B5--- E6--- | F5--- A5--- C6--- F6--- | F5--- A5--- C6--- F6--- |
+wonder  | E5--- G5--- B5--- E6--- | E5--- G5--- B5--- E6--- | D5--- F5--- A5--- D6--- | E5--- G5--- B5--- E6--- |
+bodhran | x..x ..x. x... x.x. | x..x ..x. x... x.x. | x..x ..x. x... x.x. | x.xx x.xx xxxx XXXX |
+bodhran | x..x ..x. x... x.x. | x..x ..x. x... x.x. | x..x ..x. x... x.x. | x.xx x.xx xxxx XXXX |
+tri     | x... .... x... .... | x... .... x... .... | x... .... x... .... | x... .... x... .... |
+tri     | x... .... x... .... | x... .... x... .... | x... .... x... .... | x... .... x... .... |
 
-# D A E Bm | G A F#sus4 F#
+# Am Am F F C C F E
 pattern B
-lead    | A5----- F#5----- | E5--- C#5- A4----- | B4--- E5- G#5----- | F#5----------- |
-lead    | G5----- F#5- E5--- | E5----- C#5----- | B4----- C#5----- | A#4----------- |
-echo    | .- A5----- F#5--- | -- E5--- C#5- A4--- | -- B4--- E5- G#5--- | -- F#5--------- |
-echo    | -- G5----- F#5- E5- | -- E5----- C#5--- | -- B4----- C#5--- | -- A#4--------- |
-horn    | A5!----- F#5----- | E5!--- C#5- A4----- | B4!--- E5- G#5----- | F#5!--- F#5--- F#5--- |
-horn    | G5!----- F#5- E5--- | E5!----- C#5----- | B4!----- C#5----- | A#4!--- A#4--- A#4--- |
-harp    | D3- A3- D4- E4- F#4- A4- | A2- E3- A3- B3- C#4- E4- | E3- B3- E4- F#4- G#4- B4- | B2- F#3- B3- C#4- D4- F#4- |
-harp    | G2- D3- G3- A3- B3- D4- | A2- E3- A3- B3- C#4- E4- | F#2- C#3- F#3- B3- C#4- F#4- | F#2- C#3- F#3- A#3- C#4- F#4- |
-pad     | [D]?----------- | [A]?----------- | [E]?----------- | [Bm]?----------- |
-pad     | [G]?----------- | [A]?----------- | [F#sus4]?----------- | [F#]?----------- |
-drive   | D3!- A3- F#3- D3!- F#3- A3- | A3!- E4- C#4- A3!- C#4- E4- | E3!- B3- G#3- E3!- G#3- B3- | B3!- F#4- D4- B3!- D4- F#4- |
-drive   | G3!- D4- B3- G3!- B3- D4- | A3!- E4- C#4- A3!- C#4- E4- | F#3!- C#4- B3- F#3!- B3- C#4- | F#3!- C#4- A#3- F#3!- A#3- C#4- |
-war     | X.x.x.X.x.xx | X.x.x.X.x.xx | X.x.x.X.x.xx | XxxXxxXxxXXX |
-war     | X.x.x.X.x.xx | X.x.x.X.x.xx | X.x.x.X.x.xx | XxxXxxXxxXXX |
-bass    | D2----- A1----- | A1----- E2----- | E2----- B1----- | B1----- F#2----- |
-bass    | G1----- D2----- | A1----- E2----- | F#1----- C#2----- | F#1----- C#2----- |
-bell    | D5----------- | A5----------- | E5----------- | B5----------- |
-bell    | G5----------- | A5----------- | F#5----------- | C#6----------- |
-wonder  | D6--- F#6- A6--- D7- | A5--- C#6- E6--- A6- | E6--- G#6- B6--- E7- | B5--- D6- F#6--- B6- |
-wonder  | G5--- B5- D6--- G6- | A5--- C#6- E6--- A6- | F#5--- B5- C#6--- F#6- | F#5--- A#5- C#6--- F#6- |
-timpani | D2!----- D2--- A1- | A1!----- A1--- E2- | E2!----- E2--- B1- | B1!----- B1--- F#2- |
-timpani | G1!----- G1--- D2- | A1!----- A1--- E2- | F#2!----- F#2--- C#2- | F#2- F#2- F#2- F#2- F#2!- F#2!- |
-tri     | x.o.o.x.o.o. | % | % | % |
-tri     | % | % | % | x.o.o.x.x.x. |
-bodhran | X...x.X...x. | % | % | % |
-bodhran | % | % | % | XxxXxxXxxXxx |
-snare   | ..o...x...o. | % | % | % |
-snare   | % | % | % | ..o...xxxxXX |
-brass   | [D]!--- .- [D]!--- .- | [A]!--- .- [A]!--- .- | [E]!--- .- [E]!--- .- | [Bm]!--- .- [Bm]!--- .- |
-brass   | [G]!--- .- [G]!--- .- | [A]!--- .- [A]!--- .- | [F#sus4]!--- .- [F#sus4]!--- .- | [F#]!--- .- [F#]!--- .- |
-crash   | X........... | ............ | % | % |
-crash   | x........... | ............ | % | X........... |
-choir   | [D]----------- | [A]----------- | [E]----------- | [Bm]----------- |
-choir   | [G]----------- | [A]----------- | [F#sus4]----------- | [F#]----------- |
-gong    | X........... | ............ | % | % |
-gong    | x........... | ............ | % | % |
+lead    | C5--------------- | ~E5------- ~A5------- | ~G5------- ~F5------- | .--------------- |
+lead    | E5--------------- | ~G5------- ~C6------- | ~A5------- ~G5------- | ~E5--------------- |
+horn    | C5!--------------- | ~E5------- ~A5------- | ~G5------- ~F5------- | .--------------- |
+horn    | E5!--------------- | ~G5------- ~C6------- | ~A5------- ~G5------- | ~E5--------------- |
+bird    | _ | _ | _ | A6 A5+B5-------------- |
+bird    | _ | _ | _ | .------- B6 E6+F#6------ |
+harp    | A2- E3- C4- E3- A3- E3- C4- E3- | A2- E3- C4- E3- A3- E3- C4- E3- | F2- C3- A3- C3- F3- C3- A3- C3- | F2- C3- A3- C3- F3- C3- A3- C3- |
+harp    | C2- G2- E3- G2- C3- G2- E3- G2- | C2- G2- E3- G2- C3- G2- E3- G2- | F2- C3- A3- C3- F3- C3- A3- C3- | E2- B2- G#3- B2- E3- B2- G#3- B2- |
+ost     | A4!--- B4--- E5--- B4--- | A4!--- B4--- E5--- B4--- | F4!--- G4--- C5--- G4--- | F4!--- G4--- C5--- G4--- |
+ost     | C4!--- D4--- G4--- D4--- | C4!--- D4--- G4--- D4--- | F4!--- G4--- C5--- G4--- | E4!--- F4--- B4--- F4--- |
+bass    | C2--------------- | C2------- A1------- | A1------- D2------- | A1--------------- |
+bass    | E1--------------- | A1------- E2------- | D2------- A1------- | G#1--------------- |
+pad     | [Am]?--------------- | [Am]?--------------- | [F]?--------------- | [F]?--------------- |
+pad     | [C]?--------------- | [C]?--------------- | [F]?--------------- | [E]?--------------- |
+crack   | A3!- A3- Bb3- A3- A3!- A3- B3- A3- | A3!- A3- Bb3- A3- A3!- A3- B3- A3- | F3!- F3- F#3- F3- F3!- F3- G3- F3- | F3!- F3- F#3- F3- F3!- F3- G3- F3- |
+crack   | C3!- C3- C#3- C3- C3!- C3- D3- C3- | C3!- C3- C#3- C3- C3!- C3- D3- C3- | F3!- F3- F#3- F3- F3!- F3- G3- F3- | E3!- E3- F3- E3- E3!- E3- F3- E3- |
+drive   | A2!- A2- E3- A2- A2!- A2- E3- A3- | A2!- A2- E3- A2- A2!- A2- E3- A3- | F2!- F2- C3- F2- F2!- F2- C3- F3- | F2!- F2- C3- F2- F2!- F2- C3- F3- |
+drive   | C2!- C2- G2- C2- C2!- C2- G2- C3- | C2!- C2- G2- C2- C2!- C2- G2- C3- | F2!- F2- C3- F2- F2!- F2- C3- F3- | E2!- E2- B2- E2- E2!- E2- B2- E3- |
+war     | X.x. xxX. X.x. xxXx | X.x. xxX. X.x. xxXx | X.x. xxX. X.x. xxXx | X.x. X.xx xxxx XXXX |
+war     | X.x. xxX. X.x. xxXx | X.x. xxX. X.x. xxXx | X.x. xxX. X.x. xxXx | X.x. X.xx xxxx XXXX |
+heart   | x.o. .... .... .... | x.o. .... .... .... | x.o. .... .... .... | x.o. .... .... .... |
+heart   | x.o. .... .... .... | x.o. .... .... .... | x.o. .... .... .... | x.o. .... .... .... |
+kick    | X... .... x... .... | X... .... x... .... | X... .... x... .... | X... .... x... .... |
+kick    | X... .... x... .... | X... .... x... .... | X... .... x... .... | X... .... X... X.x. |
+snare   | .... x..o .... x.o. | .... x..o .... x.o. | .... x..o .... x.o. | .... x..o .... x.o. |
+snare   | .... x..o .... x.o. | .... x..o .... x.o. | .... x..o .... x.o. | o... x..o x.x. XxXx |
+smash   | X... .... .... .... | _ | _ | _ |
+smash   | X... .... .... .... | _ | _ | _ |
+gong    | X... .... .... .... | _ | _ | _ |
+gong    | X... .... .... .... | _ | _ | _ |
+bowl    | A3--------------- | _ | F3--------------- | _ |
+bowl    | C3--------------- | _ | F3--------------- | _ |
+choir   | [Am]--------------- | [Am]--------------- | [F]--------------- | [F]--------------- |
+choir   | [C]--------------- | [C]--------------- | [F]--------------- | [E]--------------- |
+wonder  | A5--- C6--- E6--- A6--- | A5--- C6--- E6--- A6--- | F5--- A5--- C6--- F6--- | F5--- A5--- C6--- F6--- |
+wonder  | C5--- E5--- G5--- C6--- | C5--- E5--- G5--- C6--- | F5--- A5--- C6--- F6--- | E5--- G#5--- B5--- E6--- |
+bodhran | x..x ..x. x... x.x. | x..x ..x. x... x.x. | x..x ..x. x... x.x. | x.xx x.xx xxxx XXXX |
+bodhran | x..x ..x. x... x.x. | x..x ..x. x... x.x. | x..x ..x. x... x.x. | x.xx x.xx xxxx XXXX |
+tri     | x... .... x... .... | x... .... x... .... | x... .... x... .... | x... .... x... .... |
+tri     | x... .... x... .... | x... .... x... .... | x... .... x... .... | x... .... x... .... |
 
 loop A B

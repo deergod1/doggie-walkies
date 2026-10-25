@@ -1,80 +1,62 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
+# Built after the title song (music/title.scrim). The waltz kept, but in D minor: a clarinet opens
+# on the toy tune (D E F A G), an accordion on the off-beats, a music box picking high.
 title    Town
 composer Claude
-about    Smoke from the chimneys and the well in the square: a slow waltz in G for clarinet and its echo over guitar, an accordion on the off-beats and an upright bass. The town has no enemies, so it only knows explore and treasure.
-tempo    100
+about    Smoke from the chimneys and the well in the square, the one memory that never fades, but darker now: a waltz in D minor, a clarinet opening on the toy tune (D E F, A G, F), an accordion on the off-beats, a music box picking high, glass harmonica chords and a low fretless bass; the glass bird calls at the phrase ends. The town has no enemies, so it only knows explore and treasure.
+tempo    92
 beats    3
 steps    4
-reverb   0.35
+reverb   0.45
 
-# moods (music/README.md); everything else falls back to explore
-# mood explore:  lead echo guitar accordion bass tamb glock
-# mood treasure: guitar accordion glock wonder
+# moods (music/README.md)
+# mood explore:  lead accordion ost pad bass bird
+# mood treasure: ost pad bird wonder
 
-voice lead      clarinet   vol=0.75 pan=-0.15
-voice echo      clarinet   vol=0.25 pan=0.45 rev=0.5
-voice guitar    guitar     vol=0.5  pan=0.3
-voice accordion accordion  vol=0.22 pan=-0.25 gate=0.6 center=D4
-voice bass      upright    vol=0.75
-voice tamb      tamb       vol=0.3  pan=-0.35
-voice glock     glock      vol=0.25 pan=0.4  rev=0.5
-voice wonder    celesta    vol=0.4  pan=-0.3 rev=0.6
+voice lead     clarinet   vol=0.62 pan=-0.1 rev=0.4
+voice accordion accordion  vol=0.24 pan=0.3  center=D4 gate=0.6
+voice ost      musicbox   vol=0.3  pan=0.45 rev=0.6
+voice pad      glassharp  vol=0.2  pan=-0.25 center=A3 att=0.4 rel=0.8
+voice bass     fretless   vol=0.7  glide=0.08
+voice bird     crystal    vol=0.5  pan=0.4  rev=0.7
+voice wonder   crystal    vol=0.28 pan=-0.35 rev=0.6
 
-# G C G D | G C Am-D G; the tune opens on the game's motif, 1 2 3 5 4 (G A B D C)
+# Dm Dm Bb Bb Gm Gm A A
 pattern A
-lead      | G5------- A5--- | B5----- D6----- | C6------- B5--- | A5------- .--- |
-lead      | G5------- A5--- | B5--- C6--- E6--- | D6--- C6- B5- A5--- | G5------- .--- |
-echo      | .- G5------- A5- | -- B5----- D6--- | -- C6------- B5- | -- A5------- .- |
-echo      | .- G5------- A5- | -- B5--- C6--- E6- | -- D6--- C6- B5- A5- | -- G5------- .- |
-guitar    | G3- B3- D4- G4- D4- B3- | C3- G3- C4- E4- C4- G3- | G3- B3- D4- G4- D4- B3- | D3- A3- D4- F#4- D4- A3- |
-guitar    | G3- B3- D4- G4- D4- B3- | C3- G3- C4- E4- C4- G3- | A3- C4- E4- D4- F#4- A4- | G3- B3- D4- G4- D4- B3- |
-accordion | .--- [G]--- [G]--- | .--- [C]--- [C]--- | .--- [G]--- [G]--- | .--- [D]--- [D]--- |
-accordion | .--- [G]--- [G]--- | .--- [C]--- [C]--- | .--- [Am]--- [D]--- | .--- [G]--- [G]--- |
-bass      | G2--- .------- | C3--- .------- | G2--- .------- | D2--- .------- |
-bass      | G2--- .------- | C3--- .------- | A2--- .--- D2--- | G2--- .--- D2--- |
-tamb      | x... o... o... | % | % | % |
-tamb      | % | % | % | x... o.o. o... |
-glock     | .------- B6--- | .------- E6--- | .------- D6--- | .------- F#6--- |
-glock     | .------- B6--- | .------- G6--- | .------- F#6--- | .------- G6--- |
-wonder    | G6--- B6--- D7--- | E6--- G6--- C7--- | G6--- B6--- D7--- | F#6--- A6--- D7--- |
-wonder    | G6--- B6--- D7--- | E6--- G6--- C7--- | A6--- C7--- F#6--- | G6--- B6--- D7--- |
+lead    | D5----- E5- F5--- | A5------- G5--- | F5----------- | .----------- |
+lead    | D5----- E5- F5--- | Bb5------- A5--- | G5----- F5- E5--- | A4------- .--- |
+bird    | _ | _ | _ | A6 D6+E6---------- |
+bird    | _ | _ | _ | .------- E6 A5+B5-- |
+accordion | .--- [Dm]--- [Dm]--- | .--- [Dm]--- [Dm]--- | .--- [Bb]--- [Bb]--- | .--- [Bb]--- [Bb]--- |
+accordion | .--- [Gm]--- [Gm]--- | .--- [Gm]--- [Gm]--- | .--- [A]--- [A]--- | .--- [A]--- [A]--- |
+ost     | D5--- A5--- F5--- | D5--- A5--- F5--- | Bb5--- F6--- D6--- | Bb5--- F6--- D6--- |
+ost     | G5--- D6--- Bb5--- | G5--- D6--- Bb5--- | A5--- E6--- C#6--- | A5--- E6--- C#6--- |
+bass    | F1----------- | A1----------- | D2----------- | Bb1----------- |
+bass    | Bb1----------- | D2----------- | C#2----------- | E1----------- |
+pad     | [Dm]?----------- | [Dm]?----------- | [Bb]?----------- | [Bb]?----------- |
+pad     | [Gm]?----------- | [Gm]?----------- | [A]?----------- | [A]?----------- |
+wonder  | D5--- F5--- A5--- | D5--- F5--- A5--- | Bb5--- D6--- F6--- | Bb5--- D6--- F6--- |
+wonder  | G5--- Bb5--- D6--- | G5--- Bb5--- D6--- | A5--- C#6--- E6--- | A5--- C#6--- E6--- |
 
-# Em C G D | Em C Am-D D7
+# F F C C Gm Gm A A
 pattern B
-lead      | B5--- E6------- | C6--- G5--- E5--- | D5--- G5--- B5--- | A5------- .--- |
-lead      | G5--- B5--- E6--- | E6--- D6- C6- G5--- | A5--- C6--- F#5--- | A5- G5- F#5- E5- D5--- |
-echo      | .- B5--- E6----- | -- C6--- G5--- E5- | -- D5--- G5--- B5- | -- A5------- .- |
-echo      | .- G5--- B5--- E6- | -- E6--- D6- C6- G5- | -- A5--- C6--- F#5- | -- A5- G5- F#5- E5- D5- |
-guitar    | E3- B3- E4- G4- E4- B3- | C3- G3- C4- E4- C4- G3- | G3- B3- D4- G4- D4- B3- | D3- A3- D4- F#4- D4- A3- |
-guitar    | E3- B3- E4- G4- E4- B3- | C3- G3- C4- E4- C4- G3- | A3- C4- E4- D4- F#4- A4- | D3- A3- C4- F#4- C4- A3- |
-accordion | .--- [Em]--- [Em]--- | .--- [C]--- [C]--- | .--- [G]--- [G]--- | .--- [D]--- [D]--- |
-accordion | .--- [Em]--- [Em]--- | .--- [C]--- [C]--- | .--- [Am]--- [D]--- | .--- [D7]--- [D7]--- |
-bass      | E2--- .------- | C3--- .------- | G2--- .------- | D2--- .------- |
-bass      | E2--- .------- | C3--- .------- | A2--- .--- D2--- | D2--- .--- A2--- |
-tamb      | x... o... o... | % | % | % |
-tamb      | % | % | % | x... o.o. o.o. |
-glock     | .------- G6--- | .------- E6--- | .------- D6--- | .------- F#6--- |
-glock     | .------- G6--- | .------- E6--- | .------- F#6--- | .------- C7--- |
-wonder    | E6--- G6--- B6--- | E6--- G6--- C7--- | G6--- B6--- D7--- | F#6--- A6--- D7--- |
-wonder    | E6--- G6--- B6--- | E6--- G6--- C7--- | A6--- C7--- F#6--- | F#6--- A6--- C7--- |
+lead    | C5----- D5- F5--- | E5------- C5--- | G5----- F5- E5--- | C5----------- |
+lead    | D5----- E5- F5--- | G5------- Bb5--- | A5----- G5- F5--- | E5------- .--- |
+bird    | _ | _ | _ | .----- G6 C6+D6---- |
+bird    | _ | _ | _ | .------- A6 A5+B5-- |
+accordion | .--- [F]--- [F]--- | .--- [F]--- [F]--- | .--- [C]--- [C]--- | .--- [C]--- [C]--- |
+accordion | .--- [Gm]--- [Gm]--- | .--- [Gm]--- [Gm]--- | .--- [A]--- [A]--- | .--- [A]--- [A]--- |
+ost     | F5--- C6--- A5--- | F5--- C6--- A5--- | C5--- G5--- E5--- | C5--- G5--- E5--- |
+ost     | G5--- D6--- Bb5--- | G5--- D6--- Bb5--- | A5--- E6--- C#6--- | A5--- E6--- C#6--- |
+bass    | A1----------- | F1----------- | E1----------- | G1----------- |
+bass    | Bb1----------- | D2----------- | C#2----------- | A1----------- |
+pad     | [F]?----------- | [F]?----------- | [C]?----------- | [C]?----------- |
+pad     | [Gm]?----------- | [Gm]?----------- | [A]?----------- | [A]?----------- |
+wonder  | F5--- A5--- C6--- | F5--- A5--- C6--- | C5--- E5--- G5--- | C5--- E5--- G5--- |
+wonder  | G5--- Bb5--- D6--- | G5--- Bb5--- D6--- | A5--- C#6--- E6--- | A5--- C#6--- E6--- |
 
-# C D Bm Em | C D G D: the brighter turn before the waltz comes home
-pattern C
-lead      | E6------- D6--- | C6--- A5--- F#5--- | B5------- F#5--- | G5------- E5--- |
-lead      | E5--- G5--- C6--- | D6------- A5--- | B5--- A5--- G5--- | F#5------- D5--- |
-echo      | .- E6------- D6- | -- C6--- A5--- F#5- | -- B5------- F#5- | -- G5------- E5- |
-echo      | -- E5--- G5--- C6- | -- D6------- A5- | -- B5--- A5--- G5- | -- F#5------- D5- |
-guitar    | C3- G3- C4- E4- C4- G3- | D3- A3- D4- F#4- D4- A3- | B2- F#3- B3- D4- B3- F#3- | E3- B3- E4- G4- E4- B3- |
-guitar    | C3- G3- C4- E4- C4- G3- | D3- A3- D4- F#4- D4- A3- | G3- B3- D4- G4- D4- B3- | D3- A3- D4- F#4- D4- A3- |
-accordion | .--- [C]--- [C]--- | .--- [D]--- [D]--- | .--- [Bm]--- [Bm]--- | .--- [Em]--- [Em]--- |
-accordion | .--- [C]--- [C]--- | .--- [D]--- [D]--- | .--- [G]--- [G]--- | .--- [D]--- [D]--- |
-bass      | C3--- .------- | D2--- .------- | B2--- .------- | E2--- .------- |
-bass      | C3--- .------- | D2--- .------- | G2--- .------- | D2--- .--- A2--- |
-tamb      | x... o... o... | % | % | % |
-tamb      | % | % | % | x... o.o. o.o. |
-glock     | .------- G6--- | .------- F#6--- | .------- D6--- | .------- B6--- |
-glock     | .------- E6--- | .------- A6--- | .------- B6--- | .------- A6--- |
-wonder    | E6--- G6--- C7--- | F#6--- A6--- D7--- | F#6--- B6--- D7--- | E6--- G6--- B6--- |
-wonder    | E6--- G6--- C7--- | F#6--- A6--- D7--- | G6--- B6--- D7--- | F#6--- A6--- D7--- |
+pattern A2 from A
+lead    | D5----- E5- F5--- | A5------- C6--- | Bb5------- A5--- | F5----------- |
+lead    | G5----- F5- E5--- | D5------- F5--- | E5----- D5- C#5--- | D5------- .--- |
 
-loop A B A C
+loop A B A2 B

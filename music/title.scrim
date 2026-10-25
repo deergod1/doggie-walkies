@@ -1,100 +1,118 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
-title    Title
+# The main menu's song (src/game/menu.js), after the splash screen's glass bird has broken. It grew
+# out of a test of the Westworld theme on glass: a kid plays with a glass bird, and it shatters. Westworld's scale (A minor, with its Bb and
+# G#), pulse (6/8, a dotted quarter at 67) and glass. The bird's own sound is the end of Westworld:
+# a grace note falling onto two notes a step apart, ringing. Whole, the step is wide (A+B); as the
+# bird cracks it narrows (A+Bb). The toy tune fades as the bird cracks, and the break follows the
+# splash screen (src/audio/splash.js): a knock, a thin ring held while time stands still, the
+# shatter, a low swell onto D (an open fifth here: no F#, the scale stays). The shards ring over D,
+# then E leads back to the start.
+title    The Glass Bird
 composer Claude
-about    The world in its glass cubes, seen from outside before the journey starts: a slow waltz in F like the town's, played on glass. A crystal lead and its echo over a harp, glass harmonica chords, a singing bowl and wind chimes. After a while it turns to D minor and a borrowed Bb minor, then finds its way home to F. Only the main menu plays it, so it only knows explore.
-tempo    92
-beats    3
-steps    4
+about    A kid and a glass bird, in A minor and 6/8, played on glass. Alone: a rocking crystal ostinato, a singing bowl and a glass heartbeat, the bird calling (a grace note falling onto two notes a step apart). Playing: a toy tune on crystal, like a nursery song, opening on the game's motif (A B C E D). Flying: a turn to C major, the bird answering the tune in its held notes, climbing and twice singing it back; back in minor its answers fall, shorten and break off. Cracking: Bb creeps into the ostinato, the call narrows to a half step, the tune loses more each time until only a ghost of it is left on the glass harmonica, and the bass sinks. Then the break as on the splash screen: a knock and a thin glass ring while everything stands still, the shatter, glass falling and slowing, a low swell onto D. Over D the bird's calls ring in pieces, without the tune, and E leads back to the start. Only the main menu plays it, so it only knows explore.
+tempo    67       # a dotted quarter
+beats    2
+steps    6        # 6/8 in sixteenths: 12 steps a bar
 reverb   0.45
 
 # moods (music/README.md); the main menu only ever plays explore
-# mood explore:  lead echo glow chords harp bass bowl tap chimes
+# mood explore: lead glow bird wing arp ost haze bowl tap chimes break knock ring swell bass
 
-voice lead    crystal    vol=1.0  pan=-0.1
-voice echo    crystal    vol=0.32 pan=0.45 rev=0.6
-voice glow    glassharp  vol=0.32 pan=0.25 rev=0.55
-voice chords  glassharp  vol=0.2  pan=-0.3 center=A4 att=0.3 rel=0.6
-voice harp    harp       vol=0.45 pan=0.3
-voice bass    upright    vol=0.7
-voice bowl    bowl       vol=0.28 pan=-0.2 rev=0.6
-voice tap     glasstap   vol=0.25 pan=0.35
+voice lead    crystal    vol=0.85 pan=-0.1
+voice glow    glassharp  vol=0.3  pan=0.2  att=0.06 rel=0.4
+voice bird    crystal    vol=0.55 pan=0.4  rev=0.7
+voice wing    crystal    vol=0.42 pan=0.35 rev=0.6
+voice arp     crystal    vol=0.3  pan=0.3
+voice ost     crystal    vol=0.45 pan=-0.3 oct=1
+voice haze    glassharp  vol=0.16 pan=-0.2 att=0.8 rel=1.2
+voice bowl    bowl       vol=0.28 pan=0.1  rev=0.6
+voice tap     glasstap   vol=0.22 pan=0.35
 voice chimes  chimes     vol=0.3  pan=-0.4
+voice break   shatter    vol=0.6
+voice knock   kick       vol=0.35
+voice ring    glassharp  vol=0.14 pan=0.3  rev=0.8 att=0.15 rel=1.2
+voice swell   glassharp  vol=0.3  pan=-0.1 att=1.2 rel=1.5
+voice bass    fretless   vol=0.7  glide=0.08
 
-# the cubes come into view: two bars of F
-pattern intro
-chords    | [F]----------- | [Fmaj7]----------- |
-harp      | F3- C4- F4- A4- C5- A4- | F3- C4- E4- A4- C5- E5- |
-bass      | F2------- C3--- | F2------- C3--- |
-bowl      | F4----------- | _ |
-chimes    | x... .... .... | .... .... .... |
+# Alone (8 bars): the ostinato rocks on its root and the step above it (the bird's interval),
+# a glass heartbeat, and the bird calls into the rest bars. Am Am F F Am Am G E
+pattern alone
+ost    | A2!- A2- B2- A2!- A2- B2- | % | F2!- F2- G2- F2!- F2- G2- | % | A2!- A2- B2- A2!- A2- B2- | % | G2!- G2- A2- G2!- G2- A2- | E2!- E2- F2- E2!- E2- F2- |
+bowl   | A3----------- | _ | F3----------- | _ | A3----------- | _ | G3----------- | E3----------- |
+tap    | x.o... ...... | _ | x.o... ...... | _ | x.o... ...... | _ | x.o... ...... | x.o... ...... |
+bird   | _ | _ | _ | A6 A5+B5---------- | _ | _ | _ | .----- A6 A5+B5---- |
+bass   | A1----------- | % | F1----------- | % | C2----------- | % | B1----------- | G#1----------- |
+lead   | _ | _ | _ | _ | _ | _ | _ | _ |
 
-# F Bb F C | F Dm Gm-C F; the tune opens on the game's motif, 1 2 3 5 4 (F G A C Bb)
-pattern A
-lead      | F5----- G5- A5--- | C6------- Bb5--- | A5--- G5--- F5--- | G5------- .--- |
-lead      | F5----- G5- A5--- | C6--- D6--- F6--- | D6--- C6- Bb5- A5- G5- | F5------- .--- |
-echo      | .- F5----- G5- A5- | -- C6------- Bb5- | -- A5--- G5--- F5- | -- G5------- .- |
-echo      | -- F5----- G5- A5- | -- C6--- D6--- F6- | -- D6--- C6- Bb5- A5- | G5- F5------- .- |
-chords    | [F]----------- | [Bb]----------- | [F]----------- | [C]----------- |
-chords    | [F]----------- | [Dm]----------- | [Gm]----- [C]----- | [F]----------- |
-harp      | F3- C4- F4- A4- C5- A4- | Bb2- F3- Bb3- D4- F4- D4- | F3- C4- F4- A4- C5- A4- | C3- G3- C4- E4- G4- E4- |
-harp      | F3- C4- F4- A4- C5- A4- | D3- A3- D4- F4- A4- F4- | G2- D3- Bb3- C3- G3- E4- | F3- C4- F4- A4- F4- C4- |
-bass      | F2------- C3--- | Bb2------- F2--- | F2------- C3--- | C3------- G2--- |
-bass      | F2------- C3--- | D3------- A2--- | G2----- C3----- | F2------- C3--- |
-bowl      | F4----------- | _ | A4----------- | _ |
-bowl      | F4----------- | _ | G4----------- | _ |
-tap       | x... o... o... | % | % | % |
-tap       | % | % | % | x... o.o. o... |
-chimes    | x... .... .... | _ | _ | _ |
-chimes    | x... .... .... | _ | _ | _ |
+# Playing (16 bars): the toy tune, quarter and eighth like a nursery song.
+# Am Am F F Am Am G E | F F Dm Dm Bb Bb Am Am
+pattern play1
+lead   | A4--- B4- C5----- | E5----- D5----- | C5----------- | .----------- | A4--- B4- C5----- | E5----- G5----- | F5--- E5- D5----- | E5----------- |
+bird   | _ | _ | _ | A6 A5+B5---------- | _ | _ | _ | .----- E6 D5+E5---- |
+ost    | A2!- A2- B2- A2!- A2- B2- | % | F2!- F2- G2- F2!- F2- G2- | % | A2!- A2- B2- A2!- A2- B2- | % | G2!- G2- A2- G2!- G2- A2- | E2!- E2- F2- E2!- E2- F2- |
+bowl   | A3----------- | _ | F3----------- | _ | A3----------- | _ | G3----------- | E3----------- |
+tap    | x.o... ...... | _ | x.o... ...... | _ | x.o... ...... | _ | x.o... ...... | _ |
+bass   | C2----- A1----- | C2----- B1----- | A1----------- | F1----------- | C2----- A1----- | C2----- E2----- | D2----- B1----- | G#1----------- |
 
-# F Bb F C | Dm Bb Gm C7: the tune climbs, then stops short on C7, and a glass harmonica joins
-pattern A2
-lead      | F5----- G5- A5--- | C6------- Bb5--- | A5--- C6--- F6--- | E6------- D6- C6- |
-lead      | D6----- C6- A5--- | Bb5--- A5--- G5--- | Bb5------- A5- G5- | G5------- E5--- |
-echo      | .- F5----- G5- A5- | -- C6------- Bb5- | -- A5--- C6--- F6- | -- E6------- D6- |
-echo      | C6- D6----- C6- A5- | -- Bb5--- A5--- G5- | -- Bb5------- A5- | G5- G5------- E5- |
-glow      | C5----------- | D5----------- | C5----------- | C5----- Bb4----- |
-glow      | A4----------- | D5----------- | D5----------- | Bb4----------- |
-chords    | [F]----------- | [Bb]----------- | [F]----------- | [C]----------- |
-chords    | [Dm]----------- | [Bb]----------- | [Gm]----------- | [C7]----------- |
-harp      | F3- C4- F4- A4- C5- A4- | Bb2- F3- Bb3- D4- F4- D4- | F3- C4- F4- A4- C5- A4- | C3- G3- C4- E4- G4- E4- |
-harp      | D3- A3- D4- F4- A4- F4- | Bb2- F3- Bb3- D4- F4- D4- | G2- D3- G3- Bb3- D4- Bb3- | C3- G3- Bb3- E4- G4- E4- |
-bass      | F2------- C3--- | Bb2------- F2--- | F2------- C3--- | C3------- G2--- |
-bass      | D3------- A2--- | Bb2------- F2--- | G2------- D3--- | C3------- G2--- |
-bowl      | F4----------- | _ | A4----------- | _ |
-bowl      | D4----------- | _ | G4----------- | _ |
-tap       | x... o... o... | % | % | % |
-tap       | % | % | % | x... o.o. o.o. |
-chimes    | x... .... .... | _ | x... .... .... | _ |
-chimes    | x... .... .... | _ | _ | _ |
+pattern play2
+lead   | .----- C5--- D5- | E5--- D5- C5----- | D5--- C5- A4----- | .----------- | .----- D5--- C5- | Bb4----------- | A4----------- | .----------- |
+bird   | _ | _ | _ | A6 A5+B5---------- | _ | _ | _ | A6 A5+B5---------- |
+ost    | F2!- F2- G2- F2!- F2- G2- | % | D2!- D2- E2- D2!- D2- E2- | % | Bb2!- Bb2- C3- Bb2!- Bb2- C3- | % | A2!- A2- B2- A2!- A2- B2- | % |
+bowl   | F3----------- | _ | D3----------- | _ | Bb3----------- | _ | A3----------- | _ |
+tap    | x.o... ...... | _ | x.o... ...... | _ | x.o... ...... | _ | x.o... ...... | _ |
+bass   | F1----- A1----- | C2----- A1----- | F1----------- | D2----------- | Bb1----- A1----- | G1----------- | C2----------- | A1----------- |
 
-# Dm Bb Gm A7 | Dm Gm Bbm C7: the sad edge. The tune in D minor, the glass harmonica under it an
-# octave down, the bowl tolling every bar, no chimes; the borrowed Bb minor turns it home
-pattern B
-lead      | D5----- E5- F5--- | A5------- G5--- | Bb5--- A5--- G5--- | A5--- G5- F5- E5--- |
-lead      | D5----- E5- F5--- | Bb5------- D6--- | Db6--- C6--- Bb5--- | G5------- E5--- |
-echo      | .- D5----- E5- F5- | -- A5------- G5- | -- Bb5--- A5--- G5- | -- A5--- G5- F5- E5- |
-echo      | -- D5----- E5- F5- | -- Bb5------- D6- | -- Db6--- C6--- Bb5- | -- G5------- E5- |
-glow      | D4----- E4- F4--- | A4------- G4--- | Bb4--- A4--- G4--- | A4--- G4- F4- E4--- |
-glow      | D4----- E4- F4--- | Bb4------- D5--- | Db5--- C5--- Bb4--- | G4------- E4--- |
-chords    | [Dm]----------- | [Bbmaj7]----------- | [Gm]----------- | [A7]----------- |
-chords    | [Dm]----------- | [Gm]----------- | [Bbm]----------- | [C7]----------- |
-harp      | D3- A3- D4- F4- A4- F4- | Bb2- F3- A3- D4- F4- D4- | G2- D3- G3- Bb3- D4- Bb3- | A2- E3- A3- C#4- G4- C#4- |
-harp      | D3- A3- D4- F4- A4- F4- | G2- D3- G3- Bb3- D4- Bb3- | Bb2- F3- Bb3- Db4- F4- Db4- | C3- G3- Bb3- E4- G4- E4- |
-bass      | D3------- A2--- | Bb2------- F2--- | G2------- D3--- | A2------- E2--- |
-bass      | D3------- A2--- | G2------- D3--- | Bb2------- F2--- | C3------- G2--- |
-bowl      | D4----------- | Bb3----------- | G3----------- | A3----------- |
-bowl      | D4----------- | G3----------- | Bb3----------- | C4----------- |
-tap       | x... .... o... | % | % | % |
-tap       | % | % | % | x... o... o.o. |
+# Flying (16 bars): the tune, broken chords below, a turn to C major for a while. The
+# bird answers the kid in the tune's held notes and keeps quiet while it moves: a few quick wing
+# beats (often a trill on its own step) and a note that rings on, each answer higher than the last
+# and never the same length twice; twice it sings the toy tune's motif (A B C E D) back, fast. Back
+# in minor (fly2) the answers fall and get shorter, and the last one breaks off.
+# Without doubling: the glass harmonica sits out the flight.
+pattern fly1
+lead   | C5--- E5- G5----- | A5--- G5- E5----- | D5--- G5- B5----- | A5----- G5----- | A5--- C6- A5--- F5- | G5----- E5----- | B5----- G#5----- | E5----------- |
+wing   | .----- A5 B5 A5 B5 E6- | .----- B5 C6 E6 G6-- | .----- D6 E6 D6 B6-- | .------- G6 A6 D7- | _ | .----- A5 B5 C6 E6 D6- | .----- G#5 B5 E6 G#6 B6- | E7 B6 G#6 E6-- .----- |
+ost    | C2- G2- E3- G2- E3- G2- | % | G2- D3- B3- D3- B3- D3- | % | F2- C3- A3- C3- A3- C3- | % | E2- B2- G#3- B2- G#3- B2- | % |
+bowl   | C3----------- | _ | G3----------- | _ | F3----------- | _ | E3----------- | _ |
+bird   | _ | _ | _ | _ | _ | _ | _ | .----- A6 A5+B5---- |
+bass   | E2----- C2----- | F2----- C2----- | B1----- G1----- | C2----- B1----- | F1----- A1----- | C2----------- | G#1----- E1----- | G#1----------- |
 
-# the first strain again, happy: the glass harmonica sings a line above the harp, chimes every
-# other bar
-pattern A3 from A
-glow      | C5----------- | D5----------- | C5----------- | E5----------- |
-glow      | C5----------- | F5----------- | Bb4----- E5----- | A4----------- |
-chimes    | x... .... .... | _ | x... .... .... | _ |
-chimes    | x... .... .... | _ | x... .... .... | _ |
+pattern fly2
+lead   | C6--- B5- A5----- | E5----- A5----- | C6--- B5- A5--- G5- | A5----------- | F5--- E5- D5----- | A5----- F5----- | E5----------- | .----------- |
+wing   | .----- C7 B6 A6 E6-- | .----- B6 A6 B6 E6-- | _ | .- A5 B5 C6 E6 D6----- | .----- A5 G5 F5--- | .------- E6 D6-- | .----- A5 B5 A5 .-- | _ |
+ost    | A2- E3- A3- E3- A3- E3- | % | F2- C3- A3- C3- A3- C3- | % | D2- A2- F3- A2- F3- A2- | % | E2- B2- G#3- B2- G#3- B2- | % |
+bowl   | A3----------- | _ | F3----------- | _ | D3----------- | _ | E3----------- | _ |
+bird   | _ | _ | _ | _ | _ | _ | _ | A6 A5+B5---------- |
+bass   | A1----- C2----- | C2----------- | A1----- F1----- | C2----------- | D2----- Bb1----- | F1----- D2----- | G#1----------- | E1----------- |
 
-play intro
-loop A A2 B A3
+# Cracking (12 bars): Bb creeps into the ostinato, the call narrows from A+B to A+Bb, and the
+# tune fades: it loses its D, then half of itself, then all but its first note, with a ghost of it
+# on the glass harmonica; a cluster hangs; the heart skips; the bass sinks a half step a bar.
+# Then the knock, and a thin ring while everything stands still (as on the splash screen).
+# Am Am F F Am Am Bb Bb Am Am (knock) (still)
+pattern crack
+lead   | A4--- B4- C5----- | E5----- .----- | _ | _ | A4--- B4- .----- | _ | _ | _ | A4----- .----- | _ | _ | _ |
+glow   | _ | _ | _ | _ | _ | .----- C4----- | _ | _ | .----- Bb3----- | _ | _ | _ |
+bird   | _ | _ | A6 A5+B5---------- | .----- A5+Bb5?----- | _ | _ | _ | A6 A5+Bb5---------- | _ | A6! A5+Bb5!---------- | _ | _ |
+haze   | _ | _ | _ | _ | _ | A4+Bb4----------- | = | = | _ | A4+Bb4+E5----------- | _ | _ |
+ost    | A2!- A2- B2- A2!- A2- B2- | % | F2!- F2- G2- F2!- F2- G2- | % | A2!- A2- Bb2- A2!- A2- B2- | A2!- A2- Bb2- A2!- A2- Bb2- | Bb2!- Bb2- B2- Bb2!- .- B2- | Bb2!- .- B2- Bb2!- .- .- | A2!- .- Bb2- A2!- A2- .- | A2!- .- .- A2!- .- Bb2- | _ | _ |
+bowl   | A3----------- | _ | F3----------- | _ | A3----------- | _ | Bb2----------- | _ | A3----------- | _ | _ | _ |
+tap    | x.o... ...... | ...... x.o... | ....x. ...... | x..... ..o... | x.o... ...... | ..x.o. ...... | x..... x..... | ...... ....x. | x.o.x. ...... | X..... ...... | _ | _ |
+knock  | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | X..... ...... | _ |
+ring   | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | G6----------- | = |
+bass   | C2----- A1----- | C2----------- | A1----------- | F1----------- | C2----------- | B1----------- | Bb1----------- | A1----------- | Ab1----------- | G1----------- | D1!- .--------- | _ |
+
+# The shatter and the shards (12 bars): the break, two showers of glass falling and slowing,
+# a low swell onto D and A; then over D the bird's wide calls in pieces, never in the same place
+# or octave, and no tune; E in the bass leads back to the start.
+pattern shatter
+break  | X..... ...... | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ |
+chimes | x..x.. x..... | ...... ..x... | ....x. ...... | _ | _ | x..... ...... | _ | _ | _ | ...... x..... | _ | _ |
+lead   | E7! B6? A6 F6? D6 Bb5? G5 E5? C5 A4? F4 D4? | C6?- G5- E5?- B4- A4?- E4- | B5?--- F5?--- C5?--- | A4?----- .----- | _ | _ | _ | _ | _ | _ | _ | _ |
+arp    | .- C7 G6 E6? B5 A5? F5 D5? B4 G4? E4 | .- A6?- E6- C6?- G5- D5?- | .--- E6?--- A5?--- | _ | _ | _ | _ | _ | _ | _ | _ | _ |
+swell  | _ | D2+A2+D3+A3----------- | = | = | _ | _ | _ | _ | _ | _ | _ | _ |
+bird   | _ | _ | _ | _ | .----- E6 D5+E5---- | A6 A5+B5---------- | _ | .--- D7 G5+A5------ | C7 C6+D6---------- | .------- A6 D5+E5-- | _ | A6 A5+B5---------- |
+ost    | _ | _ | _ | _ | D2!----------- | = | = | = | D2!----------- | = | = | = |
+bowl   | _ | D3----------- | _ | _ | D3----------- | _ | _ | _ | D3----------- | _ | _ | _ |
+bass   | _ | D1----------- | = | = | D2----------- | = | F1----------- | = | A1----------- | = | E1----------- | = |
+
+loop alone play1 play2 fly1 fly2 crack shatter

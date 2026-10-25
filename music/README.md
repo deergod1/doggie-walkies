@@ -5,16 +5,20 @@ files) is in `docs/music.md`; this file covers how the songs should sound and ho
 
 ## The sound of the game
 
-- **Adventure.** Think Zelda (tunes you can hum, simple major and modal harmony, fanfare
-  and march), Golden Sun (warm travel music, harp and pizzicato arpeggios over pads,
-  woodwind leads) and Diablo (dark, sparse, low drones, tolling bells, lots of space, for the
-  deeper depths).
-- **Slow and layered.** Mostly 70 to 112 bpm. The music is a bed you explore over, not a
+- **Dark, mysterious and glassy.** The songs grew out of the title song (`title.scrim`, The
+  Glass Bird), which grew out of a test of Ramin Djawadi's Westworld theme on our glass: minor
+  keys, a simple tune you can hum (a kid's toy tune) over a ticking ostinato, held notes and
+  empty bars that leave room, and glass under everything. Each place keeps an instrument or two
+  of its own (a fiddle, a harpsichord, an anvil), but over a glass core (below).
+- **The story.** The glass bird (`docs/story.md`) is whole in the town and the first act,
+  breaks at the bottom of the second (the swamp) and is in pieces in the third; at the core it
+  is glued back together. The tune and the bird's calls follow it (below).
+- **Slow and layered.** Mostly 56 to 96 bpm, often in the title's 6/8. The music is a bed you explore over, not a
   foreground track. Long loops (16 to 32 bars) so it doesn't wear thin.
 - **Every voice plays in almost every bar.** The game switches voices on and off as the
   danger changes, so a voice that has just joined has to be heard within a beat or two. No
   `_` silent bars, and no voice that waits half a pattern for its entrance. Short rests
-  inside a bar are fine.
+  inside a bar are fine. The bird's calls (and cymbals, gongs, breaking glass) are the exception.
 - **Simple, because the synth is simple.** This is a small Web Audio synth, not an
   orchestra. Clear lines, triads, steady rhythms. Dense runs, thick chords and many
   sustained voices in the same register turn to mush.
@@ -28,11 +32,11 @@ drops out and only the bass, the pad and a pulse remain.
 
 | Mood | When | Character | Overworld voices |
 |---|---|---|---|
-| `explore` | nothing going on | the song itself: tune, harmony, gentle motion | lead bassoon marimba echo harp strings bass |
-| `treasure` | a chest within 6 cells, no enemy around | wonder: no drums, no bass, sparkle on top | marimba echo harp strings wonder |
-| `sense` | a live enemy within 8 cells, not after you | suspense: the tune mostly drops out and the drums lead | marimba strings bass timpani toms shaker |
-| `rise` | an enemy chasing you from afar | the tune comes back over the drums and a light kit | sense + lead echo harp kick snare |
-| `fight` | an enemy after you within 4 cells, or blows traded in the last 6 s | driving low ostinato, battle drums, accented horn and crash | rise - harp - shaker - marimba - echo + horn drive war crash |
+| `explore` | nothing going on | the song itself: tune, harmony, gentle motion, the bird's calls | lead bassoon ost pad bass bird |
+| `treasure` | a chest within 6 cells, no enemy around | wonder: no drums, no bass, sparkle on top | ost pad bird wonder |
+| `sense` | a live enemy within 8 cells, not after you | suspense: the tune drops out, the ostinato cracks, the drums lead | crack heart toms shaker pad bass bowl |
+| `rise` | an enemy chasing you from afar | the tune comes back over the drums and a light kit | sense - bowl + lead kick snare |
+| `fight` | an enemy after you within 4 cells, or blows traded in the last 6 s | driving low ostinato, battle drums, accented horn, breaking glass | rise - heart - shaker + horn drive war smash |
 | `boss` | a guardian after you (or hurt and close) | the flute leaves, horn carries the tune, choir and gong | fight - lead + choir gong |
 
 The mood rises at once and falls back once the calmer reason has held for 1 to 5 seconds.
@@ -121,14 +125,26 @@ the drums (snare on every beat, sixteenth hats) instead of changing the tempo.
   almost every bar.
 - Reuse material: `%` repeats a bar, `pattern A2 from A` copies a pattern and swaps a few
   lines, `loop A A2 B A2` sets the form, `A+2` transposes.
-- Moods: major, Mixolydian, or Dorian leaning on its major chords (the overworld: E Dorian
-  over C, D, G and A) for the surface and towns; Dorian and natural minor for caves;
-  Phrygian, diminished chords, drones and slow tempos (60 to 80) for the deep, Diablo style
-  depths.
+- Keys: stay near the title's A minor (with its Bb and G#): A or D minor, or A minor's notes
+  centred elsewhere (E Phrygian, E Phrygian dominant, F Lydian, A Phrygian). Go further only
+  where a place needs it (the volcanic depths' D Phrygian, the abyss's chords a tritone apart).
 
 ## Tricks that work
 
-What the songs in `music/` use, learned from listening closely to Golden Sun:
+What the songs in `music/` use, from the title song and from listening closely to Golden Sun:
+
+- **The glass core.** Every song has, under its own instruments: the bird's call (`bird`,
+  crystal), glass harmonica chords (`pad`), a fretless bass, crystal sparkle for `treasure`
+  (`wonder`), and for `sense` a cracked ostinato (`crack`), a glass heartbeat (`heart`,
+  `glasstap`) and a singing bowl; glass breaking (`smash`, `shatter`) is the crash.
+- **The bird's call.** A crystal grace note falling onto two notes a step apart, ringing
+  (`A6 A5+B5----------`), in the bars the tune leaves empty or holds. Whole, the step is wide
+  (a whole step); where the bird is broken it narrows to a half step (`A5+Bb5`).
+- **The rocking ostinato.** The root and the step above it, in eighths (`A2!- A2- B2- A2!- A2- B2-`):
+  the bird's interval inside the pulse. Cracked for `sense`, the step is a half step.
+- **A bass that harmonizes.** The bass does not double the tune or only play roots: one or two
+  notes a bar, mostly a third or sixth under the tune, far below, falling back on the chord
+  where the tune rests.
 
 - **Echo voice.** A second voice on the same instrument plays the lead a sixteenth to a
   dotted eighth later, at a third of the volume, panned to the other side. It gives space
@@ -141,8 +157,8 @@ What the songs in `music/` use, learned from listening closely to Golden Sun:
   reserved for `fight` and `boss`. Keep the tempo, but use accented eighths, galloping
   sixteenths and short gates to make combat feel faster. Replace the gentle arpeggio or
   light percussion rather than stacking everything: at most 12 voices play at once.
-  Use the place's own sound (guitar and frame-drum gallops in the badlands, swung mallets
-  in the swamp, clipped strings in the abyss and core); keep 6/8 and 3/4 where written.
+  Use the place's own sound (a guitar in the badlands, a marimba in the swamp, clipped strings
+  in the nests and the abyss); keep 6/8 and 3/4 where written.
   Battle drums fill every fourth bar, brass stabs start on the downbeat, and both new
   voices attack throughout every bar so a mid-phrase mood change is heard quickly.
 - **Colour in the arpeggio.** Add the 2nd or 6th to a broken chord (`E3- B3- E4- F#4- G4- B4-`),
@@ -154,8 +170,10 @@ What the songs in `music/` use, learned from listening closely to Golden Sun:
 - **Each place its own `sense` drums.** Toms and timpani are the default, but a woodblock
   gallop (badlands), a ticking hi-hat over a tom heartbeat (nests), pickaxe woodblocks
   (mines) or conga and guiro (swamp) say where you are even with the tune gone.
-- **The game's motif.** Every tune opens on scale degrees 1 2 3 5 4 in its own mode (the
-  overworld: E F# G B A), so the songs belong together.
+- **The game's motif.** The title's toy tune opens on scale degrees 1 2 3 5 4 (A B C E D), and
+  the songs open on it in their own mode, so they belong together. How much of it is left
+  follows the bird: whole in the town and act I, varied in act II, in pieces in act III (A Bb C,
+  then E; single notes like shards), whole again at the core.
 
 ## Format cheat sheet
 
