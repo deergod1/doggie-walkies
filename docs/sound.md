@@ -9,6 +9,7 @@ click. It runs at 44.1 kHz whatever the speakers run at (the browser resamples),
 | File | What |
 |---|---|
 | `src/audio/sfx.js` | one-shot effects: `sfx(name, { at, pitch, volume })`; `at` pans by screen position |
+| `src/audio/splash.js` | the splash screen's (`game/splash.js`): the glass bird struck (a muffled knock, the glass ringing on while time crawls), its shatter, and a deep swell gliding into a low chord on D; music waits for it (`holdMusic`, `audio/music.js`) |
 | `src/audio/fanfare.js` | the fanfare of a beaten boss: a jingle score (`music/jingles/victory.scrim`) played once by a synth of its own |
 | `src/audio/voices.js` | the enemies' voices, registered with sfx.js as `<species>_alert/_windup/_death` |
 | `src/audio/footsteps.js` | footsteps per surface and gait (the slime marsh's slime squelches and lets go with a gloop), pre-rendered into variants when audio starts |

@@ -41,6 +41,10 @@ docs that explain how the game works, from the big ideas down to the real code:
     players): a room code, PeerJS between the host and each guest, the others' poses,
     following each other through portals and one player's enemies shown to the others in its
     cube (`docs/online.md`).
+  - The splash screen (`src/game/splash.js`, its sounds `src/audio/splash.js`): before the main
+    menu the glass bird (`blender/glassbird.py`) waits in the dark for the first click or key, is
+    struck and breaks in slow motion, and everything fades to black into the menu. Not with
+    `?dev=1`, `?seed=` or in the guide; `?splash=1` shows it anyway, `?splash=0` never.
   - Saves (`src/core/save.js`, `src/game/save.js`): up to three heroes and eight worlds,
     apart, in `localStorage`; each hero remembers its world, goes into any other, a friend's too;
     every seed has its own name (`src/core/names.js`, `docs/saves.md`).
@@ -190,6 +194,7 @@ Blender -b --python blender/clutter.py        # libraries: clutter, items, town,
 Blender -b --python blender/town_clutter.py   # the town's lamps, benches, well, carts ... (docs/assets/town.md)
 Blender -b --python blender/tests/test_clutter.py
 Blender -b --python blender/trials.py         # the trial rooms' parts (assets/trials.glb, docs/trials.md)
+Blender -b --python blender/glassbird.py      # the glass bird, whole and in pieces (assets/glassbird.glb: the splash screen)
 Blender -b --python blender/themes.py         # the alternative themes' library and every theme's
                                               # landmarks (assets/themes/; see docs/assets/themes.md)
 npm run compress-assets                       # after any export, before committing

@@ -34,6 +34,7 @@ let ctx = null, syn = null, output = null, attached = false, idleAt = 0;
 const scores = new Map();                   // name -> score once loaded (null if it failed)
 let want = null, mood = 'explore';
 let enabled = false;
+let held = false;                           // the splash screen plays: no song yet (holdMusic)
 let cur = null;                             // the song playing
 let nextAt = 0;                             // the next song may start from here
 
@@ -95,6 +96,8 @@ export function duckMusic(seconds) {
 
 export const musicEnabled = () => enabled;
 export function setMusicEnabled(on) { enabled = !!on; }
+// while the splash screen plays (game/splash.js) no song starts; let go, the one wanted starts
+export function holdMusic(on) { held = !!on; }
 
 // for checks and the devtools console: what plays right now
 export function musicInfo() {
@@ -106,7 +109,7 @@ export function musicInfo() {
 
 function tick() {
   if (ctx.state !== 'running') return;
-  const name = enabled ? want : null;
+  const name = enabled && !held ? want : null;
   if (cur && cur.score.name !== name) stopSong();
   const score = name && scores.get(name);
   if (!cur && score && ctx.currentTime >= nextAt) startSong(score);

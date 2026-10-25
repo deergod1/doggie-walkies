@@ -255,8 +255,10 @@ Before the story can go in. Roughly in the order to build it.
    cube asks the guardian beaten. It must keep the rule that only visited cubes ever show.
 8. **Memory shards.** Something at landmarks to find and read (a glint of glass), from a pool for
    each act, kept with the world and shown in the Memories tab.
-9. **The glass bird**: a model (`blender/items.py`), and where it shows up: memories along the
-   way, beside the Heart at the end.
+9. **The glass bird**: the model is `blender/glassbird.py` (whole, and cut into the pieces it
+   breaks into; glued back with gold, the same cuts could make the mended one). The splash screen
+   before the main menu breaks it (`src/game/splash.js`). Still open: where it shows up, memories
+   along the way, beside the Heart at the end.
 10. **The opening and the ending.** A start in town for a new world (her first lines, before the
     player runs off; only her voice, nothing to see). At the core: the last boss (to design), the Heart, the bird, the name, the
     glass going clear and every memorized cube lit up in the overview, then the world going on.

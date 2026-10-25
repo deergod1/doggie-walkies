@@ -1,5 +1,6 @@
 // Entry point: load the first cube and run the frame loop.
 import './render/lighthook.js';   // (first: every lit material takes the fixed lights, render/lighthook.js)
+import { playSplash, splashCovers } from './game/splash.js';   // (early: its input comes before the game's)
 import * as THREE from 'three';
 import { renderer, scene, camera, fitView } from './render/scene.js';
 import { tickBakes, updateBakes, setCurrentBake, baked } from './render/bake.js';
@@ -266,12 +267,15 @@ function menuFrame(dt, start) {
   tickQuality(dt);
   tickBakes(state.world, curtained()); updateBakes(); setCurrentBake(state.world?.bake);
   fitView();
-  beginFrame();
-  renderer.render(scene, camera);
-  drawPortrait(heroBox());
-  endFrame();
+  const draw = !splashCovers();   // (behind the splash screen nothing shows: game/splash.js)
+  if (draw) {
+    beginFrame();
+    renderer.render(scene, camera);
+    drawPortrait(heroBox());
+    endFrame();
+  }
   keepPrograms(true);
-  tickResolution(start, frameRate());
+  tickResolution(start, frameRate(), draw);
   requestAnimationFrame(frame);
 }
 
@@ -285,7 +289,10 @@ onSettingsChange(graphicsSettings);
 if (state.mode === 'play') {
   loadCube();
   setStatus(tr('Welcome to town. Follow the path through the grove to leave.'));
-} else openMainMenu();
+} else {
+  openMainMenu();
+  playSplash();   // the glass bird breaking, over the menu (game/splash.js)
+}
 // debug / test hooks
 window.__game = {
   get map() { return state.map; }, player, generate, loadCube, updatePlayer, groundAt,

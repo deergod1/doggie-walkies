@@ -190,6 +190,9 @@ export default {
   'Left Cmd': 'Cmd links',
   'Right Cmd': 'Cmd rechts',
 
+  // the splash screen before it (game/splash.js)
+  'Click to begin': 'Klick, um zu beginnen',
+  'Tap to begin': 'Tipp, um zu beginnen',
   // the main menu (game/menu.js)
   'just now': 'gerade eben',
   '{n} min ago': 'vor {n} Min.',
