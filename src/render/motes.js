@@ -9,7 +9,7 @@
 // motes: { colors, rate (a second), drift (sideways speed), rise: [min, max] (up), life: [min, max],
 //   size: [min, max], wisps (how many at once), wisp (their colour) }
 import * as THREE from 'three';
-import { glow, emit, rand } from './particles.js';
+import { glow, emit, rand, rideAlong } from './particles.js';
 import { trackLight, untrackLight } from './lightpool.js';
 
 const WISP = { light: 1.8, reach: 3.5, life: [9, 15], fade: 1.5, speed: 0.45, near: [2, 6.5], high: [0.9, 2.3] };
@@ -18,6 +18,12 @@ let due = 0, rate = 1;
 export function setMoteRate(k) { rate = k; }
 const wisps = [];
 const holder = new THREE.Object3D();   // (what the wisps' lights hang on: the world itself)
+// The wisps are where `at` says (in scene space), not in the particles' list: a portal's slide
+// moves them with the cubes, a cut to another cube drops them (render/particles.js rideAlong)
+rideAlong({
+  shift(dx, dy, dz) { for (const w of wisps) { w.at.x += dx; w.at.y += dy; w.at.z += dz; w.to.x += dx; w.to.y += dy; w.to.z += dz; w.light.position.copy(w.at); } },
+  clear() { for (const w of wisps) untrackLight(w.light); wisps.length = 0; },
+});
 
 // theme: the current cube's (or none); (x, y, z): the character; night: how far into the world's
 // night the cube is (game/daycycle.js): at night a theme's `nightMotes` drift instead
