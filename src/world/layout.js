@@ -3,7 +3,7 @@
 // further down; small optional branches fit inside the band's most. The core has no
 // further descent. Adjacent, non-linked route sections stay sealed.
 import { mulberry32, hash32 } from '../core/util.js';
-import { bossAt } from '../core/bosses.js';
+import { bossAt, BOSS_ARENAS } from '../core/bosses.js';
 import { key, faceKey } from './coords.js';
 import { MAX_DEPTH, themeAt, themesAt, worldThemes } from '../themes/depth.js';
 import { planSites } from './sites.js';
@@ -173,8 +173,12 @@ function build(seed, d, above, theme, opts = {}) {
   const branchBudget = Math.min(4, max - cells.length) - (wantAnnex ? 1 : 0);
   // gorge spans (spans.js): on the route, and maybe a lonely island branch over a bridge
   const free = c => !used.has(id(c)) && !(d === 0 && cheb(c) <= 1);
+  // (nor next to a boss's arena of its own shape, core/bosses.js BOSS_ARENAS: Flip's box, Foggery's
+  // caldera, whose ground does not meet a gorge's at their face)
+  const shaped = [...guardians].filter(([, g]) => BOSS_ARENAS[g.boss]?.type).map(([k]) => k.split(',').map(Number).filter((_, i) => i !== 1));
   const spanPlan = planSpans(seed, d, theme.spans, spine, K, k => guardians.has(k) || hordes.has(k)
-    || nearArea(k.split(',').map(Number).filter((_, i) => i !== 1)), free, branchBudget, area?.kind === 'hairpin' ? 1 : 0);
+    || nearArea(k.split(',').map(Number).filter((_, i) => i !== 1))
+    || shaped.some(c => nb(c).some(n => K(n) === k)), free, branchBudget, area?.kind === 'hairpin' ? 1 : 0);
   // the large area: a hairpin's two spans go in with the others
   const areaPlan = area ? planArea(seed, d, theme, area.kind, spine, area.at, K, free) : null;
   if (areaPlan?.kind === 'hairpin') for (const span of areaPlan.spans) {
