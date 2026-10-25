@@ -2,16 +2,19 @@
 //   click a portal: take it            G: go to the nearest way down on this depth
 //   H: try this depth's wild horde
 //   PageDown / PageUp: go down / up a depth right away (finding the well / ring first)
-//   Alt + WASD / arrows: go to the adjacent cube on that side of the screen
+//   Alt + WASD / arrows: go to the adjacent cube on that side of the screen (only one there is)
 // None of them wait for guardians: locked portals are taken anyway (the gate stays locked).
-// The console's developer commands (game/devcommands.js: /find, /goto, /horde, /arena, /go) do the same.
+// The console's developer commands (game/devcommands.js: /find, /goto, /where, /horde, /arena) do
+// the same, and more: /goto a depth, a cube on it, a spot in that cube (goPlace).
 import { BOSS_ARENAS, BOSSES, bossAt } from '../core/bosses.js';
 import { guardianId } from '../core/guardians.js';
 import { ENEMY_KINDS } from '../core/enemies.js';
 import { testRoomKey, isTestRoom } from '../world/testrooms.js';
 import * as THREE from 'three';
 import { camera, renderer } from '../render/scene.js';
-import { step } from '../world/coords.js';
+import { step, key, parse } from '../world/coords.js';
+import { groundAt } from '../physics/collide.js';
+import { isInterior } from '../world/town.js';
 import { boundaryArrival } from '../core/boundaries.js';
 import { state, player, view, setStatus } from './state.js';
 import { whenReady } from './hud.js';
@@ -351,10 +354,13 @@ export function screenFace([ix, iy], yaw = view.yawTarget) {
 }
 
 // Through the side portal if there is one (the real slide), otherwise straight in, at the
-// nearest safe spot to where we stand along the shared face.
+// nearest safe spot to where we stand along the shared face. Only into a cube of this depth's
+// plan: nothing next to a house's inside or a test room (they are off the grid).
 export async function goAdjacent(d) {
   if (state.transitioning || state.inventoryOpen) return;
-  const k = step(state.cubeKey, d);
+  const here = state.cubeKey;
+  if (isInterior(here) || isTestRoom(here)) { setStatus('No cubes next to this one'); return; }
+  const k = step(here, d);
   if (!state.cubes.layout(state.map.depth).exists.has(k)) { setStatus(`No cube to the ${NAMES[d]}`); return; }
   const q = state.map.portals.find(p => p.kind === 'side' && p.dir === d);
   if (q) { takePortal(q); return; }
@@ -367,6 +373,43 @@ export async function goAdjacent(d) {
   if (!c) { setStatus(`The cube to the ${NAMES[d]} failed to generate`); return; }
   enterCube(c, null, null, at);
   setStatus(`Jumped ${NAMES[d]}`);
+}
+
+// Into a place (world/coords.js readPlace: /goto 7, /goto 3,2, /goto 7 3,2 8.4,3,11.2): a depth's
+// cube at X,Z (the minimap's "cube 3, 2"), in by its usual way (a side portal); no cube: the
+// depth's entrance, come down its way up (the town's spawn pad at 0); a spot: there, on the
+// nearest ground (no height: the highest ground there). Only cubes of the depth's plan.
+// Returns where it went (or throws what is wrong).
+export async function goPlace({ depth, cell = null, spot = null }) {
+  if (state.transitioning || state.inventoryOpen) throw new Error('Busy: travelling, or the inventory is open');
+  const cubes = state.cubes, L = cubes.layout(depth);
+  const k = cell ? key(cell[0], -depth, cell[1]) : depth ? L.up : cubes.start;
+  if (!L.exists.has(k)) throw new Error(cell ? `No cube ${cell.join(',')} on depth ${depth}` : `No entrance on depth ${depth}`);
+  clearMouseInput(); state.transitioning = true;
+  try {
+    const c = await whenReady(cubes.get(k));
+    if (state.cubes !== cubes) return;
+    const ways = c.map.portals, up = ways.find(p => p.kind === 'up'), pad = ways.find(p => p.kind === 'spawn');
+    if (spot) {
+      const y = spot.y ?? groundAt(spot.x, spot.z, 1e3, 0, c.map).h;
+      enterCube(c, null, null, { x: spot.x, y: Number.isFinite(y) ? y : 0, z: spot.z });
+    } else enterCube(c, !cell && up ? up.dir : pad ? null : (ways.find(p => p.kind === 'side') ?? up ?? ways[0]).dir);
+    return `${placeOf(k)} · ${c.map.biome}`;
+  } finally { if (state.cubes === cubes) state.transitioning = false; }
+}
+// a cube said as /goto takes it, with what it is for (world/sites.js roles)
+function placeOf(k) {
+  const [X, Y, Z] = parse(k), role = state.cubes.layout(-Y).roles?.get(k);
+  return `depth ${-Y} · cube ${X},${Z}${role ? ` · ${role}` : ''}`;
+}
+// where we are, as a /goto line to copy (and what the place is)
+export function whereAmI() {
+  const k = state.cubeKey, f = v => String(Math.round(v * 10) / 10);
+  if (!k) return 'Nowhere yet';
+  if (isInterior(k)) return `Inside a house (depth ${state.map.depth}): /where outside its door`;
+  if (isTestRoom(k)) return `In a test room (/testroom leave: back out) · ${state.map.biome}`;
+  const [X, Y, Z] = parse(k);
+  return `${placeOf(k)} · ${state.map.biome}\n/goto ${-Y} ${X},${Z} ${f(player.x)},${f(player.y)},${f(player.z)}`;
 }
 
 if (state.dev) {

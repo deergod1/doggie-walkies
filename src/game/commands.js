@@ -36,7 +36,6 @@ addType(commands, { name: 'mood', values: () => [...MOODS.map(m => ({ value: m, 
 const choice = (name, list) => addType(commands, { name, values: () => list.map(([value, hint]) => ({ value, label: value, hint })) });
 choice('toggle', [['on'], ['off']]);
 choice('way', [['down', 'the way down'], ['up', 'the way up']]);
-choice('dir', [['east'], ['west'], ['south'], ['north']]);
 choice('where', [['front', 'in front of you'], ['cursor', 'under the mouse']]);
 choice('drop', [['drop', 'at your feet instead of in hand']]);
 

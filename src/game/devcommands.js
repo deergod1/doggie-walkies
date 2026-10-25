@@ -13,8 +13,11 @@ import { online } from '../net/online.js';
 import { player, state } from './state.js';
 import { commands } from './commands.js';
 import { spawnEnemies, killEnemies, clearEnemies } from './devspawn.js';
-import { goTo, goHorde, goArena, goAdjacent, goSpan, goFeature, goStructure, goSpot, goTrial, goBoss, goTestRoom, leaveTestRoom, FEATURES } from './dev.js';
+import { goTo, goPlace, whereAmI, goHorde, goArena, goAdjacent, goSpan, goFeature, goStructure, goSpot, goTrial, goBoss, goTestRoom, leaveTestRoom, FEATURES } from './dev.js';
 import { BOSSES, BOSS_ARENAS } from '../core/bosses.js';
+import { DIR_NAME, readPlace, isCellText } from '../world/coords.js';
+import { MAX_DEPTH } from '../themes/depth.js';
+import { N } from '../core/constants.js';
 import { TEST_ROOMS, isTestRoom, testRoomDepth } from '../world/testrooms.js';
 import { TRIALS, TRIAL_KINDS } from '../core/trials.js';
 import { devTrial } from './trials.js';
@@ -80,17 +83,26 @@ dev({
 
 // --- getting about -------------------------------------------------------------------------
 
+// /goto down|up, east|west|south|north, or a place: [depth] [X,Z] [x,y,z] (world/coords.js readPlace)
+addType(commands, { name: 'goto', read: t => isCellText(t) ? t : undefined, values: () => [
+  { value: 'down', label: 'down', hint: 'take the nearest way down (PgDn)' }, { value: 'up', label: 'up', hint: 'take the nearest way up (PgUp)' },
+  ...DIR_NAME.slice(0, 4).map(d => ({ value: d, label: d, hint: 'the cube on that side (Alt + WASD)' })),
+  ...commands.types.get('depth').values()] });
 dev({
-  name: 'goto', help: 'take the nearest way down or up on this depth (PgDn / PgUp)', args: [{ name: 'way', type: 'way' }],
-  run({ way }) { goTo(way, true); },
+  name: 'goto', help: 'take the nearest way down or up (PgDn / PgUp), into the cube on a side, or to a depth\'s entrance, a cube X,Z on it (the minimap\'s), a spot x,y,z in it (/where says yours)',
+  args: [{ name: 'where', type: 'goto' }, { name: 'cube', type: 'text', optional: true }, { name: 'spot', type: 'text', optional: true }],
+  async run({ where, cube, spot }) {
+    const p = readPlace([where, cube, spot], state.map?.depth ?? 0, MAX_DEPTH, N);
+    if (p.error) throw new Error(p.error);
+    if (p.way) goTo(p.way, true);
+    else if (p.side !== undefined) await goAdjacent(p.side);
+    else return goPlace(p);
+  },
 });
+dev({ name: 'where', help: 'where you are, as a /goto line to copy', run: () => whereAmI() });
 dev({
   name: 'find', help: 'stand next to the nearest way down or up (G)', args: [{ name: 'way', type: 'way' }],
   run({ way }) { goTo(way, false); },
-});
-dev({
-  name: 'go', help: 'into the cube next to this one (Alt + WASD)', args: [{ name: 'side', type: 'dir' }],
-  run({ side }) { goAdjacent(['east', 'west', 'south', 'north'].indexOf(side)); },
 });
 dev({
   name: 'horde', help: "a depth's wild horde (H)", args: [{ name: 'depth', type: 'depth', optional: true }],
@@ -164,10 +176,11 @@ dev({
 addType(commands, { name: 'testroom', values: () => [...Object.entries(TEST_ROOMS).map(([k, hint]) => ({ value: k, label: k, hint })),
   { value: 'leave', label: 'leave', hint: 'back to where you were' }] });
 // where a test room is dressed: a depth, or a boss (his depth; the boss room: him)
-addType(commands, { name: 'where', values: () => [...commands.types.get('boss').values(), ...commands.types.get('depth').values()] });
+// (not 'where': that is /spawn's front or cursor, game/commands.js)
+addType(commands, { name: 'dressing', values: () => [...commands.types.get('boss').values(), ...commands.types.get('depth').values()] });
 dev({
   name: 'testroom', help: 'into a test room, dressed as this depth (or that one, or a boss\'s); boss: a boss in his arena; leave: back out; none: the list',
-  args: [{ name: 'room', type: 'testroom', optional: true }, { name: 'where', type: 'where', optional: true }],
+  args: [{ name: 'room', type: 'testroom', optional: true }, { name: 'where', type: 'dressing', optional: true }],
   async run({ room, where }) {
     if (room === 'leave') { await leaveTestRoom(); return; }
     if (room) return goTestRoom(room, where === undefined ? undefined : testRoomDepth(where));

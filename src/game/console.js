@@ -4,13 +4,15 @@
 // a command (game/commands.js, with the developer ones under ?dev=1, game/devcommands.js):
 // while typing one, the box offers what fits (the game's items, enemies, rarities ...), Tab
 // takes the highlighted one, and Enter runs the line, filling in what clearly fits (or the
-// suggestion picked with Up and Down), and closes the box. ` (the key
+// suggestion picked with Up and Down); the box stays open for what it says (and the next one),
+// a chat line closes it. ` (the key
 // left of 1) opens it with the / typed. Up and Down move through the suggestions while they
 // show, else through the lines typed before (kept across reloads); Esc hides the suggestions,
-// then closes the box. The game goes on meanwhile.
+// then closes the box. A click into the world closes it too. The game goes on meanwhile.
 //
 // Closed, new lines show for a while and fade; open, the whole chronicle scrolls, filtered by
-// All / Chat / Events. A death's line opens to its record.
+// All / Chat / Events, and its text can be selected and copied (new lines leave a selection
+// be: rows are only added and taken away). A death's line opens to its record.
 import { complete, accept, usage, helpOf } from '../core/commands.js';
 import { describe, details, KINDS, cleanText } from '../core/chronicle.js';
 import { RARITY } from '../core/gear/rarities.js';
@@ -38,6 +40,7 @@ const SUGGEST = 50;           // suggestions at most (the list scrolls)
 const HISTORY_KEY = 'cube-crawler-history', HISTORY_MAX = 50;
 
 let open = false, filter = 'all', shown = -1, expanded = new Set();
+let wording = 0;   // bumped when the lines read anew (another language): every row is made again
 // what fits the word being typed (core/commands.js complete), and which of it is highlighted
 let comp = null, sel = 0, dismissed = false;
 let picked = false;   // the highlighted suggestion was chosen with Up / Down: Enter takes it too
@@ -70,8 +73,22 @@ export function closeChat() {
   $('chat-entry').hidden = true; $('chat-tabs').hidden = true;
   comp = null; showPopup();
   if (document.activeElement === input) input.blur();
+  const s = getSelection();
+  if (s && !s.isCollapsed && box.contains(s.anchorNode)) s.removeAllRanges();   // (only open is it selectable)
   shown = -1; render();
 }
+// a click outside the box (into the world, another panel) closes it; one inside does not
+addEventListener('pointerdown', e => { if (open && !box.contains(e.target)) closeChat(); }, true);
+// The keys while the box is open but the line is not focused (text in the log selected): copying
+// goes to the browser, Esc closes, the rest go back to the line. The game gets none of them.
+addEventListener('keydown', e => {
+  if (!open || e.target === input) return;
+  e.stopImmediatePropagation();
+  if (e.metaKey || e.ctrlKey || isModifier(e.code)) return;   // Cmd / Ctrl + C ...: the browser's
+  if (e.key === 'Escape') { e.preventDefault(); closeChat(); return; }
+  input.focus();
+  if (e.key.length !== 1) e.preventDefault();   // (a letter goes on into the line)
+}, true);
 
 // the chat key (T, Enter): chat; the command key (`): a command (game/settings.js; not with the
 // inventory open, and the other panels' fields left alone)
@@ -106,9 +123,11 @@ for (const ev of ['click', 'keyup']) input.addEventListener(ev, e => {
   if (ev === 'keyup' && !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
   refreshCompletion(false);
 });
-input.addEventListener('blur', () => closeChat());
-// clicks in the box keep the line focused; the wheel scrolls the box, not the camera
-box.addEventListener('mousedown', e => { if (e.target !== input) e.preventDefault(); });
+// clicks in the box keep the line focused (but in the log they select text); the wheel scrolls
+// the box, not the camera
+box.addEventListener('mousedown', e => { if (e.target !== input && !list.contains(e.target)) e.preventDefault(); });
+// a click in the log that selected nothing: back to typing
+list.addEventListener('mouseup', () => setTimeout(() => { if (open && getSelection()?.isCollapsed) input.focus({ preventScroll: true }); }));
 box.addEventListener('wheel', e => e.stopPropagation(), { passive: true });
 
 async function submit() {
@@ -117,9 +136,11 @@ async function submit() {
   if (!line || line === '/') { closeChat(); return; }
   remember(line);
   if (!line.startsWith('/')) { closeChat(); say(line); return; }
-  // a command: the box closes (its suggestions with it) and Enter opens it again
-  closeChat();
+  // a command: the box stays open, the line empty, to read (and copy) what it says; one that
+  // leaves the game (/menu) closes it
+  input.value = ''; refreshCompletion();
   await runCommand(line);
+  if (state.mode !== 'play') closeChat();
 }
 
 // Say something: into the chronicle, over our head and, playing together, to the friends
@@ -208,11 +229,13 @@ function browse(step) {
 // --- the chronicle -----------------------------------------------------------------------------
 
 const colorOf = who => who ? playerColor(who.slot) : online.slot !== null && online.peers.size ? playerColor(online.slot) : '#ffe4ae';
+// what a row shows: made again when it changes
+const signature = e => `${wording}|${e.time}|${expanded.has(e.id)}|${colorOf(e.who)}|${JSON.stringify(e.data)}`;
 const groupOk = e => filter === 'all' || KINDS[e.kind].group === filter;
 function row(e) {
   const li = document.createElement('li');
   li.className = `k-${e.kind}${e.who ? ' friend' : ''}${e.data.error ? ' error' : ''}`;
-  li.dataset.time = e.time;
+  li.dataset.time = e.time; li.dataset.id = e.id; li.dataset.sig = signature(e);
   if (e.kind === 'chat') {
     const name = document.createElement('b');
     name.textContent = e.who ? e.who.name : tr('You');
@@ -230,7 +253,6 @@ function row(e) {
   li.append(text);
   if (e.kind === 'death') {
     li.classList.add('more');
-    li.dataset.id = e.id;
     if (expanded.has(e.id)) {
       const more = document.createElement('div');
       more.className = 'record';
@@ -242,7 +264,7 @@ function row(e) {
 }
 list.addEventListener('click', e => {
   const li = e.target.closest('li.more');
-  if (!li) return;
+  if (!li || !getSelection()?.isCollapsed) return;   // (text was selected: not a click on it)
   const id = Number(li.dataset.id);
   if (!expanded.delete(id)) expanded.add(id);
   shown = -1; render();
@@ -255,12 +277,22 @@ for (const b of $('chat-tabs').querySelectorAll('button')) b.addEventListener('c
 });
 
 // the chronicle says its lines anew in another language
-onLanguageChange(() => { shown = -1; });
+onLanguageChange(() => { wording++; shown = -1; });
 function render() {
   if (shown === chronicle.version) return;
   shown = chronicle.version;
   const bottom = list.scrollHeight - list.scrollTop - list.clientHeight < 24;
-  list.replaceChildren(...chronicle.entries.filter(e => !open || groupOk(e)).map(row));
+  // rows gone (too old, filtered out, cleared) are taken away, new ones put in their place, a
+  // changed one (kills merged, a record opened) made again; the rest stay, and a selection in them
+  const want = chronicle.entries.filter(e => !open || groupOk(e)), ids = new Set(want.map(e => e.id));
+  for (const li of [...list.children]) if (!ids.has(Number(li.dataset.id))) li.remove();
+  let at = list.firstElementChild;
+  for (const e of want) {
+    if (at && Number(at.dataset.id) === e.id) {
+      if (at.dataset.sig !== signature(e)) { const li = row(e); at.replaceWith(li); at = li; }
+      at = at.nextElementSibling;
+    } else list.insertBefore(row(e), at);
+  }
   if (bottom || !open) list.scrollTop = list.scrollHeight;
   fade(true);
 }

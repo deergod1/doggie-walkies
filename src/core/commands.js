@@ -4,7 +4,8 @@
 // A registry holds the commands and the types of their arguments:
 //   command: { name, help, args: [{ name, type, optional?, min?, max? }], dev?, run(values, ctx) }
 //   type:    { name, values(ctx): [{ value, label, hint?, color?, picture? }] } (a list to pick from;
-//            picture: an item id, shown as its model's picture)
+//            picture: an item id, shown as its model's picture), read?(text, ctx): a value
+//            written out rather than picked (a place '3,2'; undefined: not one, pick from the list)
 //            or one of the built-in 'int' and 'text'
 // The game fills it (game/commands.js, game/devcommands.js). Here: splitting a line into words
 // (words), finding the best matches for what was typed (match, pick), completing the word
@@ -196,6 +197,8 @@ export function parse(reg, line, ctx = {}) {
 // one argument's value from its word
 function read(reg, arg, text, ctx) {
   if (arg.type === 'text') return { value: text };
+  const written = argType(reg, arg)?.read?.(text, ctx);
+  if (written !== undefined) return { value: written };
   if (arg.type === 'int') {
     if (!/^-?\d+$/.test(text)) return { error: tr('{name} is a whole number, not "{text}"', { name: arg.name, text }) };
     const n = Number(text);

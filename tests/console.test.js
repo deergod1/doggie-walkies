@@ -5,6 +5,7 @@ import { createLog, addEntry, clearLog, LOG_LIMIT, MERGE_TIME, KINDS, NEWS, desc
 import { RELAYED, CHAT_BURST, CHAT_WINDOW, chatAllowed, PROTOCOL } from '../src/net/protocol.js';
 import { ITEMS } from '../src/core/items.js';
 import { ENEMY_KINDS } from '../src/core/enemies.js';
+import { readPlace, isCellText } from '../src/world/coords.js';
 import { noun, useLanguage, loadLocale } from '../src/i18n/i18n.js';
 
 const de = await loadLocale('de');
@@ -115,6 +116,30 @@ test('a command line reads into values, or says what is wrong', () => {
   assert.match(parse(reg, '/', dev).error, /Type a command/);
   assert.equal(usage(reg.commands.get('spawn')), '/spawn <enemy> [level]');
   assert.deepEqual(commandsFor(reg, {}).map(c => c.name), ['help']);
+});
+
+test('a type may take a value written out as well as one from its list', () => {
+  const reg = createRegistry(), dev = { dev: true };
+  addType(reg, { name: 'goto', read: t => isCellText(t) ? t : undefined, values: () => ['down', 'up', '7', '12'].map(v => ({ value: v, label: v })) });
+  addCommand(reg, { name: 'goto', help: 'goto', dev: true, args: [{ name: 'where', type: 'goto' }, { name: 'cube', type: 'text', optional: true }] });
+  assert.deepEqual(parse(reg, '/goto 7 3,2', dev).values, { where: '7', cube: '3,2' });
+  assert.deepEqual(parse(reg, '/goto -3,2', dev).values, { where: '-3,2' });
+  assert.deepEqual(parse(reg, '/goto do', dev).values, { where: 'down' });
+  assert.match(parse(reg, '/goto 3;2', dev).error, /No where fits/);
+});
+
+test('/goto reads a way, a side, or a depth, a cube and a spot', () => {
+  assert.deepEqual(readPlace(['down'], 4, 20), { way: 'down' });
+  assert.deepEqual(readPlace(['north'], 4, 20), { side: 3 });
+  assert.deepEqual(readPlace(['7'], 4, 20), { depth: 7 });
+  assert.deepEqual(readPlace(['3,-2'], 4, 20), { depth: 4, cell: [3, -2] });   // this depth
+  assert.deepEqual(readPlace(['7', '3,2', '8.5,3,11'], 4, 20), { depth: 7, cell: [3, 2], spot: { x: 8.5, y: 3, z: 11 } });
+  assert.deepEqual(readPlace(['3,2', '8,8'], 4, 20), { depth: 4, cell: [3, 2], spot: { x: 8, y: null, z: 8 } });
+  assert.match(readPlace(['east', '1,1'], 4, 20).error, /nothing after/);
+  assert.match(readPlace(['21'], 4, 20).error, /0 to 20/);
+  assert.match(readPlace(['7', '3'], 4, 20).error, /not a cube/);
+  assert.match(readPlace(['7', '3,2', '17,1'], 4, 20).error, /0 to 16/);
+  assert.match(readPlace(['7', '3,2', '1,1', 'x'], 4, 20).error, /Too many/);
 });
 
 test('the chronicle keeps the last entries and merges kills close together', () => {

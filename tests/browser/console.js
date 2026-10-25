@@ -15,6 +15,7 @@ import { runCommand, commands } from '../../src/game/commands.js';
 import { countOf, copperTotal, takeItem, isBound, isWorn } from '../../src/core/inventory.js';
 import { ITEMS, TOOLS } from '../../src/core/items.js';
 import { answerDeath } from '../../src/game/deathask.js';
+import { step, DIR_NAME } from '../../src/world/coords.js';
 
 const check = (condition, message) => { if (!condition) throw Error(message); };
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -65,7 +66,7 @@ export async function runConsoleChecks() {
     key('Enter', 'Enter', input());
     await delay(30);
     check(countOf(player.inventory, 'item_potion_health_greater') === potions + 1, 'Enter must run /give with the best fit');
-    check(!chatOpen() && $('chat-popup').hidden, 'After a command the box and its suggestions must close');
+    check(chatOpen() && input().value === '' && $('chat-popup').hidden, 'After a command the box must stay open, the line empty, no suggestions');
     openChat('');
     key('ArrowUp', 'ArrowUp', input());
     check(input().value === '/give gr hea', 'Up must bring the last line back: ' + input().value);
@@ -134,6 +135,47 @@ export async function runConsoleChecks() {
     answerDeath(true);
     check(!state.deathAsk && player.hp === player.maxHp, 'Respawning answers it');
     results.push('depths and deaths with their cause go into the chronicle');
+
+    // open, the log's text is selectable, and a new line leaves the selection be; closed, it is not
+    openChat('');
+    check(getComputedStyle($('chat-log')).userSelect === 'text', 'The open log must be selectable');
+    await runCommand('/seed'); await delay(100);   // (the box shows new lines on the next frame)
+    const seedRow = $('chat-log').lastElementChild, range = document.createRange();
+    range.selectNodeContents(seedRow);
+    getSelection().removeAllRanges(); getSelection().addRange(range);
+    await runCommand('/where'); await delay(100);
+    check(getSelection().toString().includes(String(state.cubes.seed)) && seedRow.isConnected, 'A new line must keep the selection: ' + getSelection().toString());
+    key('KeyC', 'c', document.body);
+    check(chatOpen() && document.activeElement === input(), 'A key while the log has the focus goes back to the line (not the game)');
+    closeChat();
+    check(getSelection().isCollapsed && getComputedStyle($('chat-log')).userSelect === 'none', 'Closed, nothing is selected and the log is not selectable');
+    results.push('the open log selects and copies, new lines keep the selection');
+
+    // /goto: a depth's entrance, a cube on this depth, a cube on a depth, a spot; /where says it back
+    await runCommand('/goto 2');
+    check(state.map.depth === 2 && state.cubeKey === state.cubes.layout(2).up, '/goto 2: the entrance of depth 2, not ' + state.cubeKey);
+    const [ox, , oz] = state.cubes.layout(2).route[2].split(',').map(Number);
+    await runCommand(`/goto ${ox},${oz}`);
+    check(state.cubeKey === state.cubes.layout(2).route[2], `/goto ${ox},${oz}: that cube of this depth, not ${state.cubeKey}`);
+    const [px, , pz] = state.cubes.layout(3).route[1].split(',').map(Number);
+    await runCommand(`/goto 3 ${px},${pz} 8,8`);
+    check(state.cubeKey === state.cubes.layout(3).route[1] && Math.hypot(player.x - 8, player.z - 8) < 3, `/goto 3 ${px},${pz} 8,8: near the middle of that cube`);
+    await runCommand('/where');
+    const line = last().data.text.split('\n').at(-1), was = [state.cubeKey, player.x, player.y, player.z];
+    check(line.startsWith(`/goto 3 ${px},${pz} `), '/where must say a /goto line: ' + line);
+    await runCommand('/goto 0');
+    check(state.cubeKey === state.cubes.start, '/goto 0: the town');
+    await runCommand(line);
+    check(state.cubeKey === was[0] && Math.hypot(player.x - was[1], player.y - was[2], player.z - was[3]) < 0.2, `${line}: back where /where was said`);
+    const before = state.cubeKey;
+    check(!await runCommand('/goto 3 99,99') && /No cube 99,99/.test(last().data.text) && state.cubeKey === before, 'A cube not on the depth must be refused');
+    check(!await runCommand('/goto 3 1,1 99,1'), 'A spot outside the cube must be refused');
+    const L3 = state.cubes.layout(3), none = [0, 1, 2, 3].find(d => !L3.exists.has(step(state.cubeKey, d)));
+    if (none !== undefined) {
+      await runCommand(`/goto ${DIR_NAME[none]}`);
+      check(state.cubeKey === before, `/goto ${DIR_NAME[none]}: no cube there, so nowhere`);
+    }
+    results.push('/goto depth, cube, depth and cube, spot, /where, no cube');
 
     // chat alone: kept all the same
     key('Enter'); type('hello'); key('Enter', 'Enter', input());

@@ -8,10 +8,17 @@ say to each other (chat) and the commands (the console).
 - **Enter** opens it to type (the action key is F or right Ctrl, `game/action.js`). A line is chat; a line that starts with `/` is a command.
   **`** (the key left of 1, `^` on a German keyboard; by `e.code`, so any layout) opens it with
   the `/` already typed. **Esc** closes the list of suggestions first, then the box. Enter on an
-  empty line closes it too, and so does running a command (Enter opens it again). The game goes on while it is open (it does not pause).
+  empty line closes it too, and so does a chat line. A command leaves it open, the line empty, to
+  read and copy what it said (one that leaves the game, `/menu`, closes it). The game goes on while it is open (it does not pause).
 - While typing, the game's keys are not the game's (`game/console.js` stops them at the field;
   the keys held to walk are let go when it opens). Clicks in the box keep the field focused; a
   click into the world closes it. The wheel scrolls the box, not the camera.
+- Open, the log's text can be selected and copied (Cmd / Ctrl + C), a `/seed` or a `/where` line.
+  A new line leaves the selection as it is: the rows are only added and taken away, a changed one
+  (kills merged, a death's record opened) made again. While the log has the focus the keys still
+  are not the game's: copying goes to the browser, Esc closes the box, any other key goes back to
+  the field. A click in the log that selects nothing goes back to the field too. Closed, nothing
+  is selectable, and closing drops the selection.
 - Closed, a new line shows for `SHOW_FOR` (12 s) and fades; open, the whole chronicle scrolls,
   filtered by **All / Chat / Events**. A death's line opens to its record when clicked.
 - Under the lines, the game's last word (`setStatus`: "Inventory is full", "Horde awakened!") shows
@@ -89,7 +96,10 @@ Developer (`?dev=1`):
 | `/daytime day\|night` | a theme's day or night (the slime marsh's: the world's play time moves on to the next one) |
 | `/god [on\|off]` | invincible: blows, falls, fire and poison take no health, a fluid puts you back on safe ground (no argument: toggle) |
 | `/goto <down\|up>`, `/find <down\|up>` | take the nearest way down / up (PgDn / PgUp), or stand next to it (G) |
-| `/go <east\|west\|south\|north>` | into the next cube (Alt + WASD) |
+| `/goto <east\|west\|south\|north>` | into the next cube on that side, if the depth has one (Alt + WASD: the side on screen) |
+| `/goto [depth] [X,Z] [x,y,z]` | a place (`world/coords.js readPlace`, `game/dev.js goPlace`): `/goto 7` depth 7's entrance, come down its way up (`0`: the town's spawn pad); `/goto 3,2` the cube X 3, Z 2 of this depth (as the minimap says it: "cube 3, 2"), in by a side portal; `/goto 7 3,2` that cube on depth 7; `/goto 7 3,2 8.4,3,11.2` a spot in it, in cells (`x,z`: on the highest ground there), on the nearest ground. Only cubes of the depth's plan |
+| `/where` | where you are: the depth, the cube, what it is (`world/sites.js` roles: landmark, side-guardian ...), the theme, and a `/goto` line to the spot to copy |
+| `/arena [kind] [depth]` | a guardian arena of that kind, the nearest depth first (no kind: this depth's way down) |
 | `/horde [depth]` | a depth's wild horde (H) |
 | `/span [n]` | the start of a gorge span's long bridge: the next one, or the n-th (docs/world.md) |
 | `/bridge [style] [depth]` | the next bridge (of that style) from this depth (or that one) on down (docs/world.md) |
@@ -122,7 +132,8 @@ gone: these commands replace them.
 
 ### Completing
 
-An argument has a type. Types with a list of values (`item`, `weapon`, `wearable`, `enemy`,
+An argument has a type. A type with a list may also read a value written out (`read`: `/goto`'s
+cube `3,2`), tried before the list. Types with a list of values (`item`, `weapon`, `wearable`, `enemy`,
 `rarity`, `depth`, `mood`, the saves `hero`, `savedworld` and `save`, and small fixed ones
 like `way`, `dir`, `toggle`) take their values from the game's own tables (`ITEMS`,
 `ENEMY_KINDS`, `RARITIES`, the store of saves ...), so new ones complete without any change

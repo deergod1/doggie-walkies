@@ -65,6 +65,8 @@ kbd { display: inline-block; min-width: 1.2em; text-align: center; background: #
 #chat-log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; justify-content: flex-end;
   max-height: 9.6em; overflow: hidden; line-height: 1.35; }
 #chat.open #chat-log { max-height: 360px; overflow-y: auto; justify-content: flex-start; scrollbar-width: thin; }
+/* open, the lines can be selected and copied (closed, the box takes no clicks) */
+#chat.open #chat-log { -webkit-user-select: text; user-select: text; cursor: text; }
 #chat-log li { flex: none; padding: 1px 0; color: #c9d1dc; white-space: pre-wrap; overflow-wrap: anywhere; transition: opacity 1.2s; }
 #chat-log li.old { opacity: 0; }
 #chat-log li.k-chat { color: #f4f6fa; }
