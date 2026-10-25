@@ -4,9 +4,7 @@
 // a command (game/commands.js, with the developer ones under ?dev=1, game/devcommands.js):
 // while typing one, the box offers what fits (the game's items, enemies, rarities ...), Tab
 // takes the highlighted one, and Enter runs the line, filling in what clearly fits (or the
-// suggestion picked with Up and Down); the box stays open for what it says (and the next one),
-// a chat line closes it. ` (the key
-// left of 1) opens it with the / typed. Up and Down move through the suggestions while they
+// suggestion picked with Up and Down), and closes the box. ` (the key left of 1) opens it with the / typed. Up and Down move through the suggestions while they
 // show, else through the lines typed before (kept across reloads); Esc hides the suggestions,
 // then closes the box. A click into the world closes it too. The game goes on meanwhile.
 //
@@ -136,11 +134,9 @@ async function submit() {
   if (!line || line === '/') { closeChat(); return; }
   remember(line);
   if (!line.startsWith('/')) { closeChat(); say(line); return; }
-  // a command: the box stays open, the line empty, to read (and copy) what it says; one that
-  // leaves the game (/menu) closes it
-  input.value = ''; refreshCompletion();
+  // a command: the box closes (its suggestions with it) and Enter opens it again
+  closeChat();
   await runCommand(line);
-  if (state.mode !== 'play') closeChat();
 }
 
 // Say something: into the chronicle, over our head and, playing together, to the friends

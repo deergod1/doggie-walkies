@@ -66,7 +66,7 @@ export async function runConsoleChecks() {
     key('Enter', 'Enter', input());
     await delay(30);
     check(countOf(player.inventory, 'item_potion_health_greater') === potions + 1, 'Enter must run /give with the best fit');
-    check(chatOpen() && input().value === '' && $('chat-popup').hidden, 'After a command the box must stay open, the line empty, no suggestions');
+    check(!chatOpen() && $('chat-popup').hidden, 'After a command the box and its suggestions must close');
     openChat('');
     key('ArrowUp', 'ArrowUp', input());
     check(input().value === '/give gr hea', 'Up must bring the last line back: ' + input().value);

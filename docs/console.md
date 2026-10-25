@@ -8,8 +8,8 @@ say to each other (chat) and the commands (the console).
 - **Enter** opens it to type (the action key is F or right Ctrl, `game/action.js`). A line is chat; a line that starts with `/` is a command.
   **`** (the key left of 1, `^` on a German keyboard; by `e.code`, so any layout) opens it with
   the `/` already typed. **Esc** closes the list of suggestions first, then the box. Enter on an
-  empty line closes it too, and so does a chat line. A command leaves it open, the line empty, to
-  read and copy what it said (one that leaves the game, `/menu`, closes it). The game goes on while it is open (it does not pause).
+  empty line closes it too, and so does a chat line or a command. The game goes on while it is
+  open (it does not pause).
 - While typing, the game's keys are not the game's (`game/console.js` stops them at the field;
   the keys held to walk are let go when it opens). Clicks in the box keep the field focused; a
   click into the world closes it. The wheel scrolls the box, not the camera.
@@ -90,7 +90,7 @@ Developer (`?dev=1`):
 
 | command | what |
 |---|---|
-| `/spawn <enemy> [level] [count] [front\|cursor]` | enemies into this cube (no level: this depth's) |
+| `/spawn <enemy> [level] [count] [front\|cursor]` | enemies into this cube (no level: this depth's); a kind that comes in troops (the Flimmers) comes `count` troops strong |
 | `/kill`, `/remove` | every enemy here dies (XP and loot) / goes (none) |
 | `/passive [on\|off]` | enemies stand still and never attack (no argument: toggle) |
 | `/daytime [morning\|noon\|evening\|dusk\|night\|dawn]` | the world's time of day (`core/daycycle.js`): the world's play time moves on to the next one (alone or as the host); none: what it is now, and what this cube's sky makes of it |
