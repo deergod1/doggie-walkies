@@ -1,7 +1,7 @@
 // Indonesian: the items and what is said about them (the names, the gear, the shops).
 export default {
 
-  // --- core/items.js: names -----------------------------------------------------------------------
+  // --- core/items.js: names ----------------------------------------------------------------------
   'Old Sword': 'Pedang Tua',
   'Short Sword': 'Pedang Pendek',
   'Medium Sword': 'Pedang Sedang',
@@ -142,7 +142,7 @@ export default {
   'Void crystal': 'Kristal Hampa',
   'Rune stone': 'Batu Rune',
 
-  // --- core/items.js: descriptions ------------------------------------------------------------------
+  // --- core/items.js: descriptions ---------------------------------------------------------------
   'Warm to the touch. The Enchanter makes weapons Toasty with it.': 'Hangat disentuh. Penyihir membuat senjata Panggang dengannya.',
   'Smells faintly of swamp. The Enchanter makes weapons Icky with it.': 'Berbau samar rawa. Penyihir membuat senjata Lengket dengannya.',
   'Always a little frosty. The Enchanter makes weapons Nippy with it.': 'Selalu sedikit dingin. Penyihir membuat senjata Sejuk dengannya.',
@@ -237,7 +237,7 @@ export default {
   'A purple crystal from the bottom of the world.': 'Kristal ungu dari dasar dunia.',
   'A black stone with a glowing red rune.': 'Batu hitam dengan rune merah menyala.',
 
-  // --- core/items.js: what the potions and flasks do ---------------------------------------------------
+  // --- core/items.js: what the potions and flasks do ---------------------------------------------
   'You move {v}% faster for {time} seconds.': 'Kamu bergerak {v}% lebih cepat selama {time} detik.',
   'You attack {v}% faster for {time} seconds.': 'Kamu menyerang {v}% lebih cepat selama {time} detik.',
   'Your attacks deal {v}% more damage for {time} seconds.': 'Seranganmu memberi {v}% lebih banyak damage selama {time} detik.',
@@ -250,18 +250,18 @@ export default {
   'It bursts into flames: everything around catches fire, and the ground burns on for a while.': 'Menyala menjadi api: segala di sekitarnya terbakar, dan tanahnya menyala beberapa saat.',
   'It bursts into a poison cloud that lingers; everything in it is poisoned.': 'Menjadi awan racun yang menggantung; segala yang di dalamnya keracunan.',
 
-  // --- core/items.js: the armor slots --------------------------------------------------------------------
+  // --- core/items.js: the armor slots ------------------------------------------------------------
   'Head': 'Kepala',
   'Body': 'Tubuh',
   'Off hand': 'Tangan satunya',
   'Feet': 'Kaki',
 
-  // --- coins ----------------------------------------------------------------------------------------
+  // --- coins -------------------------------------------------------------------------------------
   'coin|g': 'Emas',
   'coin|s': 'Perak',
   'coin|c': 'Tembaga',
 
-  // --- core/gear/rarities.js --------------------------------------------------------------------------
+  // --- core/gear/rarities.js ---------------------------------------------------------------------
   'Crap': 'Sampah',
   'Shitty': 'Buruk',
   'Vanilla': 'Biasa',
@@ -273,7 +273,7 @@ export default {
   'Impossible': 'Mustahil',
   'OMG': 'OMG',
 
-  // --- core/gear/affixes.js ---------------------------------------------------------------------------
+  // --- core/gear/affixes.js ----------------------------------------------------------------------
   '+{v} damage': '+{v} damage',
   '+{v}% damage': '+{v}% damage',
   '{v}% faster attacks': 'Serangan {v}% lebih cepat',
@@ -313,7 +313,7 @@ export default {
   'of the Iron Stomach': 'Perut Besi',
   'of Standing Firm': 'Berdiri Kokoh',
 
-  // --- core/gear/enchants.js --------------------------------------------------------------------------
+  // --- core/gear/enchants.js ---------------------------------------------------------------------
   'Sets things burning for {v}% of the hit over {time} s': 'Membakar yang kena {v}% dari pukulannya selama {time} dtk',
   'Poisons for {v}% of every hit; it piles up': 'Meracuni {v}% dari setiap pukulan; menumpuk',
   'Slows what it hits by {v}% for {time} s': 'Memperlambat yang kena {v}% selama {time} dtk',
@@ -330,7 +330,7 @@ export default {
   'Shiny': 'Kilau',
   'Pays for itself. Eventually.': 'Membayar dirinya sendiri. Lama-lama.',
 
-  // --- core/crafting.js --------------------------------------------------------------------------------
+  // --- core/crafting.js --------------------------------------------------------------------------
   "I can enchant this. I'd rather nobody watched.": 'Ini bisa saya beri sihir. Sebaiknya tak ada yang menonton.',
   'Magic sticks to dents. Mostly.': 'Sihir menempel pada penyok. Kebanyakan.',
   "A sensible weapon. Let's make it less sensible.": 'Senjata yang masuk akal. Mari kita buat kurang masuk akal.',
@@ -362,7 +362,7 @@ export default {
   "Hammered out. Don't tell the Enchanter.": 'Sudah dipalukan. Jangan beri tahu si Penyihir.',
   'Fresh off the anvil.': 'Baru turun dari landasan.',
 
-  // --- core/shops.js ------------------------------------------------------------------------------------
+  // --- core/shops.js -----------------------------------------------------------------------------
   'Alchemist': 'Alkemis',
   'Potions': 'Ramuan',
   'what will it be?': 'mau pesan apa?',
@@ -371,7 +371,7 @@ export default {
   'Armor and re-rolls': 'Armor dan Lempar Ulang',
   'armor for sale. Or show me something of yours, and the line you want hammered.': 'armor dijual. Atau tunjukkan barangmu, dan baris yang mau dipalukan.',
 
-  // --- game/inventory.js --------------------------------------------------------------------------------
+  // --- game/inventory.js -------------------------------------------------------------------------
   'Portal cancelled': 'Portal dibatalkan',
   'Quests': 'Tugas',
   'Inventory': 'Inventori',
@@ -515,7 +515,7 @@ export default {
   'Close · Esc': 'Tutup · Esc',
   'The Quests tab': 'Tab Tugas',
 
-  // --- game/equipment.js --------------------------------------------------------------------------------
+  // --- game/equipment.js -------------------------------------------------------------------------
   'Finish your current action before changing weapons': 'Selesaikan aksimu sekarang sebelum mengganti senjata',
   'Equipped {item}': 'Memasang {item}',
   'Could not load this weapon; your previous sword is still equipped': 'Senjata ini gagal dimuat; pedangmu sebelumnya masih terpasang',
@@ -532,12 +532,12 @@ export default {
   'Inventory is full': 'Inventori penuh',
   'Only headwear on the player': 'Hanya tutup kepala yang tampil di pemain',
 
-  // --- game/loot.js -------------------------------------------------------------------------------------
+  // --- game/loot.js ------------------------------------------------------------------------------
   '{item} cannot be dropped': '{item} tidak bisa dibuang',
   'Dropped {item}': 'Membuang {item}',
   'Picked up {what}': 'Mengambil {what}',
 
-  // --- game/lootlabels.js --------------------------------------------------------------------------------
+  // --- game/lootlabels.js ------------------------------------------------------------------------
   'Treasure chest': 'Peti Harta',
   '{thing} · quest': '{thing} · tugas',
 };

@@ -2,7 +2,7 @@
 // the keybinds, the themes and landmarks, the page's own words).
 export default {
 
-  // --- core/chronicle.js ------------------------------------------------------------------------------
+  // --- core/chronicle.js -------------------------------------------------------------------------
   'Out of luck': 'Sial',
   'depth {depth}, {place}': 'kedalaman {depth}, {place}',
   'the surface': 'permukaan',
@@ -50,7 +50,7 @@ export default {
   'After: {time} of playing': 'Setelah: {time} bermain',
   'Knocked out': 'Dipukul pingsan',
 
-  // --- core/commands.js ---------------------------------------------------------------------------------
+  // --- core/commands.js --------------------------------------------------------------------------
   'Type a command after the /. /help lists them': 'Ketik perintah setelah /. /help mendaftarkannya',
   'There is no command /{name}. /help lists them': 'Tidak ada perintah /{name}. /help mendaftarkannya',
   'Too many words. Usage: {usage}': 'Terlalu banyak kata. Cara pakai: {usage}',
@@ -60,7 +60,7 @@ export default {
   'No {name} fits "{text}"': 'Tak ada {name} yang cocok dengan "{text}"',
   '"{text}" could be {list}': '"{text}" bisa jadi {list}',
 
-  // --- game/commands.js ------------------------------------------------------------------------------------
+  // --- game/commands.js --------------------------------------------------------------------------
   'what the commands are (or how one works)': 'apa saja perintahnya (atau cara pakai satu perintah)',
   'Type to chat. A line that starts with / is a command (Tab completes it):': 'Ketik untuk mengobrol. Baris yang diawali / adalah perintah (Tab melengkapinya):',
   "this world's seed (?seed= in the address plays it again)": 'Seed dunia ini (?seed= di alamat memainkannya lagi)',
@@ -72,19 +72,19 @@ export default {
   '{name} (here)': '{name} (di sini)',
   '{name} (cube {cube})': '{name} (kubus {cube})',
 
-  // --- game/console.js -----------------------------------------------------------------------------------------
+  // --- game/console.js ---------------------------------------------------------------------------
   'Nobody else hears you here: O plays together with friends': 'Tak ada yang mendengarmu di sini: O bermain bersama teman',
 
-  // --- core/keybinds.js --------------------------------------------------------------------------------------------
+  // --- core/keybinds.js --------------------------------------------------------------------------
   'Space': 'Spasi',
   'Num {n}': 'Num {n}',
 
-  // --- game/deathask.js ----------------------------------------------------------------------------------------------
+  // --- game/deathask.js --------------------------------------------------------------------------
   'Quit? Your friends drop out': 'Keluar? Teman-temanmu ikut keluar',
   'Save and quit to the menu': 'Simpan dan keluar ke menu',
   'Quit to the menu': 'Keluar ke menu',
 
-  // --- game/defense.js --------------------------------------------------------------------------------------------------
+  // --- game/defense.js ---------------------------------------------------------------------------
   'The keeper rings the bell: here they come! Keep them off the cart!': 'Penjaga membunyikan belnya: mereka datang! Jauhkan mereka dari gerobaknya!',
   'Nothing comes... maybe another time.': 'Tak ada yang datang... mungkin lain kali.',
   'They are coming!': 'Mereka datang!',
@@ -94,19 +94,19 @@ export default {
   'Wave {n} beaten! Get ready...': 'Gelombang {n} kalah! Bersiap...',
   'Supply cart': 'Gerobak Bekal',
 
-  // --- game/doors.js --------------------------------------------------------------------------------------------------------
+  // --- game/doors.js -----------------------------------------------------------------------------
   'The door is stuck': 'Pintunya macet',
 
-  // --- game/downed.js ----------------------------------------------------------------------------------------------------------
+  // --- game/downed.js ----------------------------------------------------------------------------
   'A friend': 'Seorang teman',
   'Down! {who} can help you up': 'Terjatuh! {who} bisa membantumu bangun',
   'Back on your feet!': 'Kembali berdiri!',
 
-  // --- game/effects.js -------------------------------------------------------------------------------------------------------------
+  // --- game/effects.js ---------------------------------------------------------------------------
   'Poisoned: an antidote cures it': 'Keracunan: penawar menyembuhkannya',
   'poisoned {n}s': 'keracunan {n} dtk',
 
-  // --- game/escmenu.js ----------------------------------------------------------------------------------------------------------------
+  // --- game/escmenu.js ---------------------------------------------------------------------------
   'The game goes on': 'Permainannya berjalan',
   'Paused': 'Jeda',
   '{name} (you)': '{name} (kamu)',
@@ -118,26 +118,26 @@ export default {
   'Copied!': 'Tersalin!',
   'Copy join link': 'Salin tautan gabung',
 
-  // --- game/fall.js ----------------------------------------------------------------------------------------------------------------------
+  // --- game/fall.js ------------------------------------------------------------------------------
   'Fell through the void!': 'Jatuh ke kehampaan!',
 
-  // --- game/flow.js ------------------------------------------------------------------------------------------------------------------------
+  // --- game/flow.js ------------------------------------------------------------------------------
   'Only the host starts a new world': 'Hanya tuan rumah yang memulai dunia baru',
   'A new world': 'Dunia baru',
 
-  // --- game/fluidrescue.js --------------------------------------------------------------------------------------------------------------------
+  // --- game/fluidrescue.js -----------------------------------------------------------------------
   "Burned by Foggery's lava!": 'Terbakar lava Foggery!',
   'Burned by the lava! Magic pulls you out of it': 'Terbakar lava! Sihir menarikmu keluar darinya',
   "Nearly drowned in Squarlo's tide!": 'Hampir tenggelam di pasang Squarlo!',
   'Nearly drowned! Magic pulls you out of the water': 'Hampir tenggelam! Sihir menarikmu keluar dari air',
 
-  // --- game/input.js -----------------------------------------------------------------------------------------------------------------------------
+  // --- game/input.js -----------------------------------------------------------------------------
   'Music on': 'Musik nyala',
   'Music off': 'Musik mati',
   'Respawned where you came in': 'Bangkit di tempat kamu masuk',
   'Whoops!': 'Aduh!',
 
-  // --- game/log.js -----------------------------------------------------------------------------------------------------------------------------------
+  // --- game/log.js -------------------------------------------------------------------------------
   'Inn': 'Penginapan',
   'Smithy': 'Bengkel Pandai Besi',
   'Pet shop': 'Toko Hewan',
@@ -147,7 +147,7 @@ export default {
   'inside {building:the}': 'di dalam {building:the}',
   'House': 'Rumah',
 
-  // --- game/menu.js -------------------------------------------------------------------------------------------------------------------------------------
+  // --- game/menu.js ------------------------------------------------------------------------------
   'just now': 'baru saja',
   '{n} min ago': '{n} menit lalu',
   '{n} h ago': '{n} j lalu',
@@ -226,33 +226,33 @@ export default {
   'A code has four letters': 'Kode itu empat huruf',
   'Could not join': 'Gagal bergabung',
 
-  // --- game/minimap.js -----------------------------------------------------------------------------------------------------------------------------------------
+  // --- game/minimap.js ---------------------------------------------------------------------------
   'in a house': 'di dalam rumah',
   'far away': 'jauh di sana',
   'cube {x}, {z}   depth {depth}': 'kubus {x}, {z}   kedalaman {depth}',
   'portal open: depth {depth}': 'portal terbuka: kedalaman {depth}',
   '{name}: {where} (F: go)': '{name}: {where} (F: pergi)',
 
-  // --- game/movers.js ----------------------------------------------------------------------------------------------------------------------------------------------
+  // --- game/movers.js ----------------------------------------------------------------------------
   'Platforms rise out of the lava!': 'Pijakan muncul dari lava!',
 
-  // --- game/action.js -----------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- game/action.js ----------------------------------------------------------------------------
   'Open the chest': 'Buka peti',
   'Talk to {who:the}': 'Bicara dengan {who:the}',
   'Collect': 'Ambil',
 
-  // --- game/armor.js ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- game/armor.js -----------------------------------------------------------------------------
   'Blocked! −{n}': 'Tertahan! −{n}',
   'Blocked!': 'Tertahan!',
 
-  // --- game/camerakey.js --------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- game/camerakey.js -------------------------------------------------------------------------
   'Close view': 'Pandangan Dekat',
   'Overview': 'Pandangan Luas',
 
-  // --- game/chests.js --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- game/chests.js ----------------------------------------------------------------------------
   'You opened a treasure chest': 'Kamu membuka peti harta',
 
-  // --- game/quickbar.js ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- game/quickbar.js --------------------------------------------------------------------------
   'Inventory ({key})': 'Inventori ({key})',
   'Menu (Esc)': 'Menu (Esc)',
   'Menu': 'Menu',
@@ -272,12 +272,12 @@ export default {
   'Empty ({key}): select a bag item in the inventory and press {key}': 'Kosong ({key}): pilih item di tas pada inventori lalu tekan {key}',
   'Empty: select a bag item in the inventory and click here': 'Kosong: pilih item di tas pada inventori lalu klik di sini',
 
-  // --- game/ragdoll.js ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- game/ragdoll.js ---------------------------------------------------------------------------
   'Drowned!': 'Tenggelam!',
   'Burned up in lava!': 'Terbakar di lava!',
   'Dissolved in acid!': 'Larut dalam asam!',
 
-  // --- game/roomportal.js ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- game/roomportal.js ------------------------------------------------------------------------
   'Not now': 'Bukan sekarang',
   'Not while falling': 'Tidak saat jatuh',
   'Get up first': 'Bangun dulu',
@@ -288,11 +288,22 @@ export default {
   'Reading the room portal scroll... hold still': 'Membaca gulungan portal ruang... tetap diam',
   'Back where you came in': 'Kembali ke tempat kamu masuk',
 
-  // --- game/save.js ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- game/save.js ------------------------------------------------------------------------------
   'Could not save the game (is the storage full?)': 'Gagal menyimpan permainan (penyimpanan penuh?)',
 
-  // --- game/settingsmenu.js ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- game/settingsmenu.js ----------------------------------------------------------------------
   'Unlimited': 'Tak terbatas',
+  'Lighting': 'Pencahayaan',
+  'lighting|Auto': 'Otomatis',
+  'antialias|Auto': 'Otomatis',
+  'lighting|High': 'Tinggi',
+  'lighting|Medium': 'Sedang',
+  'lighting|Low': 'Rendah',
+  'lighting|Lowest': 'Terendah',
+  'Missed!': 'Meleset!',
+  // a theme's own day and night (game/daycycle.js)
+  'Night falls': 'Malam tiba',
+  'The sun comes up': 'Matahari terbit',
   'toggle|Off': 'Mati',
   'camera|Close': 'Dekat',
   'toggle|On': 'Nyala',
@@ -309,10 +320,10 @@ export default {
   '{key} is no longer the key for {label}': '{key} bukan lagi tombol untuk {label}',
   'All keys are back as they were at the start': 'Semua tombol kembali seperti semula',
 
-  // --- game/shots.js -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- game/shots.js -----------------------------------------------------------------------------
   'Hit Lv {level} {name} ({hp}/{max})': 'Kena Lv {level} {name} ({hp}/{max})',
 
-  // --- game/skineditor.js ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- game/skineditor.js ------------------------------------------------------------------------
   'Paint Skin': 'Cat Skin',
   'New Skin': 'Skin Baru',
   'Paint tools': 'Peralatan cat',
@@ -348,21 +359,21 @@ export default {
   'Could not save. Is the browser storage full?': 'Gagal menyimpan. Penyimpanan browser penuh?',
   'Could not load the skin editor.': 'Gagal memuat editor skin.',
 
-  // --- game/sword.js -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- game/sword.js -----------------------------------------------------------------------------
   'No weapon equipped': 'Tidak ada senjata terpasang',
   'Slashed Lv {level} {name} ({hp}/{max})': 'Menebas Lv {level} {name} ({hp}/{max})',
 
-  // --- game/teleportmenu.js ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- game/teleportmenu.js ----------------------------------------------------------------------
   'Teleport to': 'Teleport ke',
 
-  // --- game/throws.js --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- game/throws.js ----------------------------------------------------------------------------
   'That was the last one': 'Itu yang terakhir',
 
-  // --- game/touch.js ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- game/touch.js -----------------------------------------------------------------------------
   'Aim and throw {item}': 'Bidik dan lempar {item}',
   'Attack': 'Serang',
 
-  // --- game/townportal.js -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- game/townportal.js ------------------------------------------------------------------------
   'You are already in town': 'Kamu sudah di kota',
   'You need firm ground to open a portal': 'Kamu butuh tanah yang kokoh untuk membuka portal',
   'Opening a portal to town... hold still': 'Membuka portal ke kota... tetap diam',
@@ -373,23 +384,23 @@ export default {
   'The portal closes behind you': 'Portal menutup di belakangmu',
   'The portal does not open': 'Portalnya tidak terbuka',
 
-  // --- game/travel.js ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- game/travel.js ----------------------------------------------------------------------------
   'The way across is blocked': 'Jalan seberangnya terhalang',
 
-  // --- game/update.js -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- game/update.js ----------------------------------------------------------------------------
   'Hard landing!': 'Mendarat keras!',
 
-  // --- game/ways.js ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- game/ways.js ------------------------------------------------------------------------------
   'Portal': 'Portal',
   'Way down': 'Jalan turun',
   'Way up': 'Jalan naik',
   'Town portal': 'Portal Kota',
   'Door': 'Pintu',
 
-  // --- src/main.js -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- src/main.js -------------------------------------------------------------------------------
   'Welcome to town. Follow the path through the grove to leave.': 'Selamat datang di kota. Ikuti jalan melewati rumpun pohon untuk keluar.',
 
-  // --- net/session.js ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- net/session.js ----------------------------------------------------------------------------
   '{some} and {last}': '{some} dan {last}',
   'Room {code} is open. Waiting for friends...': 'Ruangan {code} terbuka. Menunggu teman...',
   '{note}. {open}': '{note}. {open}',
@@ -425,21 +436,21 @@ export default {
   '{name}: {why}': '{name}: {why}',
   'Off to {name}': 'Menuju {name}',
 
-  // --- physics/unstuck.js -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- physics/unstuck.js ------------------------------------------------------------------------
   'Unstuck': 'Terlepas dari jebakan',
 
-  // --- render/bars.js -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- render/bars.js ----------------------------------------------------------------------------
   '{title} · Lv {level}': '{title} · Lv {level}',
 
-  // --- render/partner.js --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- render/partner.js -------------------------------------------------------------------------
   'Helping {name} up {n}%': 'Membantu {name} bangun {n}%',
   '{name} is down! Stand next to them': '{name} terjatuh! Berdirilah di sampingnya',
 
-  // --- render/playerbar.js ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- render/playerbar.js -----------------------------------------------------------------------
   '{name} is helping you up {n}%': '{name} membantumu bangun {n}%',
   'Down! {name} can help you up · {n}s · R: give up': 'Terjatuh! {name} bisa membantumu bangun · {n} dtk · R: menyerah',
 
-  // --- src/themes/index.js --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- src/themes/index.js -----------------------------------------------------------------------
   'Meadow islands': 'Pulau Padang',
   'Cloud kingdom': 'Kerajaan Awan',
   'Lagoon isles': 'Pulau Lagun',
@@ -462,8 +473,10 @@ export default {
   'Jungle cenote': 'Cenote Rimba',
   'Volcanic depths': 'Kedalaman Vulkanik',
   'Obsidian abyss': 'Jurang Obsidian',
+  'Dark forest': 'Hutan Gelap',
+  'Slime marsh': 'Rawa Lendir',
 
-  // --- core/propmetadata.js landmarks --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- core/propmetadata.js landmarks ------------------------------------------------------------
   'chained obelisk': 'obelisk berantai',
   'void throne': 'takhta hampa',
   'covered wagon': 'gerobak tertutup',
@@ -498,6 +511,11 @@ export default {
   'brood cluster': 'sarang telur',
   'web gate': 'gerbang sarang laba-laba',
   'bone arch': 'gerbang tulang',
+  'forest chapel': 'kapel hutan',
+  'lantern tree': 'pohon lentera',
+  'mossy arch': 'gerbang berlumut',
+  'giant slime tree': 'pohon lendir raksasa',
+  'meteor crater': 'kawah meteor',
   'crypt shrine': 'candi makam',
   'expedition camp': 'kamp ekspedisi',
   'ice arch': 'gerbang es',
@@ -512,7 +530,7 @@ export default {
   'fire shrine': 'altar api',
   'fumarole': 'fumarol',
 
-  // --- index.html ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- index.html --------------------------------------------------------------------------------
   'Chat and what happened': 'Obrolan dan apa yang terjadi',
   'All': 'Semua',
   'Chat': 'Obrolan',
@@ -576,14 +594,14 @@ export default {
   'Jump': 'Lompat',
   'generating…': 'membuat dunia…',
 
-  // --- core/keybinds.js GROUPS -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- core/keybinds.js GROUPS -------------------------------------------------------------------
   'Moving': 'Bergerak',
   'Fighting': 'Bertarung',
   'Items': 'Barang',
   'View': 'Tampilan',
   'Game': 'Permainan',
 
-  // --- core/keybinds.js ACTIONS --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- core/keybinds.js ACTIONS ------------------------------------------------------------------
   'Move up': 'Gerak ke atas',
   'Move left': 'Gerak ke kiri',
   'Move down': 'Gerak ke bawah',
@@ -608,7 +626,7 @@ export default {
   'Type a command': 'Ketik perintah',
   'Music on / off': 'Musik nyala / mati',
 
-  // --- core/keybinds.js KEY_NAMES ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  // --- core/keybinds.js KEY_NAMES ----------------------------------------------------------------
   'Enter': 'Enter',
   'Num Enter': 'Enter Num',
   'Tab': 'Tab',

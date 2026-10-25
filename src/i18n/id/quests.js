@@ -3,14 +3,14 @@
 // its little word after it ("kuncinya", "yang kamu cari").
 export default {
 
-  // --- core/quests.js: where the givers stand -------------------------------------------------------
+  // --- core/quests.js: where the givers stand ----------------------------------------------------
   "on the inn's porch in town": 'di serambi penginapan di kota',
   'at the stable in town': 'di kandang di kota',
   'at the anvil in town': 'di landasan di kota',
   'by the pet shop in town': 'di dekat toko hewan di kota',
   'in the merchant camp': 'di perkemahan pedagang',
 
-  // --- core/quests.js: guardians and places ----------------------------------------------------------
+  // --- core/quests.js: guardians and places ------------------------------------------------------
   'first guardian': 'penjaga pertama',
   'second guardian': 'penjaga kedua',
   'third guardian': 'penjaga ketiga',
@@ -21,7 +21,7 @@ export default {
   'on {where:the}': 'di {where:the}',
   'Meadows': 'Padang',
 
-  // --- core/quests.js: number words --------------------------------------------------------------------
+  // --- core/quests.js: number words --------------------------------------------------------------
   'no': 'nol',
   'one': 'satu',
   'two': 'dua',
@@ -29,7 +29,7 @@ export default {
   'four': 'empat',
   'five': 'lima',
 
-  // --- core/quests.js: the quest kinds and their words ---------------------------------------------------
+  // --- core/quests.js: the quest kinds and their words -------------------------------------------
   "{owner:the}'s {thing:lower}": '{thing:lower} milik {owner:the}',
   'Down to depth {depth}': 'Turun ke kedalaman {depth}',
   'Travellers talk about {place:the}, down on depth {depth}. Nobody I know has been there. Go and see, and come back to tell me what it is like.':
@@ -164,7 +164,7 @@ export default {
   'somebody': 'seseorang',
   'Somebody': 'Seseorang',
 
-  // --- core/questplan.js: where things wait -----------------------------------------------------------
+  // --- core/questplan.js: where things wait ------------------------------------------------------
   'up on the needle of rock': 'di atas jarum batu',
   'on top of the lone peak': 'di puncak gunung yang sunyi',
   'by the great lake': 'di tepi danau besar',
@@ -186,7 +186,7 @@ export default {
   'about halfway along': 'kira-kira di tengah jalan',
   '{a}, {b}': '{a}, {b}',
 
-  // --- core/npcs.js -------------------------------------------------------------------------------------
+  // --- core/npcs.js ------------------------------------------------------------------------------
   '{name} the {role}': '{name} si {role}',
   'hermit': 'pertapa',
   'explorer': 'penjelajah',
@@ -217,18 +217,18 @@ export default {
   'she|apprentice': 'murid',
   'she|cousin': 'sepupu',
 
-  // --- core/quests.js GIVERS -----------------------------------------------------------------------------
+  // --- core/quests.js GIVERS ---------------------------------------------------------------------
   'Innkeeper': 'Pemilik Penginapan',
   'Groom': 'Penjaga Kandang',
   'Pet keeper': 'Penjaga Hewan',
 
-  // --- game/quests.js ------------------------------------------------------------------------------------
+  // --- game/quests.js ----------------------------------------------------------------------------
   'a quest': 'sebuah tugas',
   '{giver:the}': '{giver:the}',
   '{name}: Thank you!': '{name}: Terima kasih!',
   '{name}: Thank you! I will go back now. Here, take this.': '{name}: Terima kasih! Saya akan pulang sekarang. Nah, ambil ini.',
 
-  // --- game/questworld.js ----------------------------------------------------------------------------------
+  // --- game/questworld.js ------------------------------------------------------------------------
   'whoever asked': 'yang meminta',
   'That is all of them! Bring them back to {giver:the}': 'Itu sudah semuanya! Bawa semuanya kembali ke {giver:the}',
   'Found one! {have} of {need}': 'Ketemu satu! {have} dari {need}',
@@ -238,7 +238,7 @@ export default {
   'Something glints somewhere here...': 'Sesuatu berkilau di suatu tempat di sini...',
   'The cross on the map must be here somewhere!': 'Palang di peta pasti ada di suatu tempat di sini!',
 
-  // --- game/questpanel.js ------------------------------------------------------------------------------------
+  // --- game/questpanel.js ------------------------------------------------------------------------
   'easy': 'mudah',
   'medium': 'sedang',
   'hard': 'sulit',

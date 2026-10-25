@@ -26,12 +26,10 @@
 //
 // Pure, for the game, its worker, the guide and the tests in node (always English there).
 import { grammar as EN_GRAMMAR, NOUNS as EN_NOUNS } from './en.js';
+import { TRANSLATIONS } from './languages.js';
 
-export const LANGUAGES = [
-  { code: 'en', name: 'English' },
-  { code: 'de', name: 'Deutsch' },
-  { code: 'id', name: 'Bahasa Indonesia' },
-];
+// the game's languages: the ones src/i18n/languages.js wants in the game
+export const LANGUAGES = TRANSLATIONS.filter(l => l.game).map(({ code, name }) => ({ code, name }));
 export const CODES = LANGUAGES.map(l => l.code);
 export const SOURCE = 'en';
 

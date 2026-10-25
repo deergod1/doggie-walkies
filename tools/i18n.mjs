@@ -14,7 +14,9 @@
 //   glossary    a message that says a word of src/i18n/glossary.js in English, and another in a translation
 //   guide       the kids' guide (learn/) calling a thing of the game by its English name in another language
 //
-//   node tools/i18n.mjs              the problems, with where each message is used
+//   node tools/i18n.mjs              the problems, with where each message is used; what the
+//                                    languages that catch up later lack (src/i18n/languages.js)
+//                                    comes last, under "to catch up", and is no failure
 //   node tools/i18n.mjs --todo de    the missing German messages as a ready-to-fill block
 //   node tools/i18n.mjs --list       every message, with where it is used
 //   node tools/i18n.mjs --glossary   the glossary as tables (src/i18n/glossary.js)
@@ -114,6 +116,7 @@ export async function check() {
   const i18n = await import(pathToFileURL(join(ROOT, 'src/i18n/i18n.js')));
   const en = await import(pathToFileURL(join(ROOT, 'src/i18n/en.js')));
   const { GLOSSARY, names: glossaryNames } = await import(pathToFileURL(join(ROOT, 'src/i18n/glossary.js')));
+  const { GUIDE_LANGUAGES, CATCH_UP } = await import(pathToFileURL(join(ROOT, 'src/i18n/languages.js')));
   const found = await collect(), problems = [];
   for (const [text, where] of found) {
     if (text.startsWith('\u0000')) { problems.push({ kind: 'broken', text: text.slice(1), where, detail: 'a message must be a plain string, without ${}: pass the values as parameters' }); continue; }
@@ -185,8 +188,9 @@ export async function check() {
         if (!want.test(tx)) problems.push({ kind: 'glossary', lang: code, text, where: found.get(text), detail: `says "${t.word.en}": the glossary's word is "${t.word[code]}" (${JSON.stringify(tx)})` });
       }
     }
-    // the guide (learn/*.html) calls the game's things by their names in this language
-    for (const [file, texts] of guideTexts(code)) {
+    // the guide (learn/*.html) calls the game's things by their names in this language (if the
+    // guide is written in it: src/i18n/languages.js)
+    if (GUIDE_LANGUAGES.includes(code)) for (const [file, texts] of guideTexts(code)) {
       for (const name of glossaryNames()) {
         const e = messages[name], tx = typeof e === 'string' ? e : e?.text;
         if (!tx || tx === name) continue;
@@ -198,6 +202,8 @@ export async function check() {
       }
     }
   }
+  // a language that catches up later (src/i18n/languages.js) may lack messages for now
+  for (const p of problems) if (CATCH_UP.includes(p.lang) && (p.kind === 'missing' || p.kind === 'unused')) p.later = true;
   return problems;
 }
 
@@ -236,16 +242,25 @@ async function main() {
     }
     return;
   }
-  if (!problems.length) { console.log('All messages are translated.'); return; }
+  const now = problems.filter(p => !p.later), later = problems.filter(p => p.later);
   const kinds = ['broken', 'twice', 'glossary', 'guide', 'missing', 'unused'];
   for (const kind of kinds) {
-    const ps = problems.filter(p => p.kind === kind);
+    const ps = now.filter(p => p.kind === kind);
     if (!ps.length) continue;
     console.log(`\n${kind} (${ps.length}):`);
     for (const p of ps.slice(0, args.includes('--all') ? Infinity : 60))
       console.log(`  ${p.lang ? `[${p.lang}] ` : ''}${JSON.stringify(p.text)}${p.where ? `  ${p.where.slice(0, 3).join(' ')}` : ''}${p.detail ? `\n      ${p.detail}` : ''}`);
     if (ps.length > 60 && !args.includes('--all')) console.log(`  ... and ${ps.length - 60} more (--all)`);
   }
+  if (later.length) {
+    console.log(`\nto catch up (${later.length}; no failure, src/i18n/languages.js):`);
+    const langs = [...new Set(later.map(p => p.lang))];
+    for (const code of langs) for (const kind of ['missing', 'unused']) {
+      const n = later.filter(p => p.lang === code && p.kind === kind).length;
+      if (n) console.log(`  [${code}] ${n} ${kind}${kind === 'missing' ? ` (node tools/i18n.mjs --todo ${code})` : ''}`);
+    }
+  }
+  if (!now.length) { console.log(later.length ? '\nEvery language kept with every change is translated.' : 'All messages are translated.'); return; }
   process.exitCode = 1;
 }
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) await main();

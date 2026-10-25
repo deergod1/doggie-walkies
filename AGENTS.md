@@ -2,6 +2,13 @@
 
 See `README.md` for the layout and how to run things.
 
+## Translations
+
+`src/i18n/languages.js` lists the languages and how each keeps up (`docs/i18n.md`). When you change
+or add English text, translate it in the same change into the languages kept with every change
+(English and German: game and guide). The ones that catch up later (Indonesian, game only) are
+left for their own changes: do not translate into them unless asked.
+
 ## Blender previews
 
 `blender/previews/` is local output and ignored by Git: never commit renders from it.

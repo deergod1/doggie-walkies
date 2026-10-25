@@ -3,7 +3,7 @@
 // Wolla, Wolk, Squirtle, Mecked, and the bosses Gusto, Totnar, Squarlo, Flip, Foggery, Renew.
 export default {
 
-  // --- core/enemies.js: labels ----------------------------------------------------------------------
+  // --- core/enemies.js: labels -------------------------------------------------------------------
   'Spider': 'Labah-labah',
   'Stunder': 'Stunder',
   'Grass snake': 'Ular Rumput',
@@ -66,16 +66,34 @@ export default {
   'Bramble stunder': 'Stunder Duri',
   'Tide squirtle': 'Squirtle Pasang',
   'Sky wolla': 'Wolla Langit',
+  'Slug': 'Siput',
+  'Spotted slug': 'Siput Totol',
+  'Black slug': 'Siput Hitam',
+  'Arm slug': 'Siput Lengan',
+  'Ooze slug': 'Siput Lendir',
+  'Bolime': 'Bolime',
+  'Toxic bolime': 'Bolime Beracun',
+  'Glow bolime': 'Bolime Bercahaya',
+  'Ooze bolime': 'Bolime Lendir',
+  'Flimmer': 'Flimmer',
+  'Frost flimmer': 'Flimmer Beku',
+  'Haze flimmer': 'Flimmer Kabut',
+  'Shadow flimmer': 'Flimmer Bayang',
+  'Gloom spider': 'Labah-labah Muram',
+  'Lantern-face': 'Muka Lentera',
+  'Slime squirtle': 'Squirtle Lendir',
+  'Slomo': 'Slomo',
 
-  // --- core/enemies.js: the fight lines -----------------------------------------------------------------
+  // --- core/enemies.js: the fight lines ----------------------------------------------------------
   '{name} missed! Hit him while he is down': '{name} meleset! Pukul dia selagi ia jatuh',
   '{name} is out of breath! Hit him now': '{name} kehabisan napas! Pukul dia sekarang',
+  '{name} is winded! Hit him now': '{name} terengah-engah! Pukul dia sekarang',
   '{name} is stuck! Hit his foot': '{name} macet! Pukul kakinya',
   'Temp Boss {kind}': 'Bos Sementara {kind}',
   'Guardian {kind}': 'Penjaga {kind}',
   'Thrown off your feet by the shockwave!': 'Terjatuh oleh gelombang kejutnya!',
 
-  // --- core/guardians.js --------------------------------------------------------------------------------
+  // --- core/guardians.js -------------------------------------------------------------------------
   'Temp Boss': 'Bos Sementara',
   'guardian': 'penjaga',
   'Defeat {who:the} to unlock this descent': 'Kalahkan {who:the} untuk membuka turunan ini',
@@ -84,7 +102,7 @@ export default {
   'Defeat the guardian to unlock this passage': 'Kalahkan penjaganya untuk membuka jalan ini',
   '{who:The}': '{who:cap}',
 
-  // --- core/enemies.js: reasons ------------------------------------------------------------------------
+  // --- core/enemies.js: reasons ------------------------------------------------------------------
   'Pinched by an Amethyst shraps!': 'Dicubit Shraps Ametis!',
   'Hit by an amethyst!': 'Kena ametis!',
   'Bitten by an Ash cat!': 'Digigit Kucing Abu!',
@@ -175,6 +193,31 @@ export default {
   'Rammed by a bramble stunder!': 'Dihantam Stunder Duri!',
   'Splashed by a tide squirtle!': 'Tersiram Squirtle Pasang!',
   'Blown away by a Sky wolla!': 'Tertiup angin Wolla Langit!',
+  'Slimed by a Slug!': 'Dilumuri lendir Siput!',
+  'Slimed by a Spotted slug!': 'Dilumuri lendir Siput Totol!',
+  'Slimed by a Black slug!': 'Dilumuri lendir Siput Hitam!',
+  'Slimed by an Ooze slug!': 'Dilumuri lendir Siput Lendir!',
+  'An Arm slug latched on to you!': 'Siput Lengan menempel padamu!',
+  'Swallowed by a Bolime!': 'Ditelan Bolime!',
+  'Digested by a Bolime!': 'Dicerna Bolime!',
+  'Swallowed by a Toxic bolime!': 'Ditelan Bolime Beracun!',
+  'Digested by a Toxic bolime!': 'Dicerna Bolime Beracun!',
+  'Swallowed by a Glow bolime!': 'Ditelan Bolime Bercahaya!',
+  'Digested by a Glow bolime!': 'Dicerna Bolime Bercahaya!',
+  'Swallowed by an Ooze bolime!': 'Ditelan Bolime Lendir!',
+  'Digested by an Ooze bolime!': 'Dicerna Bolime Lendir!',
+  'Beaten up by a Flimmer!': 'Dihajar Flimmer!',
+  'Beaten up by a Frost flimmer!': 'Dihajar Flimmer Beku!',
+  'Beaten up by a Haze flimmer!': 'Dihajar Flimmer Kabut!',
+  'Beaten up by a Shadow flimmer!': 'Dihajar Flimmer Bayang!',
+  'Bitten by a Gloom spider!': 'Digigit Labah-labah Muram!',
+  'Poisoned by a Gloom spider!': 'Diracuni Labah-labah Muram!',
+  'Scorched by a Lantern-face!': 'Terpanggang Muka Lentera!',
+  'Slimed by a Slime squirtle!': 'Dilumuri lendir Squirtle Lendir!',
+  "Hit by Slomo's slug!": 'Kena siput Slomo!',
+  "Hit by Slomo's meteorite!": 'Kena meteorit Slomo!',
+  'Squashed flat by Slomo!': 'Digencet sampai gepeng oleh Slomo!',
+  'Slimed by Slomo!': 'Dilumuri lendir Slomo!',
   'Scorched by Foggery!': 'Terpanggang Foggery!',
   'Burned by a fire geyser!': 'Terbakar geyser api!',
   'Blown away by Gusto!': 'Tertiup angin Gusto!',
@@ -188,7 +231,7 @@ export default {
   'Kicked away by Squarlo!': 'Ditendang jauh Squarlo!',
   "Blasted by Squarlo's water cannon!": 'Kena meriam air Squarlo!',
 
-  // --- core/bounties.js -----------------------------------------------------------------------------------
+  // --- core/bounties.js --------------------------------------------------------------------------
   '{name} the {kind:lower}': '{name} si {kind:lower}',
   'Grimfang': 'Geramgigi',
   'Old Snapjaw': 'RahangTua',
@@ -207,7 +250,7 @@ export default {
   'Wartnose': 'HidungKutil',
   'Longshanks': 'KakiPanjang',
 
-  // --- core/combat.js KINDS ---------------------------------------------------------------------------------
+  // --- core/combat.js KINDS ----------------------------------------------------------------------
   'Sword slash': 'Tebasan Pedang',
   'Flail swing': 'Ayunan Flail',
   'Bow shot': 'Tembakan Busur',
@@ -215,43 +258,43 @@ export default {
   'Spell cast': 'Mantra',
   'Throw': 'Lemparan',
 
-  // --- game/enemies.js ---------------------------------------------------------------------------------------
+  // --- game/enemies.js ---------------------------------------------------------------------------
   '{name} defeated · Gate unlocked!': '{name} dikalahkan · Gerbang terbuka!',
   '{n, plural, one {Defeated # enemy} other {Defeated # enemies}}': '{n, plural, other {Mengalahkan # musuh}}',
   'Level {level}!': 'Level {level}!',
   'Horde awakened!': 'Gerombolan terbangun!',
 
-  // --- game/enemycombat.js -------------------------------------------------------------------------------------
+  // --- game/enemycombat.js -----------------------------------------------------------------------
   'Poisoned! An antidote cures it': 'Keracunan! Penawar menyembuhkannya',
   'Bitten!': 'Digigit!',
   'Poisoned': 'Keracunan',
 
-  // --- game/juice.js ----------------------------------------------------------------------------------------------
+  // --- game/juice.js -----------------------------------------------------------------------------
   'Poof!': 'Poof!',
   'Zapped!': 'Tersengat!',
   'Zap!': 'Zap!',
   'Squashed!': 'Gebuk!',
 
-  // --- game/grab.js -------------------------------------------------------------------------------------------------
+  // --- game/grab.js ------------------------------------------------------------------------------
   '{name} grabbed you!': '{name} mencengkerammu!',
 
-  // --- game/foggery.js (the boss) --------------------------------------------------------------------------------------
+  // --- game/foggery.js (the boss) ----------------------------------------------------------------
   "{name}'s shield is down! Hit him now!": 'Perisai {name} runtuh! Pukul dia sekarang!',
   '{name} croaks: the lava is rising! Up the tower!': '{name} menggerak: lavanya naik! Naik ke menaranya!',
   '{name} curls up into a ball!': '{name} menggulung diri menjadi bola!',
   'The lava swallows the tower! Jump onto the platforms!': 'Lava menelan menaranya! Lompat ke atas pijakan!',
   '{name} rises up!': '{name} bangkit!',
 
-  // --- game/gusto.js ----------------------------------------------------------------------------------------------------
+  // --- game/gusto.js -----------------------------------------------------------------------------
   '{name} splits into three! Find the real one': '{name} membelah menjadi tiga! Temukan yang asli',
 
-  // --- game/gusts.js -----------------------------------------------------------------------------------------------------
+  // --- game/gusts.js -----------------------------------------------------------------------------
   '{name} calls the tide! Get up a hill!': '{name} memanggil pasang! Naik ke bukit!',
 
-  // --- game/flip.js --------------------------------------------------------------------------------------------------------
+  // --- game/flip.js ------------------------------------------------------------------------------
   '{name} spins up!': '{name} berputar naik!',
 
-  // --- game/flipworld.js ----------------------------------------------------------------------------------------------------
+  // --- game/flipworld.js -------------------------------------------------------------------------
   'Flip turns the world upside down!': 'Flip membalikkan dunia!',
   'Flip flips the world!': 'Flip menjungkirbalikkan dunia!',
   'Up on the balcony!': 'Naik ke balkon!',
@@ -259,30 +302,39 @@ export default {
   'Swallowed by a black hole!': 'Ditelan lubang hitam!',
   'Spat out of a black hole!': 'Dimuntahkan lubang hitam!',
 
-  // --- game/squarlo.js --------------------------------------------------------------------------------------------------------
+  // --- game/squarlo.js ---------------------------------------------------------------------------
   '{name} grows into a giant!': '{name} tumbuh menjadi raksasa!',
   'The water is rising! Get up a hill!': 'Airnya naik! Naik ke bukit!',
 
-  // --- game/totnar.js -----------------------------------------------------------------------------------------------------------
+  // --- game/totnar.js ----------------------------------------------------------------------------
   '{name} loses a skull! Now he rolls': '{name} kehilangan satu tengkoraknya! Sekarang ia menggelinding',
   '{name} loses another skull! A storm gathers': '{name} kehilangan tengkoraknya lagi! Badai berkumpul',
 
-  // --- game/renew.js ---------------------------------------------------------------------------------------------------------------
+  // --- game/renew.js -----------------------------------------------------------------------------
   '{name} draws his sword': '{name} mencabut pedangnya',
   '{name}: "Not yet." He turns back time!': '{name}: "Belum sekarang." Ia memutar balik waktu!',
   '{name}: "One more time..."': '{name}: "Sekali lagi..."',
   '{name} takes up a bow. Your echo does again what you did!': '{name} mengangkat busur. Gemaimu mengulangi apa yang kamu lakukan!',
-  '{name} takes up a morning star. Two of your echoes walk again!': '{name} mengangkat gada. Dua gemaimu berjalan lagi!',
-  '{name} takes up a morning star with two balls! Three of your echoes walk again!': '{name} mengangkat gada dengan dua bola! Tiga gemaimu berjalan lagi!',
+  '{name} takes up a morning star. Two of your echoes walk again!': '{name} mengangkat gada. Dua gemamu berjalan lagi!',
+  '{name} takes up a morning star with two balls! Three of your echoes walk again!': '{name} mengangkat gada dengan dua bola! Tiga gemamu berjalan lagi!',
   '{name} has no more time. He rises away into the sky...': '{name} kehabisan waktu. Ia melayang naik ke langit...',
   '{name} is gone, back into time. What he had falls out of the sky': '{name} pergi, kembali ke dalam waktu. Miliknya berjatuhan dari langit',
 
-  // --- game/rewind.js -----------------------------------------------------------------------------------------------------------------
-  'Struck by your own echo!': 'Tersambar gemaimu sendiri!',
-  'your echo': 'gemaimu',
-  'Shot by your own echo!': 'Tertembak panah gemaimu sendiri!',
+  // --- game/rewind.js ----------------------------------------------------------------------------
+  'Struck by your own echo!': 'Tersambar gemamu sendiri!',
+  'your echo': 'gemamu',
+  'Shot by your own echo!': 'Tertembak panah gemamu sendiri!',
 
-  // --- physics/hazards.js -----------------------------------------------------------------------------------------------------------------
+  // --- game/slomo.js, game/engulf.js, core/meteors.js --------------------------------------------
+  '{name} grows legs!': '{name} menumbuhkan kaki!',
+  '{name} bursts out of his slime!': '{name} meledak keluar dari lendirnya!',
+  '{name} floods the bowl with slime!': '{name} membanjiri cekungan dengan lendir!',
+  '{name} swallowed you! Jump to break free!': '{name} menelanmu! Lompat untuk melepaskan diri!',
+  'Poisoned by a Bolime': 'Diracuni Bolime',
+  'You broke free!': 'Kamu berhasil lepas!',
+  'Hit by a slime meteorite!': 'Kena meteorit lendir!',
+
+  // --- physics/hazards.js ------------------------------------------------------------------------
   'Burned by a lavafall!': 'Terbakar air lava!',
   'Poisoned by acid': 'Diracuni asam',
   'Acid rain!': 'Hujan asam!',

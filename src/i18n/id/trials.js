@@ -2,7 +2,7 @@
 // game/trialevents: what happens while they run).
 export default {
 
-  // --- core/trials.js: the trials -------------------------------------------------------------------
+  // --- core/trials.js: the trials ----------------------------------------------------------------
   'Rising water': 'Air yang Naik',
   'The sunken room': 'Ruang Tenggelam',
   'Crumbling floor': 'Lantai Runtuh',
@@ -18,7 +18,7 @@ export default {
   'Timed gate': 'Gerbang Berwaktu',
   'Rune order': 'Urutan Rune',
 
-  // --- core/trials.js: what to do ----------------------------------------------------------------------
+  // --- core/trials.js: what to do ----------------------------------------------------------------
   'The way out is sealed': 'Jalan keluar terkunci',
   'Press the button': 'Tekan tombolnya',
   'Pull the lever': 'Tarik tuasnya',
@@ -34,7 +34,7 @@ export default {
   'Press the runestone': 'Tekan batu runenya',
   'Read the carved tablet': 'Baca tablet ukirnya',
 
-  // --- game/trials.js: the rules of the room ---------------------------------------------------------------
+  // --- game/trials.js: the rules of the room -----------------------------------------------------
   'Slide across the ice onto the plate by the closed gate': 'Seluncuri esnya sampai ke pelat di samping gerbang yang tertutup',
   'Turn the mirrors till the beam shines through every crystal into the receiver': 'Putar cermin-cerminnya sampai sinarnya menembus setiap kristal ke penerimanya',
   'Light every brazier: each one lights or puts out those it is linked to': 'Nyalakan setiap tungku: masing-masing menyalakan atau memadamkan tungku yang terhubung dengannya',
@@ -98,7 +98,7 @@ export default {
   'The water sinks': 'Airnya surut',
   'A way down is clear: on to the next platform.': 'Satu jalan turun sudah bebas: lanjut ke pijakan berikutnya.',
 
-  // --- game/trialevents.js -------------------------------------------------------------------------------------
+  // --- game/trialevents.js -----------------------------------------------------------------------
   'They are coming from the dark!': 'Mereka datang dari kegelapan!',
   'Raging {kind:lower}': '{kind:cap} yang mengamuk',
   'Caught by the raging {kind:lower}!': 'Tertangkap {kind:lower} yang mengamuk!',
@@ -115,6 +115,6 @@ export default {
   'The beacon flares: they flee into the dark.': 'Suar menyala terang: mereka kabur ke dalam gelap.',
   'The portcullis crashes down: the warden is shut in with its hall.': 'Gerbangnya menghantam turun: penunggunya terkurung di aulanya.',
 
-  // --- game/leavefight.js ------------------------------------------------------------------------------------------
+  // --- game/leavefight.js ------------------------------------------------------------------------
   '{who} still stands. Leave the arena?': '{who} masih berdiri. Tinggalkan arena?',
 };

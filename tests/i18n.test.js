@@ -2,9 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { tr, tc, say, phrase, noun, person, useLanguage, loadLocale, language, pickLanguage, parse, paramsOf, num, pct } from '../src/i18n/i18n.js';
 import { check } from '../tools/i18n.mjs';
+import { readFileSync, readdirSync } from 'node:fs';
+import { TRANSLATIONS, GAME_LANGUAGES, GUIDE_LANGUAGES, EVERY_CHANGE, CATCH_UP } from '../src/i18n/languages.js';
 
 const de = await loadLocale('de');
-const id = await loadLocale('id');
+// every language the game speaks, loaded (null for English)
+const locales = Object.fromEntries(await Promise.all(GAME_LANGUAGES.map(async code => [code, await loadLocale(code)])));
 // run fn in German with these extra messages, then back in English
 function german(extra, fn) {
   const mod = { ...de, messages: { ...de.messages, ...extra } };
@@ -84,8 +87,26 @@ test('kept words are data, said in the language of the moment', () => {
   assert.equal(say(null), '');
 });
 
+test('the wanted translations: the game has a catalog for each, the guide is written in its own', () => {
+  assert.equal(TRANSLATIONS[0].code, 'en');
+  for (const code of GAME_LANGUAGES) if (code !== 'en') assert.ok(locales[code]?.messages, `${code}: a catalog in src/i18n/${code}/`);
+  for (const code of GUIDE_LANGUAGES) assert.ok(GAME_LANGUAGES.includes(code), `${code}: the guide's languages are the game's too`);
+  for (const code of GUIDE_LANGUAGES) assert.ok(EVERY_CHANGE.includes(code), `${code}: the guide's languages are kept with every change`);
+  assert.ok(EVERY_CHANGE.includes('en') && !CATCH_UP.includes('en'));
+  // learn/lang.js names the guide's languages itself (a plain script)
+  const script = readFileSync(new URL('../learn/lang.js', import.meta.url), 'utf8');
+  assert.deepEqual([...new Set([...script.matchAll(/l(?:ang)? === '(\w+)'/g)].map(m => m[1]))].sort(), [...GUIDE_LANGUAGES].sort(), 'learn/lang.js');
+  // and the guide's pages are written in those, and only those
+  const dir = new URL('../learn/', import.meta.url);
+  const used = new Set();
+  for (const f of readdirSync(dir).filter(f => f.endsWith('.html')))
+    for (const m of readFileSync(new URL(f, dir), 'utf8').matchAll(/\slang="(\w+)"/g)) used.add(m[1]);
+  assert.deepEqual([...used].sort(), [...GUIDE_LANGUAGES].sort(), 'the lang="..." of learn/*.html');
+});
+
+// (a language that catches up later may lack messages, or keep unused ones, for now: src/i18n/languages.js)
 test('every message of the game is translated, and every translation is used', async () => {
-  const problems = await check();
+  const problems = (await check()).filter(p => !p.later);
   const show = problems.slice(0, 20).map(p => `${p.kind} ${p.lang ?? ''} ${JSON.stringify(p.text)} ${p.where?.[0] ?? ''} ${p.detail ?? ''}`);
   assert.deepEqual(show, [], `${problems.length} problems; node tools/i18n.mjs lists them`);
 });
@@ -106,8 +127,8 @@ test('every quest of a world reads in every language, nothing missing', async ()
     }
     const saved = Q.checkQuestLog(JSON.parse(JSON.stringify(Q.packQuestLog(log))));   // as saved and loaded again
     assert.equal(saved.list.length, log.list.length);
-    for (const code of ['en', 'de', 'id']) {
-      useLanguage(code, code === 'de' ? de : code === 'id' ? id : undefined);
+    for (const code of GAME_LANGUAGES) {
+      useLanguage(code, locales[code] ?? undefined);
       missing.clear();
       try {
         for (const q of saved.list) {
@@ -115,7 +136,7 @@ test('every quest of a world reads in every language, nothing missing', async ()
           words.push(Q.stateText({ ...q, state: 'ready' }));
           for (const w of words) assert.ok(w && !/[{}]|undefined|NaN|null|\[object/.test(w), `${code}: ${w}`);
         }
-        assert.deepEqual([...missing], [], `${code}: no translation missing`);
+        if (!CATCH_UP.includes(code)) assert.deepEqual([...missing], [], `${code}: no translation missing`);
       } finally { useLanguage('en'); }
     }
   }

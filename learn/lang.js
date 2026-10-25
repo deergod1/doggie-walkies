@@ -1,7 +1,8 @@
 // The guide's language: the reader's choice (the EN / DE switch, see deck.js; or ?lang=, from the
 // game's link to the guide: it becomes the choice, and leaves the address), else the browser's. A
 // plain script in <head>, so it runs before the page is drawn: kids.css then shows only the
-// elements marked with this language (<p lang="en"> / <p lang="de"> pairs).
+// elements marked with this language (<p lang="en"> / <p lang="de"> pairs). The guide's languages are
+// the `guide` ones of src/i18n/languages.js (a test checks the two agree).
 (function () {
   const url = new URL(location.href);
   let lang = url.searchParams.get('lang');

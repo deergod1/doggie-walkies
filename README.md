@@ -56,7 +56,7 @@ docs that explain how the game works, from the big ideas down to the real code:
     on the hero; Cancel leaves it unchanged. Playing together the others see it (sent once, in
     pieces). See `docs/skins.md`.
   - Settings (`src/game/settings.js`, the menu in `src/game/settingsmenu.js`, from the Esc menu
-    and the main menu): the language (English or German; at first the browser's), the frame rate cap (30, 60 or unlimited, `src/main.js`; 30 at first on touch screens), the lighting's quality level (Auto, or High to Lowest: `src/game/quality.js`, `docs/lighting.md`), the anti-aliasing (Auto: 2x MSAA on high-DPI
+    and the main menu): the language (English, German or Indonesian; at first the browser's), the frame rate cap (30, 60 or unlimited, `src/main.js`; 30 at first on touch screens), the lighting's quality level (Auto, or High to Lowest: `src/game/quality.js`, `docs/lighting.md`), the anti-aliasing (Auto: 2x MSAA on high-DPI
     screens, 4x elsewhere, picked once; or off to 8x, `src/render/msaa.js`), the camera (the overview or the close view behind the hero; Tab or C
     taps between them: `src/game/camera.js`, `docs/camera.md`), the close view's mouse look
     (speed, invert up / down: `src/game/mouselook.js`), music on / off,
@@ -64,7 +64,8 @@ docs that explain how the game works, from the big ideas down to the real code:
     control is an action with a primary and a secondary key (`src/core/keybinds.js`: codes, so
     WASD keeps its place on any layout); kept in `localStorage` as `crawler.settings`.
   - Languages (`src/i18n/`, `docs/i18n.md`): the English text in the code is the message
-    (`tr('Resume')`), each other language a catalog from it (`src/i18n/de/`), with the grammar a
+    (`tr('Resume')`), each other language a catalog from it (`src/i18n/de/`, `src/i18n/id/`; which
+    languages the game and the guide want: `src/i18n/languages.js`), with the grammar a
     sentence needs (a noun's gender and case, plurals). What is kept or sent is words to say, so
     saves and friends work across languages. `src/i18n/glossary.js` holds the important words in
     every language, which the game and the guide both use. `npm run i18n` (`tools/i18n.mjs`, also
