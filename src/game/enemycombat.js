@@ -11,6 +11,7 @@ import { walkable, stepEnemy } from '../physics/enemynav.js';
 import { attackOf, blowOf, enemyWords } from '../core/enemies.js';
 import { ignite, burnStep, burntOut, chillFrom, chillStep } from '../core/projectiles.js';
 import { afflict, statusStep, statusOver, slowFrom, slower, slowStep } from '../core/status.js';
+import { engulfPlayer, markEngulfing } from './engulf.js';
 import { immuneTo } from '../core/potions.js';
 import { absent, airborne } from '../core/enemies.js';
 import { SIT_IMPACT } from '../core/constants.js';
@@ -19,7 +20,7 @@ import { twirlPlayer } from './twirl.js';
 import { guardBlow, wornDefense } from './armor.js';
 import { tr, msg } from '../i18n/i18n.js';
 
-export const resetEnemyCombat = () => { player.burning = null; player.chilled = null; player.slowed = null; player.toxic = null; player.gust = null; player.pull = null; player.shocked = 0; player.dazed = 0; player.flat = 0; player.held = null; };
+export const resetEnemyCombat = () => { player.burning = null; player.chilled = null; player.slowed = null; player.toxic = null; player.gust = null; player.pull = null; player.shocked = 0; player.dazed = 0; player.flat = 0; player.held = null; player.engulfed = null; };
 // who struck a blow, for the chronicle when it kills us (game/log.js logDeath); it goes along
 // with the blow (core/enemies.js blowOf), over the network too
 export const attacker = e => ({ words: enemyWords(e.profile), level: e.level, guardian: !!e.guardian });
@@ -45,6 +46,8 @@ export function hitPlayer(blow, fx, fz, nx, nz) {
   const p = player;
   if (p.held) return;
   if (typeof blow.grab === 'string') { grabPlayer(blow, fx, fz); return; }
+  // swallowed by a Bolime coming down on us (game/engulf.js); already inside one, it only lands on us
+  if (typeof blow.engulf === 'string') { if (engulfPlayer(blow)) return; blow = { ...blow, engulf: null }; }
   if (blow.twirl) { twirlPlayer(blow, nx, nz); return; }   // caught in a twister (game/twirl.js)
   blow = guardBlow(blow);
   if (blow.blocked) {   // caught on the shield: a little of it gets through, nothing else (game/armor.js shows it)
@@ -83,6 +86,7 @@ export function hitPlayer(blow, fx, fz, nx, nz) {
 }
 // a blow on body p: our player, or a friend's stand-in (it says how to send it over)
 export function hitBody(p, blow, fx, fz, nx, nz) {
+  if (p.remote && typeof blow.engulf === 'string') markEngulfing(blow.engulf, p);   // (a Bolime holds on to a friend it caught)
   if (p.remote) p.hurt(blow, fx, fz, nx, nz);
   else hitPlayer(blow, fx, fz, nx, nz);
 }
@@ -146,7 +150,7 @@ function pushPlayer(dx, dz) {
 export function contactEnemies(list, dt, moveEnemies = true) {
   const p = player;
   for (const e of list) {
-    if (absent(e) || airborne(e) || p.ragdoll || p.held || p.flipping) continue;
+    if (absent(e) || airborne(e) || p.ragdoll || p.held || p.flipping || p.engulfed?.e === e) continue;
     const dx = p.x - e.x, dz = p.z - e.z, d = Math.hypot(dx, dz), body = p.r + e.profile.radius;
     if (d >= body || p.y >= e.y + e.profile.bodyHeight || p.y + p.h <= e.y) continue;
     const nx = d ? dx / d : 1, nz = d ? dz / d : 0, depth = body - d;

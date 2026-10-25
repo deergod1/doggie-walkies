@@ -23,7 +23,7 @@ const solid = (x, y, z) => insideSolid(x, z, y);
 const target = e => { const p = e.target?.here ? e.target : player; return alive(p) ? p : null; };
 
 export function fireBeam(e, a) {
-  const p = target(e), spec = a.beam, blow = { ...blowOf(e.profile, a), by: attacker(e) };
+  const p = target(e), spec = a.beam, blow = { ...blowOf(e.profile, a), by: attacker(e), ...a.engulf && { engulf: e.id } };   // (a Bolime swallows whom it lands on: game/engulf.js)
   const one = (offset, quiet) => {
     // (one beside the player passes them by: only the one at them stops at their body; a giant's
     // foot's shadow lies on the floor, round their feet)

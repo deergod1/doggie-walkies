@@ -224,6 +224,11 @@ export function voices({ amp, noise, filter, tone, sweep }) {
         sweep(t + 0.1, 1.2, 1600 * p, 700 * p, 150 * p, 2.5, 0.35, out, 0.05);
       },
     },
+    bolime: {   // a Bolime: a bubbling, rising burble, a deep breath drawn in, a long collapsing gloop
+      alert: (t, out, p) => gloops(t, 6, 300 * p, 700 * p, 0.05, 0.22, out),
+      windup: (t, out, p) => { bend(t, 0.35, 180 * p, 320 * p, 260 * p, 900 * p, 0.3, out); gloops(t + 0.15, 3, 400 * p, 800 * p, 0.06, 0.15, out); },
+      death: (t, out, p) => { bend(t, 0.9, 260 * p, 160 * p, 60 * p, 700 * p, 0.4, out); gloops(t + 0.3, 8, 120 * p, 400 * p, 0.08, 0.22, out, false); },
+    },
     slug: {   // a Slug: a low wet gurgle, a slurp drawing breath, a long deflating sigh
       alert: (t, out, p) => { bend(t, 0.4, 110 * p, 150 * p, 95 * p, 500 * p, 0.4, out); gloops(t + 0.2, 4, 150 * p, 300 * p, 0.07, 0.18, out, false); },
       windup: (t, out, p) => {

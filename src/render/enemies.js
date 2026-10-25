@@ -56,6 +56,7 @@ import { squirtleModel } from './squirtlemodel.js';
 import { meckedModel } from './meckedmodel.js';
 import { tornadoModel } from './tornadomodel.js';
 import { slugModel } from './slugmodel.js';
+import { bolimeModel } from './bolimemodel.js';
 import { flipModel } from './flipmodel.js';
 import { foggeryModel } from './foggerymodel.js';
 import { makeFoggeryLook, foggeryLook, disposeFoggeryLook } from './foggeryview.js';
@@ -84,7 +85,7 @@ import { makeBar, makeLevelLabel, makeAlertMark } from './bars.js';
 
 const prefabs = { spider: spiderModel, stunder: stunderModel, snake: snakeModel, octonaut: octonautModel,
   fireface: fireFaceModel, triangle: triangleModel, firecat: fireCatModel, shraps: shrapsModel, spicy: spicyModel, wolla: wollaModel, wolk: wolkModel, gusto: gustoModel,
-  totnar: totnarModel, snapskull: snapSkullModel, squarlo: squarloModel, squirtle: squirtleModel, mecked: meckedModel, tornado: tornadoModel, slug: slugModel, flip: flipModel, foggery: foggeryModel };
+  totnar: totnarModel, snapskull: snapSkullModel, squarlo: squarloModel, squirtle: squirtleModel, mecked: meckedModel, tornado: tornadoModel, slug: slugModel, bolime: bolimeModel, flip: flipModel, foggery: foggeryModel };
 // the models of these species (core/spawns.js speciesIn), loaded once
 export const loadSpecies = species => Promise.all(species.map(s => prefabs[s]?.load()));
 // light: [color, intensity, distance, height]; pulse: emissive / light swing with the
@@ -102,6 +103,9 @@ const GLOW = {
   flip: { light: [0x8fdcff, 2.2, 4.5, 1.2], flare: 0.9 },
   foggery: { light: [0xff7a2a, 2.4, 3.8, 1.4], flare: 0.8, flicker: 1, embers: { rate: 8, from: 1.45, spread: 0.35 } },
   firetornado: { light: [0xff7a2a, 1.6, 3, 0.7], embers: { rate: 7, from: 0.45, spread: 0.3 } },
+  // the Bolimes' cores glow inside them (most of all the Glow bolime's): by night what you see of them
+  bolime: { light: [0x9aff5a, 0.7, 2.4, 0.6], pulse: 0.25 },
+  glowbolime: { light: [0x7affd0, 1.5, 3.2, 0.6], pulse: 0.35 },
 };
 const EMBERS = ['#ffd25a', '#ff8a2a', '#ff5a14'];
 const GHOST = 0xff6a5a, GHOST_OPACITY = 0.4;
@@ -381,6 +385,12 @@ function prints(e, off) {
   if (off.x || off.y || off.z || e.profile.hover || e.profile.slimeborn || e.under || e.riding) return;
   walkPrints(e, e.x, e.y, e.z, e.yaw, e.view.size, slimeAt(e.x, e.y, e.z));
 }
+// a hopper (`hops`: where in its gait it comes down, a Bolime) lands with a soft boing
+function hops(v, e, was) {
+  const at = e.profile.hops;
+  if (at === undefined || e.mode === 'attack' || !(e.speed > 0.01) || Math.hypot(e.x - player.x, e.z - player.z) > 12) return;
+  if (was < at && (v.phase >= at || v.phase < was)) sfx('boing', { at: e, volume: 0.35, pitch: 1 / (v.size || 1) });
+}
 function footfalls(v, e, gait) {
   const was = v.stepPhase ?? v.phase;
   v.stepPhase = v.phase;
@@ -500,7 +510,7 @@ function ghostLook(v, e) {
   if (a < 0.01) v.group.visible = false;
 }
 function makeView(e, prefab) {
-  const group = new THREE.Group(), { model, mesh, material, parts } = dressEnemy(prefab, e.profile), size = e.profile.size ?? 1;
+  const group = new THREE.Group(), { model, mesh, material, parts, shell } = dressEnemy(prefab, e.profile), size = e.profile.size ?? 1;
   model.scale.multiplyScalar(size);
   group.add(model); scene.add(group);
   group.userData.figure = true;   // (casts into the realtime shadow maps as the quality level asks: render/shadows.js)
@@ -551,7 +561,7 @@ function makeView(e, prefab) {
   const embers = typeof fx?.embers?.from === 'string' ? model.getObjectByName(fx.embers.from) : null;
   const tentacles = e.profile.flail ? findTentacles(model) : [];
   if (e.proxy || e.summoned) poof(e, puffOf(e));   // it turns up
-  return { tentacles, was: { mode: e.mode, x: e.x, z: e.z }, group, model, mixer, actions, prefab, material, parts, colors: material.userData.parts.color, ghost, tag, bar, hpBar, label, mark, markT: 0, yaw: e.yaw, phase: e.phase,
+  return { tentacles, was: { mode: e.mode, x: e.x, z: e.z }, group, model, mixer, actions, prefab, material, shell, parts, colors: material.userData.parts.color, ghost, tag, bar, hpBar, label, mark, markT: 0, yaw: e.yaw, phase: e.phase,
     attacks: -1, dead: false, weights, fx, flames, light, embers, size, wheels: findWheels(model), roll: 0, spin: 0, rolled: null, waves: findWaves(model), whirl: 1, rings: findRings(model), ringSpeed: 0, flash: null, trail: null, sparks: e.profile.sparks ?? EMBERS, seed: Math.random() * 100,
     gloomColor: gloom ? new THREE.Color(...toLinear(gloom.color)) : null, gloom: 0, glimmer: 0,
     shed: findShed(model, e.profile.shed), stage: e.stage ?? 1, dark: e.dark ?? 0, ball: findBall(model, e.profile.tumble), tumble: 0, turned: 0, flash2: 0,
@@ -610,6 +620,7 @@ function dying(v, e, dt, off) {
   const fade = Math.max(0, 1 - Math.max(0, e.deadT - e.profile.deathTime - 0.5) / 0.8);
   gloomStep(v, e, dt);
   v.material.opacity = fade;
+  if (v.shell) v.shell.material.opacity = v.shell.opacity * fade;
   v.parts.forEach((p, i) => { if (p.gloom) v.colors[i].copy(baseColor(v, p)); });
   v.ghost.opacity = GHOST_OPACITY * fade;
   v.bar.visible = false; v.label.visible = false; v.mark.visible = false;
@@ -665,6 +676,7 @@ export function animateEnemies(list, dt, off = ZERO) {
     if (e.profile.hover || gait === 'swim') v.phase = (v.phase + dt / W.getClip().duration * (gait === 'swim' ? 0.6 + 0.4 * Math.min(1, e.speed / walkSpeed) : 1)) % 1;   // keeps hovering (paddling)
     else if (!attack && e.speed > 0.01) v.phase = (v.phase + dt * e.speed / stride) % 1;
     else if (!attack) v.phase = 0; // idle on both planted feet, not frozen mid-step
+    hops(v, e, v.stepPhase ?? v.phase);
     footfalls(v, e, gait);
     W.time = v.phase * W.getClip().duration;
     if (A.fast) A.fast.time = v.phase * A.fast.getClip().duration;
@@ -733,7 +745,7 @@ export function removeEnemyViews(list) {
     removeTrail(v); forgetWalker(e);
     if (v.fog) disposeFoggeryLook(v.fog);
     v.mixer.stopAllAction(); v.mixer.uncacheRoot(v.model);
-    v.material.dispose();
+    v.material.dispose(); v.shell?.material.dispose();
     v.ghost.dispose();
     v.label.material.map.dispose(); v.label.material.dispose();
     const skeletons = new Set();

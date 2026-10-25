@@ -398,7 +398,39 @@ export const SLUG = {
   style: 'ranged', keep: [2.2, 4.5],
   seedSalt: 0x51a6e5, spacing: 4,
 };
-export const ENEMY_PROFILES = [SPIDER, STUNDER, SNAKE, OCTONAUT, FIREFACE, TRIANGLE, FIRECAT, SHRAPS, SPICY, WOLLA, WOLK, SQUIRTLE, MECKED, TORNADO, SLUG];
+// A big, see-through blob of slime with eyes (blender/bolime.py, after the kids' sketch): a lime
+// green body you can see into (`shell`: the parts drawn translucent, render/enemies.js), a
+// squiggly core floating inside it, two eye stalks on top. It only ever hops (its gait), and it
+// fights by jumping onto you: its shadow follows you (a stomp beam's, as the Tornado's slam), it
+// leaps (a `ride` onto it) and comes down at the hit frame; whoever is under it then is
+// swallowed (`engulf`, game/engulf.js): inside it, slowed down a lot, the weapon too (a slowing
+// with `weapons`, core/status.js), digested a bite at a time (`bite` s apart, `share` of its damage
+// through the armor alone), until they break out (walking out fills the struggle in `walk` s,
+// every jump adds `jump`), it is staggered or killed, or it spits them out at `release`. A pounce
+// that catches nobody skips to the spitting out. The slime is its own (`slimeborn`).
+const BOLIME_POUNCE = {
+  name: 'pounce', clip: 'pounce', weight: 1, reach: 3.2, hitAt: 30 / 30, trackUntil: 0.35, attackTime: 150 / 30, hitReach: 0,
+  arc: -1, power: 1, knock: 0, knockDown: false, hop: 0, reason: 'Swallowed by a Bolime!', recover: 1.4,
+  ride: { from: 12 / 30, height: 1.3, onto: true }, steady: { from: 12 / 30, to: 30 / 30 },
+  beam: { kind: 'stomp', aim: 'feet', time: 26 / 30, track: 2.2, lock: 0.25, radius: 0.7, range: 14, sky: 5, clear: false,
+    muzzle: [0, 0, 0] },
+  engulf: { release: 132 / 30, bite: 0.9, share: 0.4, slow: 0.35, walk: 2.6, jump: 0.05, hold: 0.25,
+    reason: 'Digested by a Bolime!' },
+};
+export const BOLIME = {
+  type: 'bolime', species: 'bolime', label: 'Bolime', hp: 110, damage: 16, knock: 2,
+  xp: 64, coins: [12, 24],
+  radius: 0.5, height: 1.75, bodyHeight: 1.3, mass: 2.4, slimeborn: true, shell: { parts: ['BolimeSkin'], opacity: 0.6 }, hops: 0.82,
+  aggro: 5.5, giveUp: 9, chase: 1.5, wander: 0.9, homeSpeed: 0.8,
+  ...BOLIME_POUNCE, reach: BOLIME_POUNCE.reach, cooldown: 1.6, ichor: ['#b8ff5a', '#3e8a2a'], pitch: 1.2,
+  attacks: [BOLIME_POUNCE],
+  poise: 0.6, hitStun: 0.2, deathTime: 1.5, corpseTime: 3,
+  parts: { skin: ['BolimeSkin', 'BolimeStalk'], core: ['BolimeCore_glow'] },
+  colors: paints({ skin: 'moss.light', core: 'moss.deep' }),
+  style: 'brute',
+  seedSalt: 0xb011e, spacing: 4,
+};
+export const ENEMY_PROFILES = [SPIDER, STUNDER, SNAKE, OCTONAUT, FIREFACE, TRIANGLE, FIRECAT, SHRAPS, SPICY, WOLLA, WOLK, SQUIRTLE, MECKED, TORNADO, SLUG, BOLIME];
 
 // Gusto, the first real boss (blender/gusto.py), in place of the first descent guardian
 // (core/bosses.js). A round white-grey head with red eyes and jagged teeth, two long arms with
@@ -1069,6 +1101,21 @@ export const BONE_MECKED = enemyKind(MECKED, {
   colors: paints({ skin: 'stone.pale', belly: 'stone.light', eyes: 'eyes.ember' }), ichor: ['#efe6cf', '#8a8070'],
   mods: { hp: 1.5, damage: 1.45, speed: 1.15, size: 1.1 },
 });
+// The Bolimes of the slime marsh: the plain lime one, a yellow Toxic bolime whose slime poisons
+// as it digests, and a Glow bolime, the strongest, that glows from inside.
+const bolimeAttacks = (swallowed, digested, more = {}) => [{ ...BOLIME_POUNCE, reason: swallowed, engulf: { ...BOLIME_POUNCE.engulf, reason: digested }, ...more }];
+export const TOXIC_BOLIME = enemyKind(BOLIME, {
+  type: 'toxicbolime', label: 'Toxic bolime', reason: 'Swallowed by a Toxic bolime!', toxin: { time: 3, ticks: 3, share: 0.5 },
+  attacks: bolimeAttacks('Swallowed by a Toxic bolime!', 'Digested by a Toxic bolime!'),
+  colors: paints({ skin: 'ochre.light', core: 'crimson.deep' }), ichor: ['#e8f060', '#8a7a20'],
+  mods: { hp: 1.2, damage: 1.15 },
+});
+export const GLOW_BOLIME = enemyKind(BOLIME, {
+  type: 'glowbolime', label: 'Glow bolime', reason: 'Swallowed by a Glow bolime!', light: '#7affd0', fx: 'glowbolime',
+  attacks: bolimeAttacks('Swallowed by a Glow bolime!', 'Digested by a Glow bolime!'),
+  colors: paints({ skin: 'jade.glow', core: 'jade.pale' }), ichor: ['#9affe0', '#2a8a6a'],
+  mods: { hp: 1.45, damage: 1.35, speed: 1.1, size: 1.08 },
+});
 // The Slugs of the slime marsh: the plain dark green one, a spotted one, and the black one, the
 // strongest and the slowest, whose slime holds you longer.
 const slugBall = (slow, time) => ({ ...SLUG_BALL, slow: { ...SLUG_BALL.slow, slow, time } });
@@ -1258,7 +1305,7 @@ export const TOT_STUNDER = enemyKind(STUNDER, {
 export const ENEMY_KINDS = Object.fromEntries([...ENEMY_PROFILES, ...Object.values(GUARDIAN_KINDS), ...Object.values(DESCENT_GUARDIAN_KINDS), SAND_VIPER, BLOOD_VIPER, FROST_ADDER, VENOM_ADDER, SHADOW_MAMBA, FROST_SPIDER, BOG_SPIDER,
   GLOOM_SPIDER, REDBACK, FROST_STUNDER, STONE_STUNDER, MAGMA_STUNDER, BOG_OCTONAUT, CORAL_OCTONAUT, EMERALD_TRIANGLE, CRIMSON_TRIANGLE, FIRE_SHRAPS,
   BOG_WOLLA, STORM_WOLLA, EMBER_WOLLA, CORAL_SQUIRTLE, BLAZE_FACE, LANTERN_FACE, WISP_FACE, ASH_CAT, VOID_CAT, AMETHYST_SHRAPS, HABANERO,
-  NIGHTSHADE, DUST_WOLK, STORM_WOLK, MOSS_SQUIRTLE, FROST_MECKED, BOG_MECKED, BONE_MECKED, DUST_TORNADO, FROST_TORNADO, FIRE_TORNADO, SPOTTED_SLUG, BLACK_SLUG, ...BOSS_PROFILES, CUSTO_TRIANGLE, SNAP_SKULL, TOT_SPIDER, TOT_STUNDER,
+  NIGHTSHADE, DUST_WOLK, STORM_WOLK, MOSS_SQUIRTLE, FROST_MECKED, BOG_MECKED, BONE_MECKED, DUST_TORNADO, FROST_TORNADO, FIRE_TORNADO, SPOTTED_SLUG, BLACK_SLUG, TOXIC_BOLIME, GLOW_BOLIME, ...BOSS_PROFILES, CUSTO_TRIANGLE, SNAP_SKULL, TOT_SPIDER, TOT_STUNDER,
   TIDE_SQUIRTLE, SKY_WOLLA, FOG_FACE, FOG_CAT, REN_SPIDER, REN_FACE].map(k => [k.type, k]));
 // gone: not here for now (Gusto between his vanishing and his coming back, game/gusto.js), or
 // under the floor (a burrowing Squirtle, game/enemyai.js): it cannot be seen, hit or touched,

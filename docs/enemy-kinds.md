@@ -183,6 +183,9 @@ again. The lineup is planned with the room (`cubegen/testrooms.js` `lineUp`), so
 | Fire tornado | Tornado | `ember.mid` | ×1.5 | ×1.45 | ×1.1 | ×1.08 | ×1.47 | 18–19 |
 | Slug | (base) | `moss.deep` | | | | | | 4–5 (Slime marsh) |
 | Spotted slug | Slug | `ochre.mid`, `ink.dark` stripes | ×1.2 | ×1.15 | 1 | 1 | ×1.17 | 4–5 (Slime marsh) |
+| Bolime | (base) | `moss.light` (see-through) | | | | | | 4–5 (Slime marsh) |
+| Toxic bolime | Bolime | `ochre.light`, `crimson.deep` core | ×1.2 | ×1.15 | 1 | 1 | ×1.17 | 4–5 (Slime marsh; its digesting poisons) |
+| Glow bolime | Bolime | `jade.glow`, `jade.pale` core | ×1.45 | ×1.35 | ×1.1 | ×1.08 | ×1.4 | 5 (Slime marsh; it glows) |
 | Black slug | Slug | `ink.dark`, `moss.mid` stripes | ×1.45 | ×1.35 | ×0.85 | ×1.12 | ×1.4 | 5 (Slime marsh; its slime slows to 45% for 3 s) |
 
 The base kinds are painted from the palette too (their `colors`); the other columns are theirs.

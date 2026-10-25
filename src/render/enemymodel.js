@@ -106,9 +106,10 @@ function partsGeometry(prefab, hide = []) {
 // A material drawing each part in its own colour, glow and finish. uniforms: color (the
 // diffuse colour), emissive (glow colour times strength) and finish (roughness, metalness) per
 // part; material.emissiveIntensity scales every part's glow, opacity fades them all.
-export function partsMaterial(side = THREE.DoubleSide) {
+// shared: another parts material's uniforms to draw with (a see-through shell, dressEnemy)
+export function partsMaterial(side = THREE.DoubleSide, shared = null) {
   const fill = make => Array.from({ length: MAX_PARTS }, make);
-  const uniforms = { color: fill(() => new THREE.Color(1, 1, 1)), emissive: fill(() => new THREE.Color(0, 0, 0)),
+  const uniforms = shared ?? { color: fill(() => new THREE.Color(1, 1, 1)), emissive: fill(() => new THREE.Color(0, 0, 0)),
     finish: fill(() => new THREE.Vector2(1, 0)) };
   // transparent only to fade out: a solid body, drawn in one pass (three.js draws transparent
   // double-sided materials twice, back faces first, re-checking the program each time)
@@ -148,11 +149,15 @@ export function cloneEnemy(model) {
 // An instance of an enemy kind (profile): its own skeleton, the body without the parts the
 // kind hides, and a parts material of its own in the kind's colours. parts: the instance's own
 // copy of the prefab's parts (change them and paintParts, or write material.userData.parts).
+// A kind with a `shell` ({ parts, opacity }: the Bolime's skin) has those parts drawn see-through,
+// a second mesh on the same skeleton after the solid body (shell: { mesh, material }), sharing its
+// colours: what is inside it shows through.
 export function dressEnemy(prefab, profile) {
   const model = cloneEnemy(prefab);
   let mesh = null;
   model.traverse(o => { if (o.isSkinnedMesh) mesh = o; });
-  mesh.geometry = partsGeometry(prefab, profile?.hide);
+  const shellParts = profile?.shell?.parts ?? [];
+  mesh.geometry = partsGeometry(prefab, [...(profile?.hide ?? []), ...shellParts]);
   mesh.userData.sharedGeo = true;   // the prefab owns the geometry
   const table = kindColors(profile, prefab);
   const parts = prefab.parts.map(p => {
@@ -162,5 +167,16 @@ export function dressEnemy(prefab, profile) {
   const material = mesh.material = partsMaterial(prefab.side);
   ownShadowDepth(model);
   paintParts(material, parts);
-  return { model, mesh, material, parts };
+  let shell = null;
+  if (shellParts.length) {
+    const shown = prefab.parts.map(p => p.name).filter(n => !shellParts.includes(n));
+    const m = partsMaterial(THREE.FrontSide, material.userData.parts);
+    Object.assign(m, { transparent: true, opacity: profile.shell.opacity, depthWrite: false });
+    const s = new THREE.SkinnedMesh(partsGeometry(prefab, shown), m);
+    s.bind(mesh.skeleton, mesh.bindMatrix);
+    s.boundingSphere = mesh.boundingSphere; s.renderOrder = 2; s.userData.sharedGeo = true;
+    mesh.add(s);   // (the same world transform as the body)
+    shell = { mesh: s, material: m, opacity: profile.shell.opacity };
+  }
+  return { model, mesh, material, parts, shell };
 }

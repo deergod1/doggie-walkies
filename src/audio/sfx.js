@@ -445,6 +445,25 @@ const SOUNDS = {
       tone('sine', hz, hz * 1.8, at, 0.03, amp(at, 0.002, 0.12, 0.03, out));
     }
   },
+  gulp(t, out, p) {      // swallowed by a Bolime: a deep wet gulp, the slime closing with a squelch
+    tone('sine', 160 * p, 70 * p, t, 0.25, amp(t, 0.01, 0.6, 0.25, out));
+    const f = filter('lowpass', 1400 * p, 9, amp(t + 0.05, 0.01, 0.5, 0.3, out));
+    f.frequency.setValueAtTime(1400 * p, t + 0.05); f.frequency.exponentialRampToValueAtTime(200 * p, t + 0.35);
+    noise(t + 0.05, 0.35, f);
+    tone('sine', 240 * p, 520 * p, t + 0.3, 0.05, amp(t + 0.3, 0.003, 0.2, 0.05, out));
+  },
+  splorch(t, out, p) {   // spat out of a Bolime (or bursting out of it): a wet pop and slime splattering
+    tone('sine', 120 * p, 380 * p, t, 0.07, amp(t, 0.002, 0.55, 0.07, out));
+    noise(t, 0.2, filter('bandpass', 900 * p, 1.5, amp(t, 0.004, 0.5, 0.19, out)));
+    for (let i = 0; i < 6; i++) {
+      const at = t + 0.05 + Math.random() * 0.3, hz = (400 + Math.random() * 700) * p;
+      tone('sine', hz, hz * 1.6, at, 0.04, amp(at, 0.002, 0.12, 0.04, out));
+    }
+  },
+  boing(t, out, p) {     // a Bolime landing a hop: a soft, springy wobble
+    tone('sine', 140 * p, 220 * p, t, 0.16, amp(t, 0.004, 0.25, 0.16, out));
+    tone('sine', 280 * p, 200 * p, t + 0.03, 0.12, amp(t + 0.03, 0.004, 0.08, 0.12, out));
+  },
   tidecall(t, out, p) {  // Squarlo calling the tide: a deep swell rising, waves rolling in
     tone('sine', 55 * p, 110 * p, t, 1.8, amp(t, 0.6, 0.45, 1.2, out));
     tone('triangle', 82 * p, 165 * p, t + 0.2, 1.6, filter('lowpass', 500 * p, 1, amp(t + 0.2, 0.5, 0.2, 1.1, out)));

@@ -10,6 +10,7 @@ import { checkPortals } from './portals.js';
 import { knockDown, stepRagdoll, tickGetUp } from './ragdoll.js';
 import { tickHeld } from './grab.js';
 import { tickTwirl } from './twirl.js';
+import { tickEngulf, holdInside } from './engulf.js';
 import { movePlayer, updateLayer, landingSpeed } from '../physics/move.js';
 import { applyHazards } from '../physics/hazards.js';
 import { climb } from '../physics/climb.js';
@@ -59,10 +60,14 @@ export function updatePlayer(dt) {
   if (len > 1) { dx /= len; dz /= len; }
   const steer = [dx, dz];   // where we go ourselves (a lunge does not count for leaving a fight)
   // (a mouse order jumps by itself where its way does: game/orders.js)
-  const jumpKey = takeJump(), jump = jumpKey || !!order?.jump;
-  tickCast(dt, len > 0 || jump);   // reading the town portal scroll: moving interrupts it
+  const jumpKey = takeJump();
+  let jump = jumpKey || !!order?.jump;
+  // inside a Bolime (game/engulf.js): struggling to get out (a jump is a heave, not a jump)
+  const engulfed = !!player.engulfed;
+  if (engulfed) { clearOrder(); if (tickEngulf(dt, dx, dz, jumpKey)) jump = false; }
+  tickCast(dt, len > 0 || jump || engulfed);   // reading the town portal scroll: moving interrupts it
   // on a ladder (a mouse order takes hold of none but its own, and climbs on unless the jump key lets go)
-  if (climb(dt, dx, dz, jump, order ? order.ladder ?? null : undefined)) { cancelSword(); if (!order || jumpKey) clearOrder(); return; }
+  if (!engulfed && climb(dt, dx, dz, jump, order ? order.ladder ?? null : undefined)) { cancelSword(); if (!order || jumpKey) clearOrder(); return; }
   if (iceStep(dt, dx, dz)) { cancelSword(); return; }   // on a slide puzzle's ice (game/trials.js)
   // Attacks plant you: no walking until the blade went through (the shot left), then moving
   // cuts the rest short
@@ -73,6 +78,7 @@ export function updatePlayer(dt) {
   }
   // always run (mouse orders too), unless Ctrl is held (but for an order's jump) or a swing plants the feet
   const gr = movePlayer(dt, dx, dz, (order?.run || !wantsWalk()) && !s.active, jump);
+  holdInside();   // (still inside a Bolime: kept in it)
   updateLayer(gr);
   if (unstick(dt)) return;   // wedged in something: out onto the nearest free spot (physics/unstuck.js)
 
@@ -90,5 +96,5 @@ export function updatePlayer(dt) {
   }
   if (landed > SIT_IMPACT) { player.stun = 1.5; sfx('dizzy'); }
 
-  checkPortals(dx, dz, dt, charge, steer);
+  if (!player.engulfed) checkPortals(dx, dz, dt, charge, steer);
 }

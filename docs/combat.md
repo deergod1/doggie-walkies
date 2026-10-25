@@ -251,6 +251,22 @@ The controls are the same for all.
   ball of slime at frame 24 (`slimeball`, 6 cells/s). One that hits slows you (`slow`: to 55% for
   2.5 s, the Black slug's to 45% for 3 s; only the body, not the weapon). It dies sagging flat,
   its eye stalks drooping.
+- Bolime (`blender/bolime.py`, after the kids' sketch; the Slime marsh only): a big, see-through
+  blob of lime green slime (its skin drawn translucent over the rest: its `shell`,
+  `render/enemymodel.js dressEnemy`), a squiggly core floating inside it that glows, two eye
+  stalks on top and a little V of slime between them. It gets about only by hopping (its gait;
+  a soft boing as it lands, `hops`). It pounces (`style: 'brute'`, from up to 3.2 cells): its
+  shadow follows you (a stomp beam, as the Tornado's slam, 2.2 cells/s, holding still for the
+  last 0.25 s), it crouches and leaps at 0.4 s (a `ride` onto its shadow, 1.3 cells high) and comes
+  down at 1.0 s. Whoever stands in its shadow then is swallowed (`engulf`, `game/engulf.js`):
+  inside it, held near its middle, slowed to 35% (a slowing with `weapons`: the sword, the bow and
+  the throws too, but you can fight on from in there), digested every 0.9 s (0.4 of its damage
+  through the armor alone; the Toxic bolime's poisons). Walking out fills the struggle in 2.6 s
+  (the green bar over you), every jump adds 5% of it; full, you burst out the way you walked. A
+  stagger or its death lets you out, and at 4.4 s it spits you out anyway; out of it, a second of
+  sticky walking, the weapon free. A pounce that catches nobody spits out at once. Playing
+  together it is carried out like a grab: by the game of the player it caught. It dies bursting
+  flat and melting into a puddle, its eyes in it.
 - Tornado (`blender/tornado.py`, after the kids' sketch): a little wind spirit, light purple, a
   floating face with angry V brows over a thin body whose two arms rise up either side of it
   like a U, a round, scalloped overskirt over a long A-line skirt, both swirl-striped, and four
@@ -334,7 +350,7 @@ times a second (0.2 s, jittered so a pack does not decide in lockstep) and acts 
     when blocked and now and then, and darts in once the cooldown is over.
   - `ranged` (Fire-face, Triangle, Spicy, Wolla, Wolk, Tornado, Slug): backs away while closer than `keep[0]`, sidesteps while the
     throw recovers, and moves for a clear shot when it has none.
-  - `brute` (Stunder, Octonaut, Shraps, Mecked): holds its ground. The Stunder `charge`s: it runs the
+  - `brute` (Stunder, Octonaut, Shraps, Mecked, Bolime): holds its ground. The Stunder `charge`s: it runs the
     last 1.5–5 cells at 1.8× its chase speed when it can strike again (the Mecked at 1.4×).
   Cooldowns vary by ±20% per blow. Throws are aimed ahead of a running player by half the way
   they would run before the throw arrives; changing direction dodges them.
