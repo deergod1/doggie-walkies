@@ -118,6 +118,18 @@ test('the light comes in three bands of depths: light, medium and dark (and nigh
   assert.ok(THEMES.some(t => t.act === 2 && !t.cave) && THEMES.some(t => t.act === 2 && t.cave), 'act II: open and walled');
 });
 
+// the backdrop's nebula (render/sky.js) in every theme: its band (haze) brighter than the sky's
+// top, also in the dark caves, where only the stars go out
+test('every sky has a nebula, the caves a faint one without stars', () => {
+  const lum = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)).reduce((s, v, i) => s + v * [0.2126, 0.7152, 0.0722][i], 0);
+  for (const t of [...THEMES, TOWN, CORE]) {
+    const { sky, stars = 0 } = t.light;
+    assert.equal(sky.length, 4, `${t.props}: top, bottom, haze and tint`);
+    assert.ok(lum(sky[2]) >= lum(sky[0]) + 8 && lum(sky[2]) >= 18, `${t.props}: a nebula to see`);
+    if (t.cave) assert.equal(stars, 0, `${t.props}: no stars under the rock`);
+  }
+});
+
 test('the route, its guardians and hordes never depend on the themes a world picked', () => {
   const shape = L => DEPTHS.map(d => {
     const l = L(d);

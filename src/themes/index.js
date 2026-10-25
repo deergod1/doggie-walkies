@@ -22,7 +22,8 @@
 //   void: how much of a cube may be open to the depth below; relief: how tall highlands get
 //   arche: weights of the cube archetypes (cubegen/archetypes.js); props: prop set (assets/props/,
 //   clutter/, themes/ <set>.glb), propDensity: chance of a prop per floor (0.32)
-//   light: sky [top, bottom, haze?, tint?] (backdrop, see render/sky.js), stars 0..1, hemi [sky, ground, intensity], sun [colour, intensity], fog 0..1,
+//   light: sky [top, bottom, haze, tint] (backdrop, see render/sky.js: haze is the nebula's band,
+//     tint its patch low on the right; walled-in caves too, faint, with no stars), stars 0..1, hemi [sky, ground, intensity], sun [colour, intensity], fog 0..1,
 //     lamp 0..1: how bright the character's own light is (0 under the sky, 1 in the dark deep)
 //   music: the song (music/<name>.scrim) that plays here; the town and the core have their own (SONGS)
 //   spans: gorge spans (world/spans.js), or null: the chance of any on a depth, at most `max`,
