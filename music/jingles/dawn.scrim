@@ -1,6 +1,6 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
-# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim). For dawn (game/daycycle.js, game/worldclock.js; nothing plays now).
-# Not played by the game yet: only in tools/player.html, under Jingles.
+# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim).
+# Played by audio/jingles.js: game/daycycle.js, the sun coming up.
 title    Dawn
 composer Claude
 about    Day breaks: a crystal run rising over F and then C, wind chimes, and the bird's wide call.

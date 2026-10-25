@@ -1,6 +1,6 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
-# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim). For a trial room lived through (now the sfx `unlock` and `levelUp`, game/trials.js).
-# Not played by the game yet: only in tools/player.html, under Jingles.
+# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim).
+# Played by audio/jingles.js: game/trials.js resolve, after the sfx unlock.
 title    Trial
 composer Claude
 about    A memory lived through: the title's rocking crystal ostinato and its toy tune, whole (A B C, E D, C), quietly over glass harmonica chords and a fretless bass, a glass tap and a singing bowl, ending on the bird's wide call.

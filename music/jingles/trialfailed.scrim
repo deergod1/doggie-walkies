@@ -1,6 +1,6 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
-# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim). For a trial failed, to start over (game/trials.js; the sfx thud now).
-# Not played by the game yet: only in tools/player.html, under Jingles.
+# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim).
+# Played by audio/jingles.js: game/trials.js, a trial failed, or its runestones gone dark.
 title    Trial failed
 composer Claude
 about    Start over: the toy tune begins (A B C) and is cut off by the bird's call narrowed to a half step, over a low Bb.

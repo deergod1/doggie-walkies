@@ -1,6 +1,6 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
-# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim). For reaching the core (depth 20; docs/story.md), when the story goes in.
-# Not played by the game yet: only in tools/player.html, under Jingles.
+# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim).
+# Played by audio/jingles.js: game/flow.js settleIn, the first time at the core in a world.
 title    The Core
 composer Claude
 about    The glass bird glued back together: the toy tune whole again on crystal (A B C, E D), its last notes mended (B where the crack was, then A), over the title's rocking ostinato, glass harmonica chords, a singing bowl, and the bird's wide call ringing as at the end of the title song.

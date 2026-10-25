@@ -17,7 +17,7 @@ way: the descent guardian's level, id, gate, seal, amber HP bar and drops; its d
 the well, for good. Its label shows its name (`♛ Gusto · Lv 1`), the locked well says
 "Defeat Gusto to unlock this descent", and the music turns to the boss mood like for any
 guardian, unless the boss has a song of his own (Gusto: `music/gusto.scrim`, its moods his
-fight's phases, `docs/music.md`). Beating any boss plays a fanfare (`src/audio/fanfare.js`,
+fight's phases, `docs/music.md`). Beating any boss plays a jingle (`src/audio/jingles.js`,
 `docs/sound.md`). Once hurt, or once it has struck, it no longer keeps to its post
 (`game/defence.js`); out of his arena (a dev spawn, the boss test room) he fights on the same (`relentless`,
 `game/enemyai.js decide`).

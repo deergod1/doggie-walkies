@@ -13,6 +13,7 @@ import { player, state, setStatus } from './state.js';
 import { online, relay } from '../net/online.js';
 import { log } from './log.js';
 import { sfx } from '../audio/sfx.js';
+import { jingle } from '../audio/jingles.js';
 import { awardXP } from '../core/progression.js';
 import { addCopper, addInstance, autoBar, fits, formatCoins } from '../core/inventory.js';
 import { ITEMS } from '../core/items.js';
@@ -126,8 +127,8 @@ function grant(id, rewards, title) {
   log('quest', { title, what: 'done', xp: rewards.xp, copper: rewards.copper });
   setStatus([tr('Quest complete: {title}', { title: say(title) }), tr('+{xp} XP', { xp: rewards.xp }),
     ...rewards.copper ? [formatCoins(rewards.copper)] : []].join(' · '));
-  sfx('coin', { pitch: 0.8 });
-  if (levels) { log('level', { level: player.level }, { share: true }); sfx('levelUp'); }
+  sfx('coin', { pitch: 0.8 }); jingle('quest');
+  if (levels) { log('level', { level: player.level }, { share: true }); jingle('levelup'); }
 }
 
 // --- a death puts the cube back (game/flow.js) ------------------------------------------------
@@ -148,12 +149,12 @@ function announce(L) {
     if (!was || was === q.state) continue;
     const giver = giverName(q);
     const title = q.title, said = say(title);
-    if (q.state === 'active' && was === 'offered') { log('quest', { title, what: 'taken' }); setStatus(tr('Quest taken: {title}', { title: said })); }
+    if (q.state === 'active' && was === 'offered') { log('quest', { title, what: 'taken' }); setStatus(tr('Quest taken: {title}', { title: said })); jingle('questtaken'); }
     else if (q.state === 'active' && was === 'failed') log('quest', { title, what: 'restarted' });
     else if (q.state === 'ready') {
       log('quest', { title, what: 'ready', giver: phrase('{giver:the}', { giver }) });
       setStatus(tr('Quest done: {title} · back to {giver}', { title: said, giver: tr('{giver:the}', { giver }) })); sfx('unlock');
-    } else if (q.state === 'failed') { log('quest', { title, what: 'failed' }); setStatus(tr('Quest failed: {title}', { title: said })); }
+    } else if (q.state === 'failed') { log('quest', { title, what: 'failed' }); setStatus(tr('Quest failed: {title}', { title: said })); jingle('questfailed'); }
   }
   seen = now; seenIn = state.run;
 }

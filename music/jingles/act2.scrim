@@ -1,6 +1,6 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
-# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim). For the first cube of act II (growing up; docs/story.md), when the story goes in.
-# Not played by the game yet: only in tools/player.html, under Jingles.
+# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim).
+# Played by audio/jingles.js: game/flow.js settleIn, the first time at the first depth of act II in a world.
 title    Act II: Growing up
 composer Claude
 about    The happiest stretch: the toy tune varied, turned around (E D C, A B, C), on crystal with a glass harmonica a third below it, two voices together, over F, G and A minor, a vibraphone, and the bird's wide call.

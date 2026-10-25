@@ -13,6 +13,7 @@ import { bareSlots } from '../core/inventory.js';
 import { showChestOpen } from '../render/chests.js';
 import { spill } from './loot.js';
 import { sfx } from '../audio/sfx.js';
+import { jingle } from '../audio/jingles.js';
 import { tr } from '../i18n/i18n.js';
 
 const OPEN_REACH = 1.2;   // cells from the chest's centre the player opens it from
@@ -42,7 +43,7 @@ export function openChest(site) {
   const { copper, items } = chestLoot(site, state.map.depth, state.map.seed, favoredKind(player), bareSlots(player.inventory));
   const a = site.anchor, front = site.approach ?? a;
   spill(`c:${site.id}`, front, copper, items, { kept: true }, { x: a.x, y: a.y + 0.6, z: a.z }, opening);
-  sfx('chest', { at: a });
+  sfx('chest', { at: a }); jingle('chest', { delay: 0.4 });   // the hinge and the lid, then the glint
   setStatus(tr('You opened a treasure chest'));
   return true;
 }
@@ -55,5 +56,5 @@ export function shareChest(id) {
   const site = state.map?.rewardSites?.find(s => s.id === id);
   if (!site) return;
   showChestOpen(state.world, id);
-  if (site.anchor) sfx('chest', { at: site.anchor });
+  if (site.anchor) { sfx('chest', { at: site.anchor }); jingle('chest', { delay: 0.4 }); }
 }

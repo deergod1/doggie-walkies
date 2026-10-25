@@ -1,6 +1,6 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
-# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim). For the first cube of act III (the sealed memories; docs/story.md), when the story goes in.
-# Not played by the game yet: only in tools/player.html, under Jingles.
+# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim).
+# Played by audio/jingles.js: game/flow.js settleIn, the first time at the first depth of act III in a world.
 title    Act III: The sealed memories
 composer Claude
 about    What she sealed away: a thin glass ring over a singing bowl, then the toy tune only in pieces (A, then Bb, then E, single notes with silence between), a glass harmonica cluster A and Bb, and the bird's call narrowed to a half step, left unresolved.

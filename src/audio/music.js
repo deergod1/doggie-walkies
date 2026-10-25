@@ -27,7 +27,7 @@ const GAP = 0.8;                            // seconds between one song fading a
 const JOIN_MARGIN = 0.04;                   // s: a joining voice comes in on the first step after this
 const MIN_HELD = 0.15;                      // s: a held note joined with less than this left stays out
 
-const DUCK = 0.3;                           // the music's level under a fanfare (duckMusic)
+const DOWN = 0.6, UP = 1.2;                  // s the music takes to go down under a jingle, and to come back (duckMusic)
 const RING_OUT = 4;                         // s after a song stops before the synth leaves the bus (the reverb's tail)
 
 let ctx = null, syn = null, output = null, attached = false, idleAt = 0;
@@ -85,13 +85,30 @@ export function setMood(name) {
   if (sting) playSting(sting);
 }
 
-// hold the music down for a moment (s), under a fanfare (audio/fanfare.js), then bring it back
-export function duckMusic(seconds) {
-  if (!syn) return;
-  const g = syn.out.gain, now = ctx.currentTime;
-  g.cancelScheduledValues(now);
-  g.setTargetAtTime(VOLUME * DUCK, now, 0.08);
-  g.setTargetAtTime(VOLUME, now + seconds, 0.6);
+// turn the music down to `level` (of its volume) for `seconds` from ctx time `start`, under a
+// jingle (audio/jingles.js), then bring it back: smoothly both ways (a smoothstep, followed each
+// tick). A jingle asked for while another holds it down takes over from where that one is then.
+let duck = null, ducked = 1;   // duck: { prev, level, start, end, from }; ducked: the level set last
+export function duckMusic(start, seconds, level) {
+  duck = { prev: duck, level, start, end: start + seconds, from: null };
+}
+const smooth = x => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x);
+function duckAt(d, t) {
+  if (!d) return 1;
+  if (d.from == null) {
+    if (t < d.start) return duckAt(d.prev, t);
+    d.from = duckAt(d.prev, d.start); d.prev = null;
+  }
+  if (t < d.start + DOWN) return d.from + (d.level - d.from) * smooth((t - d.start) / DOWN);
+  if (t < d.end) return d.level;
+  return d.level + (1 - d.level) * smooth((t - d.end) / UP);
+}
+function applyDuck() {
+  const now = ctx.currentTime, f = duckAt(duck, now);
+  if (duck && duck.from != null && now >= duck.end + UP) duck = null;
+  if (!syn || f === ducked || Math.abs(f - ducked) < 1e-4 && f !== 1) return;
+  syn.out.gain.setTargetAtTime(VOLUME * f, now, 0.03);
+  ducked = f;
 }
 
 export const musicEnabled = () => enabled;
@@ -109,6 +126,7 @@ export function musicInfo() {
 
 function tick() {
   if (ctx.state !== 'running') return;
+  applyDuck();
   const name = enabled && !held ? want : null;
   if (cur && cur.score.name !== name) stopSong();
   const score = name && scores.get(name);

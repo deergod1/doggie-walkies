@@ -47,6 +47,7 @@ import { drawLoot, lootLanded } from '../render/loot.js';
 import { questItemsHere } from './questworld.js';
 import { floatText } from '../render/floattext.js';
 import { sfx } from '../audio/sfx.js';
+import { jingle } from '../audio/jingles.js';
 import { online, relay } from '../net/online.js';
 import { log } from './log.js';
 import { tr } from '../i18n/i18n.js';
@@ -263,6 +264,7 @@ function landed(p) {
   const r = rarityOf(p);
   if (r.rank >= RARITY.unusual.rank) sfx('drop', { at: p, pitch: 1 + 0.12 * (r.rank - RARITY.unusual.rank), volume: 0.86 + 0.12 * (r.rank - RARITY.unusual.rank) });
   else sfx('clink', { at: p, volume: 0.6 });
+  if (r.rank >= RARITY.fabled.rank) jingle('legendary');   // Fabled or better: a jingle too
   lootLanded(p, state.world);
 }
 

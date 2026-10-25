@@ -1,7 +1,7 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
-# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim). A soft stinger for a cube memorized (got through; docs/story.md), when the story goes in.
-# Not played by the game yet: only in tools/player.html, under Jingles.
-# Every cube gets it, so it has to stay small: one soft ring.
+# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim).
+# Played by audio/jingles.js: game/travel.js, a cube left by its way down for the first time.
+# Many cubes get it, so it has to stay small: one soft ring.
 title    Memorized
 composer Claude
 about    A place she will not forget again: one soft ring, the bird's wide pair (A and B) on a glass harmonica swelling in and fading, with a glass tap.

@@ -13,6 +13,7 @@ import { groundAt } from '../physics/collide.js';
 import { respawnPoint } from '../physics/respawn.js';
 import { player, state, setStatus } from './state.js';
 import { sfx } from '../audio/sfx.js';
+import { jingle } from '../audio/jingles.js';
 import { showStats, flash, fadeOut, fadeIn, whenReady } from './hud.js';
 import { resetCut } from './cut.js';
 import { resetEnemies, mirroring, detachEnemies } from './enemies.js';
@@ -44,7 +45,8 @@ import { questWorld, noticeQuestGoals, forgetPicked } from './questworld.js';
 import { raidDied } from './defense.js';
 import { checkQuestLog } from '../core/quests.js';
 import { checkSmith } from '../core/save.js';
-import { depthOf } from '../themes/depth.js';
+import { depthOf, MAX_DEPTH } from '../themes/depth.js';
+import { ACTS } from '../themes/index.js';
 import { enterTrial, restartTrial, refreshTrialView, sealedIn, warnTrials } from './trials.js';
 import { setFluidPalettes } from '../render/fluidpal.js';
 import { tr } from '../i18n/i18n.js';
@@ -110,7 +112,7 @@ function restoreVisit(v) {
 export function die() {
   if (state.deathAsk) return;
   const cause = player.lastHurt?.reason;
-  sfx('death');
+  if (!jingle('death')) sfx('death');
   raidDied();   // a raid going on is lost (game/defense.js)
   logDeath();
   askRespawn(cause, backAfterDeath);
@@ -299,10 +301,18 @@ export function enterCube(c, from = null, back = null, at = null) {
 export function settleIn(neighbors = true) {
   const c = state.cubes.cubes.get(state.cubeKey);
   showStats(c.map, state.cubeKey, state.cubes.seed, c.visits);
-  noteDepth(c.map, state.cubes.seed);   // the first time this deep: into the chronicle
+  // the first time this deep: into the chronicle, and the first of an act (or the core) gets its jingle
+  if (noteDepth(c.map, state.cubes.seed)) actJingle(c.map.depth);
   if (neighbors) showNeighbors(visitedNeighbors(state.cubeKey));
   if (gateLocked(state.map, state.run)) setStatus(guardianLockMessage(state.map, guardianKind(state.map)));
   prefetchAround(c);
+}
+
+// the jingle of the act (themes/index.js ACTS) that starts at depth d, or of the core
+function actJingle(d) {
+  const act = ACTS.findIndex(a => a?.[0] === d);
+  if (act > 0) jingle(`act${act}`);
+  else if (d === MAX_DEPTH) jingle('core');
 }
 
 const beyond = (c, take) => (c.map.portals || []).filter(take).map(p => step(c.key, p.dir));

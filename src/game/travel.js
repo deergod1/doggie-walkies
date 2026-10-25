@@ -21,11 +21,12 @@ import { shiftParticles } from '../render/particles.js';
 import { shiftFloatText } from '../render/floattext.js';
 import { player, state, setStatus } from './state.js';
 import { sfx } from '../audio/sfx.js';
+import { jingle } from '../audio/jingles.js';
 import { whenReady } from './hud.js';
 import { resetEnemies, detachEnemies, drawEnemies, allEnemies } from './enemies.js';
 import { cancelSword } from './sword.js';
 import { clearMouseInput } from './orders.js';
-import { arrivalPoint, portalSeen, spawnAt, settleIn, visitedNeighbors, discover, beginVisit, devShores } from './flow.js';
+import { arrivalPoint, portalSeen, spawnAt, settleIn, visitedNeighbors, discover, beginVisit, devShores, visitedKeys } from './flow.js';
 import { enterTrial, warnTrials } from './trials.js';
 import { slideVisuals, endVisuals } from './travelfx.js';
 import { fallPoint } from './fall.js';
@@ -33,6 +34,8 @@ import { townPadIn } from '../core/townportal.js';
 import { cancelCast } from './townportal.js';
 import { tr } from '../i18n/i18n.js';
 import { questWorld } from './questworld.js';
+import { isInterior } from '../world/town.js';
+import { depthOf } from '../themes/depth.js';
 
 const GAP = CUBE_H + BASE;   // vertical distance between strata while sliding
 let trip = null;
@@ -40,6 +43,8 @@ const off = new THREE.Vector3(), oldOff = new THREE.Vector3();
 const ease = t => t * t * (3 - 2 * t);
 
 export const travelling = () => !!trip;
+const firstPortal = () => (state.run?.quests.deepest ?? 0) <= 1
+  && visitedKeys().filter(k => !isInterior(k) && depthOf(k) > 0).length <= 1;
 // Where the player really is: while travelling, the point on the walk in the new cube's
 // coordinates (player.x / z also carry the slide offset, as everything drawn slides with it).
 // What the minimap shows and the others are told (net/session.js), so neither jumps a cube
@@ -61,6 +66,10 @@ export function startTravel(p, { force = false } = {}) {
   // the town portal sounds on its own (game/townportal.js), a fall whistles (game/sounds.js)
   const sound = { side: 'gate', down: 'wellDown', up: 'ringUp' }[p.kind];
   if (sound) sfx(sound);
+  // the first time through a side portal in this world (only the cube we came down into seen
+  // below the town): the jingle portal; a cube left by its way down for the first time: memorized
+  if (p.kind === 'side' && firstPortal()) jingle('portal');
+  else if (p.kind === 'down' && !cubes.cubes.get(k)?.visits && state.map?.depth > 0) jingle('memorized');
   whenReady(cubes.get(k)).then(c => {
     if (state.cubes === cubes && state.cubeKey === source) slide(p, c, cloud); else hidePortalCloud();
   }, () => {

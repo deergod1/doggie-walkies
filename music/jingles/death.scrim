@@ -1,6 +1,6 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
-# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim). For a death (now the sfx `death`, game/flow.js).
-# Not played by the game yet: only in tools/player.html, under Jingles.
+# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim).
+# Played by audio/jingles.js: game/flow.js die, in place of the sfx death.
 # The ring of the victory jingle and the title's shatter, then the toy tune trying again.
 title    Death
 composer Claude

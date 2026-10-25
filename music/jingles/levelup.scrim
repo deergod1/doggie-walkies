@@ -1,6 +1,6 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
-# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim). A stinger for a level gained (now the sfx `levelUp`, game/enemies.js): short, over the music.
-# Not played by the game yet: only in tools/player.html, under Jingles.
+# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim).
+# Played by audio/jingles.js: game/enemies.js and game/quests.js, a level gained.
 title    Level up
 composer Claude
 about    A level gained: a crystal sweep up and the bird's call, then its call again an octave higher, over a glass harmonica chord.

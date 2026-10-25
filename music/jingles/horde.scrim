@@ -1,6 +1,6 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
-# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim). For a horde waking (game/hordes.js; nothing plays now, the music only changes its mood).
-# Not played by the game yet: only in tools/player.html, under Jingles.
+# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim).
+# Played by audio/jingles.js: game/enemies.js, a horde awakened.
 title    Horde
 composer Claude
 about    A horde wakes: a low singing bowl, glass breaking far off, and two bars of the title's cracked ostinato (A and Bb) over a low tom, a fretless bass sinking from A to Bb.

@@ -1,6 +1,6 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
-# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim). For a quest failed (game/quests.js; only a status line now).
-# Not played by the game yet: only in tools/player.html, under Jingles.
+# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim).
+# Played by audio/jingles.js: game/quests.js, a quest failed.
 title    Quest failed
 composer Claude
 about    A quest failed: the bird's call, then again lower and narrowed to a half step, over A minor falling to D minor and a low singing bowl.

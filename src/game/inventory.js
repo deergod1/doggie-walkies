@@ -25,6 +25,7 @@
 // once, render/itemviews.js); the selected one turns.
 import { player, state, setStatus } from './state.js';
 import { sfx } from '../audio/sfx.js';
+import { jingle } from '../audio/jingles.js';
 import { ITEMS, COINS, ARMOR_SLOTS, ARMOR_SLOT_NAMES, isGear } from '../core/items.js';
 import { BURST_SHARE } from '../core/shots.js';
 import { BAR_SIZE, equippedItem, ownedItem, assignBar, barAllowed, barIndexOf, countOf, copperTotal, formatCoins, coinCounts, hasRoom, autoBar, isWorn, wornItem } from '../core/inventory.js';
@@ -95,7 +96,6 @@ function showTab(view) {
   $('inventory-title').textContent = tab === 'quests' ? tr('Quests') : tr('Inventory');
   document.querySelector('#inventory-panel .inventory-body').hidden = tab !== 'bag';
   $('quests-body').hidden = tab !== 'quests';
-  $('quests-footer').hidden = tab !== 'quests';
   showKeys();
   signature = ''; updateInventory();
   const ware = trader && $('inventory-shop').querySelector('[data-ware]'), first = floorMode && $('inventory-floor').querySelector('[data-floor]');
@@ -522,7 +522,8 @@ function enchant(id) {
   // its name before: once enchanted the name carries the enchantment ("made Duskfang Toasty")
   const cost = enchantCost(w, id), was = enchantEntry(w), before = itemWords(w), done = enchantWeapon(player.inventory, w.instanceId, id);
   if (done === 'ok') {
-    sfx('spell', { pitch: 1.2 }); sfx('coin', { pitch: 0.8 });
+    if (!jingle('enchant')) sfx('spell', { pitch: 1.2 });
+    sfx('coin', { pitch: 0.8 });
     const says = tr(ENCHANTED_SAYS[id]);
     setStatus(`${tr('Enchanter')}: ${was ? tr('{says} ({name} wandered off, offended.)', { says, name: was.name }) : says}`);
     log('craft', { what: 'enchant', item: before, enchant: id, copper: cost.copper });
@@ -537,7 +538,7 @@ function reroll(i) {
   const ids = a => (a.gen?.affixes ?? []).map(x => x.id);
   const cost = rerollCost(w), before = ids(w), was = before[i], words = itemWords(w), done = rerollWeapon(player.inventory, w.instanceId, i);
   if (done === 'ok') {
-    sfx('hit', { pitch: 1.5 }); sfx('clink', { pitch: 0.7 }); sfx('coin', { pitch: 0.8 });
+    sfx('hit', { pitch: 1.5 }); sfx('coin', { pitch: 0.8 }); if (!jingle('enchant')) sfx('clink', { pitch: 0.7 });
     const rest = before.filter((_, j) => j !== i), into = ids(w).find(n => !rest.includes(n)) ?? was;
     setStatus(`${tr('Smith')}: ${tr(pick(REROLLED_SAYS))} (${tr(AFFIX[was].name)} → ${tr(AFFIX[into].name)})`);
     log('craft', { what: 'reroll', item: words, affix: was, into, copper: cost });
@@ -597,7 +598,6 @@ function showKeys() {
     const key = keyLabel(b.dataset.tab === 'bag' ? 'inventory' : 'quests');
     b.title = key ? `${b.textContent} · ${key}` : b.textContent;
   }
-  $('quests-key-text').textContent = quests || tr('The Quests tab');
 }
 showKeys();
 onSettingsChange(showKeys);

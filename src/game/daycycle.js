@@ -10,6 +10,7 @@
 // dayClock: the world's play time with the dev's shift (/dayspeed, game/devcommands.js).
 import { state, setStatus } from './state.js';
 import { themeOf } from '../themes/depth.js';
+import { jingle } from '../audio/jingles.js';
 import { nightLight, dayLight, SUNSET } from '../themes/skies.js';
 import { nightAt, glowAt, sunAt } from '../core/daycycle.js';
 import { setSunPlan } from '../render/bake.js';
@@ -45,10 +46,12 @@ export function updateDayCycle(dt) {
   if (dt > 0 && state.daySpeed !== 1) state.dayShift += (state.daySpeed - 1) * dt;
   const sky = skyNow();
   state.night = sky === 'none' ? 0 : sky === 'midnight' ? 1 : nightAt(dayClock());
-  // a word when it turns (not on coming in)
+  // a word and a jingle when it turns (not on coming in)
   const night = fullCycle(sky) ? state.night >= 0.5 : null;
-  if (night !== null && wasNight !== null && night !== wasNight && !state.transitioning)
+  if (night !== null && wasNight !== null && night !== wasNight && !state.transitioning) {
     setStatus(night ? tr('Night falls') : tr('The sun comes up'));
+    jingle(night ? 'dusk' : 'dawn');
+  }
   wasNight = night;
 }
 

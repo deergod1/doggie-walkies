@@ -8,6 +8,7 @@ import { online } from '../net/online.js';
 import { die } from './flow.js';
 import { standUp } from './ragdoll.js';
 import { sfx } from '../audio/sfx.js';
+import { jingle } from '../audio/jingles.js';
 import { REVIVE_TIME, REVIVE_REACH, REVIVE_HP, BLEED_OUT } from '../core/downed.js';
 import { cleanBy } from '../core/chronicle.js';
 import { log } from './log.js';
@@ -42,7 +43,7 @@ export function tickDown(dt) {
   const r = player.ragdoll;
   player.down = null; player.ragdoll = null;
   player.hp = Math.ceil(player.maxHp * REVIVE_HP);
-  sfx('levelUp');
+  if (!jingle('revived')) sfx('levelUp');
   setStatus(tr('Back on your feet!'));
   log('up', { by: d.by }, { share: true });
   standUp(r);

@@ -147,6 +147,6 @@ test('Gusto\'s music follows his fight', () => {
 test('the boss fanfare is short and plays once', () => {
   const { song, errors } = loadScore(readFileSync(resolve(dir, 'jingles/victory.scrim'), 'utf8'));
   assert.deepEqual(errors, []);
-  assert.equal(song.intro.dur, 0, 'all in the loop, which audio/fanfare.js plays once');
+  assert.equal(song.intro.dur, 0, 'all in the loop, which audio/jingles.js plays once');
   assert.ok(song.loop.dur > 3 && song.loop.dur < 7, `${song.loop.dur} s`);
 });

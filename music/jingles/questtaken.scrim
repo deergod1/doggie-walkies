@@ -1,6 +1,6 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
-# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim). For a quest taken (game/quests.js: offered to active; only a status line now).
-# Not played by the game yet: only in tools/player.html, under Jingles.
+# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim).
+# Played by audio/jingles.js: game/quests.js, a quest taken.
 title    Quest taken
 composer Claude
 about    A quest taken: the bird's wide call, then a second call a fourth higher, left open like a question, over an open glass harmonica chord and a glass tap.

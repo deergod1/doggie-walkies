@@ -1,6 +1,6 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
-# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim). For dusk (game/daycycle.js, game/worldclock.js; nothing plays now).
-# Not played by the game yet: only in tools/player.html, under Jingles.
+# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim).
+# Played by audio/jingles.js: game/daycycle.js, night falling.
 title    Dusk
 composer Claude
 about    Night falls: a crystal run falling over A minor and D minor, a low singing bowl, and the bird's wide call, then once more an octave lower.

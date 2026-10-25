@@ -1,6 +1,6 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
-# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim). For the first time stepping through a portal (game/travel.js; the portal sounds now).
-# Not played by the game yet: only in tools/player.html, under Jingles.
+# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim).
+# Played by audio/jingles.js: game/travel.js, the first side portal in a world.
 title    Portal
 composer Claude
 about    Through the glass for the first time: a crystal swirl up and back down, a glass harmonica chord swelling in, wind chimes, and the bird's wide call on the other side.

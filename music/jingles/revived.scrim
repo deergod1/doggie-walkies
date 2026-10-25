@@ -1,6 +1,6 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
-# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim). For being revived by a friend, playing together (game/downed.js; the sfx levelUp now).
-# Not played by the game yet: only in tools/player.html, under Jingles.
+# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim).
+# Played by audio/jingles.js: game/downed.js, helped up by a friend.
 title    Revived
 composer Claude
 about    Back on your feet: the opposite of the death jingle, the bird's narrow call (A and Bb) opening to its wide one (A and B), with a crystal shimmer and a glass harmonica chord swelling in.

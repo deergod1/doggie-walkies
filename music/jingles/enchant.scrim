@@ -1,6 +1,6 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
-# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim). For an item enchanted or forged (game/enchants.js, the Smith; its own sound now).
-# Not played by the game yet: only in tools/player.html, under Jingles.
+# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim).
+# Played by audio/jingles.js: game/inventory.js, the Enchanter enchanting or the Smith re-rolling.
 title    Enchant
 composer Claude
 about    An item enchanted or forged: a crystal run up an A minor chord, struck by an anvil bell, a glass harmonica chord and the bird's wide call.

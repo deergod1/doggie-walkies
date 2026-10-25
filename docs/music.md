@@ -96,15 +96,15 @@ next sixteenth, over the loop; its voices play in no mood, so their channels sta
 a dissonant brass chord as he splits, gong, crash and brass as the three of him appear (again
 each time he comes back), a whoosh as he vanishes.
 
-Beating a boss (a real one or a Temp Boss) plays a fanfare (`src/audio/fanfare.js`,
-`music/jingles/victory.scrim`, `docs/sound.md`), and the music ducks under it (`duckMusic`); a
-boss with his own song is gone by then, and the place's song comes back after it. The jingle is
-a score in `music/jingles/` (with its `index.json`), which `tools/player.html` lists under
-Jingles; it is no song, so it is in no `SONGS`. The other jingles there, built on the title song
-too, are not played by the game yet: `death` (the victory's ring and the title's shatter, then the
+Beating a boss (a real one or a Temp Boss) plays a jingle (`src/audio/jingles.js`,
+`music/jingles/victory.scrim`, `docs/sound.md`), and the music is turned down under it, smoothly
+(`duckMusic`); a boss with his own song is gone by then, and the place's song comes back after it.
+The jingles are scores in `music/jingles/` (with its `index.json`), which `tools/player.html`
+lists under Jingles; they are no songs, so they are in no `SONGS`. The others, built on the title
+song too, play at the game's other big moments (`docs/sound.md` says where): `death` (the victory's ring and the title's shatter, then the
 toy tune trying again), `trial` (a trial room lived through), `quest` (a quest done), `act1`,
 `act2`, `act3` and `core` (the first cube of each act and the core, the toy tune whole, varied,
-in pieces and mended, for when the story goes in: `docs/story.md`), all 3.5 to 4.5 s, and short
+in pieces and mended), all 3.5 to 4.5 s, and short
 stingers meant to play over the music: `levelup`, `chest` (a chest's glint), `legendary` and
 `memorized` (one soft ring for a cube got through), `questtaken`, `questfailed`, `trialsealed` (the
 knock and the ring), `trialfailed`, `revived` (by a friend), `horde` (it wakes), `dawn`, `dusk`,

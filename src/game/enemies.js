@@ -59,8 +59,7 @@ import { createHordeGroups, coordinateHordes } from './hordes.js';
 import { setGuardianGate } from '../render/world.js';
 import { refreshOpenFaces } from './flow.js';
 import { sfx } from '../audio/sfx.js';
-import { duckMusic } from '../audio/music.js';
-import { fanfare } from '../audio/fanfare.js';
+import { jingle } from '../audio/jingles.js';
 import { party, nearestTo } from './party.js';
 import { relay, online } from '../net/online.js';
 import { log } from './log.js';
@@ -143,7 +142,7 @@ function awardKills(list) {
       if (droppedHere(e)) dropLoot(e, reward.coins);
       if (e.guardianGate) {
         unlocked = enemyName(e.profile);
-        boss ||= e.guardianRole === 'descent';   // a boss (a real one or a Temp Boss): the fanfare
+        boss ||= e.guardianRole === 'descent';   // a boss (a real one or a Temp Boss): his jingle
         log('guardian', { label: enemyWords(e.profile), level: e.level, depth: state.map.depth, boss: !!e.boss }, { share: true });
       }
       relay.defeated?.(e);
@@ -157,10 +156,10 @@ function awardKills(list) {
   if (levels) log('level', { level: player.level }, { share: true });
   if (killed) hordeBroken();
   if (unlocked) { setGuardianGate(state.world, false); refreshOpenFaces(); }
-  // a boss's fanfare (audio/fanfare.js), the music held down under it, a level gained after it
-  const played = boss ? fanfare() : 0;
-  if (played) duckMusic(played + 0.5); else if (unlocked) sfx('unlock');
-  if (levels) sfx('levelUp', { delay: played });
+  // a boss's jingle (audio/jingles.js: the music turned down under it), a level gained after it
+  // (it waits its turn)
+  if (!(boss && jingle('victory')) && unlocked) sfx('unlock');
+  if (levels && !jingle('levelup')) sfx('levelUp');
   return unlocked;
 }
 // Does this game drop e's loot? Its killer's does: whoever hit it last (game/sword.js; null:
@@ -221,7 +220,7 @@ export function updateEnemies(dt) {
     coordinateDefence(state.map, state.run, list, state.map.guardian ? nearestTo(state.map.guardian.x, state.map.guardian.z) : player);
   }
   const horde = hordeGroups[0], bodies = party();
-  if (coordinateHordes(hordeGroups, horde && bodies.length > 1 ? nearestTo(horde.anchor.x, horde.anchor.z, bodies) : player, dt)) { setStatus(tr('Horde awakened!')); log('horde'); }
+  if (coordinateHordes(hordeGroups, horde && bodies.length > 1 ? nearestTo(horde.anchor.x, horde.anchor.z, bodies) : player, dt)) { setStatus(tr('Horde awakened!')); log('horde'); jingle('horde'); }
   stepCalls(dt);
   // Flip's world turning (game/flipworld.js): everything in it turns with it
   updateFlipWorld(list, dt);

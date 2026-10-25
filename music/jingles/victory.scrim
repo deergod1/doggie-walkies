@@ -1,5 +1,5 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
-# Not a song: the jingle a beaten boss gets (src/audio/fanfare.js plays it once, as a sound).
+# Not a song: the jingle a beaten boss gets (src/audio/jingles.js plays it once, as a sound; game/enemies.js).
 # Built on the title song (music/title.scrim): its knock and the thin ring held while time stands
 # still (the end of its cracking), its shatter, and its toy tune, which lands this once on a major
 # third (C#), with the glass bird's wide call after it.

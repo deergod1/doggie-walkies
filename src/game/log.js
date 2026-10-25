@@ -37,13 +37,14 @@ export function logDeath() {
   player.lastHurt = null;
 }
 
-// The first time down at a depth in this world (game/flow.js settleIn)
+// The first time down at a depth in this world (game/flow.js settleIn): true then
 let reached = new Set(), reachedIn = null;
 export function noteDepth(map, seed) {
   if (seed !== reachedIn) { reached = new Set(); reachedIn = seed; }
-  if (!map || map.depth <= 0 || map.interior || map.testRoom || reached.has(map.depth)) return;
+  if (!map || map.depth <= 0 || map.interior || map.testRoom || reached.has(map.depth)) return false;
   reached.add(map.depth);
   log('depth', { depth: map.depth, place: placeOf(map) }, { share: true });
+  return true;
 }
 // a saved world (game/save.js): its depths down to `deepest` were reached before
 export function knowDepths(seed, deepest) {

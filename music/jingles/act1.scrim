@@ -1,6 +1,6 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
-# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim). For the first cube of act I (childhood; docs/story.md), when the story goes in.
-# Not played by the game yet: only in tools/player.html, under Jingles.
+# Not a song: a jingle, played once as a sound (like music/jingles/victory.scrim).
+# Played by audio/jingles.js: game/flow.js settleIn, the first time at depth 1 in a world.
 title    Act I: Childhood
 composer Claude
 about    The first memories, under the sky: the toy tune whole on crystal (A B C, E D, C), over a harp and glass harmonica chords turning from A minor to C major, wind chimes, and the bird's wide call.

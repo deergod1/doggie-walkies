@@ -1,6 +1,6 @@
 # Before writing or changing music, read music/README.md (style, moods, format).
-# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim). For a trial room sealing you in (game/trials.js; a rumble and the gate now): a memory that holds on to you.
-# Not played by the game yet: only in tools/player.html, under Jingles.
+# Not a song: a short jingle, played once as a sound (like music/jingles/victory.scrim).
+# Played by audio/jingles.js: game/trials.js, a trial room arming (with its rumble and gate).
 title    Trial sealed
 composer Claude
 about    A memory that holds on to you: the knock and the thin glass ring of the title's cracking, held while time stands still, over a low D and a singing bowl.

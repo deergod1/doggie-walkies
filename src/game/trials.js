@@ -19,6 +19,7 @@ import { openedSides } from '../core/boundaries.js';
 import { setPortalSeals } from '../render/world.js';
 import { player, state, setStatus } from './state.js';
 import { sfx } from '../audio/sfx.js';
+import { jingle } from '../audio/jingles.js';
 import { log } from './log.js';
 import { allEnemies, mirroring } from './enemies.js';
 import { relay, online } from '../net/online.js';
@@ -235,7 +236,7 @@ function announce(s, happened) {
   if (happened === 'armed') {
     setStatus(`${tr(TRIALS[s.kind].name)}! ${tr(SEALED)}`);
     banner(tr(TRIALS[s.kind].name), HOW[s.kind] ? tr(HOW[s.kind]) : '');
-    sfx('rumble'); sfx('gate', { delay: 0.4 });
+    sfx('rumble'); sfx('gate', { delay: 0.4 }); jingle('trialsealed');
   }
   if (happened === 'running') sfx('rumble', { pitch: 0.7 });
 }
@@ -346,7 +347,7 @@ export function usePart(p, fromOther = false) {
   else if (p.type === 'runestone') {   // the next in the order lights; a wrong one puts them all out
     const key = `${pz.id}:n`, n = s.bits[key] ?? 0;
     if (pz.field.order[n] === p.i) s.bits[key] = n + 1;
-    else { s.bits[key] = 0; if (!fromOther) { sfx('thud'); setStatus(tr('The stones go dark: start over')); } }
+    else { s.bits[key] = 0; if (!fromOther) { sfx('thud'); jingle('trialfailed'); setStatus(tr('The stones go dark: start over')); } }
   }
   else if (p.type === 'brazier') {   // it and every one linked to it
     const lit = bitsOf(pz, s, 'brazier');
@@ -368,7 +369,7 @@ export function resolve(tell = true) {
   state.run.unlockedGates.add(m.gate);
   refreshOpenFaces();
   if (tell) relay.trialDone?.({ key: s.key, gate: m.gate, time: s.t });   // resolved for everyone (net/session.js)
-  sfx('unlock'); sfx('levelUp', { delay: 0.2 });
+  sfx('unlock'); if (!jingle('trial')) sfx('levelUp', { delay: 0.2 });
   setStatus(tr('{trial}: done! The way on is open', { trial: tr(TRIALS[m.kind].name) }));
   const done = { flood: msg('The water drains away.'), miasma: msg('The vents open: the fog lifts.'), cold: msg('The great fire burns: the cold lifts.'),
     storm: msg('Lightning strikes the rod: the storm ends.'), ...EVENT_DONE, collapse: msg('The keystone holds: the floor is whole again.'),
@@ -569,6 +570,7 @@ export function failTrial(reason) {
   const s = state.trial, m = mapTrial();
   if (!s || !m || s.phase === 'resolved') return;
   log('trial', { name: TRIALS[m.kind].name, depth: state.map.depth, what: 'failed' });
+  jingle('trialfailed');
   if (sealedIn()) { backBeforeTrial(reason); return; }
   setStatus(tr(reason));
   restartTrial();

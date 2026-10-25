@@ -10,7 +10,7 @@ click. It runs at 44.1 kHz whatever the speakers run at (the browser resamples),
 |---|---|
 | `src/audio/sfx.js` | one-shot effects: `sfx(name, { at, pitch, volume })`; `at` pans by screen position |
 | `src/audio/splash.js` | the splash screen's (`game/splash.js`): the glass bird struck (a muffled knock, the glass ringing on while time crawls), its shatter, and a deep swell gliding into a low chord on D; music waits for it (`holdMusic`, `audio/music.js`) |
-| `src/audio/fanfare.js` | the fanfare of a beaten boss: a jingle score (`music/jingles/victory.scrim`) played once by a synth of its own |
+| `src/audio/jingles.js` | the jingles: short scores (`music/jingles/`) for a boss beaten, a death, a quest, a level, a chest ..., played once by a synth of their own, one after another, the music turned down under them |
 | `src/audio/voices.js` | the enemies' voices, registered with sfx.js as `<species>_alert/_windup/_death` |
 | `src/audio/footsteps.js` | footsteps per surface and gait (the slime marsh's slime squelches and lets go with a gloop), pre-rendered into variants when audio starts |
 | `src/audio/loops.js` | continuous sounds: the charge and cast drones, the ambient beds, drips and lava pops |
@@ -46,18 +46,39 @@ click. It runs at 44.1 kHz whatever the speakers run at (the browser resamples),
 | `lob`, `glass`, `boom`, `hiss`, `poison` | a flask thrown, breaking, a blast, a toxic cloud, a poison tick (`game/juice.js`) |
 | `<species>_alert/_windup/_death` | an enemy starts chasing you (at most every 0.3 s), winds up an attack, dies |
 
-## The boss fanfare
+## Jingles
 
-A boss falling (a real one or a Temp Boss: a descent guardian) plays a fanfare instead of
-`unlock` (`game/enemies.js`): a jingle written as a score like the songs,
-`music/jingles/victory.scrim` (listen in `tools/player.html`, under Jingles), played once by a
-synth of its own into the sounds' bus (`src/audio/fanfare.js`). So it is a sound, heard with the
-music off too, and every boss gets it, whatever song plays. It is built on the title song (The
+The game's big moments get a jingle, written as a score like the songs (`music/jingles/`, listen
+in `tools/player.html`, under Jingles) and played once by a synth of its own into the sounds' bus
+(`src/audio/jingles.js`, `jingle(name)`). So they are sounds, heard with the music off too,
+whatever song plays. One plays at a time: one asked for while another plays waits its turn,
+unless that is more than 5 s away (then it is left out), and one already playing or waiting is
+not played twice (a level gained with a boss's kill comes after his jingle). The music is turned
+down under each, smoothly (a smoothstep down over 0.6 s and back up over 1.2 s, `duckMusic` in
+`audio/music.js`): to 55% under the big ones, to 80% under the stingers. Where each plays:
+
+| Jingle | When |
+|---|---|
+| `victory` | a boss falls (a real one or a Temp Boss: a descent guardian), instead of `unlock` (`game/enemies.js`) |
+| `death` | any death, instead of `death` (`game/flow.js`) |
+| `revived` | helped up by a friend (`game/downed.js`) |
+| `levelup` | a level gained, from a kill or a quest (`game/enemies.js`, `game/quests.js`) |
+| `quest`, `questtaken`, `questfailed` | a quest's reward paid, a quest taken, failed (`game/quests.js`) |
+| `trialsealed`, `trial`, `trialfailed` | a trial room arming, done, failed or its runestones gone dark (`game/trials.js`) |
+| `horde` | a horde awakened (`game/enemies.js`) |
+| `chest` | a chest opened: the glint after the sound `chest`'s hinge and lid (`game/chests.js`) |
+| `legendary` | a Fabled weapon or better landing (`game/loot.js`) |
+| `enchant` | the Enchanter enchanting, the Smith re-rolling (`game/inventory.js`) |
+| `dawn`, `dusk` | the sun coming up, night falling (`game/daycycle.js`) |
+| `portal` | the first side portal in a world (`game/travel.js`) |
+| `memorized` | a cube left by its way down for the first time (`game/travel.js`) |
+| `act1`, `act2`, `act3`, `core` | the first time at the first depth of an act, or at the core, in a world (`game/flow.js settleIn`) |
+
+`victory`, the boss's, is built on the title song (The
 Glass Bird): a knock and a thin glass ring while time stands still (the end of the title's
 cracking), the shatter and wind chimes, then the toy tune on crystal and its echo (A B C E D)
 over glass harmonica chords, F and G, landing on an A major chord (the tune's C as C#), slowing,
-with a crystal sweep, a singing bowl and the glass bird's wide call. About 4 s; the music ducks under it (`duckMusic`, `audio/music.js`) and a level
-gained with the kill chimes after it.
+with a crystal sweep, a singing bowl and the glass bird's wide call. About 4 s.
 
 ## Continuous sounds
 
