@@ -65,20 +65,25 @@ export function loadPropSets(sets) {
   }));
 }
 
+// the game's clock (`wind`) as a uniform of the vertex shader, declared once: a part that both
+// sways and glows (a hanging lantern's glass) takes both edits, and a second declaration of the
+// same uniform does not compile
+const withWind = src => (/\buniform float uWind\b/.test(src) ? src : 'uniform float uWind;\n' + src);
+
 // sway: bend with the wind, more the further from the attachment point; per-instance phase
 function swayMaterial(mat, sway) {
   const prev = mat.onBeforeCompile, key = mat.customProgramCacheKey();
   mat.onBeforeCompile = (sh, r) => {
     prev.call(mat, sh, r);
     sh.uniforms.uWind = wind; sh.uniforms.uSway = { value: sway };
-    sh.vertexShader = 'uniform float uWind, uSway;\n' + sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
+    sh.vertexShader = withWind('uniform float uSway;\n' + sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
       float ph = 0.0;
       #ifdef USE_INSTANCING
         ph = instanceMatrix[3].x * 0.9 + instanceMatrix[3].z * 1.7;
       #endif
       float bend = abs(position.y) * uSway * 0.07;
       transformed.x += sin(uWind * 1.9 + ph) * bend;
-      transformed.z += cos(uWind * 1.4 + ph * 1.3) * bend * 0.7;`);
+      transformed.z += cos(uWind * 1.4 + ph * 1.3) * bend * 0.7;`));
   };
   mat.customProgramCacheKey = () => key + '|sway';
   return mat;
@@ -100,12 +105,12 @@ function glowMaterial(mat, kind, night = false) {
       : kind === 'steady' ? '1.0'
       : '0.8 + 0.2 * sin(uWind * 13.0 + glowSeed * 7.0) * sin(uWind * 7.3 + glowSeed * 3.0)';
     const lit = !night ? '' : kind === 'window' ? ' * litAt(uNight, glowSeed)' : ` * mix(${LAMP_BY_DAY}, 1.0, litAt(uNight, glowSeed))`;
-    sh.vertexShader = `uniform float uWind, uNight;\nvarying float vGlowK;\n${LIT_GLSL}\n` + sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
+    sh.vertexShader = withWind(`uniform float uNight;\nvarying float vGlowK;\n${LIT_GLSL}\n` + sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
       float glowSeed = 0.0, paneSeed = position.x * 1.2 + position.y * 0.8 + position.z;   // (slowly across the house: a window shimmers as one)
       #ifdef USE_INSTANCING
         glowSeed = mod(instanceMatrix[3].x * 1.7 + instanceMatrix[3].z * 2.3, 6.28);
       #endif
-      vGlowK = (${k})${lit};`);
+      vGlowK = (${k})${lit};`));
     sh.fragmentShader = 'varying float vGlowK;\n' + sh.fragmentShader.replace('#include <emissivemap_fragment>',
       '#include <emissivemap_fragment>\n  totalEmissiveRadiance *= vGlowK;');
   };
