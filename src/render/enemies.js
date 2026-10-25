@@ -60,6 +60,8 @@ import { bolimeModel } from './bolimemodel.js';
 import { flipModel } from './flipmodel.js';
 import { foggeryModel } from './foggerymodel.js';
 import { makeFoggeryLook, foggeryLook, disposeFoggeryLook } from './foggeryview.js';
+import { slomoModel } from './slomomodel.js';
+import { makeSlomoLook, slomoLook } from './slomoview.js';
 import { isFigure, animateFigures, removeFigureViews } from './renewview.js';
 import { STAGE_PROFILES, enemyName } from '../core/enemies.js';
 import { SQUARLO_FIGHT } from '../core/squarlo.js';
@@ -79,13 +81,14 @@ import { attackOf, makeEnemy, ENEMY_KINDS } from '../core/enemies.js';
 import { toLinear } from '../core/oklch.js';
 import { guardianColor, guardianTitle } from '../core/guardians.js';
 import { player } from '../game/state.js';
+import { character } from './character.js';
 import { uiScale } from '../game/uiscale.js';
 import { cameraKick, footfallFx } from '../game/juice.js';
 import { makeBar, makeLevelLabel, makeAlertMark } from './bars.js';
 
 const prefabs = { spider: spiderModel, stunder: stunderModel, snake: snakeModel, octonaut: octonautModel,
   fireface: fireFaceModel, triangle: triangleModel, firecat: fireCatModel, shraps: shrapsModel, spicy: spicyModel, wolla: wollaModel, wolk: wolkModel, gusto: gustoModel,
-  totnar: totnarModel, snapskull: snapSkullModel, squarlo: squarloModel, squirtle: squirtleModel, mecked: meckedModel, tornado: tornadoModel, slug: slugModel, bolime: bolimeModel, flip: flipModel, foggery: foggeryModel };
+  totnar: totnarModel, snapskull: snapSkullModel, squarlo: squarloModel, squirtle: squirtleModel, mecked: meckedModel, tornado: tornadoModel, slug: slugModel, bolime: bolimeModel, flip: flipModel, foggery: foggeryModel, slomo: slomoModel };
 // the models of these species (core/spawns.js speciesIn), loaded once
 export const loadSpecies = species => Promise.all(species.map(s => prefabs[s]?.load()));
 // light: [color, intensity, distance, height]; pulse: emissive / light swing with the
@@ -106,6 +109,8 @@ const GLOW = {
   // the Bolimes' cores glow inside them (most of all the Glow bolime's): by night what you see of them
   bolime: { light: [0x9aff5a, 0.7, 2.4, 0.6], pulse: 0.25 },
   glowbolime: { light: [0x7affd0, 1.5, 3.2, 0.6], pulse: 0.35 },
+  // Slomo's stuff glows inside him, his eyes flare up to a throw
+  slomo: { light: [0x9aff5a, 2.2, 4.5, 1.3], flare: 0.6 },
 };
 const EMBERS = ['#ffd25a', '#ff8a2a', '#ff5a14'];
 const GHOST = 0xff6a5a, GHOST_OPACITY = 0.4;
@@ -409,6 +414,26 @@ function shudder(v, e, dt) {
     { v: [rand(-0.4, 0.4), rand(0.4, 1.2), rand(-0.4, 0.4)], life: rand(0.5, 0.8), size: rand(0.2, 0.35), grow: 1.4, color: '#eef2f8', alpha: 0.5, drag: 1 });
 }
 
+// An Arm slug latched on (game/slomo.js: mode 'split') sits on top of the head of the one it holds,
+// facing the way they face, held still there: on our own hero, on their head bone as the animator
+// left it this frame (render/animator.js), so it rides along with every step and swing; on a friend,
+// where the game says (over their head)
+// It is drawn like what a figure wears (render/figure.js overGhost): after the hero's silhouette,
+// else it would count as terrain hiding the hero and the silhouette would shine through it; and
+// without a silhouette of its own (the head hides some of it).
+const headAt = new THREE.Vector3();
+function onHead(v, e) {
+  const g = character.group;
+  if (!v.onHead) { v.onHead = true; v.body.renderOrder = 1001; v.silhouette.visible = false; }
+  if (!character.ready || !g.visible || Math.hypot(e.x - player.x, e.z - player.z) > 0.6 || Math.abs(e.y - player.y) > 1.5) return;
+  character.bones.head.getWorldPosition(headAt);
+  v.group.position.set(headAt.x, headAt.y + 0.2, headAt.z);
+  v.yaw = g.rotation.y; v.group.rotation.y = v.yaw;
+}
+function offHead(v) {
+  if (!v.onHead) return;
+  v.onHead = false; v.body.renderOrder = 0; v.silhouette.visible = true;
+}
 // Totnar's parts lost by stage ({ stage: [bone names] } -> [{ stage, bones }])
 const BONE_BITS = ['#efe6cf', '#ffffff', '#cfc4a8'], STICK_BITS = ['#8a6440', '#5a3e26', '#7d8a3c'];
 // what e has lost by its stage, scaled away; what it loses now bursts apart first: bone shards
@@ -561,12 +586,12 @@ function makeView(e, prefab) {
   const embers = typeof fx?.embers?.from === 'string' ? model.getObjectByName(fx.embers.from) : null;
   const tentacles = e.profile.flail ? findTentacles(model) : [];
   if (e.proxy || e.summoned) poof(e, puffOf(e));   // it turns up
-  return { tentacles, was: { mode: e.mode, x: e.x, z: e.z }, group, model, mixer, actions, prefab, material, shell, parts, colors: material.userData.parts.color, ghost, tag, bar, hpBar, label, mark, markT: 0, yaw: e.yaw, phase: e.phase,
+  return { tentacles, was: { mode: e.mode, x: e.x, z: e.z }, group, model, mixer, actions, prefab, material, shell, parts, body: mesh, silhouette, colors: material.userData.parts.color, ghost, tag, bar, hpBar, label, mark, markT: 0, yaw: e.yaw, phase: e.phase,
     attacks: -1, dead: false, weights, fx, flames, light, embers, size, wheels: findWheels(model), roll: 0, spin: 0, rolled: null, waves: findWaves(model), whirl: 1, rings: findRings(model), ringSpeed: 0, flash: null, trail: null, sparks: e.profile.sparks ?? EMBERS, seed: Math.random() * 100,
     gloomColor: gloom ? new THREE.Color(...toLinear(gloom.color)) : null, gloom: 0, glimmer: 0,
     shed: findShed(model, e.profile.shed), stage: e.stage ?? 1, dark: e.dark ?? 0, ball: findBall(model, e.profile.tumble), tumble: 0, turned: 0, flash2: 0,
     sink: e.under ? 1 : 0, underWas: e.under ? 1 : 0, height: e.profile.height / size, morphing: false, swim: false,
-    fog: e.profile.species === 'foggery' ? makeFoggeryLook(model, group) : null };
+    fog: e.profile.species === 'foggery' ? makeFoggeryLook(model, group) : null, slomo: e.profile.species === 'slomo' ? makeSlomoLook(model) : null };
 }
 // the hover clip's beat (matches blender/triangle.py): sharp, twice per loop
 const beat = phase => (0.5 + 0.5 * Math.cos(2 * Math.PI * 2 * phase)) ** 6;
@@ -612,6 +637,7 @@ function dying(v, e, dt, off) {
   }
   if (!v.dead) {
     v.dead = true;
+    offHead(v);   // (an Arm slug dropping off a head)
     for (const a of Object.values(v.actions)) a.setEffectiveWeight(0);
     v.actions.death.reset().play().setEffectiveWeight(1);
     v.actions.death.timeScale = 0;
@@ -659,7 +685,11 @@ export function animateEnemies(list, dt, off = ZERO) {
     if (!e.ghost) clouds(v, e);
     v.group.visible = e.mode !== 'gone';
     if (e.mode === 'gone') { if (v.light) v.light.intensity = 0; continue; }
-    if (e.mode === 'split' && !STAGE_PROFILES[e.boss]) shudder(v, e, dt);
+    if (e.mode === 'split' && e.profile.latches) onHead(v, e);
+    else {
+      offHead(v);
+      if (e.mode === 'split' && !STAGE_PROFILES[e.boss]) shudder(v, e, dt);
+    }
     growLook(v, e, dt);
     const attack = e.mode === 'attack', strike = A[attackOf(e).clip ?? 'attack'];
     if (attack && v.attacks !== e.attacks) {
@@ -671,10 +701,14 @@ export function animateEnemies(list, dt, off = ZERO) {
     // a bigger body takes longer strides
     const walkSpeed = (gait === 'walk' ? prefab.walkSpeed : prefab.gaitSpeeds[gait]) * v.size, fastSpeed = prefab.fastSpeed * v.size;
     const fast = A.fast && gait === 'walk' ? THREE.MathUtils.clamp((e.speed - walkSpeed) / (fastSpeed - walkSpeed), 0, 1) : 0;
+    // turning on the spot it steps round too: its feet go round as far as the turn takes them
+    // (`turnStride`: cells from its middle to its feet, else its radius)
+    const turning = v.turnedYaw === undefined ? 0 : Math.abs(Math.atan2(Math.sin(v.yaw - v.turnedYaw), Math.cos(v.yaw - v.turnedYaw))) * (e.profile.turnStride ?? e.profile.radius);
+    v.turnedYaw = v.yaw;
     const stride = walkSpeed * W.getClip().duration * (1 - fast)
       + (A.fast ? fastSpeed * A.fast.getClip().duration * fast : 0);
     if (e.profile.hover || gait === 'swim') v.phase = (v.phase + dt / W.getClip().duration * (gait === 'swim' ? 0.6 + 0.4 * Math.min(1, e.speed / walkSpeed) : 1)) % 1;   // keeps hovering (paddling)
-    else if (!attack && e.speed > 0.01) v.phase = (v.phase + dt * e.speed / stride) % 1;
+    else if (!attack && (e.speed > 0.01 || turning > 0.01 * dt)) v.phase = (v.phase + (dt * e.speed + turning) / stride) % 1;
     else if (!attack) v.phase = 0; // idle on both planted feet, not frozen mid-step
     hops(v, e, v.stepPhase ?? v.phase);
     footfalls(v, e, gait);
@@ -692,6 +726,7 @@ export function animateEnemies(list, dt, off = ZERO) {
     v.parts.forEach((p, i) => v.colors[i].copy(baseColor(v, p)).lerp(flash > 0.1 || !e.hovered ? white : hover, Math.max(flash, e.hovered ? 0.22 : 0)));
     v.bar.visible = !!e.guardian || !!e.hovered || !e.hordeId && e.hp < e.profile.hp;
     v.label.visible = v.bar.visible || !e.hordeId && Math.hypot(e.x - player.x, e.z - player.z) < e.profile.aggro + 1;
+    if (e.mode === 'split' && e.profile.latches) v.bar.visible = v.label.visible = false;   // (on a head: no bar over it)
     // a guardian always says what it is; any other enemy while hovered (or locked on: what a
     // click goes for, game/pointer.js), else only its level
     if (!e.guardian) v.label.setLevel(e.level, e.hovered ? enemyName(e.profile) : null);
@@ -708,6 +743,7 @@ export function animateEnemies(list, dt, off = ZERO) {
     shedParts(v, e); tumble(v, e, dt); lightTurns(v, e, dt);
     burrowLook(v, e, dt); ripples(v, e, dt); wardLook(v, e, dt);
     if (v.fog) foggeryLook(v, e, dt);
+    if (v.slomo) slomoLook(v, e, dt);
     glowFx(v, e, dt, 1); glints(v, e, dt);
     if (e.ghost) ghostLook(v, e);
   }

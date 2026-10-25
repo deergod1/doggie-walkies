@@ -229,6 +229,19 @@ export function voices({ amp, noise, filter, tone, sweep }) {
       windup: (t, out, p) => { bend(t, 0.35, 180 * p, 320 * p, 260 * p, 900 * p, 0.3, out); gloops(t + 0.15, 3, 400 * p, 800 * p, 0.06, 0.15, out); },
       death: (t, out, p) => { bend(t, 0.9, 260 * p, 160 * p, 60 * p, 700 * p, 0.4, out); gloops(t + 0.3, 8, 120 * p, 400 * p, 0.08, 0.22, out, false); },
     },
+    slomo: {   // the slime boss: a huge bubbling roar, a deep slurping heave, a long gurgling collapse
+      alert: (t, out, p) => {
+        bend(t, 0.7, 70 * p, 110 * p, 60 * p, 380 * p, 0.55, out);
+        gloops(t + 0.15, 9, 90 * p, 260 * p, 0.06, 0.28, out, false);
+        noise(t, 0.6, filter('bandpass', 260 * p, 2, amp(t, 0.05, 0.25, 0.5, out)));
+      },
+      windup: (t, out, p) => { bend(t, 0.4, 90 * p, 140 * p, 110 * p, 500 * p, 0.35, out); gloops(t + 0.1, 4, 140 * p, 320 * p, 0.07, 0.22, out); },
+      death: (t, out, p) => {
+        bend(t, 1.8, 120 * p, 80 * p, 30 * p, 400 * p, 0.55, out);
+        gloops(t + 0.5, 14, 70 * p, 220 * p, 0.09, 0.3, out, false);
+        noise(t + 1.2, 0.8, filter('lowpass', 500 * p, 1, amp(t + 1.2, 0.05, 0.35, 0.7, out)));
+      },
+    },
     slug: {   // a Slug: a low wet gurgle, a slurp drawing breath, a long deflating sigh
       alert: (t, out, p) => { bend(t, 0.4, 110 * p, 150 * p, 95 * p, 500 * p, 0.4, out); gloops(t + 0.2, 4, 150 * p, 300 * p, 0.07, 0.18, out, false); },
       windup: (t, out, p) => {

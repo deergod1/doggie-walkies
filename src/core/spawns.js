@@ -124,7 +124,7 @@ export function population(map) {
   const boss = map.guardian?.boss && ENEMY_KINDS[map.guardian.boss];
   if (boss) return new Map([[boss.species, { count: 1, pack: 1, lead: true, kinds: { [boss.type]: 1 },
     also: [...new Set([boss, ...STAGE_PROFILES[boss.boss] ?? []].flatMap(p => p.attacks ?? [])
-      .flatMap(a => [a.summon?.kind, a.projectile?.becomes].filter(Boolean)))] }]]);
+      .flatMap(a => [a.summon?.kind, a.summon?.also, a.projectile?.becomes].filter(Boolean)))] }]]);
   if (map.horde) {
     const { kind, count } = map.horde, base = ENEMY_KINDS[kind];
     const ordinary = population({ ...map, horde: null, populationScale: 1 });

@@ -121,6 +121,7 @@ export function projectileFx(pr, what) {
   if (pr.kind === 'skull') { skullFx(pr, what); return; }
   if (pr.kind === 'water') { waterFx(pr, what); return; }
   if (pr.kind === 'slimeball') { slimeFx(pr, what); return; }
+  if (pr.kind === 'slugarm') { slugArmFx(pr, what); return; }
   if (pr.kind === 'eye') { eyeFx(pr, what); return; }
   if (pr.kind === 'orb') { orbFx(pr, what); return; }
   if (pr.kind === 'arrow') { arrowFx(pr, what); return; }
@@ -203,6 +204,13 @@ function waterFx(pr, what) {
   sfx('drip', { at: pr, volume: what === 'spent' ? 0.5 : 0.9 });
 }
 
+// one of Slomo's slug arms: torn off his arm with a wet pop and flung, and where it lands a splat of
+// goo (it comes to life there, game/slomo.js)
+function slugArmFx(pr, what) {
+  if (what === 'launch') { sfx('pop', { at: pr, pitch: 0.6 }); sfx('skullthrow', { at: pr, pitch: 0.8, volume: 0.7 }); return; }
+  slimeFx(pr, what === 'spent' ? 'blocked' : what);
+  if (what === 'hit') cameraKick(pr.vx, pr.vz, 0.07, 0.03);
+}
 // a Slug's ball of slime: spat with a wet hork, and where it ends a splat of goo
 const GOO = ['#d8ff9a', '#8ae048', '#3e7a2a'];
 function slimeFx(pr, what) {
@@ -646,12 +654,14 @@ function jetFx(e, g, what, dt) {
 // (look 'leaves', game/totnar.js): a rustle and a spray of leaves and twigs towards each of his.
 // Squarlo slaps the floor (look 'splash', game/squarlo.js): water runs from his hands to each
 // Squirtle popping out of it. Foggery croaks his Fire-faces and Fire-cats up (look 'embers').
+// Slomo heaves his slimes out of his back (look 'slime').
 const SUMMONS = { triangles: { sound: 'summon', flash: '#9fdcff', colors: ['#e0f6ff', '#7fd0ff'], streak: 10 },
   leaves: { sound: 'rustle', flash: '#ffb070', colors: ['#8a6440', '#7d8a3c', '#b8a07a'], streak: 5 },
   splash: { sound: 'splash', flash: '#c8f4ff', colors: DROPS, streak: 8 },
   rings: { sound: 'summon', flash: '#bfe8ff', colors: ['#f0faff', '#8fd8ff'], streak: 10 },
   embers: { sound: 'fireball', flash: '#ffb050', colors: ['#ffd25a', '#ff8a2a', '#ff4a17'], streak: 10 },
-  time: { sound: 'summon', flash: '#e8fbff', colors: ['#ffffff', '#bdf3ff', '#ffe9a8'], streak: 12 } };
+  time: { sound: 'summon', flash: '#e8fbff', colors: ['#ffffff', '#bdf3ff', '#ffe9a8'], streak: 12 },
+  slime: { sound: 'splorch', flash: '#c8ff7a', colors: ['#d8ff9a', '#9ae048', '#5a9a2a'], streak: 9 } };
 export function summonFx(mouth, list, look = 'triangles') {
   const s = SUMMONS[look];
   sfx(s.sound, { at: mouth });

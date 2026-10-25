@@ -840,7 +840,97 @@ export const RENEW_TWIN = {
   ...RENEW, type: 'renewtwin', weapon: 'weapon_flail_twin', ...RENEW_TWIN_SWING, cooldown: 1, chase: 2.5,
   attacks: [RENEW_TWIN_SWING, RENEW_TWIN_DASH, RENEW_ROLL], phase: 4, circle: 2,
 };
-export const BOSS_PROFILES = [GUSTO, TOTNAR, SQUARLO, FLIP, FOGGERY, RENEW];
+// Slomo, the boss at the bottom of act II (depth 13, core/bosses.js; blender/slomo.py, after the
+// kids' sketches): a slime boss in three shapes, one model (the clips of each shape scale the
+// others' bones away; render/slomoview.js blends from one shape into the next while he changes).
+// He fights in his slime bowl (cubegen/arenashapes.js `bowl`), always at night; game/slomo.js runs
+// his fight, core/slomo.js holds its rules. The slime is his own (`slimeborn`): it does not hold him.
+// Phase 1 (SLOMO): a great see-through blob of lime slime (its skin drawn translucent: `shell`),
+// the squiggly stuff a Bolime has inside it, two eye stalks with an angry V between them, and two
+// long slime arms that end in Slugs. He throws the slug of an arm (`arm`: which, 0 left, 1 right;
+// it grows back, game/slomo.js): it flies in an arc (`lob`, core/projectiles.js) and where it lands
+// it comes to life (`becomes`: an Arm slug that crawls after the player, latches on, bites a few
+// times and drops off dead). He spits slime meteorites up into the sky (a cast with a `rain`:
+// they come down round the player, game/meteors.js).
+// Phase 2 (SLOMO_LEGS): the blob in front of a slug body on six long legs. Nothing staggers him and
+// blows do less (`steadfast`, `armour`), unless he is exposed. He walks after the player on his legs
+// (turning no faster than `turnSpeed`: he steps round, core/enemies.js), now and then (core/slomo.js
+// `jump`) he jumps super high onto the player
+// (`jump`, his shadow following them, like Giant Squarlo's; landing on a player squashes them flat)
+// and his landing sends out shockwaves, two rings (`wave.rings`, game/quakes.js) a second apart:
+// jump over each as it comes (timed for the hero's jump: core/slomo.js dodge).
+// He floods his bowl with slime from one side (a cast, `ward`ed: game/slomo.js). The meteorites stay.
+// Phase 3 (SLOMO_SLUG): the slug alone, still on its legs. He spits balls of slime (three at once),
+// calls Ooze slugs and Ooze bolimes out of himself and Slime squirtles, floods the bowl and spits
+// meteorites.
+const SLOMO_ARM = {
+  name: 'armL', clip: 'armL', weight: 3, reach: 10, hitAt: 27 / 30, trackUntil: 0.75, attackTime: 45 / 30, hitReach: 0,
+  arc: 0.5, power: 0.7, knock: 2.5, knockDown: false, hop: 2.5, reason: "Hit by Slomo's slug!",
+  projectile: { kind: 'slugarm', speed: 7, radius: 0.3, range: 16, spin: 5, lob: 11, arm: 0, becomes: 'armslug',
+    slow: { time: 2, slow: 0.6, source: 'slime' }, muzzle: [1.09, 1.024, 1.465] },
+};
+const SLOMO_ARM_R = { ...SLOMO_ARM, name: 'armR', clip: 'armR', projectile: { ...SLOMO_ARM.projectile, arm: 1, muzzle: [-1.09, 1.024, 1.465] } };
+// (meteorites: `count` of them, the first on the player and the rest `spread` cells round them,
+// `stagger` s apart, each hitting with `power` of his damage, game/meteors.js)
+const SLOMO_METEOR = {
+  name: 'meteor', clip: 'meteor', weight: 2, reach: 14, hitAt: 33 / 30, trackUntil: 0.6, attackTime: 54 / 30, hitReach: 0,
+  arc: -1, power: 0, knock: 0, knockDown: false, hop: 0, reason: 'Slomo', cast: 'meteors',
+  rain: { count: 4, spread: [1.4, 3.6], stagger: 0.3, power: 0.6, reason: "Hit by Slomo's meteorite!", muzzle: [0, 3.082, 0.083] },
+};
+const SLOMO_JUMP = {
+  name: 'jump', clip: 'jump', weight: 3, reach: 12, rise: 3, hitAt: 60 / 30, trackUntil: 21 / 30, attackTime: 90 / 30, hitReach: 0,
+  arc: -1, power: 1.3, knock: 0, knockDown: false, hop: 0, daze: 2.5, reason: 'Squashed flat by Slomo!',
+  beam: { kind: 'stomp', aim: 'feet', time: 48 / 30, track: 0, lock: 12 / 30, radius: 1.6, range: 20, sky: 12, clear: false,
+    muzzle: [0, 0, 0] },
+  jump: { from: 21 / 30, height: 9, track: 2.8 },
+  // (two rings a second apart: each to jump over with a jump of its own, core/slomo.js dodge)
+  wave: { speed: 7, reach: 7, width: 0.9, rise: 0.4, power: 0.5, knock: 7, hop: 3.5, rings: 2, gap: 1 },
+  exposed: { from: 60 / 30, until: 81 / 30, damage: 1.3, say: msg('{name} is winded! Hit him now') },
+};
+const SLOMO_FLOOD = {
+  name: 'flood', clip: 'flood', weight: 1, reach: 40, hitAt: 54 / 30, trackUntil: 0.4, attackTime: 72 / 30, hitReach: 0,
+  arc: -1, power: 0, knock: 0, knockDown: false, hop: 0, reason: 'Slomo', cast: 'flood', ward: true,
+};
+const SLOMO_SPIT = {
+  name: 'spit', clip: 'spit', weight: 3, reach: 9, hitAt: 24 / 30, trackUntil: 0.6, attackTime: 42 / 30, hitReach: 0,
+  arc: 0.5, power: 0.55, knock: 2.5, knockDown: false, hop: 2.5, reason: 'Slimed by Slomo!',
+  projectile: { ...SLUG_BALL, speed: 7, radius: 0.3, range: 11, volley: 3, fan: 0.3, slow: { time: 2.5, slow: 0.5, source: 'slime' },
+    muzzle: [0, 0.962, 1.404] },
+};
+const SLOMO_SUMMON = {
+  name: 'summon', clip: 'summon', weight: 2, reach: 14, hitAt: 30 / 30, trackUntil: 0.5, attackTime: 48 / 30, hitReach: 0,
+  arc: -1, power: 0, knock: 0, knockDown: false, hop: 0, reason: 'Slomo', cast: 'summon',
+  summon: { kind: 'oozeslug', also: 'oozebolime', muzzle: [0, 2.04, 0.043] },
+};
+const SLOMO_SQUIRTLE = { ...SLOMO_SUMMON, name: 'squirtle', summon: { kind: 'slimesquirtle', muzzle: [0, 2.04, 0.043] } };
+export const SLOMO = {
+  type: 'slomo', species: 'slomo', label: 'Slomo', hp: 1000, damage: 24, knock: 3,
+  xp: 650, coins: [190, 340],
+  radius: 1, height: 2.9, bodyHeight: 2.3, mass: 9, slimeborn: true, shell: { parts: ['SlomoSkin'], opacity: 0.55 }, turnSpeed: 1.6, turnStride: 0.9,
+  aggro: 8, giveUp: 16, chase: 1.1, wander: 0.5, homeSpeed: 0.8,
+  ...SLOMO_ARM, cooldown: 1.3, ichor: ['#b8ff5a', '#3e8a2a'], pitch: 0.55,
+  attacks: [SLOMO_ARM, SLOMO_ARM_R, SLOMO_METEOR], phase: 1,
+  poise: 2, hitStun: 0.25, deathTime: 2.4, corpseTime: 5,
+  parts: { skin: ['SlomoSkin', 'SlomoStalk'], core: ['SlomoCore_glow'], slug: ['SlomoSlug', 'SlomoFoot'], stripes: ['SlomoStripes'] },
+  light: '#9aff5a', sparks: ['#e0ffb0', '#b8ff5a', '#6cc23a'],
+  style: 'ranged', keep: [3.5, 7], guardian: true, guardianRole: 'descent', boss: 'slomo',
+  seedSalt: 0x5105a0, spacing: 6,
+};
+// ... on legs (phase 2): the blob in front of a slug body
+export const SLOMO_LEGS = {
+  ...SLOMO, type: 'slomolegs', radius: 1.1, height: 3.1, bodyHeight: 2.6, mass: 16, chase: 1.5, wander: 0.8, gait: 'stride', turnSpeed: 1.1, turnStride: 1.3,
+  ...SLOMO_JUMP, cooldown: 1.1, attacks: [SLOMO_JUMP, SLOMO_FLOOD, { ...SLOMO_METEOR, clip: 'meteorLegs', rain: { ...SLOMO_METEOR.rain, count: 6, muzzle: [0, 2.627, 0.62] } }],
+  phase: 2, style: 'brute', steadfast: true, armour: 0.8,
+};
+// ... the slug alone (phase 3), still on its legs, leaving a trail of slime
+export const SLOMO_SLUG = {
+  ...SLOMO, type: 'slomoslug', radius: 0.85, height: 2.3, bodyHeight: 1.6, mass: 9, chase: 1.2, wander: 0.6, gait: 'crawl', trail: '#3e7a2a',
+  turnSpeed: 1.3, turnStride: 1,
+  ...SLOMO_SPIT, cooldown: 1.1, attacks: [SLOMO_SPIT, SLOMO_SUMMON, SLOMO_SQUIRTLE, { ...SLOMO_FLOOD, clip: 'floodSlug' },
+    { ...SLOMO_METEOR, clip: 'meteorSlug', rain: { ...SLOMO_METEOR.rain, count: 5, muzzle: [0, 2.371, 1.167] } }],
+  phase: 3, style: 'ranged', keep: [3, 7],
+};
+export const BOSS_PROFILES = [GUSTO, TOTNAR, SQUARLO, FLIP, FOGGERY, RENEW, SLOMO];
 
 // What an enemy kind is called, as words to say in any language (src/i18n/i18n.js say): its kind's
 // noun ('Spider', a Spinne in German), a boss's name, a guardian's 'Guardian Spider' or 'Temp
@@ -1163,7 +1253,7 @@ export const SQUARLO_GIANT = enemyKind(SQUARLO, {
 // a boss's profile for each of its stages (game/squarlo.js; a friend's game swaps it by the stage
 // the runner sends, net/foes.js)
 export const STAGE_PROFILES = { squarlo: [SQUARLO, SQUARLO_GIANT], foggery: [FOGGERY, FOGGERY_BALL, FOGGERY_BALL],
-  renew: [RENEW, RENEW_BOW, RENEW_FLAIL, RENEW_TWIN] };
+  renew: [RENEW, RENEW_BOW, RENEW_FLAIL, RENEW_TWIN], slomo: [SLOMO, SLOMO_LEGS, SLOMO_SLUG] };
 // One full attack and recovery, averaged over a species' attacks (s), and what it deals per
 // second at level 1 (a projectile's burn included): how dangerous it is to stand next to.
 export function attackCycle(profile) {
@@ -1302,15 +1392,48 @@ export const TOT_STUNDER = enemyKind(STUNDER, {
   aggro: 9, giveUp: 14, coins: [0, 0], drops: MINION_DROPS(0.12), puff: { ...LEAF_PUFF, size: 0.8 },
   mods: { hp: 0.55, damage: 0.55, speed: 1.1, size: 0.72, xp: 0.12 },
 });
+// Slomo's minions (game/slomo.js): slime green, they go for the player at once. The Arm slug is a
+// slug arm he threw, come to life where it landed: small and quick for a slug, it does not spit
+// (`reach` 0: it only crawls after the player), and once it reaches them it latches on, bites and
+// drops off dead (core/slomo.js `latch`); after a while it melts away anyway (`lifetime`).
+const SLIME_PUFF = { colors: ['#d8ff9a', '#9ae048', '#5a9a2a'], size: 0.5 };
+export const ARM_SLUG = enemyKind(SLUG, {
+  type: 'armslug', label: 'Arm slug', reason: 'An Arm slug latched on to you!', minion: true, lifetime: 8, latches: true,
+  projectile: null, reach: 0, style: 'brute', aggro: 12, giveUp: 16, coins: [0, 0], drops: MINION_DROPS(0.02), puff: SLIME_PUFF,
+  colors: paints({ body: 'moss.mid', stripes: 'moss.dark', eyes: 'eyes.bone' }), ichor: ['#c8ff7a', '#3e7a2a'],
+  mods: { hp: 0.25, damage: 0.5, speed: 2.4, size: 0.55, xp: 0.05 },
+});
+export const OOZE_SLUG = enemyKind(SLUG, {
+  type: 'oozeslug', label: 'Ooze slug', reason: 'Slimed by an Ooze slug!', minion: true,
+  colors: paints({ body: 'moss.light', stripes: 'moss.deep', eyes: 'eyes.bone' }), ichor: ['#d8ff9a', '#4f8f2a'], trail: '#6cb03a',
+  aggro: 12, giveUp: 16, coins: [0, 0], drops: MINION_DROPS(0.05), puff: SLIME_PUFF,
+  mods: { hp: 0.7, damage: 0.6, xp: 0.15 },
+});
+export const OOZE_BOLIME = enemyKind(BOLIME, {
+  type: 'oozebolime', label: 'Ooze bolime', reason: 'Swallowed by an Ooze bolime!', minion: true,
+  attacks: [{ ...BOLIME_POUNCE, reason: 'Swallowed by an Ooze bolime!', engulf: { ...BOLIME_POUNCE.engulf, reason: 'Digested by an Ooze bolime!' } }],
+  colors: paints({ skin: 'moss.pale', core: 'jade.deep' }), ichor: ['#d8ff9a', '#3e8a2a'],
+  aggro: 12, giveUp: 16, coins: [0, 0], drops: MINION_DROPS(0.05), puff: SLIME_PUFF,
+  mods: { hp: 0.7, damage: 0.6, xp: 0.15 },
+});
+// a Squirtle of slime, a bit bigger, whose spit is a ball of slime that slows
+export const SLIME_SQUIRTLE = enemyKind(SQUIRTLE, {
+  type: 'slimesquirtle', label: 'Slime squirtle', reason: 'Slimed by a Slime squirtle!', minion: true,
+  projectile: { ...SQUIRTLE.projectile, kind: 'slimeball', radius: 0.17, push: 0, pushTime: 0, slow: { time: 2, slow: 0.6, source: 'slime' } },
+  colors: paints({ body: 'moss.glow', belly: 'moss.pale' }), ichor: ['#c8f0a0', '#4f8f2a'],
+  aggro: 12, giveUp: 16, coins: [0, 0], drops: MINION_DROPS(0.05), puff: SLIME_PUFF,
+  mods: { hp: 1.1, damage: 0.8, size: 1.3, xp: 0.2 },
+});
 export const ENEMY_KINDS = Object.fromEntries([...ENEMY_PROFILES, ...Object.values(GUARDIAN_KINDS), ...Object.values(DESCENT_GUARDIAN_KINDS), SAND_VIPER, BLOOD_VIPER, FROST_ADDER, VENOM_ADDER, SHADOW_MAMBA, FROST_SPIDER, BOG_SPIDER,
   GLOOM_SPIDER, REDBACK, FROST_STUNDER, STONE_STUNDER, MAGMA_STUNDER, BOG_OCTONAUT, CORAL_OCTONAUT, EMERALD_TRIANGLE, CRIMSON_TRIANGLE, FIRE_SHRAPS,
   BOG_WOLLA, STORM_WOLLA, EMBER_WOLLA, CORAL_SQUIRTLE, BLAZE_FACE, LANTERN_FACE, WISP_FACE, ASH_CAT, VOID_CAT, AMETHYST_SHRAPS, HABANERO,
   NIGHTSHADE, DUST_WOLK, STORM_WOLK, MOSS_SQUIRTLE, FROST_MECKED, BOG_MECKED, BONE_MECKED, DUST_TORNADO, FROST_TORNADO, FIRE_TORNADO, SPOTTED_SLUG, BLACK_SLUG, TOXIC_BOLIME, GLOW_BOLIME, ...BOSS_PROFILES, CUSTO_TRIANGLE, SNAP_SKULL, TOT_SPIDER, TOT_STUNDER,
-  TIDE_SQUIRTLE, SKY_WOLLA, FOG_FACE, FOG_CAT, REN_SPIDER, REN_FACE].map(k => [k.type, k]));
+  TIDE_SQUIRTLE, SKY_WOLLA, FOG_FACE, FOG_CAT, REN_SPIDER, REN_FACE, ARM_SLUG, OOZE_SLUG, OOZE_BOLIME, SLIME_SQUIRTLE].map(k => [k.type, k]));
 // gone: not here for now (Gusto between his vanishing and his coming back, game/gusto.js), or
 // under the floor (a burrowing Squirtle, game/enemyai.js): it cannot be seen, hit or touched,
 // like the dead
-export const absent = e => e.mode === 'dead' || e.mode === 'gone' || !!e.under;
+// (and an Arm slug latched on to a player, core/slomo.js: it sits on their head, mode 'split')
+export const absent = e => e.mode === 'dead' || e.mode === 'gone' || !!e.under || (e.mode === 'split' && !!e.profile.latches);
 
 // the attack e is performing (or about to perform): one of profile.attacks, else the profile
 export const attackOf = e => e.profile.attacks?.[e.attack] ?? e.profile;

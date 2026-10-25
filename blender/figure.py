@@ -162,7 +162,8 @@ TRIANGLE_BUDGET = {
     "Slug": 6000, "SlugBall": 800, "Bolime": 6000,
     "Flip": 10000,                                                       # (41 little loops)
     "Foggery": 12000,                                                    # (a frog and his ball, both on fire)
-    "FireFaceBall": 1500, "ShrapsIceBall": 1500, "TrianglePunch": 1500, "TotnarSkull": 1500, "SquirtleDrop": 800, "FlipBall": 1200, "FoggeryEye": 1500,   # projectiles
+    "Slomo": 12000,                                                      # (a blob with slug arms and a slug on legs)
+    "FireFaceBall": 1500, "ShrapsIceBall": 1500, "TrianglePunch": 1500, "TotnarSkull": 1500, "SquirtleDrop": 800, "FlipBall": 1200, "FoggeryEye": 1500, "SlomoArmSlug": 1500,   # projectiles
     "TornadoTwister": 1500,                                              # (its twisters)
 }
 # How much the collapse spares material borders (joints: 1, kept outright). Fully kept, the

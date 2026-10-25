@@ -3,7 +3,7 @@
 // generated clutter (cubegen/arenaprops.js), and a sealed onward exit. The doorways and the
 // guardian's spot stay flat. Every free zone floor connects without jumps, and the zone
 // holds the doubled population; an arena that cannot falls back to a plainer one.
-import { N, LH, DIRS, MAX_L, WATER } from '../core/constants.js';
+import { N, LH, DIRS, MAX_L, WATER, ACID } from '../core/constants.js';
 import { idx, edgeKey, clamp, mulberry32, hash32, makeNoise } from '../core/util.js';
 import { floorY } from '../core/surfaces.js';
 import { population } from '../core/spawns.js';
@@ -12,7 +12,7 @@ import { rockTint } from '../themes/surfaces.js';
 import { createContext } from './context.js';
 import { groundHeights } from './ground.js';
 import { placePortals } from './portals.js';
-import { SHAPES, BOSS_SHAPES, TIDAL } from './arenashapes.js';
+import { SHAPES, BOSS_SHAPES, TIDAL, BOWL } from './arenashapes.js';
 import { dressArena } from './arenaprops.js';
 import { BOSS_ARENAS } from '../core/bosses.js';
 import { flipArena } from './fliparena.js';
@@ -150,7 +150,7 @@ export function generateGuardian(spec) {
     const start = floors[idx(ex, ez)], guard = floors[idx(...U)], gate = floors[idx(px, pz)];
     if (!terrainOK(floors, start, [guard, gate])) continue;
     for (const clutter of [1, .5, 0]) {
-      const dress = dressArena({ type, shape, floors, frame, R, biome: spec.biome, tint, clutter, braziers });
+      const dress = dressArena({ type, shape, floors, frame, R, biome: spec.biome, tint, clutter, braziers, props: own?.props });
       if (!roomFor(floors, dress.blocked, start, gate, need)) continue;
       arena = { type, shape, floors, dress };
       break;
@@ -192,6 +192,12 @@ export function generateGuardian(spec) {
     arena: { type: arena.type, requested },
     // the tidal hills' water (game/tide.js): its levels at rest and at high tide, and the box of
     // cells it stands in (inside the bank)
-    tide: arena.type === 'tidal' ? { rest: level + TIDAL.low + TIDAL.rest, high: level + TIDAL.high, fluid: WATER, box: [1, 1, N - 1, N - 1] } : null,
+    tide: arena.type === 'tidal' ? { rest: level + TIDAL.low + TIDAL.rest, high: level + TIDAL.high, fluid: WATER, box: [1, 1, N - 1, N - 1] }
+      // Slomo's flood (game/tide.js, core/slomo.js): over the basin of his slime bowl, inside the
+      // bank; dry at rest (and gone for good once he is beaten), wadeable as water (`fluid`, never
+      // over the head), drawn as slime (`look`: the depth's acid colours); it comes in from a side
+      // (`flood`: its front, game/tide.js) and follows his level fast
+      : arena.type === 'bowl' ? { rest: level + BOWL.low - 0.5, gone: level + BOWL.low - 0.5, high: level + BOWL.low + BOWL.flood,
+        fluid: WATER, look: ACID, box: [2, 2, N - 2, N - 2], flood: true, follow: 4 } : null,
     fences, fenceList, placements: dress.placements, blockers: dress.blockers });
 }

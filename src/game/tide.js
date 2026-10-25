@@ -4,18 +4,25 @@
 // physics (physics/fluid.js setTide: what drowns, what is waded through) and is drawn
 // (render/trials.js: the trial's rising water, in the tide's box). Enemies it goes over drown,
 // but those that swim float in it.
+// Slomo's flood (his slime bowl, map.tide `flood`: cubegen/guardian.js) comes in from a side: his
+// `floodSide` and `front` (core/slomo.js floodBox) say how far across it has come; only that part of
+// its box is in it (the physics) and shown (render/trials.js setFloodFront), its front a wall of
+// slime rolling on (render/slomofx.js). It is drawn as slime (`look`), waded through as water.
 import { LH, WATER, LAVA } from '../core/constants.js';
 import { tideLevel } from '../core/squarlo.js';
 import { setTide, standingAt, enemyUnder } from '../physics/fluid.js';
-import { setTrialWater } from '../render/trials.js';
-import { state } from './state.js';
+import { setTrialWater, setFloodFront } from '../render/trials.js';
+import { drawFloodFront } from '../render/slomofx.js';
+import { state, player } from './state.js';
+import { slowPlayer } from './enemycombat.js';
+import { SLOMO_FIGHT, floodBox } from '../core/slomo.js';
 import { guardianId } from '../core/guardians.js';
 
 // how fast a shown level follows the boss's (levels/s): it moves smoothly between rows (a tide's
 // own `follow`, else this)
 const FOLLOW = 1.2;
 let shown = null;
-const dry = () => { state.tide = null; setTide(null); setTrialWater(state.world, null, null); };
+const dry = () => { state.tide = null; setTide(null); setTrialWater(state.world, null, null); setFloodFront(state.world, null); drawFloodFront(null); };
 // Foggery's lava (map.tide.gone, cubegen/towerarena.js) can go over the top of his tower (his
 // `tide` over 1) and drain away (under 0); once he is beaten it is gone for good
 const beaten = m => m.tide.gone !== undefined && !!m.guardian && state.run.defeated.has(guardianId(m.key));
@@ -25,15 +32,24 @@ export function updateTide(list, dt) {
     if (shown !== null) { shown = null; dry(); }
     return;
   }
-  let k = 0, own = false;
-  for (const e of list) if (e.boss && Number.isFinite(e.tide) && (!own || e.tide > k)) { k = e.tide; own = true; }
+  let k = 0, own = false, by = null;
+  for (const e of list) if (e.boss && Number.isFinite(e.tide) && (!own || e.tide > k)) { k = e.tide; own = true; by = e; }
   if (beaten(state.map) && (!own || k > 0)) k = (t.gone - t.rest) / (t.high - t.rest);
   const want = tideLevel(t, k), follow = t.follow ?? FOLLOW;
   shown = shown === null ? want : shown + Math.max(-follow * dt, Math.min(follow * dt, want - shown));
   if (t.gone !== undefined && shown <= t.gone + 0.05) { state.tide !== null && dry(); state.tide = null; return; }
   state.tide = shown;
-  setTide({ y: shown * LH, fluid: t.fluid, box: t.box });
+  // (a flood: only as far across as its front has come)
+  const box = t.flood ? floodBox(t.box, by?.floodSide ?? 0, by ? by.front ?? 1 : 1) : t.box;
+  setTide({ y: shown * LH, fluid: t.fluid, box });
   setTrialWater(state.world, shown * LH, 'running');
+  if (t.flood) {
+    setFloodFront(state.world, box);
+    drawFloodFront({ box, side: by?.floodSide ?? 0, front: by ? by.front ?? 1 : 1, y: shown * LH, base: t.rest * LH }, dt);
+    // its slime holds our player's feet, on top of the wading
+    const p = player, s = standingAt(p.x, p.z);
+    if (s && s.y > p.y + 0.05 && p.hp > 0 && !p.ragdoll) slowPlayer(SLOMO_FIGHT.flood.slow);
+  }
 }
 // (and a boss's water or lava still standing from the cube before goes: it would drown what is here)
 export const resetTide = () => { if (shown !== null || state.tide != null) dry(); shown = null; };

@@ -357,12 +357,24 @@ export function buildTrialView(m, group, over = null) {
   }
   return view;
 }
-// a boss's tide (game/tide.js, map.tide): only the water, in its box
+// a boss's tide (game/tide.js, map.tide): only the water, in its box, drawn as what it looks like
+// (`look`: Slomo's flood is slime, waded through as water)
 function tideView(m, group, over) {
   const view = { kind: 'tide', parts: new Map(), water: null, tide: null, level: null, phase: null, barriers: new Map(), crust: null,
     plates: new Map(), gates: new Map(), levers: new Map(), cage: null, grid: new Map(), beams: new Map(), links: new Map() };
-  standingWater(m, m.tide.fluid, view, group, m.tide.box, over);
+  standingWater(m, m.tide.look ?? m.tide.fluid, view, group, m.tide.box, over);
   return view;
+}
+// How far a flood has come (game/tide.js: Slomo's, from one side of its box): the standing fluid is
+// drawn only inside `box` ([x0, z0, x1, z1], cells; null: all of it), and only there what lies
+// under it wavers, the light through it plays and the ground is wet (render/underwater.js, wet.js:
+// the cube's standing box)
+const FLOOD_BOX = { value: new THREE.Vector4(-1e4, -1e4, 1e4, 1e4) };
+export function setFloodFront(world, box) {
+  if (box) FLOOD_BOX.value.set(box[0], box[1], box[2], box[3]);
+  else FLOOD_BOX.value.set(-1e4, -1e4, 1e4, 1e4);
+  const v = world?.trialView;
+  if (v?.over && v.box) v.over.box.value.set(...(box ?? v.box));
 }
 // A fluid standing over the cells of `box` ([x0, z0, x1, z1]: a trial's whole cube, a tide's
 // basin) at one level, rising and falling (setTrialWater): its surface and the wet bands it
@@ -371,13 +383,16 @@ function standingWater(m, fluid, view, group, box, over) {
   // nothing where the cube's own fluid takes its level (WATER_OWN: that one is drawn); dropped
   // above the cut inside the cutaway (its cap there: section.js setTrialWaterCap), not where cave
   // walls come down (it stays to the cube's edge)
-  const surface = inject(fluidMaterial(fluid, 'full'), fs => 'uniform sampler2D uWaterOwn;\n' + fs.replace('#include <clipping_planes_fragment>', `
+  // (and outside the part a flood's front has reached: FLOOD_BOX, setFloodFront)
+  const surface = inject(fluidMaterial(fluid, 'full'), fs => 'uniform sampler2D uWaterOwn;\nuniform vec4 uFloodBox;\n' + fs.replace('#include <clipping_planes_fragment>', `
     if (texelFetch(uWaterOwn, clamp(ivec2(floor(vCutW.xz)), ivec2(0), ivec2(${N - 1})), 0).r > 0.5) discard;
+    if (vCutW.x < uFloodBox.x || vCutW.z < uFloodBox.y || vCutW.x > uFloodBox.z || vCutW.z > uFloodBox.w) discard;
     if (cutRegion(true) > 0.5) discard;
     #include <clipping_planes_fragment>`), 'cut-trial-fluid');
   const compile = surface.onBeforeCompile;
-  surface.onBeforeCompile = (sh, r) => { compile.call(surface, sh, r); sh.uniforms.uWaterOwn = WATER_OWN; };
+  surface.onBeforeCompile = (sh, r) => { compile.call(surface, sh, r); sh.uniforms.uWaterOwn = WATER_OWN; sh.uniforms.uFloodBox = FLOOD_BOX; };
   if (over) { over.box.value.set(...box); over.standKind.value.set(fluid, m.fluidRows?.[fluid] ?? palRow(m.depth ?? 0, fluid, 0)); view.over = over; }
+  view.box = box;
   // Its shores are the ground's (materials.js cellMaterial: the walls round each cell, section.js
   // WATER_SHORE, and the ground under it, its `shore`), and the room's walls stay wet where it has
   // just been (wetBands, with the same material: its level and wet line in `waterTide`,

@@ -131,7 +131,7 @@ fight for that depth).
 nightmares as a little girl, to make them less scary. That is why the first bosses look the way
 they do, and why their words can be sad while they look funny.
 
-- **Act I (0 to 6), childhood dreams**: the six bosses we have, where they are, read as:
+- **Act I (0 to 6), childhood dreams**: the six bosses of the first act, where they are, read as:
   - **Gusto**: the grin in the dark under the bed, the first fear. "I was so sure he was real.
     I suppose he was."
   - **Totnar**: a dry summer, a fire, a burning heart inside dead sticks: anger that kept
@@ -142,8 +142,11 @@ they do, and why their words can be sad while they look funny.
   - **Foggery**: fog and thrown eyes: what she did not want to see.
   - **Renew**: someone like you who turns time back: the first time she wished she could undo
     something. The step from child to grown-up, where the sky ends.
-- **Act II (7 to 13), growing up**: bosses still to make: half finished, glassy, familiar things
-  out of shape. A quarrel, a broken promise, a door that would not open.
+- **Act II (7 to 13), growing up**: half finished, glassy, familiar things out of shape. A quarrel,
+  a broken promise, a door that would not open. The first of them stands at the bottom of the act:
+  - **Slomo** (13): a see-through slime that throws bits of itself at you, floods everything and,
+    burst, is only a slug underneath: a mess that kept spreading until it was looked at.
+    "It got into everything. It was smaller than it looked." The rest are still to make.
 - **Act III (14 to 19), sealed memories**: the days around the crack.
 - **The core (20)**: the crack itself, the memory of that day. Never the sibling.
 

@@ -68,8 +68,14 @@ export const resetCalls = () => { calls = []; };
 export function stepCalls(dt) { calls = calls.filter(c => (c.t -= dt) > 0); }
 const call = e => calls.push({ x: e.x, y: e.y, z: e.z, t: 0.3, from: e });
 
+// (a big body turns no faster than its `turnSpeed`, rad/s: Slomo steps round, he does not spin)
 // learn: space.html#angles (see learn/README.md)
-const turn = (e, yaw, dt, rate = 8) => { e.yaw += Math.atan2(Math.sin(yaw - e.yaw), Math.cos(yaw - e.yaw)) * Math.min(1, dt * rate); };
+const turn = (e, yaw, dt, rate = 8) => {
+  let d = Math.atan2(Math.sin(yaw - e.yaw), Math.cos(yaw - e.yaw)) * Math.min(1, dt * rate);
+  const most = e.profile.turnSpeed;
+  if (most) d = Math.max(-most * dt, Math.min(most * dt, d));
+  e.yaw += d;
+};
 // the player e goes after (one that left the cube is not gone after any more)
 const foe = e => e.target && (e.target === player || e.target.here) ? e.target : player;
 const toPlayer = e => { const p = foe(e); return Math.atan2(p.x - e.x, p.z - e.z); };

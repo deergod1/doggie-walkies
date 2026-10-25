@@ -415,4 +415,35 @@ export function stepsUp(s) {
   each((x, z, c) => { if (s.zone[c] && (dist[c] < 0 || dist[c] > most)) { most = dist[c] < 0 ? 99 : dist[c]; best = [x, z]; } });
   return best;
 }
-export const BOSS_SHAPES = { tidal };
+// 10. Slime bowl (Slomo's): a wide flat basin `low` levels under the doorways, with a few round
+// mounds standing out of it to the doorways' level (their tops `r` cells round, slopes down
+// round them), and a bank of scenery all round the cube just inside its edge. His flood (game/tide.js,
+// core/slomo.js) comes in over the basin from one side and stands `flood` levels over its floor:
+// under anyone's head (HEAD_Y), over neither the slopes' tops, the mounds nor the doorways. The
+// basin stays wide and flat: room for a big body to walk and land on, and the flood as deep
+// everywhere on it.
+export const BOWL = { low: -1, flood: 0.85, mounds: 3, r: [0.9, 1.3], apart: 5, clear: 3.5 };
+function bowl(fr) {
+  const { R } = fr, s = blank(), mounds = [];
+  const bank = (x, z) => x === 1 || z === 1 || x === N - 2 || z === N - 2;
+  const far = (x, z, [px, pz], d) => Math.hypot(x - px - 0.5, z - pz - 0.5) >= d;
+  for (let i = 0; i < 300 && mounds.length < BOWL.mounds; i++) {
+    const x = 3.5 + R() * (N - 7), z = 3.5 + R() * (N - 7), r = BOWL.r[0] + R() * (BOWL.r[1] - BOWL.r[0]);
+    if (mounds.some(m => Math.hypot(m.x - x, m.z - z) < BOWL.apart) || ![fr.E, fr.U, fr.G].every(p => far(x, z, p, BOWL.clear))) continue;
+    mounds.push({ x, z, r });
+  }
+  const active = new Uint8Array(N * N), fixed = new Uint8Array(N * N);
+  each((x, z, c) => {
+    if (bank(x, z) && !fr.flat[c]) { s.rel[c] = 2; s.crisp[c] = 1; return; }
+    s.zone[c] = 1; active[c] = 1; s.rel[c] = BOWL.low;
+    if (mounds.some(m => Math.hypot(x + 0.5 - m.x, z + 0.5 - m.z) <= m.r)) { s.rel[c] = 0; fixed[c] = 1; }
+  });
+  finish(s, fr, BOWL.low, 2);
+  each((x, z, c) => { if (fr.flat[c]) fixed[c] = 1; });
+  relax(s.rel, active, fixed);
+  s.marks.peaks = mounds.map(m => idx(Math.floor(m.x), Math.floor(m.z)));
+  s.marks.mounds = mounds;
+  s.min = 0;   // (the basin may sink lower than other arenas' floors)
+  return s;
+}
+export const BOSS_SHAPES = { tidal, bowl };

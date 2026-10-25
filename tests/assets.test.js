@@ -8,7 +8,7 @@ import { SLASH_CLIP, SHOOT_CLIP, CROSSBOW_CLIP, CAST_CLIP, THROW_CLIP, KINDS } f
 import { MUZZLES } from '../src/core/shots.js';
 import { WEAPONS, WEARABLES, OUTFIT_SLOTS, POTIONS } from '../src/core/items.js';
 import { SPIDER, STUNDER, SNAKE, OCTONAUT, FIREFACE, TRIANGLE, FIRECAT, SHRAPS, FIRE_SHRAPS, SPICY, WOLK, GUSTO, GUSTO_SPLIT, TOTNAR, SNAP_SKULL,
-  SQUARLO, SQUARLO_GIANT, SQUIRTLE, MECKED, TORNADO, SLUG, BOLIME, FLIP, FOGGERY, FOGGERY_BALL, fireAt } from '../src/core/enemies.js';
+  SQUARLO, SQUARLO_GIANT, SQUIRTLE, MECKED, TORNADO, SLUG, BOLIME, FLIP, FOGGERY, FOGGERY_BALL, SLOMO, SLOMO_LEGS, SLOMO_SLUG, fireAt } from '../src/core/enemies.js';
 import { CHAR_SCALE } from '../src/core/constants.js';
 
 await decoderReady;
@@ -36,6 +36,7 @@ const BUDGETS = {
   gusto: { Gusto: 8000 }, totnar: { Totnar: 10000, TotnarSkull: 1500 }, snapskull: { SnapSkull: 3000 },
   squarlo: { Squarlo: 8000 }, squirtle: { Squirtle: 5000, SquirtleDrop: 800 }, flip: { Flip: 10000, FlipBall: 1200 },
   foggery: { Foggery: 12000, FoggeryEye: 1500 }, mecked: { Mecked: 7000 }, tornado: { Tornado: 7000, TornadoTwister: 1500 }, slug: { Slug: 6000, SlugBall: 800 }, bolime: { Bolime: 6000 },
+  slomo: { Slomo: 12000, SlomoArmSlug: 1500 },
 };
 test('characters and enemies keep to their triangle budgets', () => {
   for (const [file, budget] of Object.entries(BUDGETS)) {
@@ -565,6 +566,34 @@ test('the Bolime hops, pounces on its attack\'s timings (the leap, the landing, 
   const names = new Set(j.materials.map(m => m.name));
   for (const m of [...Object.values(BOLIME.parts).flat(), ...BOLIME.shell.parts]) assert.ok(names.has(m), m);
   for (const bone of ['body', 'top', 'core', 'stalk.L', 'stalk.R']) assert.ok(j.nodes.some(n => n.name === bone), bone);
+});
+test('Slomo: three shapes in one model, his clips match his attacks, his slugs thrown from his arms\' ends', () => {
+  const { json: j, duration } = glb('slomo'), a = Object.fromEntries(j.animations.map(c => [c.name, c]));
+  assert.deepEqual(Object.keys(a).sort(), ['SlomoArmL', 'SlomoArmR', 'SlomoCrawl', 'SlomoDeath', 'SlomoFlood', 'SlomoFloodSlug', 'SlomoJump',
+    'SlomoMeteor', 'SlomoMeteorLegs', 'SlomoMeteorSlug', 'SlomoOoze', 'SlomoSpit', 'SlomoStride', 'SlomoSummon']);
+  for (const n of ['SlomoOoze', 'SlomoStride', 'SlomoCrawl']) assert.equal(a[n].extras.loop, true, n);
+  assert.ok(Math.abs(duration(a.SlomoDeath) - SLOMO.deathTime) < 1e-5); assert.equal(a.SlomoDeath.extras.hold_last_frame, true);
+  const clip = { armL: 'SlomoArmL', armR: 'SlomoArmR', meteor: 'SlomoMeteor', jump: 'SlomoJump', flood: 'SlomoFlood', meteorLegs: 'SlomoMeteorLegs',
+    spit: 'SlomoSpit', summon: 'SlomoSummon', meteorSlug: 'SlomoMeteorSlug', floodSlug: 'SlomoFloodSlug' };
+  for (const at of [...SLOMO.attacks, ...SLOMO_LEGS.attacks, ...SLOMO_SLUG.attacks]) {
+    const c = a[clip[at.clip]];
+    assert.ok(c, at.clip);
+    assert.equal(c.extras.hit_frame / 30, at.hitAt, at.clip);
+    assert.ok(Math.abs(duration(c) - at.attackTime) < 1e-5, at.clip);
+    if (at.projectile) assert.deepEqual(c.extras.muzzle, at.projectile.muzzle, at.clip);
+    if (at.summon) assert.deepEqual(c.extras.muzzle, at.summon.muzzle, at.clip);
+    if (at.rain) assert.deepEqual(c.extras.muzzle, at.rain.muzzle, at.clip);
+    if (at.jump) assert.equal(c.extras.ride_frame / 30, at.jump.from);
+  }
+  // his gaits' paces: the feet that are down sweep back as fast as he goes (blender/slomo.py)
+  assert.ok(a.SlomoStride.extras.speed >= SLOMO_LEGS.chase * 0.9 && a.SlomoCrawl.extras.speed >= SLOMO_SLUG.chase * 0.9);
+  const names = new Set(j.materials.map(m => m.name));
+  for (const m of [...Object.values(SLOMO.parts).flat(), ...SLOMO.shell.parts]) assert.ok(names.has(m), m);
+  const skin = j.materials.find(m => m.name === 'SlomoSkin').pbrMetallicRoughness.baseColorFactor;
+  assert.ok(skin[1] > skin[0] && skin[1] > skin[2] * 3, 'lime green');
+  // his shapes and his arms' slugs are bones the game scales and blends (render/slomoview.js), and the slug he throws
+  for (const n of ['blob', 'body', 'top', 'core', 'slug', 'slug.head', 'hand.L', 'hand.R', 'arm.L.1', 'leg.1L', 'leg.3R', 'antenna.L', 'SlomoArmSlug'])
+    assert.ok(j.nodes.some(o => o.name === n), n);
 });
 test('the snapping skull hops, bites at its hit frame and crumbles', () => {
   const { json: j, duration } = glb('snapskull'), a = Object.fromEntries(j.animations.map(c => [c.name, c]));

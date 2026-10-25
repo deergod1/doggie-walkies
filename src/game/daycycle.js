@@ -1,7 +1,8 @@
 // The world's days and nights in the cube being played (core/daycycle.js): what its sky shows of
 // them (skyOf: its theme's `sky`, themes/index.js; none indoors, in trial and test rooms, and in a
-// boss's arena, where it is always noon, but in one with days and nights like any cube, `days`:
-// Gusto's, core/bosses.js BOSS_ARENAS), how far into the night it is (state.night), the light
+// boss's arena, where it is always noon, but in one that is always at night: `midnight`, Slomo's,
+// core/bosses.js BOSS_ARENAS `night`, and in one with days and nights like any cube, `days`:
+// Gusto's), how far into the night it is (state.night), the light
 // the look blends in (lookCycle: render/look.js eases it, so coming into a cube or out of one
 // fades it), where the sun stands for the bakes (render/bake.js setSunPlan: under an open sky it
 // goes round, its shadows baked again as it goes; elsewhere, and on the lowest lighting level,
@@ -19,8 +20,11 @@ import { tr } from '../i18n/i18n.js';
 // how much of the warm light of a low sun mornings and evenings take on, by sky
 const GLOW = { open: 0.5, hazy: 0.25 };
 
-// what the days and nights do in map: 'open', 'hazy', 'night' or 'none' (themes/index.js `sky`)
+// what the days and nights do in map: 'open', 'hazy', 'night' or 'none' (themes/index.js `sky`);
+// 'midnight' in a boss's arena that is always at night (his test room too)
+const nightArena = map => !!BOSS_ARENAS[map.guardian?.boss ?? (map.testRoom?.name === 'boss' ? map.testRoom.lineup?.[0]?.type : null)]?.night;
 export function skyOf(map) {
+  if (map?.biome && !map.interior && nightArena(map)) return 'midnight';
   if (!map || map.interior || map.testRoom || map.trialRoom || !map.biome) return 'none';
   if (map.guardian?.boss && !BOSS_ARENAS[map.guardian.boss]?.days) return 'none';
   return themeOf(map).sky ?? 'none';
@@ -32,7 +36,7 @@ export const skyNow = () => skyOf(state.map);
 // do the days and nights go round in full there (the light turns, the meteorites fall at night)?
 export const fullCycle = sky => sky === 'open' || sky === 'hazy';
 // how far into the night the cube being played is (0: day, or no nights here)
-export const nightNow = () => skyNow() === 'none' ? 0 : nightAt(dayClock());
+export const nightNow = () => skyNow() === 'none' ? 0 : skyNow() === 'midnight' ? 1 : nightAt(dayClock());
 
 let wasNight = null;
 // every frame (main.js), before the look
@@ -40,7 +44,7 @@ export function updateDayCycle(dt) {
   // (the dev's /dayspeed: the time of day runs faster or slower than the world's clock)
   if (dt > 0 && state.daySpeed !== 1) state.dayShift += (state.daySpeed - 1) * dt;
   const sky = skyNow();
-  state.night = sky === 'none' ? 0 : nightAt(dayClock());
+  state.night = sky === 'none' ? 0 : sky === 'midnight' ? 1 : nightAt(dayClock());
   // a word when it turns (not on coming in)
   const night = fullCycle(sky) ? state.night >= 0.5 : null;
   if (night !== null && wasNight !== null && night !== wasNight && !state.transitioning)
@@ -55,6 +59,7 @@ export function lookCycle(dt) {
   const sky = skyNow(), ease = Math.min(1, dt * 2);
   if (sky === 'none') return { ease, parts: [], sunK: 1 };
   const theme = themeOf(state.map), clock = dayClock(), n = nightAt(clock);
+  if (sky === 'midnight') return { ease, parts: [[nightLight(theme), 1]], sunK: 1 };
   if (sky === 'night') return { ease, parts: [[dayLight(theme), 1 - n]], sunK: 1 };
   const glow = glowAt(clock) * GLOW[sky] * (1 - n);
   return { ease, parts: [[SUNSET, glow], [nightLight(theme), n]], sunK: sky === 'open' && movingSun() ? sunAt(clock, theme.sunLow).light : 1 };

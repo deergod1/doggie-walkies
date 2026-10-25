@@ -178,6 +178,13 @@ export class Viewer {
         e.ascended = risen === 2;
         e.rising = Number.isFinite(risen) && risen > 0 && risen < 2 ? { u: Math.min(1, risen) } : null;
       }
+      // Slomo's slug arms and his flood's side and front (game/slomo.js; game/tide.js floods ours after them)
+      if (Array.isArray(b[22])) {
+        const [arms, side, front] = b[22];
+        if (Array.isArray(arms)) e.arms = arms.map(v => Number.isFinite(v) ? Math.max(0, Math.min(1, v)) : 1);
+        e.floodSide = Number.isInteger(side) && side >= 0 && side < 4 ? side : 0;
+        e.front = Number.isFinite(front) ? Math.max(0, Math.min(1, front)) : 1;
+      }
       if (e.mode === 'dead') { e.hp = 0; e.deadT = b[6]; e.dark = 0; (e.beam || e.bolts) && mirrorBeam(e, null); return; }
       mirrorBeam(e, Array.isArray(b[12]) ? b[12] : null, Array.isArray(b[16]) ? b[16] : null);
     });

@@ -7,6 +7,12 @@
 // Playing together the world's play time runs on real time (game/worldclock.js), so a long frame
 // can skip much of a warning: one whose shadow showed less than METEOR.notice does not hit the
 // player (it lands all the same), and one that landed does not come again if the clock goes back.
+//
+// A boss may spit meteorites of his own (Slomo: an attack's `rain`, core/enemies.js SLOMO_METEOR),
+// in his arena, day or night: read off his attack clock like a shockwave (game/quakes.js), every game
+// lets them come down round its own player as he spits them (core/slomo.js rainOf), each hitting
+// only that player (with the boss's blow, `rain.power` of his damage) and leaving its splat. They
+// spare the enemies (they are his).
 import { state, player } from './state.js';
 import { allEnemies, mirroring } from './enemies.js';
 import { hitBody } from './enemycombat.js';
@@ -17,14 +23,19 @@ import { DAY } from '../core/daycycle.js';
 import { slowPlayer } from './enemycombat.js';
 import { METEOR, meteorsAt, meteorBlow, enemyMeteorDamage } from '../core/meteors.js';
 import { damageEnemy } from '../core/combat.js';
-import { absent } from '../core/enemies.js';
+import { absent, attackOf, blowOf } from '../core/enemies.js';
+import { rainOf } from '../core/slomo.js';
+import { attacker } from './enemycombat.js';
 import { groundAt, ceilingAt } from '../physics/collide.js';
 import { floorY } from '../core/surfaces.js';
-import { LH } from '../core/constants.js';
+import { LH, N } from '../core/constants.js';
 import { meteorFx, statusHurtFx } from './juice.js';
 import { drawMeteors, removeMeteorView, drawSplats, clearMeteorViews } from '../render/meteors.js';
 
 let shown = new Map(), splats = [], cube = null;
+// a boss's meteorites ({ m: { id, t }, at, since, landed, blow }, on `rainClock`: s since they started
+// coming), those still to come (their warning not yet started) and those showing
+let rain = [], raining = [], rainClock = 0, rainId = 0;
 const landed = new Map();   // id -> when, of those that landed in this cube (kept two days and nights)
 // where meteorites may come down in a map: its dry floors open to the sky (cached)
 const spots = new WeakMap();
@@ -56,6 +67,7 @@ export function updateMeteors(dt) {
   if (state.cubeKey !== cube) { clearMeteors(); cube = state.cubeKey; }
   splats = splats.filter(s => (s.t += dt) < METEOR.splat.time);
   wade();
+  if (map && !state.transitioning) bossRain(dt);
   if (!falling || !allowed(map) || state.transitioning) { for (const v of shown.values()) removeMeteorView(v); shown.clear(); return; }
   const clock = dayClock(), now = meteorsAt(map.seed ?? 0, state.cubeKey, clock), ids = new Set(now.map(m => m.id));
   for (const [id, v] of shown) if (!ids.has(id)) { removeMeteorView(v); shown.delete(id); }
@@ -100,6 +112,45 @@ function land(v) {
     }
   }
 }
+// A boss spitting meteorites (an attack's `rain`): as he passes the hit frame they are made round
+// our player (each its warning `delay` s after the one before), shown from their warning on; each
+// lands METEOR.warn s after its warning started, hitting our player if they are in reach.
+function bossRain(dt) {
+  rainClock += dt;
+  for (const e of allEnemies()) {
+    const a = e.mode === 'attack' ? attackOf(e) : null;
+    if (!a?.rain || e.rained === e.attacks || e.t < a.hitAt) continue;
+    e.rained = e.attacks;
+    const blow = { ...blowOf(e.profile, { power: a.rain.power, knock: METEOR.knock, hop: 3, reason: a.rain.reason, slow: METEOR.slow }), by: attacker(e) };
+    const x0 = player.x, z0 = player.z;
+    for (const { dx, dz, delay } of rainOf(a.rain, (Math.random() * 2 ** 32) >>> 0)) {
+      const start = rainClock + delay, id = `rain:${++rainId}`;
+      rain.push({ m: { id, t: start + METEOR.warn }, x: x0 + dx, z: z0 + dz, since: start, blow, landed: false, view: null });
+    }
+  }
+  // their warnings starting: where they come down (on the ground there, open to the sky)
+  for (const r of rain.filter(r => rainClock >= r.since)) {
+    rain.splice(rain.indexOf(r), 1);
+    const x = Math.min(N - 0.6, Math.max(0.6, r.x)), z = Math.min(N - 0.6, Math.max(0.6, r.z));
+    const g = groundAt(x, z, player.y + 2, 1);
+    if (!g.s || !Number.isFinite(g.h) || !open(x, g.h, z)) continue;
+    r.at = { x, y: g.h, z };
+    raining.push(r);
+    meteorFx(r, 'warn');
+  }
+  raining = raining.filter(r => {
+    if (r.landed) { if (rainClock < r.m.t + 0.1) return true; removeMeteorView(r); return false; }
+    if (!r.falling && rainClock >= r.m.t - METEOR.fall) { r.falling = true; meteorFx(r, 'fall'); }
+    if (rainClock < r.m.t) return true;
+    r.landed = true;
+    meteorFx(r, 'land');
+    splats.push({ x: r.at.x, y: r.at.y, z: r.at.z, t: 0 });
+    const p = player, { x, y, z } = r.at, d = Math.hypot(p.x - x, p.z - z);
+    if (d <= METEOR.radius + p.r && Math.abs(p.y - y) < 1.2 && p.hp > 0 && !p.ragdoll && open(p.x, p.y, p.z))
+      hitBody(p, r.blow, x, z, d ? (p.x - x) / d : 1, d ? (p.z - z) / d : 0);
+    return true;
+  });
+}
 // wading through a splat: slowed, a little (the enemies too, those we run)
 function wade() {
   if (!splats.length) return;
@@ -110,8 +161,12 @@ function wade() {
 }
 export function drawAllMeteors(dt, off) {
   drawMeteors([...shown.values()], dayClock(), dt, off);
+  drawMeteors(raining, rainClock, dt, off);
   drawSplats(splats, dt, off);
 }
-export function clearMeteors() { clearMeteorViews([...shown.values()]); shown.clear(); splats = []; landed.clear(); }
-export const meteorsNow = () => [...shown.values()];
+export function clearMeteors() {
+  clearMeteorViews([...shown.values(), ...raining]); shown.clear(); splats = []; landed.clear();
+  rain = []; raining = [];
+}
+export const meteorsNow = () => [...shown.values(), ...raining];
 export const splatsNow = () => splats;

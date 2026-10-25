@@ -1,4 +1,4 @@
-// Projectiles in flight: the fireball / Triangle punch / ice ball / Totnar's skull / water ball / slime ball / Foggery's eye meshes exported
+// Projectiles in flight: the fireball / Triangle punch / ice ball / Totnar's skull / water ball / slime ball / Foggery's eye / Slomo's slug meshes exported
 // (Renew's spells and the echoes' shots: orbs of light, no model; his arrows: the game's arrow)
 // beside their thrower (enemymodel.js props), turned along the flight (a `tumble`ing one end over
 // end), each with a light and a particle trail.
@@ -17,6 +17,7 @@ import { squirtleModel } from './squirtlemodel.js';
 import { slugModel } from './slugmodel.js';
 import { flipModel } from './flipmodel.js';
 import { foggeryModel } from './foggerymodel.js';
+import { slomoModel } from './slomomodel.js';
 import { kindColors, recolor } from './recolor.js';
 
 const LOOKS = {
@@ -34,6 +35,8 @@ const LOOKS = {
   ball: { model: flipModel, prop: () => flipModel.props?.FlipBall, light: [0x8fdcff, 2.2, 3], trail: ['#ffffff', '#bfeaff', '#6fcbff'], rate: 55 },
   // one of Foggery's eyes, looking where it flies, burning like a fireball, its flames trailing
   eye: { model: foggeryModel, prop: () => foggeryModel.props?.FoggeryEye, light: [0xff8a3a, 2.4, 3], trail: ['#ffd25a', '#ff8a2a', '#ff4a17'], rate: 70 },
+  // one of Slomo's slug arms, thrown in an arc, head first, wriggling, goo dripping off it
+  slugarm: { model: slomoModel, prop: () => slomoModel.props?.SlomoArmSlug, light: [0x9aff5a, 1, 2.4], trail: ['#d8ff9a', '#8ae048', '#3e7a2a'], rate: 30, gravity: 6 },
   // a spell of Renew's staff, or an echo's shot (game/rewind.js): no model, a glowing orb in its
   // `color` (the spec's), like the player's spells (render/shots.js)
   orb: { orb: true, light: [0xbdf3ff, 2.2, 3], trail: ['#ffffff'], rate: 60 },
@@ -92,6 +95,7 @@ export function drawProjectiles(list, dt, off = { x: 0, y: 0, z: 0 }) {
     if (pr.spec.tumble) g.rotateX(pr.t * pr.spec.tumble);
     if (pr.kind === 'fireball') g.scale.setScalar(1 + 0.08 * Math.sin(pr.t * 40));
     if (pr.kind === 'orb') g.scale.setScalar(1 + 0.12 * Math.sin(pr.t * 37));
+    if (pr.kind === 'slugarm') g.scale.set(1 + 0.12 * Math.sin(pr.t * 23), 1, 1 - 0.1 * Math.sin(pr.t * 23));
     if (pr.kind === 'water') g.scale.set(1 + 0.12 * Math.sin(pr.t * 31), 1 - 0.1 * Math.sin(pr.t * 31), 1 + 0.15 * Math.sin(pr.t * 17));
     v.light.intensity = v.base * (0.8 + 0.2 * Math.sin(pr.t * 31) * Math.sin(pr.t * 13));
     const colors = v.trail, n = Math.floor(v.look.rate * dt + Math.random());

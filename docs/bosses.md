@@ -5,9 +5,10 @@ boss placeholders ([guardians.md](guardians.md)): the game calls them **Temp Bos
 (`♛ Temp Boss Spider`), as they hold the place of bosses to come. `BOSSES` in `src/core/bosses.js` says which
 depth has which: so far the first descent, on the road out of town (depth 0), has **Gusto**, the
 second (depth 1) **Totnar**, the third (depth 2) **Squarlo**, the fourth (depth 3) **Flip**, the
-fifth (depth 4) **Foggery** and the sixth (depth 5) **Renew**. A boss may bring an arena of its own
-(`BOSS_ARENAS`: Squarlo's tidal hills, Flip's box, Foggery's caldera), or only braziers lit round
-the one his depth has (Totnar, Renew).
+fifth (depth 4) **Foggery** and the sixth (depth 5) **Renew**; at the bottom of act II (depth 13)
+**Slomo**. A boss may bring an arena of its own (`BOSS_ARENAS`: Squarlo's tidal hills, Flip's box,
+Foggery's caldera, Slomo's slime bowl), or only braziers lit round the one his depth has (Totnar,
+Renew).
 
 The layout marks that arena's guardian with `boss` (`world/layout.js`, `cubegen/guardian.js`;
 `bossPlaceholder` is false there). The boss stands on the guardian's spot **alone**: no
@@ -24,8 +25,8 @@ Like every guardian's arena, leaving it while the boss lives asks first, and bei
 the entrance never takes you out ([guardians.md](guardians.md#encounter-and-persistence)).
 
 Each boss runs its own fight (`game/gusto.js`, `game/totnar.js`, `game/squarlo.js`, `game/flip.js`,
-`game/foggery.js`, `game/renew.js`, its rules in `core/gusto.js`, `core/totnar.js`, `core/squarlo.js`,
-`core/flip.js`, `core/foggery.js`, `core/renew.js`); what they share is `game/bossfight.js`: the players in the fight, sending a
+`game/foggery.js`, `game/renew.js`, `game/slomo.js`, its rules in `core/gusto.js`, `core/totnar.js`, `core/squarlo.js`,
+`core/flip.js`, `core/foggery.js`, `core/renew.js`, `core/slomo.js`); what they share is `game/bossfight.js`: the players in the fight, sending a
 body into it, the floors a body fits on, putting minions down round their boss and letting
 bodies go. A boss's minions (`minion` kinds, summoned) live in no roster: they pay a little XP
 once, no coins, no weapons, now and then a minor health potion, and go with their boss when it
@@ -928,6 +929,141 @@ then the light comes back, slowly.
 (they look like and are called what they are), minions in no roster, going for the player at once;
 a little XP once, now and then a minor health potion.
 
+## Slomo
+
+![Slomo's clips](img/model-slomo.jpg)
+
+From the kids' sketches (`blender/slomo.py`, `assets/slomo.glb`): a slime boss in three shapes, one
+model (each clip shows one shape and scales the others' bones away; `render/slomoview.js` blends the
+gait of one shape into the next while he changes, so the blob slides forward and the slug grows out
+of it behind on its legs, then the blob bursts and the slug turns round).
+
+- **The blob** (phase 1): a great see-through dome of lime slime, about 2.9 cells tall to his eyes
+  (its skin drawn translucent, his `shell`, like a Bolime's), the squiggly stuff a Bolime has
+  inside it drawn like the sketch's angry face (two wavy lines, a bar and a frown), two eye stalks
+  on top with a V of slime between them, and two long slime arms out of his sides, each ending in a
+  Slug (the slime marsh's: striped, curly legs, eye stalks).
+- **On legs** (phase 2): the blob, a little smaller, sits in front of a slug body striped dark
+  across its back, carried on six long legs, the slug's own eye stalks at its far end.
+- **The slug** (phase 3): the slug alone, turned round (its head in front now), still on its legs,
+  leaving a trail of slime.
+
+Profiles: `SLOMO`, `SLOMO_LEGS` and `SLOMO_SLUG` (`STAGE_PROFILES.slomo`, one a phase) in
+`src/core/enemies.js`; the fight's rules in `src/core/slomo.js` (`SLOMO_FIGHT`); the fight in
+`src/game/slomo.js`, his flood in `src/game/tide.js` (its rolling front `render/slomofx.js`), his
+jump in `src/game/bossjump.js` (shared with Giant Squarlo), his meteorites in `src/game/meteors.js`,
+his shockwaves in `src/game/quakes.js`.
+
+| | Level 15 |
+|---|---|
+| Health | 3380 (the descent tier's floor, grown fourteen levels), a third a phase |
+| Damage | 58 (slug arm ×0.7 and a slowing; meteorite ×0.6; landing ×1.3, shockwave ×0.5; slime ball ×0.55 a ball, slowing; an Arm slug's bite ×0.5 of its own; the flood: none, it slows) |
+| XP | 650 grown; coins 190–340 at level 1; two weapons and two potions like a descent guardian |
+| Poise | 2 s; on legs nothing staggers him, and blows do ×0.8 unless he is winded |
+
+The slime is his own (`slimeborn`): it does not hold him. A big body, he turns no faster than his
+`turnSpeed` (1.1–1.6 rad/s, `game/enemyai.js turn`), and turning on the spot steps round too: his
+gait goes on as far as his feet go round (`turnStride`, `render/enemies.js`). His legs walk in two
+tripods; a foot that is down sweeps back as fast as he goes (the clips' `speed`: 4 L sin(swing) a
+loop, `blender/slomo.py`), so his feet stay put on the ground.
+
+### His arena: the slime bowl
+
+His descent arena is always a slime bowl (`BOSS_ARENAS.slomo.type`, `cubegen/arenashapes.js`
+`bowl`, `BOWL`): a wide flat basin a level under the doorways, three small round mounds standing
+out of it to the doorways' level, and a bank of scenery round the cube that keeps his flood in.
+Nothing in it blocks (he walks and lands on it, his flood comes and goes): the slime marsh's goo,
+moss, reeds and vents strewn about (`props: ['slime']`, `cubegen/arenaprops.js`) whatever the
+theme of the depth, in its colours. It is **always night** there (`night`, `game/daycycle.js`: the
+theme's own night, the slime marsh's green moonlight and spores, or a blue moonlight in the frozen
+caves).
+
+Depth 13 is the bottom of act II; the slime marsh is the act's last theme, so a world that shows
+it has it there (about four in five); the others have Slomo's bowl in their own theme at 13.
+
+**The flood** (`map.tide`, `flood`): a standing fluid over the basin, inside the bank, dry at rest.
+It is waded through as water (`fluid`: never over anyone's head, `BOWL.flood` 0.85 levels over the
+basin, 0.43 cells), drawn as slime (`look`: the depth's acid colours). His `floodSide` and `front`
+say where it comes in from and how far across it has come (`core/slomo.js floodBox`): only that part
+of its box is in it and shown (`render/trials.js setFloodFront`: the surface, and the light playing
+under it and the wet ground), its front a wall of slime rolling on (`render/slomofx.js`). Wading in
+it slows (the wading, and its slime: `flood.slow`, `game/tide.js`; the enemies the slime does not
+hold go on). The mounds and the doorways stay dry. Beaten, it is gone for good.
+
+### Phase 1: the blob (full health to two thirds)
+
+- **Slug arm** (within 10 cells, clips `SlomoArmL` / `SlomoArmR`, 1.5 s): he winds an arm up and
+  back and whips it forward, and at 0.9 s the slug on its end flies off in an arc (`lob`: thrown up
+  and falling onto where the player stands, `core/projectiles.js`), slowing whoever it hits. The arm
+  grows a new one in 3 s (`arms`); he throws only an arm he has.
+- Where it lands it comes to life: an **Arm slug** (`armslug`, at most four about; more melt). It
+  crawls after the player, quick for a slug, never spitting; once it reaches them it **latches on**:
+  it sits on top of their head (held there, `render/enemies.js onHead`; nothing touches it), bites
+  every 0.6 s (slowing them) and after 2.4 s drops off dead. After 8 s it melts anyway.
+- **Meteorites** (within 14 cells, clip `SlomoMeteor`, 1.8 s, every 8–12 s, the first 4 s into the
+  fight): he squashes down and heaves up tall, spitting gloop into the sky at 1.1 s, and four slime
+  meteorites come down: the first on the player, the rest 1.4–3.6 cells round them, 0.3 s apart
+  (`rain`, `core/slomo.js rainOf`). Like the marsh's at night (`core/meteors.js`): a shadow grows for
+  1.7 s, then the lump falls; it hits (knocked back, slowed) and leaves a splat. Every game lets its
+  own come down round its own player, from his attack clock (`game/meteors.js`), and they spare the
+  enemies.
+
+### Growing legs
+
+At two thirds he stops (mode `split`): for 3.2 s nothing hurts him while the slug body grows out of
+the blob behind it and his arms are drawn in; the Arm slugs go with them.
+
+### Phase 2: on legs (two thirds to a third)
+
+- He walks after the player on his legs (`brute`, 1.5 cells/s).
+- **Jump** (within 12 cells, up a hill too, clip `SlomoJump`, 3 s, every 8–12 s, the first 3 s into
+  the phase, `jump`): like Giant Squarlo's, up to 9 cells high. His shadow shows from 0.4 s on the
+  floor nearest the player and follows them at 2.8 cells/s, holding still for the last 0.4 s; he
+  springs off at 0.7 s and lands on it at 2 s: whoever is in it (1.6 cells) is squashed flat (×1.3)
+  and dazed for 2.5 s. He squats winded until 2.7 s: blows do ×1.3 ("Slomo is winded! Hit him now").
+- **Two shockwaves** from his landing, one second apart (`wave.rings`, `gap`, `game/quakes.js`),
+  each running out at 7 cells/s to 7 cells: whoever is on the ground when one rolls under them is
+  thrown off their feet (×0.5). **Jump over each.** The timing is the hero's jump's
+  (`core/slomo.js dodge`): a band 0.9 deep is under a body (0.22 round) for 0.19 s; a jump keeps them
+  in the air 2 JUMP_V / GRAV = 0.57 s, so a jump started up to 0.38 s before the band reaches them
+  (and no later than when it does) clears it. Of two rings each can be cleared with a jump of its
+  own however early or late one jumped for the first if the gap is at least 2 × 0.57 − 0.19 = 0.95 s:
+  it is 1 s. Just outside his shadow the first band comes 0.23 s after he lands: jump as he comes
+  down (from 0.15 s before to 0.23 s after), and again a second later.
+- **The flood** (from anywhere, clip `SlomoFlood`, 2.4 s, the first 5 s into the phase, then 13–19 s
+  after it drained): he rears up on his hind legs and slams down at 1.8 s, nothing hurting him
+  meanwhile (`ward`; "Slomo floods the bowl with slime!"). The slime comes in from a side of the bowl
+  (another than the last time, at random), its front across in 2.4 s; it stands 1.5 s and drains
+  away in **10 s**. While it is due he starts nothing else.
+- **Meteorites** (clip `SlomoMeteorLegs`): six of them.
+
+### Bursting out
+
+At a third the blob bursts (a splash of goo) and the slug turns round (3.2 s, nothing hurting him).
+
+### Phase 3: the slug (a third to death)
+
+- **Slime** (within 9 cells, clip `SlomoSpit`, 1.4 s): he rears up and spits three balls of slime at
+  once, fanned out (0.55 each), that slow.
+- **Slimes** (clip `SlomoSummon`, 1.6 s, every 8 s): he heaves and slimes plop out of his back, Ooze
+  slugs and Ooze bolimes in turn, as many as fill up to **five**.
+- **Slime squirtles** (the summon's clip, every 12 s): up to **two**, popping out of the floor.
+- **The flood** (clip `SlomoFloodSlug`) and the **meteorites** (`SlomoMeteorSlug`, five), as before.
+
+His death drains the flood away for good and takes his minions along.
+
+## Slomo's minions
+
+They live in no roster (`minion`), go for the player at once, pay a little XP once and drop a minor
+health potion now and then; the slime is their own (or they swim): his flood does not slow them.
+
+| | Kind of | Size | Notes |
+|---|---|---|---|
+| Arm slug (`ARM_SLUG`) | Slug | 0.55× | a thrown slug arm come to life: ×2.4 speed, ×0.25 health, never spits; latches on and drops off dead |
+| Ooze slug (`OOZE_SLUG`) | Slug | 1× | pale lime, ×0.7 health, ×0.6 damage |
+| Ooze bolime (`OOZE_BOLIME`) | Bolime | 1× | pale, ×0.7 health, ×0.6 damage |
+| Slime squirtle (`SLIME_SQUIRTLE`) | Squirtle | 1.3× | bright lime; spits slime balls that slow |
+
 ## Playing together
 
 The game that runs the cube's enemies runs the fight; the others are shown it (`net/foes.js`):
@@ -951,7 +1087,10 @@ him turn the world). Foggery's stage swaps his profile like Squarlo's, his tide 
 under 0 (his lava), and his row carries two more slots (the first unused): his eyes, his shield and
 the clock of his platforms. Every game raises its own lava by his tide, raises its platforms once
 the lava is at its highest, follows his platforms' clock (`game/movers.js followMovers`) and pulls
-its own player out of the lava. Renew's stage swaps his profile like Foggery's, and his row carries
+its own player out of the lava. Slomo's stage swaps his profile like Squarlo's, his tide is his
+flood's height, and his row carries four more slots (the first three unused): his slug arms and his
+flood's side and front; every game floods its own bowl after them and lets its own meteorites
+come down. Renew's stage swaps his profile like Foggery's, and his row carries
 three more slots (the first two unused): the room's clock, whether time runs back and whether the
 fight is on, and a fourth: how far he has risen away at the end (2: gone). Every game records its own hero and rewinds them after his clock, and has its own
 echoes and ghosts (from what it was shown), the echoes hurting only it (`game/rewind.js`); the fight's bodies are rewound by the runner and shown
@@ -969,7 +1108,8 @@ elsewhere without a turn) and `/spawn skywolla`; `/arena flip` goes to his box. 
 (`addFoggerys`; out of his caldera there is no lava, no climb and no platforms), `/spawn fogface`
 and `/spawn fogcat`; `/arena tower` goes to his caldera, `/boss foggery` into it. `/spawn renew`
 (`addRenews`: his whole fight, rewinds and echoes, anywhere), `/spawn renspider`, `/spawn renface`;
-`/boss renew`.
+`/boss renew`. `/spawn slomo` (`addSlomos`; out of his bowl there is no flood), `/spawn armslug`,
+`/spawn oozeslug`, `/spawn oozebolime`, `/spawn slimesquirtle`; `/arena bowl`, `/boss slomo`.
 
 `/boss gusto` goes into the real arena (one beaten is up again). `/testroom boss gusto` (or
 `/testroom boss 0`: a boss, or the depth whose boss it is) goes into his **test room**
@@ -989,7 +1129,7 @@ without a boss of its own has no boss room yet.
 ## Checks
 
 ```sh
-node --test tests/gusto.test.js tests/totnar.test.js tests/squarlo.test.js tests/flip.test.js tests/foggery.test.js tests/renew.test.js tests/testrooms.test.js tests/assets.test.js
+node --test tests/gusto.test.js tests/totnar.test.js tests/squarlo.test.js tests/flip.test.js tests/foggery.test.js tests/renew.test.js tests/slomo.test.js tests/testrooms.test.js tests/assets.test.js
 ```
 
 ```js
@@ -998,6 +1138,7 @@ await (await import('./tests/browser/totnar.js')).runTotnarChecks() // Totnar's,
 await (await import('./tests/browser/squarlo.js')).runSquarloChecks() // Squarlo's, in his tidal hills
 await (await import('./tests/browser/foggery.js')).runFoggeryChecks()  // Foggery's, in his caldera: the lava, the climb, his cats, the platforms
 await (await import('./tests/browser/renew.js')).runRenewChecks()      // Renew's, in his arena: the rewinds, the echoes and ghosts, his minions, the bow and keeping away, the morning stars, the end and his flail, the dusk
+await (await import('./tests/browser/slomo.js')).runSlomoChecks()      // Slomo's, in his bowl: the slug arms latching on, the meteorites, the flood from a side, the jump and jumping over its shockwaves, his slimes
 await (await import('./tests/browser/bossroom.js')).runBossRoomChecks() // each boss's test room: idle until hit
 ```
 
@@ -1024,3 +1165,7 @@ prints must match `FLIP` (`tests/assets.test.js`).
 Foggery: `Blender -b --python blender/foggery.py -- assets/foggery.glb blender/foggery.blend
 blender/previews/foggery-preview.png`, then `npm run compress-assets`. The eye, summon, spit and
 cats points it prints must match `FOGGERY` and `FOGGERY_BALL` (`tests/assets.test.js`).
+
+Slomo: `Blender -b --python blender/slomo.py -- assets/slomo.glb blender/slomo.blend
+blender/previews/slomo-preview.png`, then `npm run compress-assets`. The arm, meteorite, spit and
+summon points it prints must match `SLOMO`, `SLOMO_LEGS` and `SLOMO_SLUG` (`tests/assets.test.js`).

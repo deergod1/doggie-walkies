@@ -369,6 +369,21 @@ export function dressArena(arena) {
       faces(.2, .3);
       break;
     }
+    case 'bowl': {
+      // Slomo's slime bowl: nothing that blocks (a big body walks and lands on it, his flood comes
+      // and goes): the slime's cover and puddles over the basin, the theme's cover and small things on
+      // the mounds and the slopes, the small things of the sets he brings (BOSS_ARENAS `props`) all
+      // over, a slime tuft or a vent on each mound
+      const dry = f => f.top >= fr.level - 1, basin = zone.filter(f => !dry(f)), slime = PALETTES.slime;
+      const loose2 = list => list.filter(n => variantsOf(n).every(v => !propMetadata.get(v).blocking));
+      cover(basin, .6, [...slime.cover, ...slime.cover, ...pal.cover]);
+      cover(zone.filter(dry), .8, [...pal.cover, ...slime.cover]);
+      scatter(open.filter(dry), loose(6), loose2(pal.small));
+      scatter(open, loose(10), [...loose2(slime.small), ...smallProps(arena.props ?? [], 0.6)]);
+      for (const m of (shape.marks.peaks || []).slice(0, 4)) put(floors[m], loose2([slime.ritual, ...slime.small]), { center: true });
+      faces(.25, .35, [...slime.wall, ...pal.wall], [...slime.lip, ...pal.lip]);
+      break;
+    }
     case 'courtyard': {
       cover(zone, .75, [...TILES, ...TILES, ...pal.cover]);
       const ends = rim.filter(f => [0, 1, 2, 3].filter(d => { const g = nb(f, d); return g && g.arenaCell && !g.encounter; }).length <= 1);

@@ -4,11 +4,18 @@
 // A projectile leaves the muzzle (model space: x, up, forward) of enemy e and flies straight
 // along e's heading, pitched towards the target's height (at most ~24 degrees), so stepping
 // aside during the wind-up dodges it. One thrown from a hand off to the side (`converge`:
-// Totnar's) is turned to cross the line of e's heading where the target is as far.
+// Totnar's) is turned to cross the line of e's heading where the target is as far. One that is
+// `lob`bed (Slomo's slug arms; lob: its gravity, cells/s²) flies in an arc from its muzzle onto
+// the target, `speed` along the ground: it falls on from there till it lands (stepProjectile).
 export function launch(e, spec, target) {
   const [mx, my, mz] = spec.muzzle;
   let s = Math.sin(e.yaw), c = Math.cos(e.yaw);
   const x = e.x + mx * c + mz * s, y = e.y + my, z = e.z - mx * s + mz * c;
+  if (spec.lob) {
+    const dx = target.x - x, dz = target.z - z, d = Math.hypot(dx, dz), T = Math.max(0.45, d / spec.speed);
+    const ux = d > 0.01 ? dx / d : s, uz = d > 0.01 ? dz / d : c, v = d / T;
+    return { kind: spec.kind, spec, x, y, z, vx: ux * v, vy: (target.y - y) / T + 0.5 * spec.lob * T, vz: uz * v, travelled: 0, t: 0 };
+  }
   if (spec.converge) {
     const d = Math.max(mz + 1, Math.hypot(target.x - e.x, target.z - e.z)), ax = e.x + s * d - x, az = e.z + c * d - z, l = Math.hypot(ax, az);
     s = ax / l; c = az / l;
@@ -33,6 +40,7 @@ export function stepProjectile(pr, dt, p, solid) {
   const n = Math.max(1, Math.ceil(pr.spec.speed * dt / 0.08)), h = dt / n, bodies = Array.isArray(p) ? p : p ? [p] : [];
   pr.t += dt;
   for (let i = 0; i < n; i++) {
+    if (pr.spec.lob) pr.vy -= pr.spec.lob * h;
     pr.x += pr.vx * h; pr.y += pr.vy * h; pr.z += pr.vz * h;
     pr.travelled += pr.spec.speed * h;
     pr.victim = bodies.find(b => touches(pr, b));
