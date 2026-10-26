@@ -15,6 +15,7 @@ import { ROLES } from '../core/npcs.js';
 import { PROP_METADATA } from '../core/propmetadata.js';
 import { THEMES } from '../themes/index.js';
 import { KINDS as ATTACKS } from '../core/combat.js';
+import { LINES } from '../core/narration.js';
 
 // the people's roles and relations, and a woman's of each that has one ('she|hermit': src/i18n/i18n.js
 // nounOf; core/questplan.js RELATIONS)
@@ -60,5 +61,6 @@ export function sources() {
     'src/core/propmetadata.js landmarks': [...new Set(PROP_METADATA.filter(p => p.landmark).map(p => landmarkName(p.name)))],
     'src/themes/index.js': Object.values(THEMES).map(t => t.name),
     'src/core/combat.js KINDS': Object.values(ATTACKS).map(k => k.verb),
+    'src/core/narration.js': LINES.map(l => l.text),
   };
 }

@@ -1,0 +1,67 @@
+{
+  "pipeline": 1,
+  "voices": {
+    "en": {
+      "model": "english",
+      "voice": "azelma"
+    },
+    "de": {
+      "model": "german_24l",
+      "voice": "azelma"
+    }
+  },
+  "clips": {
+    "en": {
+      "opening.looked-like.m": {
+        "text": "There you are! ...No. I'm sorry. For a moment you looked just like him.",
+        "seed": 0,
+        "dur": 5.18,
+        "hash": "2e856b930356ca70"
+      },
+      "opening.looked-like.f": {
+        "text": "There you are! ...No. I'm sorry. For a moment you looked just like her.",
+        "seed": 0,
+        "dur": 5.14,
+        "hash": "bdc266487e744d22"
+      },
+      "boss.gusto.after": {
+        "text": "I was so sure he was real. I suppose he was.",
+        "seed": 0,
+        "dur": 3.44,
+        "hash": "85b58501c92fe2f7"
+      },
+      "boss.squarlo.after": {
+        "text": "It was such a little thing. Then it wasn't.",
+        "seed": 0,
+        "dur": 2.81,
+        "hash": "0775b91dc3408cd3"
+      }
+    },
+    "de": {
+      "opening.looked-like.m": {
+        "text": "Da bist du ja! ...Nein. Entschuldige. Einen Moment lang sahst du genau aus wie er.",
+        "seed": 0,
+        "dur": 7.88,
+        "hash": "fd6cf1a619780244"
+      },
+      "opening.looked-like.f": {
+        "text": "Da bist du ja! ...Nein. Entschuldige. Einen Moment lang sahst du genau aus wie sie.",
+        "seed": 0,
+        "dur": 8.42,
+        "hash": "aa594fad954e3813"
+      },
+      "boss.gusto.after": {
+        "text": "Ich war mir so sicher, dass es ihn wirklich gibt. Vielleicht gab es ihn ja auch.",
+        "seed": 0,
+        "dur": 3.81,
+        "hash": "414473b0d8705a34"
+      },
+      "boss.squarlo.after": {
+        "text": "Es war so eine kleine Sache. Und dann nicht mehr.",
+        "seed": 0,
+        "dur": 3.19,
+        "hash": "a1ee5394ce45e778"
+      }
+    }
+  }
+}

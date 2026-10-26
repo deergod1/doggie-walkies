@@ -8,8 +8,9 @@ import items from './items.js';
 import enemies from './enemies.js';
 import quests from './quests.js';
 import trials from './trials.js';
+import story from './story.js';
 
-export const parts = { ui, items, enemies, quests, trials };
+export const parts = { ui, items, enemies, quests, trials, story };
 
 export default {
   code: 'de',

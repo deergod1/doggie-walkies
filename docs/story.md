@@ -2,8 +2,9 @@
 
 Status: a sketch. Nothing of it is built yet. This is the story we want to tell, how it fits the
 game's rules, and the list of what the game needs before the story can go in (the end of this
-page). The words of the narrator are only text for now; voice can come later, so every line gets
-an id it can be recorded under. Complements [world.md](world.md), [bosses.md](bosses.md),
+page). Every line gets an id it is recorded under: the lines written so far are in
+`src/core/narration.js`, voiced ahead with a text-to-speech model ([narration.md](narration.md)),
+but nothing plays them yet. Complements [world.md](world.md), [bosses.md](bosses.md),
 [quests.md](quests.md), [saves.md](saves.md), [online.md](online.md) and [i18n.md](i18n.md).
 
 Tone: cheerful, with a sad edge. Like Bastion, a voice that talks while you play, in one or two
@@ -234,7 +235,8 @@ Before the story can go in. Roughly in the order to build it.
    has finished (the lines for heroes who have been here before). Playing together, the host's
    world keeps it.
 4. **The narrator.** The table of lines (id, when, conditions such as depth, theme, boss, owner or
-   guest, alone or together, how often, priority, note) and what picks from it: a line from the
+   guest, alone or together, how often, priority, note; `src/core/narration.js` has the ids, texts,
+   notes and forms so far, voiced: [narration.md](narration.md)) and what picks from it: a line from the
    event, the seed and how often it came, so every screen picks the same one; a queue with
    priorities and a pause between lines, quiet in fights except for bosses. Spine beats and what
    happens to the world (a first time at a depth, a boss beaten, a cube memorized) come from the

@@ -9,6 +9,23 @@ or add English text, translate it in the same change into the languages kept wit
 (English and German: game and guide). The ones that catch up later (Indonesian, game only) are
 left for their own changes: do not translate into them unless asked.
 
+## Narration
+
+The narrator's lines (`src/core/narration.js`, German in `src/i18n/de/story.js`) are pre-rendered
+with Pocket TTS into `assets/narration/` (`docs/narration.md`). When you add or change a line, its
+text or its German, also run `node tools/narration.mjs` (needs `uv`; the first run downloads about
+1 GB of models) and commit the clips and `assets/narration/manifest.json` with it: `npm test` fails
+while one is missing or stale. `node tools/narration.mjs --check` lists what is out of date.
+
+- Check what you rendered. The `transcribe_file` tool only understands English; for German use the
+  `audio-transcription` skill with `--language de`. If a clip says the text wrong, try other takes
+  (`node tools/narration.mjs --takes 4 --only <id> --lang <lang>`), listen or transcribe them, and
+  pin the good one as the line's `seed`; or reword the line.
+- A recorded line never says a player's name: give a line with parameters `forms` (e.g.
+  `SIBLING`), never a name.
+- Only the languages in `VOICES` (`tools/narration.mjs`: English, German with `german_24l`) are
+  voiced; do not add Indonesian.
+
 ## Blender previews
 
 `blender/previews/` is local output and ignored by Git: never commit renders from it.

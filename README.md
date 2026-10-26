@@ -53,6 +53,9 @@ docs that explain how the game works, from the big ideas down to the real code:
   - Quests (`src/core/quests.js`, `src/game/quests.js`, the inventory's Quests tab in
     `src/game/questpanel.js`, U): the villagers give quests, shared by everyone in the world and
     saved with it (`docs/quests.md`).
+  - The narrator's lines (`src/core/narration.js`, `docs/story.md`): voiced ahead with Kyutai's
+    Pocket TTS (voice Azelma; German with the 24-layer model) into `assets/narration/` by
+    `node tools/narration.mjs` (`docs/narration.md`); nothing plays them yet.
   - Skins (main menu: **Choose Skin**, like Choose World; the painter in `src/game/skineditor.js`):
     up to ten named skins in the browser's IndexedDB, each with a thumbnail of the hero wearing
     it; choose one (or none), paint on one, delete one, or paint a new one. The painter has a
@@ -144,6 +147,7 @@ npm run serve            # uv run --no-project tools/serve.py [port]
 # ?touch=1 forces the touch controls (docs/touch.md); ?lang=de or ?lang=en picks the language
 # with RADIUS_API_KEY, ANTHROPIC_API_KEY or OPENAI_API_KEY set, the guide's tutor uses it through the server
 npm run i18n             # what is left to translate (docs/i18n.md)
+node tools/narration.mjs # render the narrator's new or changed lines (docs/narration.md)
 npm test
 ```
 
