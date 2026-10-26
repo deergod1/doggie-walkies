@@ -13,7 +13,7 @@ export class SkinPreview {
     this.figure.model.traverse(o => {
       if (o.isMesh) { o.userData.skinMaterial = true; this.meshes.push(o); }
     });
-    this.scene = new THREE.Scene(); this.scene.background = new THREE.Color('#19212f');
+    this.scene = new THREE.Scene(); this.scene.background = new THREE.Color('#131a19');   // the glass (style.css)
     this.scene.add(this.figure.group, new THREE.HemisphereLight(0xffffff, 0x8293ac, 2));
     const light = new THREE.DirectionalLight(0xffffff, 2.5); light.position.set(2, 4, 5); this.scene.add(light);
     this.figure.group.updateMatrixWorld(true);

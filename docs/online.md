@@ -69,7 +69,7 @@ being helped up and getting back in. Up to four players, co-op.
   the others ask for the PNG once and get it in pieces (`skinWant`, `skin`; `docs/skins.md`).
 - Each explores where they like. Each player is an arrow in their colour on the minimap, pointing
   where they face (a friend off the map is a line under it: another depth, in a house, far
-  away). The map is round, follows you and turns with the camera (`game/minimap.js`).
+  away). The map is an octagon of glass, follows you and turns with the camera (`game/minimap.js`).
 - **The teleport scroll**: playing together, the room portal scroll goes by that name (the
   same item, `core/items.js` `together`, `game/itemnames.js`). Using it first asks where to
   (`game/teleportmenu.js`, on the quick bar keys or a click): where you came into the room, or

@@ -1,6 +1,6 @@
-// Overview of the cubes visited at the current depth: a round map centred on the player that
-// turns with the camera (what is ahead on screen is up on the map; the "N" on the rim is north,
-// -z). Cubes are coloured by their WFC tile; edges show rivers (blue) and portals (gold: leads
+// Overview of the cubes visited at the current depth: a map centred on the player that turns with
+// the camera (what is ahead on screen is up on the map; the "N" on the rim is north, -z), in an
+// upright octagon of glass (a cut stone, like the menus: docs/ui.md). Cubes are coloured by their WFC tile; edges show rivers (blue) and portals (gold: leads
 // somewhere new, cyan: explored; ringed in a trial's colour: into a trial room); triangles are wells / rings; a violet dot is the open town
 // portal. Each player is an arrow pointing where they face, in their colour (ours is white when
 // playing alone). The quest followed (game/questpanel.js followedQuest) shows in gold where it
@@ -35,9 +35,21 @@ const R = 3.5, CELL = 24, PAD = 6, SIZE = 2 * R * CELL + PAD * 2, C = SIZE / 2, 
 const canvas = Object.assign(document.createElement('canvas'), { id: 'minimap', width: SIZE, height: SIZE + 42 });
 document.body.appendChild(canvas);
 const g = canvas.getContext('2d');
-const BG = '#0b0d1266', OUTLINE = '#0b0d12', QUEST = '#ffd34a';
+const OUTLINE = '#0b0c0d', QUEST = '#ffd34a', TEXT = '#98aaa5';
+// the octagon: its corners RIM from the centre, its sides APO (the map's edge, for what is on it)
+const RIM = C - 1, APO = RIM * Math.cos(Math.PI / 8);
 const REFRESH = 4;
 let drawn = '', drawnAt = -Infinity, drawnScale = 0;   // what the map showed last, when (ms), at what pixel ratio
+
+function octagon(r = RIM) {
+  g.beginPath();
+  for (let k = 0; k < 8; k++) { const a = Math.PI / 8 + k * Math.PI / 4; g.lineTo(C + r * Math.cos(a), C + r * Math.sin(a)); }
+  g.closePath();
+}
+// how far the octagon's edge is from the centre in the direction a (radians)
+const reach = a => APO / Math.max(...[0, 1, 2, 3].map(k => Math.abs(Math.cos(a - k * Math.PI / 4))));
+// a point on the canvas at least `margin` inside the octagon
+const onMap = ([x, y], margin = 0) => Math.hypot(x - C, y - C) <= reach(Math.atan2(y - C, x - C)) - margin;
 
 // a point on edge d of the cell at (px, pz), t in [0,1] along it
 const edgePt = (px, pz, d, t) => [[px + CELL, pz + t * CELL], [px, pz + t * CELL], [px + t * CELL, pz + CELL], [px + t * CELL, pz]][d];
@@ -79,7 +91,7 @@ function pointer([x, y], [fx, fy]) {
 }
 // the quest off the map: an arrow on the rim towards [x, y] (canvas)
 function rimArrow([x, y]) {
-  const a = Math.atan2(y - C, x - C), r = R * CELL - 8, fx = Math.cos(a), fy = Math.sin(a);
+  const a = Math.atan2(y - C, x - C), r = reach(a) - 8, fx = Math.cos(a), fy = Math.sin(a);
   pointer([C + fx * r, C + fy * r], [fx, fy]);
 }
 
@@ -88,7 +100,7 @@ function rimArrow([x, y]) {
 function spot(b, cx, Y, cz) {
   if (isInterior(b.cube)) return null;
   const [bx, by, bz] = parse(b.cube), u = bx + b.x / N - cx, v = bz + b.z / N - cz;
-  return by === Y && Math.hypot(u, v) <= R - 0.15 ? [u * CELL, v * CELL] : null;
+  return by === Y && onMap(screen(u * CELL, v * CELL), 4) ? [u * CELL, v * CELL] : null;
 }
 // where a friend is when not on this map
 function whereabouts(b, Y) {
@@ -118,8 +130,8 @@ export function drawMinimap() {
   const tp = state.run.townPortal, friends = online.buddies.filter(b => b.cube), away = friends.filter(b => !spot(b, cx, Y, cz));
   // a line of text under the map each: the cube and depth, being in a house, the town portal,
   // each friend off the map
-  const lines = [[tr('cube {x}, {z}   depth {depth}', { x: X0, z: Z0, depth: -Y }), '#aab3c2']];
-  if (inside) lines.push([tr('in a house'), '#aab3c2']);
+  const lines = [[tr('cube {x}, {z}   depth {depth}', { x: X0, z: Z0, depth: -Y }), TEXT]];
+  if (inside) lines.push([tr('in a house'), TEXT]);
   if (tp) lines.push([tr('portal open: depth {depth}', { depth: tp.depth }), '#c9a8ff']);
   for (const b of away) lines.push([tr('{name}: {where} (F: go)', { name: b.name, where: whereabouts(b, Y) }), playerColor(b.slot)]);
   const height = SIZE + 14 * lines.length;
@@ -128,13 +140,21 @@ export function drawMinimap() {
   if (canvas.height !== h) canvas.height = h;
   g.setTransform(scale, 0, 0, scale, 0, 0);
   g.clearRect(0, 0, SIZE, height);
-  g.fillStyle = BG; g.beginPath(); g.arc(C, C, R * CELL, 0, Math.PI * 2); g.fill();
-  g.fillRect(0, SIZE, SIZE, height - SIZE);
+  // the glass: darker away from the light (top left); under the map a plate for the lines, its
+  // lower right corner cut
+  const face = g.createLinearGradient(0, 0, SIZE, SIZE);
+  face.addColorStop(0, '#1a2422bf'); face.addColorStop(1, '#0a0e0db3');
+  g.fillStyle = face; octagon(); g.fill();
+  g.fillStyle = '#0e1312b3'; g.beginPath();
+  g.moveTo(0, SIZE); g.lineTo(SIZE, SIZE); g.lineTo(SIZE, height - 6); g.lineTo(SIZE - 6, height); g.lineTo(0, height); g.closePath(); g.fill();
+  const line = g.createLinearGradient(0, 0, SIZE, 0);
+  line.addColorStop(0, '#3b4f4b'); line.addColorStop(1, '#3b4f4b00');
+  g.fillStyle = line; g.fillRect(0, SIZE, SIZE, 1);
   // the cubes, turned with the camera and cut to the circle; the marks on them come after,
   // upright (marks: [x, y] in the turned frame, how to draw it)
   const marks = [];
   g.save();
-  g.beginPath(); g.arc(C, C, R * CELL, 0, Math.PI * 2); g.clip();
+  octagon(); g.clip();
   g.translate(C, C); g.rotate(view.yaw);
   for (let dz = -REACH; dz <= REACH; dz++) for (let dx = -REACH; dx <= REACH; dx++) {
     const k = key(X0 + dx, Y, Z0 + dz), c = W.cubes.get(k);
@@ -170,7 +190,7 @@ export function drawMinimap() {
   // the quest followed: somewhere in a cube, a frame round it (inside, so ours still shows)
   const goal = questTarget(followedQuest()), [gx, gy, gz] = goal ? parse(goal.key) : [];
   const goalAt = goal && gy === Y ? [gx + (goal.at ? goal.at.x / N : 0.5) - cx, gz + (goal.at ? goal.at.z / N : 0.5) - cz] : null;
-  const goalOn = goalAt && Math.hypot(...goalAt) < R - 0.25;
+  const goalOn = goalAt && onMap(screen(goalAt[0] * CELL, goalAt[1] * CELL), 6);
   if (goalOn && !goal.at) {
     g.strokeStyle = QUEST; g.lineWidth = 2; g.setLineDash([4, 3]);
     g.strokeRect((gx - X0 - fx) * CELL + 3, (gz - Z0 - fz) * CELL + 3, CELL - 6, CELL - 6);
@@ -179,22 +199,31 @@ export function drawMinimap() {
   g.restore();
   for (const [at, draw] of marks) {
     const p = screen(...at);
-    if (Math.hypot(p[0] - C, p[1] - C) < R * CELL - 2) draw(p);
+    if (onMap(p, 2)) draw(p);
   }
   // the open town portal: a violet dot where it stands (in town too, at its other end)
   for (const [k, pad] of tp ? [[tp.key, tp.pad], [TOWN_KEY, W.cubes.get(TOWN_KEY)?.map.town?.portal]] : []) {
     const [x, y, z] = parse(k);
     if (!pad || y !== Y) continue;
     const u = x + pad.x / N - cx, v = z + pad.z / N - cz;
-    if (Math.hypot(u, v) < R - 0.1) dot(screen(u * CELL, v * CELL), 3.5, '#b98cff');
+    const at = screen(u * CELL, v * CELL);
+    if (onMap(at, 2)) dot(at, 3.5, '#b98cff');
   }
-  // north on the rim
-  const [nx, ny] = screen(0, -(R * CELL - 9));
-  dot([nx, ny], 7, '#0b0d12cc');
-  g.fillStyle = '#e8ecf3'; g.font = `bold 11px ${DISPLAY}`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  // the octagon's edge, lit from above, and a spark where the light meets its upper left corner
+  const edge = g.createLinearGradient(0, C - RIM, 0, C + RIM);
+  edge.addColorStop(0, '#6b968d'); edge.addColorStop(1, '#1f2b29');
+  g.strokeStyle = edge; g.lineWidth = 1; octagon(RIM - 0.5); g.stroke();
+  const sx = C + RIM * Math.cos(Math.PI * 11 / 8), sy = C + RIM * Math.sin(Math.PI * 11 / 8);
+  const spark = g.createRadialGradient(sx, sy, 0, sx, sy, 16);
+  spark.addColorStop(0, '#f2fffcd9'); spark.addColorStop(0.12, '#d8f6f066'); spark.addColorStop(1, '#86e0d200');
+  g.save(); octagon(); g.clip(); g.fillStyle = spark; g.fillRect(sx - 16, sy - 16, 32, 32); g.restore();
+  // north on the rim: a cut stone with the N
+  const na = Math.atan2(-cos, sin), [nx, ny] = [C + Math.cos(na) * (reach(na) - 9), C + Math.sin(na) * (reach(na) - 9)];
+  g.fillStyle = '#0e1312e6'; g.strokeStyle = '#6b968d'; g.lineWidth = 1; g.beginPath();
+  g.moveTo(nx, ny - 8); g.lineTo(nx + 8, ny); g.lineTo(nx, ny + 8); g.lineTo(nx - 8, ny); g.closePath(); g.fill(); g.stroke();
+  g.fillStyle = '#e3ece9'; g.font = `bold 11px ${DISPLAY}`; g.textAlign = 'center'; g.textBaseline = 'middle';
   g.fillText('N', nx, ny + 0.5);
   g.textAlign = 'start'; g.textBaseline = 'alphabetic';
-  g.strokeStyle = '#ffffff30'; g.lineWidth = 1; g.beginPath(); g.arc(C, C, R * CELL - 0.5, 0, Math.PI * 2); g.stroke();
   // the quest followed: a pin where it wants you, or an arrow on the rim (over the N) when that
   // is off the map
   if (goalOn && goal.at) pin(screen(goalAt[0] * CELL, goalAt[1] * CELL));

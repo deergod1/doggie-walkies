@@ -87,9 +87,6 @@ export default {
   'Going on': 'Laufend',
   Done: 'Erledigt',
   Archived: 'Abgelegt',
-  'Game paused · Quests come from the villagers: a <b>!</b> over one has a quest for you, a <b>?</b> one to hand in':
-    'Spiel angehalten · Aufträge bekommst du von den Leuten in der Stadt: Ein <b>!</b> über jemandem heißt, da gibt es einen Auftrag für dich, ein <b>?</b>, da kannst du einen abgeben',
-  'opens the quests': 'öffnet die Aufträge',
   'Potions at work': 'Wirkende Tränke',
   'Quick bar': 'Schnellleiste',
   'Teleport to': 'Teleportieren zu',
@@ -440,9 +437,7 @@ export default {
   'Bought {item} for {price}.': '{item} für {price} gekauft.',
   'Bought {item:a} for {price}': 'Du hast {item:einen} für {price} gekauft',
   'Not for sale': 'Nicht zu verkaufen',
-  'Close · {key} / Esc': 'Schließen · {key} / Esc',
   'Close · Esc': 'Schließen · Esc',
-  'The Quests tab': 'Der Reiter Aufträge',
 
   // the quick bar (game/quickbar.js)
   'Inventory ({key})': 'Inventar ({key})',

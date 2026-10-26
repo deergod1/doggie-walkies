@@ -53,7 +53,7 @@ export const chatOpen = () => open;
 export function openChat(text = '') {
   if (state.inventoryOpen) return;
   open = true;
-  box.classList.add('open');
+  box.classList.add('open', 'glass');   // (open, a glass panel: style.css)
   $('chat-entry').hidden = false; $('chat-tabs').hidden = false;
   clearInput();   // the keys held to walk are let go: from now on they type
   input.value = text;
@@ -67,7 +67,7 @@ export function openChat(text = '') {
 export function closeChat() {
   if (!open) return;
   open = false;
-  box.classList.remove('open');
+  box.classList.remove('open', 'glass');
   $('chat-entry').hidden = true; $('chat-tabs').hidden = true;
   comp = null; showPopup();
   if (document.activeElement === input) input.blur();

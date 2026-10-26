@@ -45,8 +45,8 @@ docs that explain how the game works, from the big ideas down to the real code:
     menu the glass bird (`blender/glassbird.py`) waits in the dark for the first click or key, is
     struck and breaks in slow motion, and everything fades to black into the menu. Not with
     `?dev=1`, `?seed=` or in the guide; `?splash=1` shows it anyway, `?splash=0` never.
-  - The look of the menus (`docs/ui.md`): the bird's faceted teal glass with an amber core, so
-    far on the main menu and the settings (`style.css`, the panels' facets `assets/ui/facets.svg`).
+  - The look of the menus (`docs/ui.md`): the bird's faceted teal glass with an amber core, on the
+    menus, the inventory and the HUD (`style.css`, the panels' facets `assets/ui/facets.svg`).
   - Saves (`src/core/save.js`, `src/game/save.js`): up to three heroes and eight worlds,
     apart, in `localStorage`; each hero remembers its world, goes into any other, a friend's too;
     every seed has its own name (`src/core/names.js`, `docs/saves.md`).

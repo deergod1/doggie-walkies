@@ -5,9 +5,9 @@
   --pad: calc(16px + var(--safe-t)) calc(16px + var(--safe-r)) calc(16px + var(--safe-b)) calc(16px + var(--safe-l));
   --pad-y: calc(32px + var(--safe-t) + var(--safe-b)); --ui: 1; }
 
-/* the glass (docs/ui.md): the look of the glass bird (game/splash.js), for now on the main menu and the settings.
+/* the glass (docs/ui.md): the look of the glass bird (game/splash.js) on the menus, the inventory and the HUD, each panel a .glass.
    Cool glass outside, a warm amber core inside: the frames are dark teal glass with lit edges, amber only marks
-   what is alive (the main action, what is chosen, the focus). No round corners: cut ones, like a cut stone. */
+   what is alive (the main action, what is chosen, the focus, money). No round corners: cut ones, like a cut stone. */
 :root { --void: #0b0c0d; --glass-line: #86e0d2; --glass-hi: #d8f6f0; --ember: #ffa040; --ember-hi: #ffd6a0; --ember-text: #ffe2bc;
   --ink: #e3ece9; --ink-dim: #98aaa5; --ink-faint: #62716d; }
 /* (registered: they ease when they change, and each surface has its own, nothing inherited from the panel around it) */
@@ -17,57 +17,80 @@
 @property --glow { syntax: '<color>'; inherits: false; initial-value: transparent; }
 @property --glint { syntax: '<percentage>'; inherits: false; initial-value: 100%; }
 /* a surface: its corners cut by --c1 (top left) to --c4 (bottom left), clockwise; --face fills it; its edges lit from above,
-   --edge-hi on top fading to --edge-lo below (the straight ones a border-image, the cut ones a line in each corner);
-   --glow an amber light from inside, coming from --glow-at; --glint a band of light crossing it (from 100%, off its left,
-   to 0%, off its right): only on what is pressed, as it is hovered, never across the panels (it would distract).
-   --frame is the edges and the glint, under them each kind of surface puts its own. */
-:where(#title-panel, #settings-panel, .dropdown-list, #title-panel :is(button, input, .title-link), #settings-panel button:not(#settings-close)) {
+   --edge-hi on top fading to --edge-lo below (the straight ones a border-image, the cut ones a line in each corner, --edge-w
+   thick); --glow an amber light from inside, coming from --glow-at; --under what lies between the glow and the face (an item's
+   rarity); --glint a band of light crossing it (from 100%, off its left, to 0%, off its right): only on what is pressed, as it
+   is hovered, never across the panels (it would distract). --frame is the edges and the glint, under them each kind of
+   surface puts its own. The surfaces: the panels, what is pressed or typed into on them (not a .plain button), the wells
+   sunk into them, the dropdown's list. */
+:where(.glass:not(.glass-back), .glass :is(button, input:not([type=range], [type=color]), select, .title-link):not(.plain), .dropdown-list,
+  #inventory-hero, #inventory-details, #inventory-act, #quests-details, #quests-talk, .coin-slot, #menu-room, #skin-view, #effects .fx, #chat-popup, #quest-track),
+  .glass.glass-back::before {
   --c1: 5px; --c2: 5px; --c3: 5px; --c4: 5px; --glow-at: 50% 115%; --glint-color: var(--glass-hi);
   --face: #18201f; --edge-hi: #4d6a64; --edge-lo: #263231;
-  border: 1px solid transparent; border-radius: 0; border-image: linear-gradient(var(--edge-hi), var(--edge-lo)) 1;
+  border: var(--edge-w, 1px) solid transparent; border-radius: 0; border-image: linear-gradient(var(--edge-hi), var(--edge-lo)) 1;
   clip-path: polygon(var(--c1) 0, calc(100% - var(--c2)) 0, 100% var(--c2), 100% calc(100% - var(--c3)), calc(100% - var(--c3)) 100%,
     var(--c4) 100%, 0 calc(100% - var(--c4)), 0 var(--c1));
   --frame: linear-gradient(110deg, transparent 42%, color-mix(in srgb, var(--glint-color) 16%, transparent) 42% 46.5%,
       color-mix(in srgb, var(--glint-color) 7%, transparent) 46.5% 50%, transparent 50%) var(--glint) 0 / 250% 100% no-repeat border-box,
-    linear-gradient(to bottom right, var(--edge-hi) calc(50% + 1px), transparent calc(50% + 1px)) left top / var(--c1) var(--c1) no-repeat border-box,
-    linear-gradient(to bottom left, var(--edge-hi) calc(50% + 1px), transparent calc(50% + 1px)) right top / var(--c2) var(--c2) no-repeat border-box,
-    linear-gradient(to top left, var(--edge-lo) calc(50% + 1px), transparent calc(50% + 1px)) right bottom / var(--c3) var(--c3) no-repeat border-box,
-    linear-gradient(to top right, var(--edge-lo) calc(50% + 1px), transparent calc(50% + 1px)) left bottom / var(--c4) var(--c4) no-repeat border-box;
-  background: var(--frame), radial-gradient(ellipse 75% 95% at var(--glow-at), var(--glow), transparent) border-box, var(--face);
+    linear-gradient(to bottom right, var(--edge-hi) calc(50% + var(--edge-w, 1px)), transparent calc(50% + var(--edge-w, 1px))) left top / var(--c1) var(--c1) no-repeat border-box,
+    linear-gradient(to bottom left, var(--edge-hi) calc(50% + var(--edge-w, 1px)), transparent calc(50% + var(--edge-w, 1px))) right top / var(--c2) var(--c2) no-repeat border-box,
+    linear-gradient(to top left, var(--edge-lo) calc(50% + var(--edge-w, 1px)), transparent calc(50% + var(--edge-w, 1px))) right bottom / var(--c3) var(--c3) no-repeat border-box,
+    linear-gradient(to top right, var(--edge-lo) calc(50% + var(--edge-w, 1px)), transparent calc(50% + var(--edge-w, 1px))) left bottom / var(--c4) var(--c4) no-repeat border-box;
+  background: var(--frame), radial-gradient(ellipse 75% 95% at var(--glow-at), var(--glow), transparent) border-box,
+    var(--under, linear-gradient(transparent, transparent)), var(--face);
   color: var(--ink); transition: --face .15s, --edge-hi .15s, --edge-lo .15s, --glow .25s, color .15s;
 }
 /* the panels: large uneven cuts, darker glass the world shows through a little, the facets lit from the top left
    (assets/ui/facets.svg, tools/facets.mjs) and a still spark where the light meets the cut */
-:where(#title-panel, #settings-panel) {
+:where(.glass:not(.glass-back)), .glass.glass-back::before {
   --c1: 18px; --c2: 6px; --c3: 18px; --c4: 6px; --face: #0e1312eb; --edge-hi: #6b968d; --edge-lo: #1f2b29;
-  background: var(--frame), radial-gradient(circle at 18px 1px, #f2fffc 0, #d8f6f080 1.5px, #86e0d224 14px, transparent 70px) border-box,
+  background: var(--frame), radial-gradient(circle at var(--c1) 1px, #f2fffc 0, #d8f6f080 1.5px, #86e0d224 14px, transparent 70px) border-box,
+    radial-gradient(ellipse 75% 95% at var(--glow-at), var(--glow), transparent) border-box,
     url(assets/ui/facets.svg) left top / 960px 960px no-repeat border-box, var(--face);
 }
+/* a .glass-back panel (the chat) is not cut itself, its glass lies behind it: what is in it can reach out of it (the chat's
+   list of what a command can go on with, over the game) */
+.glass.glass-back { isolation: isolate; }
+.glass.glass-back::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+/* a well sunk into a panel (the hero's picture, the details, ...): darker, its lower edge the lit one */
+:where(#inventory-hero, #inventory-details, #inventory-act, #quests-details, #quests-talk, .coin-slot, #menu-room, #skin-view) {
+  --c1: 8px; --c2: 0px; --c3: 8px; --c4: 0px; --face: #090c0cb3; --edge-hi: #1a2321; --edge-lo: #34463f; }
 /* pressed things: the glint crosses them on hover (the way back is instant, not swept) */
-:where(#title-panel :is(button, .title-link), #settings-panel button:not(#settings-close)) { cursor: pointer; }
-:where(#title-panel :is(button, .title-link), #settings-panel button:not(#settings-close)):hover:not(:disabled) {
+:where(.glass :is(button, .title-link):not(.plain)) { cursor: pointer; }
+:where(.glass :is(button, .title-link):not(.plain)):hover:not(:disabled) {
   --face: #213030; --edge-hi: #7fb3a8; --edge-lo: #2d3d3a; color: #fff;
   --glint: 0%; transition: --glint .75s cubic-bezier(.2, .6, .3, 1), --face .15s, --edge-hi .15s, --edge-lo .15s, --glow .25s, color .15s; }
 /* the main action and what is chosen: the bird's amber core glowing from inside */
-:where(#title-panel .menu-big, #title-panel .title-pick.chosen, #settings-panel :is(.settings-choice button.on, .settings-toggle.on, #settings-pages button.on,
-  #settings-tabs button.on), .dropdown.open .dropdown-button) {
+:where(#title-panel .menu-big, .glass :is(.menu-main, .title-pick.chosen, .settings-choice button.on, .settings-toggle.on, #settings-pages button.on,
+  #settings-tabs button.on, #chat-tabs button.on, [role=tab][aria-selected=true], [aria-pressed=true], #inventory-bar-keys button.on, .quest-entry.selected, .quest-actions .main,
+  #leave-stay, #death-respawn, #skin-save), .dropdown.open .dropdown-button) {
   --face: #22170f; --edge-hi: #d99a5c; --edge-lo: #6b4226; --glow: #ffa04052; --glint-color: #ffe6c4; color: var(--ember-text); }
-:where(#title-panel .menu-big, #title-panel .title-pick.chosen, #settings-panel :is(.settings-choice button.on, .settings-toggle.on)):hover {
+:where(#title-panel .menu-big, .glass :is(.menu-main, .title-pick.chosen, .settings-choice button.on, .settings-toggle.on, [aria-pressed=true],
+  #inventory-bar-keys button.on, .quest-entry.selected, .quest-actions .main, #leave-stay, #death-respawn, #skin-save)):hover:not(:disabled) {
   --face: #2c1d12; --edge-hi: #ffc78a; --edge-lo: #8a5530; --glow: #ffa04080; color: #fff4e4; }
-/* asking to be sure (delete, reset): a red glass */
-:where(#title-panel .confirm, #settings-panel .confirm) { --face: #2a1411; --edge-hi: #c8664c; --edge-lo: #5e281d; --glow: #ff6a4033; color: #ffd0c4; }
-:where(#title-panel .confirm, #settings-panel .confirm):hover { --face: #3a1a14; --edge-hi: #f08a6c; color: #fff0ea; }
+/* asking to be sure (delete, reset, leave): a red glass */
+:where(.glass .confirm) { --face: #2a1411; --edge-hi: #c8664c; --edge-lo: #5e281d; --glow: #ff6a4033; color: #ffd0c4; }
+:where(.glass .confirm):hover { --face: #3a1a14; --edge-hi: #f08a6c; color: #fff0ea; }
 /* typed into: darker, deeper glass */
-:where(#title-panel input) { --face: #0a0e0d; --edge-hi: #2a3836; --edge-lo: #4a625d; color: #fff; cursor: text; }
-:where(#title-panel input)::placeholder { color: var(--ink-faint); }
-:where(#title-panel, #settings-panel) :disabled { opacity: .5; cursor: default; }
+:where(.glass :is(input, select)) { --face: #0a0e0d; --edge-hi: #2a3836; --edge-lo: #4a625d; color: #fff; }
+:where(.glass input) { cursor: text; }
+:where(.glass input)::placeholder { color: var(--ink-faint); }
+:where(.glass) :disabled { opacity: .5; cursor: default; }
 /* the focus, over all of the above: amber edges (an outline would be cut off with the corners) */
-:where(#title-panel :is(button, input, .title-link), #settings-panel button:not(#settings-close)):focus-visible {
-  outline: none; --edge-hi: var(--ember-hi); --edge-lo: #c47a3e; --glow: #ffa04040; box-shadow: inset 0 0 0 1px #ffd6a066; }
+:where(.glass :is(button, input, select, .title-link):not(.plain)):focus-visible {
+  outline: none; --edge-hi: #fff4e4; --edge-lo: var(--ember-hi); box-shadow: inset 0 0 0 1px #ffe6c4aa; }
+/* a button that is only a word (the close buttons): no glass, amber when hovered */
+:where(.glass .plain) { padding: 0; color: var(--ink-dim); background: none; border: none; cursor: pointer; }
+:where(.glass .plain):hover { color: var(--ember-text); }
+:where(.glass .plain):focus-visible { outline: 1px solid var(--ember-hi); outline-offset: 3px; }
 /* a small heading: a cut gem before it, lit on its upper face */
-:where(#settings-panel h2, #title-panel h3)::before { content: ''; flex: none; width: 6px; height: 6px; margin: 0 1px; transform: rotate(45deg);
+:where(#settings-panel h2, #title-panel h3, #inventory-panel :is(.inventory-body > div, #quests-talk) > h2, #quests-details-inner h3, #teleport-menu h2)::before { content: ''; display: inline-block;
+  flex: none; width: 6px; height: 6px; margin: 0 9px 0 1px; vertical-align: 1px; transform: rotate(45deg);
   background: linear-gradient(135deg, var(--glass-hi) 0 35%, var(--glass-line) 35% 55%, #3f8a7f 55%); box-shadow: 0 0 6px #86e0d266; }
-body.calm :is(#title-panel, #settings-panel, #title-panel *, #settings-panel *) { --glint-color: transparent; }
+/* behind a panel: the dark the bird waits in */
+:where(#menu-overlay, #leave-overlay, #settings-overlay, #inventory-overlay) { background: radial-gradient(ellipse at 50% 45%, #0b0c0d8c 0%, #0b0c0dc4 60%, #050606eb 100%); }
+body.calm :is(.glass, .glass *) { --glint-color: transparent; }
 /* the UI scale (the settings, game/uiscale.js): the HUD and the menus zoomed as a whole, offsets from the window's edges and all.
    Inside them nothing uses vw / vh (browsers disagree on whether zoom scales those): percentages of the window instead. */
 :is(#quickbar, #effects, #teleport-menu, #chat, #minimap, #quest-track, #trial-hud, #trial-banner, #loading, #look-hint, #crosshair, #teach-pace,
@@ -109,7 +132,8 @@ body.no-map #minimap { display: none; }
 body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 input, textarea, [contenteditable] { -webkit-user-select: text; user-select: text; }
 img { -webkit-user-drag: none; }
-kbd { display: inline-block; min-width: 1.2em; text-align: center; background: #2a2f3a; border: 1px solid #444c5c; border-radius: 3px; padding: 0 4px; color: #e6e9ef; font-family: var(--font-display); }
+kbd { display: inline-block; min-width: 1.2em; text-align: center; background: #131a19; border: 1px solid; border-color: #4d6a64 #34463f #263231; border-radius: 1px; padding: 0 4px;
+  color: #dbe7e3; font-family: var(--font-display); }
 
 #dev { position: absolute; top: calc(8px + var(--safe-t)); left: calc(8px + var(--safe-l)); z-index: 5; max-width: min(640px, calc(100vw - 260px)); padding: 4px 7px;
   font: 10px/1.45 var(--font-mono); color: #aab3c2; background: #0b0d1299; border-radius: 3px; user-select: text; }
@@ -120,109 +144,107 @@ kbd { display: inline-block; min-width: 1.2em; text-align: center; background: #
 #dev-hint { color: #8a96a8; }
 #dev-hint kbd { font-size: 9px; padding: 0 3px; }
 
-/* the chat box (game/console.js): the chronicle, the game's last word, a line to type in */
+/* the chat box (game/console.js): the chronicle, the game's last word, a line to type in; open, a glass panel (console.js
+   gives it .glass then), closed only its lines over the game */
 #chat { position: fixed; left: 12px; bottom: 12px; z-index: 18; box-sizing: border-box; width: min(470px, calc(50% - 200px)); min-width: 280px;
   display: flex; flex-direction: column; font-size: 15px; pointer-events: none; text-shadow: 0 1px 2px #000, 0 0 4px #000; }
-#chat.open { max-height: calc(42% + 100px); pointer-events: auto; padding: 6px 8px 8px; background: #0b0d12d9; border: 1px solid #444c5c; border-radius: 6px; box-shadow: 0 10px 40px #0007; }
+#chat.open::before { --c1: 14px; --c3: 14px; }
+#chat.open { max-height: calc(42% + 100px); pointer-events: auto; padding: 6px 8px 8px; }
 #chat-tabs { display: flex; gap: 4px; align-items: baseline; margin-bottom: 4px; }
-#chat-tabs button { font-size: 11px; color: #8a96a8; background: none; border: 1px solid transparent; border-radius: 3px; padding: 1px 7px; cursor: pointer; }
-#chat-tabs button.on { color: #fff; border-color: #444c5c; background: #2a2f3a; }
-#chat-tabs span { margin-left: auto; color: #6f7a8c; font-size: 13px; }
+#chat #chat-tabs button { --c1: 4px; --c2: 1px; --c3: 4px; --c4: 1px; font-size: 11px; padding: 1px 7px; }
+#chat #chat-tabs button:not(.on, :focus-visible) { --face: transparent; --edge-hi: transparent; --edge-lo: transparent; color: var(--ink-dim); }
+#chat #chat-tabs button:not(.on):hover { --face: #ffffff08; color: var(--ink); }
+#chat-tabs span { margin-left: auto; color: var(--ink-faint); font-size: 13px; }
 #chat-log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; justify-content: flex-end;
   max-height: 9.6em; overflow: hidden; line-height: 1.35; }
 #chat.open #chat-log { max-height: 360px; overflow-y: auto; justify-content: flex-start; scrollbar-width: thin; }
 /* open, the lines can be selected and copied (closed, the box takes no clicks) */
 #chat.open #chat-log { -webkit-user-select: text; user-select: text; cursor: text; }
-#chat-log li { flex: none; padding: 1px 0; color: #c9d1dc; white-space: pre-wrap; overflow-wrap: anywhere; transition: opacity 1.2s; }
+#chat-log li { flex: none; padding: 1px 0; color: #cfdad6; white-space: pre-wrap; overflow-wrap: anywhere; transition: opacity 1.2s; }
 #chat-log li.old { opacity: 0; }
-#chat-log li.k-chat { color: #f4f6fa; }
+#chat-log li.k-chat { color: #f2f7f5; }
 #chat-log li.k-death { color: #ff8a7a; }
 #chat-log li.k-down { color: #ffb08a; }
 #chat-log li.k-up, #chat-log li.k-level { color: #9fe39a; }
-#chat-log li.k-guardian, #chat-log li.k-depth { color: #ffd27a; }
-#chat-log li.k-kill, #chat-log li.k-trade { color: #aab3c2; }
+#chat-log li.k-guardian, #chat-log li.k-depth { color: var(--ember-hi); }
+#chat-log li.k-kill, #chat-log li.k-trade { color: #aebcb8; }
 #chat-log li.k-horde { color: #ff9f5a; }
-#chat-log li.k-party { color: #cfe2ff; }
-#chat-log li.k-world { color: #8a96a8; text-align: center; border-top: 1px solid #ffffff1a; margin-top: 3px; padding-top: 3px; }
+#chat-log li.k-party { color: #bfe6de; }
+#chat-log li.k-world { color: var(--ink-dim); text-align: center; margin-top: 3px; padding-top: 3px;
+  border-top: 1px solid; border-image: linear-gradient(90deg, transparent, #3b4f4b 25%, #3b4f4b 75%, transparent) 1; }
 #chat-log li.k-system { color: #9ec7ff; }
 #chat-log li.k-dev { color: #b9a6ff; }
 #chat-log li.error { color: #ff7a6a; }
 #chat-log li.friend > span { border-left: 3px solid var(--who); padding-left: 5px; }
 #chat-log li.more { cursor: pointer; }
-#chat-log li.more > span::after { content: ' \25B8'; color: #8a96a8; }
-#chat-log .record { margin: 2px 0 3px 10px; padding-left: 8px; border-left: 1px solid #ff8a7a66; color: #d8dde6; font-size: 14px; }
-#chat-status { min-height: 1.35em; color: #ffd27a; opacity: 0; transition: opacity .3s; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+#chat-log li.more > span::after { content: ' \25B8'; color: var(--ink-dim); }
+#chat-log .record { margin: 2px 0 3px 10px; padding-left: 8px; border-left: 1px solid #ff8a7a66; color: #d9e3df; font-size: 14px; }
+#chat-status { min-height: 1.35em; color: var(--ember-hi); opacity: 0; transition: opacity .3s; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 #chat-status.on { opacity: .85; }
 #chat-entry { position: relative; }
-#chat-usage { margin: 2px 0; color: #8a96a8; font-size: 14px; }
-#chat-usage b { color: #ffe4ae; font-weight: normal; text-decoration: underline; }
-#chat-usage span { color: #6f7a8c; }
+#chat-usage { margin: 2px 0; color: var(--ink-dim); font-size: 14px; }
+#chat-usage b { color: var(--ember-text); font-weight: normal; text-decoration: underline; }
+#chat-usage span { color: var(--ink-faint); }
 #chat-field { position: relative; }
-#chat-field input, #chat-ghost { box-sizing: border-box; width: 100%; font: inherit; font-size: 16px; padding: 5px 8px; border: 1px solid transparent; }
-#chat-field input { position: relative; color: #fff; background: #1a1f29; border-color: #5a6475; border-radius: 4px; outline: none; }
-#chat-field input:focus { border-color: #ffcf7a; }
-#chat-ghost { position: absolute; inset: 0; z-index: 1; color: #6f7a8c; white-space: pre; overflow: hidden; pointer-events: none; text-shadow: none; }
+/* the line typed into, and the rest of a command's completion shown after it (the same box, the same type) */
+#chat-field input, #chat-ghost { box-sizing: border-box; width: 100%; font: inherit; font-size: 16px; padding: 5px 8px; }
+#chat-field input { --c1: 4px; --c2: 1px; --c3: 4px; --c4: 1px; position: relative; }
+#chat-ghost { position: absolute; inset: 0; z-index: 1; color: var(--ink-faint); white-space: pre; overflow: hidden; pointer-events: none; text-shadow: none;
+  border: 1px solid transparent; }
 #chat-ghost span { visibility: hidden; }
-#chat-popup { position: absolute; left: 0; right: 0; bottom: 100%; margin: 0 0 4px; padding: 3px; list-style: none; max-height: 17em; overflow-y: auto; scrollbar-width: thin;
-  background: #12161ef5; border: 1px solid #444c5c; border-radius: 5px; box-shadow: 0 6px 24px #0009; text-shadow: none; }
-#chat-popup li { display: flex; align-items: center; gap: 7px; padding: 2px 6px; border-radius: 3px; cursor: pointer; white-space: nowrap; }
-#chat-popup li.on { background: #2f3747; }
-#chat-popup li:hover { background: #262d3a; }
+/* what a command can go on with: a list of glass, like the dropdown's */
+#chat-popup { --c1: 0px; --c2: 8px; --c3: 0px; --c4: 3px; --face: #111716f7; --edge-hi: #4d6a64; --edge-lo: #2c3a37;
+  position: absolute; left: 0; right: 0; bottom: 100%; margin: 0 0 4px; padding: 3px; list-style: none; max-height: 17em; overflow-y: auto; scrollbar-width: thin;
+  text-shadow: none; }
+#chat-popup li { display: flex; align-items: center; gap: 7px; padding: 2px 6px; cursor: pointer; white-space: nowrap; }
+#chat-popup li.on { background: linear-gradient(90deg, #86e0d22e, #86e0d20a); box-shadow: inset 2px 0 0 var(--ember-hi); }
+#chat-popup li:hover { background: linear-gradient(90deg, #86e0d21f, #86e0d208); }
 #chat-popup img, #chat-popup i { flex: none; width: 18px; height: 18px; object-fit: contain; }
-#chat-popup .label { color: #f4f6fa; }
-#chat-popup .id { color: #6f7a8c; font-size: 14px; overflow: hidden; text-overflow: ellipsis; }
+#chat-popup .label { color: var(--ink); }
+#chat-popup .id { color: var(--ink-faint); font-size: 14px; overflow: hidden; text-overflow: ellipsis; }
 #chat-popup .label { flex: none; }
-#chat-popup .hint { margin-left: auto; padding-left: 8px; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: #8a96a8; font-size: 14px; }
+#chat-popup .hint { margin-left: auto; padding-left: 8px; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--ink-dim); font-size: 14px; }
 
 /* the Esc menu (game/escmenu.js): over the game, dimmed; alone the game waits meanwhile */
-#menu-overlay { position: fixed; inset: 0; z-index: 24; display: grid; place-items: center; padding: var(--pad); background: #080c1399; }
-#menu-panel { box-sizing: border-box; width: min(420px, 100%); max-height: 100%; overflow: auto;
-  padding: 16px 20px; background: #12161ef0; border: 1px solid #444c5c; border-radius: 8px; box-shadow: 0 16px 60px #0008; font-size: 15px; }
+#menu-overlay { position: fixed; inset: 0; z-index: 24; display: grid; place-items: center; padding: var(--pad); }
+#menu-panel { box-sizing: border-box; width: min(420px, 100%); max-height: 100%; overflow: auto; padding: 16px 20px; font-size: 15px; }
 #menu-panel header { display: flex; align-items: baseline; gap: 12px; }
 #menu-panel h1 { margin: 0 0 12px; color: #fff; font-size: 16px; letter-spacing: 3px; }
-#menu-paused { color: #8a96a8; font-size: 14px; }
-#menu-panel p { margin: 10px 0 6px; color: #aab3c2; }
-#menu-panel :is(button, input) { color: #e6e9ef; background: #2a2f3a; border: 1px solid #444c5c; border-radius: 4px; padding: 6px 10px; }
-#menu-panel button { cursor: pointer; font-size: 13px; }
-#menu-panel button:hover:not(:disabled) { background: #364052; color: #fff; }
-#menu-panel :is(button, input):focus-visible { outline: 2px solid #ffcf7a; outline-offset: 1px; }
-#menu-panel #menu-close { margin-left: auto; color: #8a96a8; background: none; border: none; padding: 0; font-size: 12px; }
+#menu-paused { color: var(--ink-dim); font-size: 14px; }
+#menu-panel p { margin: 10px 0 6px; color: #aebcb8; }
+#menu-panel :is(button, input) { padding: 6px 10px; }
+#menu-panel button { font-size: 13px; }
+#menu-panel #menu-close { margin-left: auto; padding: 0; font-size: 12px; }
 /* one column of items all alike: the buttons, the join code while hosting */
 #menu-list { display: grid; gap: 10px; }
 #menu-panel .menu-big { display: block; box-sizing: border-box; width: 100%; min-height: 42px; margin: 0; padding: 10px; font-size: 14px; }
-#menu-panel .menu-main { color: #ffe4ae; border-color: #8a7a52; }
+#menu-panel .menu-main { --c1: 8px; --c3: 8px; letter-spacing: .5px; }
 .menu-row { display: flex; gap: 8px; }
-#menu-room { display: flex !important; align-items: center; justify-content: center; gap: 14px; padding: 4px 10px !important;
-  border: 1px dashed #444c5c; border-radius: 4px; color: #8a96a8; }
+#menu-room { display: flex !important; align-items: center; justify-content: center; gap: 14px; padding: 4px 10px !important; color: var(--ink-dim); }
 #menu-room[hidden] { display: none !important; }
 #menu-room small { font-size: 14px; }
-#menu-room-code { color: #ffe4ae; font-family: var(--font-display); font-size: 22px; font-weight: normal; letter-spacing: 8px; user-select: all; }
-#menu-panel :is(#menu-leave, #menu-quit).confirm { color: #ffd0c4; border-color: #b0563f; background: #3a2420; }
-#menu-players { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; color: #e6e9ef; }
-#menu-players i { display: inline-block; width: 9px; height: 9px; margin-right: 8px; border-radius: 50%; }
-#menu-status { margin: 0 !important; color: #cfe2ff !important; text-align: center; }
+#menu-room-code { color: var(--ember-text); font-family: var(--font-display); font-size: 22px; font-weight: normal; letter-spacing: 8px; user-select: all;
+  text-shadow: 0 0 12px #ffa04066; }
+#menu-players { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; color: var(--ink); }
+/* each player's colour: a little cut stone */
+#menu-players i { display: inline-block; width: 8px; height: 8px; margin: 0 9px 0 1px; transform: rotate(45deg); }
+#menu-status { margin: 0 !important; color: #bfe6de !important; text-align: center; }
 #menu-status:empty { display: none; }
-/* "Leave the fight?" (game/leavefight.js) and "You died" (game/deathask.js): over the game, under the Esc menu */
-:is(#leave-overlay, #death-overlay) { position: fixed; inset: 0; z-index: 23; display: grid; place-items: center; padding: var(--pad); background: #080c1399; }
-#death-overlay { background: #1a050599; }
-:is(#leave-panel, #death-panel) { box-sizing: border-box; width: min(360px, 100%); padding: 16px 20px; background: #12161ef0; border: 1px solid #444c5c;
-  border-radius: 8px; box-shadow: 0 16px 60px #0008; font-size: 15px; }
+/* "Leave the fight?" (game/leavefight.js) and "You died" (game/deathask.js): over the game, under the Esc menu; dying in a red dark */
+:is(#leave-overlay, #death-overlay) { position: fixed; inset: 0; z-index: 23; display: grid; place-items: center; padding: var(--pad); }
+#death-overlay { background: radial-gradient(ellipse at 50% 45%, #1a05058c 0%, #12040499 60%, #080202e6 100%); }
+:is(#leave-panel, #death-panel) { box-sizing: border-box; width: min(360px, 100%); padding: 16px 20px; font-size: 15px; }
+#death-panel { --face: #120d0ceb; --edge-hi: #b0705e; --edge-lo: #2e1814; }
 :is(#leave-panel, #death-panel) h1 { margin: 0 0 8px; color: #fff; font-size: 16px; letter-spacing: 3px; }
-#death-panel h1 { color: #ffb4a4; }
-:is(#leave-panel, #death-panel) p { margin: 0 0 14px; color: #aab3c2; }
+#death-panel h1 { color: #ffb4a4; text-shadow: 0 0 14px #ff6a4055; }
+:is(#leave-panel, #death-panel) p { margin: 0 0 14px; color: #aebcb8; }
 #death-panel p:empty { display: none; }
 :is(#leave-panel, #death-panel) .leave-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-:is(#leave-panel, #death-panel) button { font-size: 14px; min-height: 42px; color: #e6e9ef; background: #2a2f3a; border: 1px solid #444c5c;
-  border-radius: 4px; padding: 10px; cursor: pointer; }
-:is(#leave-panel, #death-panel) button:hover { background: #364052; color: #fff; }
-:is(#leave-panel, #death-panel) button:focus-visible { outline: 2px solid #ffcf7a; outline-offset: 1px; }
-:is(#leave-panel #leave-stay, #death-panel #death-respawn) { color: #ffe4ae; border-color: #8a7a52; }
-#death-panel #death-menu.confirm { color: #ffd0c4; border-color: #b0563f; background: #3a2420; }
-:is(#leave-panel, #death-panel) kbd { margin-left: 6px; color: #8a96a8; font-size: 11px; }
+:is(#leave-panel, #death-panel) button { font-size: 14px; min-height: 42px; padding: 10px; }
+:is(#leave-panel, #death-panel) kbd { margin-left: 6px; font-size: 11px; }
 body.touch :is(#leave-panel, #death-panel) kbd { display: none; }
 /* the settings (game/settingsmenu.js): over the Esc menu or the main menu */
-#settings-overlay { position: fixed; inset: 0; z-index: 27; display: grid; place-items: center; padding: var(--pad);
-  background: radial-gradient(ellipse at 50% 45%, #0b0c0d8c 0%, #0b0c0dc4 60%, #050606eb 100%); }
+#settings-overlay { position: fixed; inset: 0; z-index: 27; display: grid; place-items: center; padding: var(--pad); }
 #settings-panel { box-sizing: border-box; width: min(720px, 100%); max-height: 100%; overflow: auto;
   padding: 16px 20px; font-size: 15px; }
 #settings-panel header { display: flex; align-items: baseline; gap: 12px; }
@@ -245,7 +267,7 @@ body.touch :is(#leave-panel, #death-panel) kbd { display: none; }
     border-image: linear-gradient(90deg, transparent, #3b4f4b 15%, #3b4f4b 85%, transparent) 1; }
   #settings-panel #settings-pages button { --c3: 0px; --c2: 6px; --glow-at: 50% 115%; flex: 1; text-align: center; }
 }
-#settings-panel h2 { display: flex; align-items: center; gap: 9px; margin: 16px 0 8px; padding-top: 12px; color: #9cc9bf; font-size: 13px; letter-spacing: 1px;
+#settings-panel h2 { display: flex; align-items: center; margin: 16px 0 8px; padding-top: 12px; color: #9cc9bf; font-size: 13px; letter-spacing: 1px;
   border-top: 1px solid; border-image: linear-gradient(90deg, #3b4f4b, #3b4f4b55 60%, transparent) 1; }
 #settings-tabs { display: flex; gap: 2px; margin: 10px 0 0; border-bottom: 1px solid;
   border-image: linear-gradient(90deg, transparent, #3b4f4b 10%, #3b4f4b 90%, transparent) 1; }
@@ -254,9 +276,7 @@ body.touch :is(#leave-panel, #death-panel) kbd { display: none; }
 #settings-panel #settings-tabs button:not(.on):hover { --face: #ffffff08; color: var(--ink); }
 #settings-keys { display: grid; align-content: start; gap: 4px; min-height: calc(var(--rows, 9) * 30px - 4px); padding-top: 10px; }
 #settings-panel button { font-size: 13px; padding: 5px 10px; }
-#settings-close { margin-left: auto; color: var(--ink-dim); background: none; border: none; padding: 0 !important; font-size: 11px !important; cursor: pointer; }
-#settings-close:hover { color: var(--ember-text); }
-#settings-close:focus-visible { outline: 1px solid var(--ember-hi); outline-offset: 3px; }
+#settings-panel #settings-close { margin-left: auto; padding: 0; font-size: 11px; }
 #settings-panel #settings-reset { --c1: 3px; --c2: 3px; --c3: 3px; --c4: 3px; margin-left: auto; padding: 2px 8px; font-size: 11px; }
 #settings-panel #settings-reset:not(.confirm, :hover) { color: #b3c2be; }
 /* the mouse turning the view (game/camerakey.js) */
@@ -305,25 +325,26 @@ body.orbiting, body.orbiting * { cursor: none !important; }
 .dropdown-list li.on { color: var(--ember-text); }
 .dropdown-list li:is(:hover, :focus) { background: linear-gradient(90deg, #86e0d21f, #86e0d208); outline: none; }
 .dropdown-list li:focus-visible { box-shadow: inset 2px 0 0 var(--ember-hi); }
-#inventory-overlay { position: fixed; inset: 0; z-index: 20; background: #080c13b8; display: grid; place-items: center; padding: 16px 16px 84px; }
+#inventory-overlay { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 16px 16px 84px; }
 /* game/inventory.js: the hero | (floor or shop) | the bag and the actions underneath | the details. Nothing in it changes
    its size with the selection: the details scroll inside their column, the actions keep their rows. */
-#inventory-panel { box-sizing: border-box; width: min(1100px, 100%); max-height: 100%; overflow: auto; padding: 18px 22px;
-  background: #202631; border: 1px solid #68715e; border-radius: 8px; box-shadow: 0 16px 80px #0009; }
+#inventory-panel { --c1: 22px; --c3: 22px; box-sizing: border-box; width: min(1100px, 100%); max-height: 100%; overflow: auto; padding: 18px 22px;
+  display: grid; grid-template-columns: minmax(0, 1fr); }
+/* the bag and the quests in one place, the one not shown only unseen: the panel is as large as the larger, whichever is in front */
+#inventory-panel header { grid-area: 1 / 1; } #inventory-feedback { grid-area: 3 / 1; }
+#inventory-panel :is(.inventory-body, #quests-body) { grid-area: 2 / 1; }
+#inventory-panel :is(.inventory-body, #quests-body).away { visibility: hidden; }
 #inventory-panel.with-floor { width: min(1200px, 100%); }
 #inventory-panel header { display: flex; align-items: center; gap: 18px; }
 #inventory-panel header > div:first-child { flex: none; }
-#inventory-panel h1 { margin: 0 0 5px; color: #ffe4ae; font-size: 22px; letter-spacing: 2px; }
-#inventory-panel h2 { font-size: 13px; margin: 12px 0 8px; color: #c5cdbc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#inventory-panel button, #inventory-panel select { font-size: 13px; color: #e7dfcf; background: #343d46; border: 1px solid #69746d; border-radius: 4px; padding: 7px 10px; cursor: pointer; }
-#inventory-panel button:hover:not(:disabled) { background: #465249; }
-#inventory-panel button:focus-visible, #inventory-panel select:focus-visible { outline: 2px solid #ffcf7a; outline-offset: 2px; }
-#inventory-panel button:disabled { opacity: .5; cursor: default; }
+#inventory-panel h1 { margin: 0 0 5px; color: var(--ember-text); font-size: 22px; letter-spacing: 2px; text-shadow: 0 0 16px #ffa04040; }
+#inventory-panel h2 { font-size: 13px; margin: 12px 0 8px; color: #9cc9bf; letter-spacing: .5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#inventory-panel :is(button, select) { font-size: 13px; padding: 7px 10px; }
 #inventory-close { flex: none; }
 #inventory-currency { flex: 1; display: flex; justify-content: flex-end; gap: 8px; min-width: 0; }
-.coin-slot { flex: 0 1 120px; min-width: 0; display: flex; align-items: center; gap: 6px; background: #181e28; border: 1px solid #444e5e; padding: 2px 8px 2px 2px; border-radius: 4px; }
+.coin-slot { --c1: 6px; --c3: 6px; flex: 0 1 120px; min-width: 0; display: flex; align-items: center; gap: 6px; padding: 2px 8px 2px 2px; color: var(--ember-hi); }
 .coin-slot img { width: 34px; height: 34px; object-fit: contain; flex: none; }
-.coin-slot small { display: block; color: #a4b0ba; font-size: 14px; }
+.coin-slot small { display: block; color: var(--ink-dim); font-size: 14px; }
 .inventory-body { display: grid; gap: 18px; grid-template-columns: 240px minmax(0, 1fr) 260px; grid-template-areas: "hero bag details"; }
 #inventory-panel.with-floor .inventory-body { grid-template-columns: 220px 86px minmax(0, 1fr) 250px; grid-template-areas: "hero floor bag details"; }
 #inventory-hero-col { grid-area: hero; } #inventory-floor-col, #inventory-shop-col { grid-area: floor; }
@@ -331,79 +352,84 @@ body.orbiting, body.orbiting * { cursor: none !important; }
 /* the hero (render/itemviews.js) fills its column; it does not make the column taller */
 #inventory-hero-col, #inventory-floor-col, #inventory-shop-col { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
 #inventory-hero-col[hidden], #inventory-floor-col[hidden], #inventory-shop-col[hidden] { display: none; }
-#inventory-hero { flex: 1 1 0; min-height: 120px; width: 100%; height: 0; border-radius: 4px;
-  background: radial-gradient(ellipse at 50% 70%, #2f3a4a, #181e28 72%); }
+#inventory-hero { --c1: 14px; --c3: 14px; box-sizing: border-box; flex: 1 1 0; min-height: 120px; width: 100%; height: 0;
+  --under: radial-gradient(ellipse at 50% 70%, #22302d, #0c1110 72%); }
 /* the armor worn, a slot each (game/inventory.js) */
 #inventory-worn { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
 #inventory-panel .worn-slot { aspect-ratio: 1; }
-.worn-slot .slot-name { position: absolute; inset: 0; display: grid; place-items: center; color: #5d6878; font: 11px var(--font-display); }
+.worn-slot .slot-name { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink-faint); font: 11px var(--font-display); }
 #inventory-equipped { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 8px; margin-top: 8px; font-size: 15px; align-items: baseline; }
-#inventory-equipped small { color: #8f9aaa; font-size: 14px; }
-#inventory-equipped b { font-weight: normal; color: #ffcf7a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#inventory-equipped small { color: var(--ink-dim); font-size: 14px; }
+/* (a weapon's name can be long: it is shown whole, over as many lines as it takes) */
+#inventory-equipped b { font-weight: normal; color: var(--ember-hi); overflow-wrap: break-word; }
 /* the floor or the wares: one strip of square slots (about four in view, the rest scroll), a row over the bag on a phone */
 .inventory-scroll { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; overflow-x: hidden;
   padding: 5px; margin: -5px; scrollbar-width: thin; }
 #inventory-panel .side-slot { flex: none; width: 100%; }
-.side-slot .price { position: absolute; left: 0; right: 0; bottom: 1px; color: #e6c35a; font: 11px var(--font-display); text-align: center; text-shadow: 0 1px 2px #000; }
+.side-slot .price { position: absolute; left: 0; right: 0; bottom: 1px; color: var(--ember-hi); font: 11px var(--font-display); text-align: center; text-shadow: 0 1px 2px #000; }
 .side-slot.poor .price { color: #9a6a5a; }
-#inventory-shop-title { color: #e6c35a !important; }
-/* the selected item: a thick gold ring outside its (rarity) border */
-#inventory-panel .inventory-slot.selected { box-shadow: 0 0 0 1px #10141c, 0 0 0 4px #ffcf7a, 0 0 12px 2px #ffcf7a66; }
-.floor-empty { color: #8b95a3; font-size: 14px; }
+#inventory-shop-title { color: var(--ember-hi) !important; }
+.floor-empty { color: var(--ink-dim); font-size: 14px; }
 #inventory-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
-/* the border: how the item is used (gray: in the bag, light blue: equipped or in hand, dark blue: on the quick bar);
-   the backdrop: its rarity (from Decent up) */
-#inventory-panel .inventory-slot { aspect-ratio: 1; position: relative; background: #181e28; padding: 1px; min-width: 0; overflow: hidden;
-  border: 2px solid #5b636b; }
-#inventory-panel .inventory-slot.worn { border-color: #8fd8ff; }
-#inventory-panel .inventory-slot.on-bar { border-color: #2f5fd0; }
-#inventory-panel button.inventory-slot[style*="--rarity"] { background: radial-gradient(circle at 50% 55%, color-mix(in srgb, var(--rarity) 70%, #181e28) 0%,
-  color-mix(in srgb, var(--rarity) 38%, #181e28) 45%, color-mix(in srgb, var(--rarity) 16%, #181e28) 100%); }
+/* a slot: a small cut stone, its edges how the item is used (glass: in the bag, bright teal: equipped or in hand, blue: on
+   the quick bar); what lies in it its rarity (from Decent up), glowing from the middle */
+#inventory-panel .inventory-slot { --c1: 7px; --c2: 2px; --c3: 7px; --c4: 2px; --edge-w: 2px; --face: #0f1514; --edge-hi: #4f625e; --edge-lo: #2c3836;
+  aspect-ratio: 1; position: relative; padding: 1px; min-width: 0; overflow: hidden; }
+#inventory-panel .inventory-slot:hover:not(:disabled) { --face: #18221f; --edge-hi: #7fa59c; --edge-lo: #3a4b47; }
+#inventory-panel .inventory-slot.worn { --edge-hi: #b4f4ea; --edge-lo: #4f9d92; }
+#inventory-panel .inventory-slot.on-bar { --edge-hi: #7f9fff; --edge-lo: #2f4fb0; }
+#inventory-panel button.inventory-slot[style*="--rarity"] { --under: radial-gradient(circle at 50% 55%, color-mix(in srgb, var(--rarity) 70%, #0f1514) 0%,
+  color-mix(in srgb, var(--rarity) 38%, #0f1514) 45%, color-mix(in srgb, var(--rarity) 14%, #0f1514) 100%); }
 #inventory-panel button.inventory-slot[style*="--rarity"]:hover { filter: brightness(1.15); }
+/* the weapon the Enchanter or the Smith works on, while something else is selected: lit teal from its edges in */
+#inventory-panel .inventory-slot.work { --edge-hi: #d8fff8; --edge-lo: #8fe3d6; box-shadow: inset 0 0 10px #8fe3d699; }
+/* the selected item: amber edges and the amber light coming in from them (its middle stays its rarity's) */
+#inventory-panel .inventory-slot.selected { --edge-hi: #ffe6c4; --edge-lo: #e8903e; box-shadow: inset 0 0 0 1px #fff0d8aa, inset 0 0 14px #ffa040b3; }
+#inventory-panel .inventory-slot:focus-visible { --edge-hi: var(--ember-hi); --edge-lo: #c47a3e; box-shadow: inset 0 0 0 1px #ffd6a066, inset 0 0 8px #ffa04066; }
 .inventory-slot :is(img, canvas) { width: 100%; height: 100%; object-fit: contain; display: block; }
 .inventory-slot .count { position: absolute; right: 5px; bottom: 2px; color: #fff; text-shadow: 0 1px 3px #000; }
-.inventory-slot .equipped { position: absolute; left: 4px; top: 2px; color: #8fd8ff; font-size: 10px; text-shadow: 0 1px 2px #000; }
-.inventory-slot .bar-key { position: absolute; right: 4px; top: 2px; color: #7ea2ff; font-size: 10px; text-shadow: 0 1px 2px #000; }
+.inventory-slot .equipped { position: absolute; left: 5px; top: 2px; color: #b4f4ea; font-size: 10px; text-shadow: 0 1px 2px #000; }
+.inventory-slot .bar-key { position: absolute; right: 4px; top: 2px; color: #9fb6ff; font-size: 10px; text-shadow: 0 1px 2px #000; }
 /* under the bag, in one row: the selected item's actions, and on the right its quick bar slot */
-#inventory-act { margin-top: 12px; padding: 8px 10px; background: #181e28; border-radius: 4px; display: flex; align-items: center; gap: 12px; }
+#inventory-act { margin-top: 12px; padding: 8px 10px; display: flex; align-items: center; gap: 12px; }
 .inventory-actions { display: flex; gap: 6px; height: 34px; flex: none; }
 #inventory-panel .inventory-actions button { height: 34px; padding: 0 14px; }
-#inventory-bar { display: flex; align-items: center; gap: 8px; height: 34px; margin-left: auto; min-width: 0; font-size: 15px; color: #c5cdbc; white-space: nowrap; }
+#inventory-bar { display: flex; align-items: center; gap: 8px; height: 34px; margin-left: auto; min-width: 0; font-size: 15px; color: #b3c2be; white-space: nowrap; }
 #inventory-bar-keys { display: grid; grid-template-columns: repeat(6, minmax(26px, 34px)); gap: 4px; }
-#inventory-panel #inventory-bar-keys button { height: 34px; padding: 0; text-align: center; }
-#inventory-panel #inventory-bar-keys button.on { color: #10141c; background: #ffcf7a; border-color: #ffcf7a; }
+#inventory-panel #inventory-bar-keys button { --c1: 4px; --c2: 1px; --c3: 4px; --c4: 1px; height: 34px; padding: 0; text-align: center; }
 /* the details: their own scroll, so a long text never makes the dialog taller */
-#inventory-details { position: relative; min-height: 500px; background: #181e28; border-radius: 4px; }
+#inventory-details { position: relative; min-height: 500px; }
 .inventory-details-inner { position: absolute; inset: 0; overflow-y: auto; padding: 6px 12px; }
 #inventory-item-view { display: block; width: 100%; height: 110px; }
-#inventory-item-stats { color: #b8c2d0; white-space: pre-line; font-size: 15px; margin: 6px 0; }
-#inventory-item-name { margin-bottom: 2px !important; }
-#inventory-item-base { color: #8f9aaa; font-size: 15px; }
+#inventory-item-stats { color: #b3c2be; white-space: pre-line; font-size: 15px; margin: 6px 0; }
+/* the selected item's name: whole, however long, broken over lines */
+#inventory-panel #inventory-item-name { margin-bottom: 2px; white-space: normal; overflow: visible; overflow-wrap: break-word; line-height: 1.3; }
+#inventory-item-base { color: var(--ink-dim); font-size: 15px; }
 #inventory-item-affixes { margin: 4px 0; padding: 0; list-style: none; color: #8fb6ff; font-size: 15px; }
-#inventory-item-affixes .affix-name { color: #6f7f99; font-style: italic; }
+#inventory-item-affixes .affix-name { color: #6f8580; font-style: italic; }
 /* the Enchanter's enchantment on a weapon, and the Smith's re-roll buttons (game/inventory.js) */
 #inventory-item-affixes .enchant { color: #8fe3d6; }
 #inventory-item-affixes .rerollable { display: flex; align-items: center; gap: 6px; margin: 3px 0; }
-#inventory-panel #inventory-item-affixes button.reroll { flex: none; margin-left: auto; height: 24px; padding: 0 8px; font-size: 13px; }
+#inventory-panel #inventory-item-affixes button.reroll { --c1: 3px; --c2: 3px; --c3: 3px; --c4: 3px; flex: none; margin-left: auto; height: 24px; padding: 0 8px; font-size: 13px; }
+/* a line between the parts of the details: lit at its start, fading out */
+:is(#inventory-item-price, #inventory-item-compare) { border-top: 1px solid; border-image: linear-gradient(90deg, #3b4f4b, #3b4f4b55 60%, transparent) 1; }
 /* what it costs at a villager's (game/inventory.js priceHtml): each coin and crystal with its picture, and what you have */
-#inventory-item-price { margin: 8px 0; padding-top: 6px; border-top: 1px solid #2c3442; font-size: 15px; }
+#inventory-item-price { margin: 8px 0; padding-top: 6px; font-size: 15px; }
 #inventory-item-price[hidden] { display: none; }
-#inventory-item-price h3 { margin: 0 0 4px; font-size: 15px; color: #e6c35a; font-weight: normal; }
+#inventory-item-price h3 { margin: 0 0 4px; font-size: 15px; color: var(--ember-hi); font-weight: normal; }
 #inventory-item-price .price-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin: 2px 0; }
-#inventory-item-price .price-what { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; color: #e8edf2; }
+#inventory-item-price .price-what { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; color: var(--ink); }
 #inventory-item-price .price-part { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
 #inventory-item-price img { width: 22px; height: 22px; object-fit: contain; }
-#inventory-item-price .price-have { flex: none; color: #8f9aaa; font-size: 13px; line-height: 22px; white-space: nowrap; }
+#inventory-item-price .price-have { flex: none; color: var(--ink-dim); font-size: 13px; line-height: 22px; white-space: nowrap; }
 #inventory-item-price .price-have.short { color: #ff7a6a; }
-#inventory-item-price .price-note { margin: 4px 0 0; color: #9ea9b6; font-size: 14px; }
-/* the weapon the Enchanter or the Smith works on, while something else is selected */
-#inventory-panel .inventory-slot.work { box-shadow: 0 0 0 1px #10141c, 0 0 0 3px #8fe3d6; }
-#inventory-item-compare { font-size: 15px; color: #9ea9b6; margin: 8px 0; padding-top: 6px; border-top: 1px solid #2c3442; }
-#inventory-item-compare p { margin: 0 0 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#inventory-item-price .price-note { margin: 4px 0 0; color: #a5b4b0; font-size: 14px; }
+#inventory-item-compare { font-size: 15px; color: #a5b4b0; margin: 8px 0; padding-top: 6px; }
+#inventory-item-compare p { margin: 0 0 4px; overflow-wrap: break-word; }
 .compare-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 1px 6px; }
 .compare-grid span { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.compare-grid span:nth-child(4n+1) { text-align: left; color: #b8c2d0; overflow: hidden; text-overflow: ellipsis; }
-.compare-grid .arrow { color: #5f6b7b; }
+.compare-grid span:nth-child(4n+1) { text-align: left; color: #b3c2be; overflow: hidden; text-overflow: ellipsis; }
+.compare-grid .arrow { color: var(--ink-faint); }
 #inventory-item-compare .up { color: #7fd87a; } #inventory-item-compare .down { color: #ff7a6a; }
 #loot-labels { position: fixed; inset: 0; z-index: 4; pointer-events: none; overflow: hidden; }
 /* mouse look (the close view, game/mouselook.js): no cursor, labels are not clicked; the
@@ -432,49 +458,42 @@ body.look #loot-labels .loot-label { pointer-events: none; }
 .rainbow { animation: rainbow 2.5s linear infinite; }
 /* reducing motion (the settings: the system's choice at first, game/display.js): nothing blinks, flows or pops */
 body.calm :is(.rainbow, #rewind, #rewind *, #quickbar.assigning.ready, #effects .fx.ending, #touch-use) { animation: none !important; }
-#inventory-panel footer { font-size: 14px; color: #9ea9b6; }
 /* the tabs: the bag or the quests (game/inventory.js, game/questpanel.js) */
 #inventory-tabs { flex: none; display: flex; gap: 4px; }
-#inventory-panel #inventory-tabs button { padding: 6px 16px; background: #181e28; }
-#inventory-panel #inventory-tabs button[aria-selected="true"] { color: #10141c; background: #ffcf7a; border-color: #ffcf7a; }
-#inventory-panel footer[hidden], .inventory-body[hidden] { display: none; }
+#inventory-panel #inventory-tabs button { padding: 6px 16px; }
 /* the quests: the list (with what the villager talked to has, above it) | the selected quest */
 #quests-body { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); }
-#quests-body[hidden] { display: none; }
 #quests-list-col { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
-#quests-talk { margin-top: 12px; padding: 8px 10px; background: #2a2418; border: 1px solid #6a5a32; border-radius: 4px; }
+/* the villager's: a well lit amber */
+#quests-talk { --face: #1c130bcc; --edge-hi: #3a2818; --edge-lo: #8a5a30; --glow: #ffa04026; --glow-at: 50% 0%; margin-top: 12px; padding: 8px 10px; }
 #quests-talk[hidden] { display: none; }
-#inventory-panel #quests-talk h2 { margin: 0 0 4px; color: #e6c35a; }
-#quests-talk p { margin: 0 0 8px; font-size: 15px; color: #c9bfa6; }
+#inventory-panel #quests-talk h2 { margin: 0 0 4px; color: var(--ember-hi); }
+#quests-talk p { margin: 0 0 8px; font-size: 15px; color: #cdbfa8; }
 #quests-talk .quest-entries { display: flex; flex-direction: column; gap: 6px; }
 #quests-filter { display: flex; gap: 6px; margin: 12px 0 8px; }
 #inventory-panel #quests-filter button { padding: 5px 10px; font-size: 12px; }
-#inventory-panel #quests-filter button[aria-pressed="true"] { color: #10141c; background: #ffcf7a; border-color: #ffcf7a; }
 #quests-list { flex: 1 1 0; min-height: 160px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding: 4px; margin: -4px; scrollbar-width: thin; }
-#inventory-panel .quest-entry { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; background: #181e28; padding: 6px 10px; }
-#inventory-panel .quest-entry.selected { border-color: #ffcf7a; box-shadow: 0 0 0 1px #ffcf7a, 0 0 10px #ffcf7a44; }
-.quest-entry .mark { flex: none; width: 16px; text-align: center; font-weight: bold; color: #e6c35a; }
-.quest-entry.ready .mark { color: #7fd87a; } .quest-entry.failed .mark { color: #ff7a6a; } .quest-entry.done .mark { color: #8f9aaa; }
+#inventory-panel .quest-entry { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 6px 10px; }
+.quest-entry .mark { flex: none; width: 16px; text-align: center; font-weight: bold; color: var(--ember); }
+.quest-entry.ready .mark { color: #7fd87a; } .quest-entry.failed .mark { color: #ff7a6a; } .quest-entry.done .mark { color: var(--ink-dim); }
 .quest-entry span:last-child { min-width: 0; }
-.quest-entry b { display: block; font-weight: normal; color: #ffe4ae; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.quest-entry small { display: block; color: #8f9aaa; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.quest-empty { color: #8b95a3; font-size: 15px; padding: 4px 2px; }
-#quests-details { position: relative; min-height: 500px; background: #181e28; border-radius: 4px; }
+.quest-entry b { display: block; font-weight: normal; color: var(--ember-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.quest-entry small { display: block; color: var(--ink-dim); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.quest-empty { color: var(--ink-dim); font-size: 15px; padding: 4px 2px; }
+#quests-details { position: relative; min-height: 500px; }
 #quests-details-inner { padding: 6px 14px; }
-#inventory-panel #quests-details-inner h2 { font-size: 16px; color: #ffe4ae; white-space: normal; margin: 12px 0 4px; }
-#quests-details-inner h3 { font-size: 12px; color: #c5cdbc; margin: 14px 0 6px; font-weight: normal; letter-spacing: 1px; text-transform: uppercase; }
-.quest-meta { color: #8f9aaa; font-size: 15px; }
-.quest-text { color: #d6dccf; font-size: 16px; line-height: 1.45; }
-.quest-goals, .quest-rewards { margin: 0; padding: 0; list-style: none; font-size: 16px; color: #b8c2d0; }
-.quest-goals li::before { content: '○ '; color: #8f9aaa; }
+#inventory-panel #quests-details-inner h2 { font-size: 16px; color: var(--ember-text); white-space: normal; margin: 12px 0 4px; }
+#quests-details-inner h3 { font-size: 12px; color: #9cc9bf; margin: 14px 0 6px; font-weight: normal; letter-spacing: 1px; text-transform: uppercase; }
+.quest-meta { color: var(--ink-dim); font-size: 15px; }
+.quest-text { color: #d9e3df; font-size: 16px; line-height: 1.45; }
+.quest-goals, .quest-rewards { margin: 0; padding: 0; list-style: none; font-size: 16px; color: #b3c2be; }
+.quest-goals li::before { content: '○ '; color: var(--ink-dim); }
 .quest-goals li.done { color: #7fd87a; } .quest-goals li.done::before { content: '✓ '; color: #7fd87a; }
-.quest-goals li.now { color: #ffe4ae; }
+.quest-goals li.now { color: var(--ember-text); }
 .quest-rewards li { margin: 2px 0; }
-.quest-hint { color: #ffcf7a; font-size: 15px; margin: 12px 0 0; }
+.quest-hint { color: var(--ember-hi); font-size: 15px; margin: 12px 0 0; }
 .quest-actions { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 10px; }
-#inventory-panel .quest-actions .main { color: #10141c; background: #ffcf7a; border-color: #ffcf7a; }
-#inventory-panel .quest-actions .main:hover:not(:disabled) { background: #ffe0a0; }
-#inventory-feedback { height: 22px; margin: 10px 0 6px; color: #ffcf7a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#inventory-feedback { height: 22px; margin: 10px 0 6px; color: var(--ember-hi); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* smaller screens: the details under the bag, the hero beside both (with a floor or shop: under it). Not media queries: the
    width at the UI scale (game/uiscale.js) */
 body.ui-w1000 .inventory-body { grid-template-columns: 170px minmax(0, 1fr); grid-template-areas: "hero bag" "hero details"; }
@@ -504,50 +523,49 @@ body.ui-w540 #quests-list { flex: none; max-height: 220px; }
 body.ui-w540 #quests-details { min-height: 0; }
 body.ui-w540 #quests-details-inner { position: static; }
 
-/* quick bar (game/quickbar.js): above the inventory's dimmed backdrop, so items can be assigned */
-#quickbar { position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); z-index: 21; display: flex; gap: 6px;
-  padding: 6px; background: #0b0d12b3; border: 1px solid #444c5c; border-radius: 6px; font-family: var(--font-display); }
-#quickbar.assigning { border-color: #ffcf7a; }
-/* a bag item that can go on it is selected: the bar calls for a tap */
+/* quick bar (game/quickbar.js): above the inventory's dimmed backdrop, so items can be assigned; a strip of glass with a cut
+   stone for each slot, like the bag's */
+#quickbar { --c1: 10px; --c2: 3px; --c3: 10px; --c4: 3px; position: fixed; left: 50%; bottom: 12px; transform: translateX(-50%); z-index: 21;
+  display: flex; gap: 6px; padding: 6px; font-family: var(--font-display); }
+/* the inventory open: its edges amber; a bag item that can go on it is selected: it calls for a tap, its light swelling */
+#quickbar.assigning { --edge-hi: #d99a5c; --edge-lo: #6b4226; }
 #quickbar.assigning.ready { animation: qb-call 1.4s ease-in-out infinite; }
-@keyframes qb-call { 50% { box-shadow: 0 0 0 2px #ffcf7a88, 0 0 16px #ffcf7a66; } }
-#quickbar .qb-slot { position: relative; width: 50px; height: 50px; padding: 3px; overflow: hidden; cursor: pointer;
-  background: radial-gradient(circle at 50% 60%, color-mix(in srgb, var(--rarity, transparent) 22%, transparent), #181e28 70%);
-  border: 1px solid #3a4352; border-radius: 4px; }
-#quickbar .qb-slot:hover { border-color: #8a96a8; }
-#quickbar .qb-slot.equipped { box-shadow: inset 0 0 0 2px #ffcf7a; }
+@keyframes qb-call { 50% { --edge-hi: #ffe6c4; --edge-lo: #c47a3e; --glow: #ffa04059; } }
+#quickbar .qb-slot { --c1: 6px; --c2: 2px; --c3: 6px; --c4: 2px; --face: #0f1514d9; --edge-hi: #465a56; --edge-lo: #27322f;
+  --under: radial-gradient(circle at 50% 60%, color-mix(in srgb, var(--rarity, transparent) 30%, transparent), transparent 75%);
+  position: relative; width: 50px; height: 50px; padding: 3px; overflow: hidden; }
+#quickbar .qb-slot:hover { --face: #18221fe6; --edge-hi: #7fa59c; --edge-lo: #3a4b47; }
+/* the weapon held: amber edges; the flask readied in the hand: amber light coming in from them too */
+#quickbar .qb-slot.equipped { --edge-hi: #ffd6a0; --edge-lo: #c47a3e; }
+#quickbar .qb-slot.in-hand { --edge-hi: #ffe6c4; --edge-lo: #e8903e; box-shadow: inset 0 0 0 1px #fff0d877, inset 0 0 12px #ffa040a6; }
 #quickbar .qb-slot.none-left img { filter: grayscale(1); opacity: .35; }
 #quickbar .qb-slot img { width: 100%; height: 100%; object-fit: contain; display: block; position: relative; }
-#quickbar .qb-key { position: absolute; left: 4px; top: 1px; color: #e6e9ef; font-size: 10px; text-shadow: 0 1px 2px #000; }
+#quickbar .qb-key { position: absolute; left: 5px; top: 1px; color: #cfdad6; font-size: 10px; text-shadow: 0 1px 2px #000; }
 #quickbar .qb-count { position: absolute; right: 4px; bottom: 1px; color: #fff; font-size: 11px; text-shadow: 0 1px 3px #000; }
 #quickbar .qb-cast { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: #b98cff59; pointer-events: none; }
-#quickbar .qb-slot.casting { border-color: #b98cff; }
-#quickbar .qb-slot.cooling .qb-cast { background: #10141c99; }
-#quickbar .qb-slot.in-hand { box-shadow: inset 0 0 0 2px #ffcf7a, 0 0 8px #ffcf7a88; }
+#quickbar .qb-slot.casting { --edge-hi: #d9c4ff; --edge-lo: #7a52c8; }
+#quickbar .qb-slot.cooling .qb-cast { background: #0b0c0d99; }
 #quickbar :is(.qb-bag, .qb-menu) { display: none; }
 
-/* the teleport scroll asking where to (game/teleportmenu.js): over the quick bar and the effects */
-#teleport-menu { position: fixed; left: 50%; bottom: 120px; transform: translateX(-50%); z-index: 21; box-sizing: border-box;
-  width: min(300px, calc(100% - 24px)); display: grid; gap: 4px; padding: 8px; background: #0b0d12e6; border: 1px solid #b98cff;
-  border-radius: 6px; box-shadow: 0 10px 40px #0008; }
+/* the teleport scroll asking where to (game/teleportmenu.js): over the quick bar and the effects; glass with the scroll's violet in its edges */
+#teleport-menu { --c1: 12px; --c3: 12px; --edge-hi: #b98cff; --edge-lo: #3a2a5a; position: fixed; left: 50%; bottom: 120px; transform: translateX(-50%); z-index: 21;
+  box-sizing: border-box; width: min(300px, calc(100% - 24px)); display: grid; gap: 4px; padding: 8px; }
 #teleport-menu h2 { margin: 0 2px 2px; color: #d9c4ff; font-size: 12px; font-weight: normal; letter-spacing: 1px; }
-#teleport-menu button { display: flex; align-items: baseline; gap: 8px; min-height: 38px; padding: 6px 10px; text-align: left; cursor: pointer;
-  font-size: 13px; color: #e6e9ef; background: #1b2029; border: 1px solid #3a4352; border-radius: 4px; }
-#teleport-menu button:hover { border-color: #b98cff; background: #262036; }
-#teleport-menu button.off { cursor: default; opacity: .55; }
-#teleport-menu button.off:hover { border-color: #3a4352; background: #1b2029; }
+#teleport-menu button { display: flex; align-items: baseline; gap: 8px; min-height: 38px; padding: 6px 10px; text-align: left; font-size: 13px; }
+#teleport-menu button:hover:not(.off) { --face: #221c30; --edge-hi: #c9a6ff; --edge-lo: #4a3670; }
+#teleport-menu button.off { cursor: default; opacity: .55; --glint-color: transparent; --face: #18201f; --edge-hi: #4d6a64; --edge-lo: #263231; color: var(--ink); }
 #teleport-menu kbd { font-size: 10px; }
 #teleport-menu b { font-weight: normal; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#teleport-menu small { margin-left: auto; color: #8a96a8; font-size: 14px; white-space: nowrap; }
+#teleport-menu small { margin-left: auto; color: var(--ink-dim); font-size: 14px; white-space: nowrap; }
 body.touch #teleport-menu kbd { display: none; }
 
 /* potions at work and poison (game/effects.js): little icons with the time left, over the quick bar */
 #effects { position: fixed; left: 50%; bottom: 78px; transform: translateX(-50%); z-index: 19; display: flex; gap: 5px; pointer-events: none; }
-#effects .fx { position: relative; width: 30px; height: 30px; padding: 2px; background: #0b0d12cc; border: 1px solid #5a6475; border-radius: 4px; overflow: hidden; }
+#effects .fx { position: relative; width: 30px; height: 30px; padding: 2px; overflow: hidden; --c1: 4px; --c2: 1px; --c3: 4px; --c4: 1px; --face: #0e1312d9; --edge-hi: #5e7f78; --edge-lo: #26302e; }
 #effects .fx img { width: 100%; height: 100%; object-fit: contain; display: block; position: relative; }
 #effects .fx .left { position: absolute; left: 0; right: 0; bottom: -1px; text-align: center; color: #fff; font: 11px/1.2 var(--font-display); text-shadow: 0 1px 2px #000; }
-#effects .fx .bar { position: absolute; left: 0; bottom: 0; height: 2px; background: #ffcf7a; }
-#effects .fx.status { border-color: #8fdc3c; width: auto; padding: 2px 6px; color: #b8f080; font: 12px/26px var(--font-display); }
+#effects .fx .bar { position: absolute; left: 0; bottom: 0; height: 2px; background: var(--ember); box-shadow: 0 0 4px var(--ember); }
+#effects .fx.status { --edge-hi: #b8f080; --edge-lo: #4f7a1e; width: auto; padding: 2px 6px; color: #b8f080; font: 12px/26px var(--font-display); }
 #effects .fx.ending { animation: fx-blink .5s steps(2) infinite; }
 @keyframes fx-blink { 50% { opacity: .45; } }
 
@@ -605,11 +623,10 @@ body.touch :is(input, textarea, select) { font-size: calc(16px / min(var(--ui), 
 body.touch #quickbar { top: calc(8px + env(safe-area-inset-top)); bottom: auto; gap: 5px; padding: 5px; }
 body.touch #quickbar .qb-slot { width: 46px; height: 46px; }
 body.touch #quickbar .qb-key { display: none; }
-body.touch #quickbar :is(.qb-bag, .qb-menu) { display: grid; place-items: center; width: 46px; height: 46px; padding: 0; margin-left: 4px; cursor: pointer;
-  background: #2a2f3a; border: 1px solid #8a7a52; border-radius: 4px; }
-body.touch #quickbar :is(.qb-bag, .qb-menu) svg { width: 28px; height: 28px; fill: #ffe4ae; }
-body.touch #quickbar .qb-menu { border-color: #444c5c; }
-body.touch #quickbar .qb-menu svg { fill: #c5cdbc; }
+body.touch #quickbar :is(.qb-bag, .qb-menu) { display: grid; place-items: center; width: 46px; height: 46px; padding: 0; margin-left: 4px; }
+body.touch #quickbar :is(.qb-bag, .qb-menu) svg { width: 28px; height: 28px; fill: var(--ember-text); }
+body.touch #quickbar .qb-bag { --edge-hi: #d99a5c; --edge-lo: #6b4226; --glow: #ffa04033; }
+body.touch #quickbar .qb-menu svg { fill: #b3c2be; }
 body.touch #effects { top: calc(72px + env(safe-area-inset-top)); bottom: auto; }
 body.touch #teleport-menu { top: calc(112px + env(safe-area-inset-top)); bottom: auto; }
 body.touch #minimap { width: calc(120px * var(--map, 1)); height: auto; top: calc(8px + env(safe-area-inset-top)); right: calc(8px + env(safe-area-inset-right)); }
@@ -653,7 +670,7 @@ body.in-menu :is(#quickbar, #teleport-menu, #chat, #minimap, #effects, #touch, #
 #title-panel { padding: 16px 20px; font-size: 15px; min-height: 0; overflow: auto; }
 #title-panel h2 { margin: 0 0 10px; color: #fff; font-size: 14px; letter-spacing: 1px; }
 #title-panel h2 small { color: var(--ink-dim); font-family: var(--font-body); font-weight: normal; font-size: 14px; letter-spacing: 0; margin-left: 6px; }
-#title-panel h3 { display: flex; align-items: center; gap: 9px; margin: 16px 0 6px; color: #9cc9bf; font-size: 12px; font-weight: normal; letter-spacing: 1px; }
+#title-panel h3 { display: flex; align-items: center; margin: 16px 0 6px; color: #9cc9bf; font-size: 12px; font-weight: normal; letter-spacing: 1px; }
 #title-panel p { margin: 8px 0; color: #aebcb8; }
 #title-panel :is(button, input, .title-link) { padding: 6px 10px; }
 #title-panel button, .title-link { font-size: 13px; text-decoration: none; text-align: center; }
@@ -703,25 +720,22 @@ body.in-menu :is(#quickbar, #teleport-menu, #chat, #minimap, #effects, #touch, #
 #title-hero:focus-visible { outline: 2px solid var(--ember-hi); outline-offset: 2px; }
 
 /* Native modal keeps the game/menu behind the paint tools inert, including on touch. */
-#skin-editor { box-sizing: border-box; width: min(760px, 96vw); max-height: 94dvh; overflow: auto;
-  padding: 20px; border: 1px solid #61718b; border-radius: 12px; background: #101722; color: #e6e9ef; font: inherit; }
-#skin-editor::backdrop { background: #080c13d9; }
-#skin-editor h2 { margin: 0 0 14px; }
+#skin-editor { --c1: 22px; --c3: 22px; box-sizing: border-box; width: min(760px, 96vw); max-height: 94dvh; overflow: auto; padding: 20px; font: inherit; }
+#skin-editor::backdrop { background: radial-gradient(ellipse at 50% 45%, #0b0c0db3 0%, #050606f0 100%); }
+#skin-editor h2 { margin: 0 0 14px; color: #fff; }
+#skin-editor h2 small { color: var(--ink-dim); font-family: var(--font-body); font-weight: normal; font-size: 14px; }
 .skin-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.skin-tools button { padding: 8px 14px; color: #e6e9ef; background: #263349; border: 1px solid #61718b; border-radius: 6px; cursor: pointer; }
-.skin-tools button[aria-pressed="true"] { background: #3a567f; border-color: #ffcf7a; }
-.skin-tools label { display: flex; align-items: center; gap: 6px; }
-.skin-tools input[type="color"] { width: 44px; height: 36px; padding: 2px; }
-.skin-tools input[type="range"] { width: 88px; }
-#skin-view { height: clamp(230px, 48dvh, 440px); margin-top: 12px; border-radius: 8px; overflow: hidden; }
+#skin-editor .skin-tools button { padding: 8px 14px; }
+.skin-tools label { display: flex; align-items: center; gap: 6px; color: #b3c2be; }
+.skin-tools input[type="color"] { width: 44px; height: 36px; padding: 2px; background: #0a0e0d; border: 1px solid #4d6a64; cursor: pointer; }
+.skin-tools input[type="range"] { width: 88px; accent-color: var(--ember); }
+#skin-view { box-sizing: border-box; height: clamp(230px, 48dvh, 440px); margin-top: 12px; overflow: hidden; }
 #skin-view canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
-#skin-editor p { font-size: 16px; color: #b5c2d8; }
+#skin-editor p { font-size: 16px; color: #aebcb8; }
 .skin-library { margin-top: 12px; }
-#skin-name { flex: 1; min-width: 120px; padding: 8px 10px; border: 1px solid #61718b; border-radius: 6px;
-  background: #19212f; color: #e6e9ef; font: inherit; }
-#skin-name:invalid { border-color: #9c8154; }
+#skin-editor #skin-name { flex: 1; min-width: 120px; padding: 8px 10px; font: inherit; }
+#skin-editor #skin-name:invalid:not(:focus-visible) { --edge-lo: #7a6440; }
 #skin-status { min-height: 1.3em; }
-#skin-editor :focus-visible { outline: 2px solid #ffcf7a; outline-offset: 2px; }
 /* an outpost's supply cart under raid (game/defense.js): its strength over it */
 /* (placed in the screen's pixels: grown by the UI scale, not zoomed) */
 .cart-bar { position: absolute; left: 0; top: 0; width: calc(100px * var(--ui)); font: calc(12px * var(--ui))/1.2 var(--font-display); color: #ffe4ae; text-align: center;
@@ -729,11 +743,12 @@ body.in-menu :is(#quickbar, #teleport-menu, #chat, #minimap, #effects, #touch, #
 .cart-bar i { display: block; height: calc(6px * var(--ui)); margin-top: 2px; background: #0b0e14d0; border: 1px solid #ffffff33; border-radius: 3px; overflow: hidden; }
 .cart-bar b { display: block; height: 100%; background: #e6c35a; transition: width .2s; }
 .cart-bar[data-phase="countdown"] span::after, .cart-bar[data-phase="between"] span::after { content: ' · get ready'; }
-/* the quest followed (game/questpanel.js Track): its title and what to do now, under the minimap */
-#quest-track { position: fixed; top: calc(38px + 222px * var(--map, 1) + var(--safe-t)); right: calc(16px + var(--safe-r)); width: 200px; z-index: 3; pointer-events: none;
-  padding: 6px 9px; background: #0b0e14b8; border: 1px solid #ffffff1f; border-radius: 4px; font: 15px/1.3 var(--font-body); color: #c9d2dc; }
+/* the quest followed (game/questpanel.js Track): its title and what to do now, under the minimap, on glass like it */
+#quest-track { --c1: 8px; --c2: 2px; --c3: 8px; --c4: 2px; --face: #0e1312b8; --edge-hi: #5e7f78; --edge-lo: #1f2b29;
+  position: fixed; top: calc(38px + 222px * var(--map, 1) + var(--safe-t)); right: calc(16px + var(--safe-r)); width: 200px; z-index: 3; pointer-events: none;
+  padding: 6px 9px; font: 15px/1.3 var(--font-body); color: #cfdad6; }
 #quest-track[hidden] { display: none; }
-#quest-track b { display: block; color: #e6c35a; font: 13px/1.5 var(--font-display); }
+#quest-track b { display: block; color: var(--ember-hi); font: 13px/1.5 var(--font-display); }
 body.touch #quest-track { top: calc(2px + 148px * var(--map, 1) + env(safe-area-inset-top)); width: 150px; font-size: 14px; }
 /* a trial room (game/trials.js): its name and what it needs while it runs, the banner as it arms */
 #trial-hud { position: fixed; top: calc(14px + var(--safe-t)); left: 50%; transform: translateX(-50%); z-index: 3; pointer-events: none;

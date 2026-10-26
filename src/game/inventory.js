@@ -94,8 +94,9 @@ function showTab(view) {
   tab = view === 'quests' ? 'quests' : 'bag';
   for (const b of $('inventory-tabs').querySelectorAll('[data-tab]')) b.setAttribute('aria-selected', String(b.dataset.tab === tab));
   $('inventory-title').textContent = tab === 'quests' ? tr('Quests') : tr('Inventory');
-  document.querySelector('#inventory-panel .inventory-body').hidden = tab !== 'bag';
-  $('quests-body').hidden = tab !== 'quests';
+  // both stay laid out, one over the other, so the panel keeps its size between the tabs (style.css)
+  document.querySelector('#inventory-panel .inventory-body').classList.toggle('away', tab !== 'bag');
+  $('quests-body').classList.toggle('away', tab !== 'quests');
   showKeys();
   signature = ''; updateInventory();
   const ware = trader && $('inventory-shop').querySelector('[data-ware]'), first = floorMode && $('inventory-floor').querySelector('[data-floor]');
@@ -347,7 +348,8 @@ export function updateInventory() {
   const next = `${inv.version}:${sel}:${work}:${floorMode}:${trader?.name}:${floor.map(p => p.id)}:${allowed}:${state.equipping}:${player.hp}:${player.maxHp}:${player.xp}:${state.statusMsg}:${together()}:${state.run?.smith.visit}/${state.run?.smith.sold.length}:${shieldInHand()}`;
   if (next !== signature || inv !== shown) draw(next, inv, equipped, allowed, floor, item);
   // the hero and the selected item turning (render/itemviews.js; real time: the game is paused)
-  drawLiveViews($('inventory-panel'), (readiedFlask(player) ?? equippedWeapon(player))?.id ?? null, performance.now() / 1000);
+  // (not while the quests are in front: the bag's views are there, unseen)
+  if (tab === 'bag') drawLiveViews($('inventory-panel'), (readiedFlask(player) ?? equippedWeapon(player))?.id ?? null, performance.now() / 1000);
 }
 function draw(next, inv, equipped, allowed, floor, item) {
   signature = next; shown = inv;
@@ -590,10 +592,10 @@ function use() {
 
 $('inventory-close').addEventListener('click', () => setInventoryOpen(false));
 $('inventory-tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) showTab(b.dataset.tab); });
-// the keys it names are the settings' (game/settings.js)
+// the keys the tabs name are the settings' (game/settings.js); the close button only names Esc, the
+// same on both tabs (with the tab's key it would change its width, and the header's with it)
 function showKeys() {
-  const bag = keyLabel('inventory'), quests = keyLabel('quests'), key = tab === 'quests' ? quests : bag;
-  $('inventory-close').textContent = key ? tr('Close · {key} / Esc', { key }) : tr('Close · Esc');
+  $('inventory-close').textContent = tr('Close · Esc');
   for (const b of $('inventory-tabs').querySelectorAll('[data-tab]')) {
     const key = keyLabel(b.dataset.tab === 'bag' ? 'inventory' : 'quests');
     b.title = key ? `${b.textContent} · ${key}` : b.textContent;

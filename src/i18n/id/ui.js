@@ -584,9 +584,6 @@ export default {
   'Quick bar:': 'Bilah cepat:',
   'Put on quick bar slot': 'Taruh di slot bilah cepat',
   'Which quests': 'Tugas apa saja',
-  'Game paused · Quests come from the villagers: a <b>!</b> over one has a quest for you, a <b>?</b> one to hand in':
-    'Permainan jeda · Tugas datang dari warga: <b>!</b> di atasnya berarti ada tugas untukmu, <b>?</b> berarti tugas untuk diserahkan',
-  'opens the quests': 'membuka tugas',
   'Potions at work': 'Ramuan yang bekerja',
   'Quick bar': 'Bilah Cepat',
   'Turn the view left': 'Putar pandangan ke kiri',

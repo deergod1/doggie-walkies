@@ -20,7 +20,7 @@ export async function openSkinEditor({ hero, name = '', save, onClose }) {
   if (active) return;
   active = true;
   const previousFocus = document.activeElement, dialog = document.createElement('dialog');
-  dialog.id = 'skin-editor'; dialog.setAttribute('aria-labelledby', 'skin-title');
+  dialog.id = 'skin-editor'; dialog.className = 'glass'; dialog.setAttribute('aria-labelledby', 'skin-title');
   dialog.innerHTML = `<h2 id="skin-title">${escapeText(name ? tr('Paint Skin') : tr('New Skin'))} <small>2048 × 2048</small></h2>
     <div class="skin-tools" role="group" aria-label="${escapeText(tr('Paint tools'))}">
       <button data-tool="pen" aria-pressed="true">${escapeText(tr('Pen'))}</button>
@@ -69,7 +69,7 @@ export async function openSkinEditor({ hero, name = '', save, onClose }) {
     if (!dialog.isConnected) return;
     figure = createFigure();
     figure.model.traverse(o => { if (o.isMesh) { o.userData.skinMaterial = true; meshes.push(o); } });
-    const scene = new THREE.Scene(); scene.background = new THREE.Color('#19212f');
+    const scene = new THREE.Scene(); scene.background = new THREE.Color('#131a19');   // the glass (style.css)
     scene.add(figure.group, new THREE.HemisphereLight(0xffffff, 0x8293ac, 2));
     const light = new THREE.DirectionalLight(0xffffff, 2.5); light.position.set(2, 4, 5); scene.add(light);
     figure.group.updateMatrixWorld(true);

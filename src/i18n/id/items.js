@@ -511,9 +511,7 @@ export default {
   'Bought {item} for {price}.': 'Membeli {item} seharga {price}.',
   'Bought {item:a} for {price}': 'Membeli {item:a} seharga {price}',
   'Not for sale': 'Tidak dijual',
-  'Close · {key} / Esc': 'Tutup · {key} / Esc',
   'Close · Esc': 'Tutup · Esc',
-  'The Quests tab': 'Tab Tugas',
 
   // --- game/equipment.js -------------------------------------------------------------------------
   'Finish your current action before changing weapons': 'Selesaikan aksimu sekarang sebelum mengganti senjata',

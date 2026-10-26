@@ -25,7 +25,7 @@
   <div id="dev-stats"></div>
   <div id="dev-hint"><kbd>`</kbd> commands: /spawn, /weapon, /give ... (/help lists them)</div>
 </div>
-<div id="chat" aria-label="Chat and what happened" data-t="aria-label">
+<div id="chat" class="glass-back" aria-label="Chat and what happened" data-t="aria-label">
   <div id="chat-tabs" hidden><button data-filter="all" class="on" data-t>All</button><button data-filter="chat" data-t>Chat</button><button data-filter="events" data-t>Events</button><span data-t>Enter to send · Esc to close</span></div>
   <ol id="chat-log" role="log" aria-live="polite"></ol>
   <div id="chat-status" role="status"></div>
@@ -36,8 +36,8 @@
   </div>
 </div>
 <div id="menu-overlay" hidden>
-  <section id="menu-panel" role="dialog" aria-modal="true" aria-labelledby="menu-title">
-    <header><h1 id="menu-title" data-t>Menu</h1><span id="menu-paused">Paused</span><button id="menu-close" aria-label="Close" data-t="aria-label">Esc</button></header>
+  <section id="menu-panel" class="glass" role="dialog" aria-modal="true" aria-labelledby="menu-title">
+    <header><h1 id="menu-title" data-t>Menu</h1><span id="menu-paused">Paused</span><button id="menu-close" class="plain" aria-label="Close" data-t="aria-label">Esc</button></header>
     <div id="menu-list">
       <button id="menu-resume" class="menu-big menu-main" data-t>Resume</button>
       <button id="menu-host" class="menu-big menu-main" data-t>Host this world</button>
@@ -52,7 +52,7 @@
   </section>
 </div>
 <div id="leave-overlay" hidden>
-  <section id="leave-panel" role="alertdialog" aria-modal="true" aria-labelledby="leave-title" aria-describedby="leave-text">
+  <section id="leave-panel" class="glass" role="alertdialog" aria-modal="true" aria-labelledby="leave-title" aria-describedby="leave-text">
     <h1 id="leave-title" data-t>Leave the fight?</h1>
     <p id="leave-text"></p>
     <div class="leave-buttons">
@@ -62,7 +62,7 @@
   </section>
 </div>
 <div id="death-overlay" hidden>
-  <section id="death-panel" role="alertdialog" aria-modal="true" aria-labelledby="death-title" aria-describedby="death-cause">
+  <section id="death-panel" class="glass" role="alertdialog" aria-modal="true" aria-labelledby="death-title" aria-describedby="death-cause">
     <h1 id="death-title" data-t>You died</h1>
     <p id="death-cause"></p>
     <div class="leave-buttons">
@@ -72,8 +72,8 @@
   </section>
 </div>
 <div id="settings-overlay" hidden>
-  <section id="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title">
-    <header><h1 id="settings-title" data-t>Settings</h1><button id="settings-close" aria-label="Close settings" data-t="text aria-label">Done · Esc</button></header>
+  <section id="settings-panel" class="glass" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <header><h1 id="settings-title" data-t>Settings</h1><button id="settings-close" class="plain" aria-label="Close settings" data-t="text aria-label">Done · Esc</button></header>
     <div class="settings-body">
       <div id="settings-pages" role="tablist" aria-orientation="vertical" aria-label="Kinds of settings" data-t="aria-label">
         <button role="tab" id="settings-page-tab-general" data-page="general" aria-controls="settings-page-general" data-t>General</button>
@@ -143,7 +143,7 @@
   <button id="title-hero" hidden aria-label="Choose Character" data-t="aria-label"><span id="title-hero-view"></span><b id="title-hero-name"></b><small id="title-hero-level"></small></button>
   <div id="title-box">
     <h1 id="title-logo" data-t>The Glass Bird</h1>
-    <section id="title-panel" aria-live="polite"></section>
+    <section id="title-panel" class="glass" aria-live="polite"></section>
   </div>
 </div>
 <div id="loot-labels"></div>
@@ -151,7 +151,7 @@
 <div id="lock-marker" hidden></div>
 <div id="look-hint" hidden data-t>Click to look around</div>
 <div id="inventory-overlay" hidden>
-  <section id="inventory-panel" role="dialog" aria-modal="true" aria-labelledby="inventory-title" tabindex="-1">
+  <section id="inventory-panel" class="glass" role="dialog" aria-modal="true" aria-labelledby="inventory-title" tabindex="-1">
     <header><div><h1 id="inventory-title">Inventory</h1><div id="inventory-progress"></div></div><div id="inventory-tabs" role="tablist" aria-label="Bag or quests" data-t="aria-label"><button role="tab" data-tab="bag" aria-selected="true" data-t>Bag</button><button role="tab" data-tab="quests" aria-selected="false" data-t>Quests</button></div><div id="inventory-currency" aria-label="Currency" data-t="aria-label"></div><button id="inventory-close" aria-label="Close inventory" data-t="aria-label">Close · Esc</button></header>
     <div class="inventory-body">
       <div id="inventory-hero-col"><h2 data-t>Hero</h2><canvas id="inventory-hero" data-live-hero aria-hidden="true"></canvas><div id="inventory-worn" role="group" aria-label="Armor worn" data-t="aria-label"></div><div id="inventory-equipped"></div></div>
@@ -166,13 +166,13 @@
         <canvas id="inventory-item-view" aria-hidden="true"></canvas><h2 id="inventory-item-name">Select an item</h2>
         <div id="inventory-item-base"></div><p id="inventory-item-stats"></p><ul id="inventory-item-affixes"></ul><div id="inventory-item-price" hidden></div><div id="inventory-item-compare"></div></div></aside>
     </div>
-    <div id="quests-body" hidden>
+    <div id="quests-body" class="away">
       <div id="quests-list-col"><div id="quests-talk" hidden></div>
         <div id="quests-filter" role="group" aria-label="Which quests" data-t="aria-label"><button data-filter="active" aria-pressed="true">Going on</button><button data-filter="done" aria-pressed="false">Done</button><button data-filter="archived" aria-pressed="false">Archived</button></div>
         <div id="quests-list" role="listbox" aria-label="Quests" data-t="aria-label"></div></div>
       <aside id="quests-details"><div class="inventory-details-inner" id="quests-details-inner"></div></aside>
     </div>
-    <p id="inventory-feedback" role="status"></p><footer id="quests-footer" hidden><span data-t>Game paused · Quests come from the villagers: a <b>!</b> over one has a quest for you, a <b>?</b> one to hand in</span> · <span id="quests-key-text">U</span> <span data-t>opens the quests</span></footer>
+    <p id="inventory-feedback" role="status"></p>
   </section>
 </div>
 <div id="effects" aria-label="Potions at work" data-t="aria-label"></div>
@@ -180,8 +180,8 @@
 <div id="trial-hud" hidden aria-live="polite"><b id="trial-name"></b><span id="trial-line"></span><div id="trial-meter"><i id="trial-bar"></i></div></div>
 <div id="trial-banner" hidden><b></b><span></span></div>
 <div id="trial-tip" hidden></div>
-<div id="quickbar" aria-label="Quick bar" data-t="aria-label"></div>
-<div id="teleport-menu" role="menu" aria-label="Teleport to" hidden data-t="aria-label"></div>
+<div id="quickbar" class="glass" aria-label="Quick bar" data-t="aria-label"></div>
+<div id="teleport-menu" class="glass" role="menu" aria-label="Teleport to" hidden data-t="aria-label"></div>
 <div id="touch" hidden aria-hidden="true">
   <div id="touch-stick"><div id="touch-ring" hidden><div id="touch-knob"></div></div></div>
   <button id="touch-turn-left" class="touch-turn" tabindex="-1" aria-label="Turn the view left" data-t="aria-label"><svg viewBox="0 0 24 24"><path d="M8.6 5.2 4 9.8l4.6 4.6V11a7 7 0 0 1 9.9 6.4h2.4A9.4 9.4 0 0 0 8.6 8.6z"/></svg></button>
