@@ -25,6 +25,7 @@ import { allEnemies, addEnemies, mirroring } from './enemies.js';
 import { rebuildWorld, refreshOpenFaces } from './flow.js';
 import { drawTracker } from './questpanel.js';
 import { tr, say, phrase, cleanWords } from '../i18n/i18n.js';
+import { narrate } from './narrator.js';
 
 const CHECK_EVERY = 0.5;   // s (real time): the gates looked at, offers brought up to date, a landmark looked for
 // seen: the quests' states as last told (in run seenIn); sent: the log as last given out
@@ -128,7 +129,7 @@ function grant(id, rewards, title) {
   setStatus([tr('Quest complete: {title}', { title: say(title) }), tr('+{xp} XP', { xp: rewards.xp }),
     ...rewards.copper ? [formatCoins(rewards.copper)] : []].join(' · '));
   sfx('coin', { pitch: 0.8 }); jingle('quest');
-  if (levels) { log('level', { level: player.level }, { share: true }); jingle('levelup'); }
+  if (levels) { log('level', { level: player.level }, { share: true }); jingle('levelup'); narrate('level'); }
 }
 
 // --- a death puts the cube back (game/flow.js) ------------------------------------------------
@@ -149,7 +150,7 @@ function announce(L) {
     if (!was || was === q.state) continue;
     const giver = giverName(q);
     const title = q.title, said = say(title);
-    if (q.state === 'active' && was === 'offered') { log('quest', { title, what: 'taken' }); setStatus(tr('Quest taken: {title}', { title: said })); jingle('questtaken'); }
+    if (q.state === 'active' && was === 'offered') { log('quest', { title, what: 'taken' }); setStatus(tr('Quest taken: {title}', { title: said })); jingle('questtaken'); narrate('quest'); }
     else if (q.state === 'active' && was === 'failed') log('quest', { title, what: 'restarted' });
     else if (q.state === 'ready') {
       log('quest', { title, what: 'ready', giver: phrase('{giver:the}', { giver }) });

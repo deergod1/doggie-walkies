@@ -3,8 +3,9 @@
 //             startLanguage), the UI scale (game/uiscale.js), the minimap's size (game/display.js),
 //             the item names on the floor always or only hovered (game/lootlabels.js; X switches
 //             it too), the damage numbers (game/juice.js), the music on or off, the volume of
-//             everything, the music's and the sounds' (audio/context.js), and whether the game is
-//             quiet in the background
+//             everything, the music's, the sounds' and the narrator's (audio/context.js), the
+//             narrator's subtitles (game/narrator.js), and whether the game is quiet in the
+//             background
 //   Graphics  the frame rate cap (main.js), the render resolution (render/resolution.js), the
 //             anti-aliasing (render/msaa.js), the lighting's quality level (game/quality.js), the
 //             particles (render/particles.js), the brightness (game/display.js), reducing motion
@@ -92,6 +93,7 @@ const settings = {
   clickMove: stored.clickMove !== false, invertZoom: stored.invertZoom === true, startZoom: zoomStep(stored.startZoom),
   music: stored.music === true, quietBehind: typeof stored.quietBehind === 'boolean' ? stored.quietBehind : !embedded,
   masterVolume: volume(stored.masterVolume), musicVolume: volume(stored.musicVolume), soundVolume: volume(stored.soundVolume),
+  voiceVolume: volume(stored.voiceVolume), subtitles: stored.subtitles !== false,
   keys: resolveBindings(stored.keys),
 };
 
@@ -101,6 +103,7 @@ function sound() {
   quietAudio(settings.quietBehind);
   setVolume('music', settings.musicVolume);
   setVolume('sounds', settings.soundVolume);
+  setVolume('voice', settings.voiceVolume);
 }
 function changed() {
   sound();
@@ -197,6 +200,11 @@ export const musicVolume = () => settings.musicVolume;
 export const soundVolume = () => settings.soundVolume;
 export function setMusicVolume(v) { settings.musicVolume = volume(v); changed(); }
 export function setSoundVolume(v) { settings.soundVolume = volume(v); changed(); }
+// the narrator (game/narrator.js): her voice's volume (0: she is only read), and her subtitles
+export const voiceVolume = () => settings.voiceVolume;
+export function setVoiceVolume(v) { settings.voiceVolume = volume(v); changed(); }
+export const subtitles = () => settings.subtitles;
+export function setSubtitles(on) { settings.subtitles = !!on; changed(); }
 
 // --- keys ---------------------------------------------------------------------------------------
 

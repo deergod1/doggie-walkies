@@ -14,8 +14,10 @@ left for their own changes: do not translate into them unless asked.
 The narrator's lines (`src/core/narration.js`, German in `src/i18n/de/story.js`) are pre-rendered
 with Pocket TTS into `assets/narration/` (`docs/narration.md`). When you add or change a line, its
 text or its German, also run `node tools/narration.mjs` (needs `uv`; the first run downloads about
-1 GB of models) and commit the clips and `assets/narration/manifest.json` with it: `npm test` fails
-while one is missing or stale. `node tools/narration.mjs --check` lists what is out of date.
+1 GB of models): `npm test` fails while a clip rendered here is missing or stale.
+`node tools/narration.mjs --check` lists what is out of date. For now the clips and the manifest are
+not committed (`assets/narration/` is in `.gitignore`) until we are happy with the voice; the game
+only shows the subtitles without them. Do not commit them unless asked.
 
 - Check what you rendered. The `transcribe_file` tool only understands English; for German use the
   `audio-transcription` skill with `--language de`. If a clip says the text wrong, try other takes

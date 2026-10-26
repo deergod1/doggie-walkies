@@ -32,6 +32,7 @@ import { stepSiege, stepChase, dropPortcullis, resetEvents, lightBeacon, eventHu
 import { path as teachPath, label as teachLabel } from './teach.js';
 import { tr, msg } from '../i18n/i18n.js';
 import { uiScale } from './uiscale.js';
+import { narrate } from './narrator.js';
 
 const $ = id => document.getElementById(id);
 const SD = [[1, 0], [-1, 0], [0, 1], [0, -1]];
@@ -236,7 +237,7 @@ function announce(s, happened) {
   if (happened === 'armed') {
     setStatus(`${tr(TRIALS[s.kind].name)}! ${tr(SEALED)}`);
     banner(tr(TRIALS[s.kind].name), HOW[s.kind] ? tr(HOW[s.kind]) : '');
-    sfx('rumble'); sfx('gate', { delay: 0.4 }); jingle('trialsealed');
+    sfx('rumble'); sfx('gate', { delay: 0.4 }); jingle('trialsealed'); narrate('trial', { what: 'sealed' });
   }
   if (happened === 'running') sfx('rumble', { pitch: 0.7 });
 }
@@ -377,6 +378,7 @@ export function resolve(tell = true) {
     slide: m.role === 'branch' ? msg('The gate is open, and the vault with it.') : msg('The gate is open: the way on too.') }[m.kind];
   banner(isPuzzle(m.kind) ? tr('Solved!') : tr('Well done!'), done ? tr(done) : '');
   log('trial', { name: TRIALS[m.kind].name, depth: state.map.depth, what: 'resolved' }, { share: tell });
+  narrate('trial', { what: 'resolved' });
   showTrial();
   return true;
 }
@@ -570,7 +572,7 @@ export function failTrial(reason) {
   const s = state.trial, m = mapTrial();
   if (!s || !m || s.phase === 'resolved') return;
   log('trial', { name: TRIALS[m.kind].name, depth: state.map.depth, what: 'failed' });
-  jingle('trialfailed');
+  jingle('trialfailed'); narrate('trial', { what: 'failed' });
   if (sealedIn()) { backBeforeTrial(reason); return; }
   setStatus(tr(reason));
   restartTrial();

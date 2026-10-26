@@ -17,6 +17,7 @@ import { ENCHANT } from './gear/enchants.js';
 import { AFFIX } from './gear/affixes.js';
 import { formatCoins } from './inventory.js';
 import './gear/stats.js';   // (an item's words say themselves: sayAs('item'))
+import { lineById } from './narration.js';
 import { tr, msg, say, language, cleanWords } from '../i18n/i18n.js';
 
 // learn: memory.html#diary (see learn/README.md)
@@ -47,6 +48,7 @@ export const KINDS = {
                                  // ('ready'), handed in and paid ('done'), failed or started again
   party: { group: 'events' },    // { text }: someone joined or left
   world: { group: 'events' },    // { seed, name? }: a new world began (name: a saved one, back in it)
+  narration: { group: 'events' },// { line, form }: what the narrator said (core/narration.js: a line's id, and its form)
   system: { group: 'system' },   // { text }: what the console says (help, mistakes)
   dev: { group: 'system' },      // { text, error? }: what a developer command did
 };
@@ -167,6 +169,10 @@ export function describe({ kind, data: d = {}, who }) {
         case 'restarted': return tr('Quest started again: {title}', { title });
         default: return tr('Quest: {title}', { title });
       }
+    }
+    case 'narration': {
+      const line = lineById(d.line);
+      return line ? tr(line.text, line.forms?.[d.form]) : '';
     }
     case 'world': return d.name ? tr('{name} · seed {seed}', { name: d.name, seed: String(d.seed) }) : tr('A new world · seed {seed}', { seed: String(d.seed) });
     default: return w(d.text ?? '');

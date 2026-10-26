@@ -16,6 +16,7 @@ import { spill } from './loot.js';
 import { sfx } from '../audio/sfx.js';
 import { jingle } from '../audio/jingles.js';
 import { tr } from '../i18n/i18n.js';
+import { narrate } from './narrator.js';
 
 const OPEN_REACH = 1.2;   // cells from the chest's centre the player opens it from
 
@@ -47,6 +48,7 @@ export function openChest(site) {
     list => stowLoot(state.world, site.id, list));
   sfx('chest', { at: a }); jingle('chest', { delay: 0.4 });   // the hinge and the lid, then the glint
   setStatus(tr('You opened a treasure chest'));
+  narrate('chest');
   return true;
 }
 

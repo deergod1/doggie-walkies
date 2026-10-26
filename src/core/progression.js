@@ -89,7 +89,8 @@ export function createPlayerStats(dev = false) {
 // (visit) and what of this visit's we bought (sold: indices)
 // learn: memory.html#notes (see learn/README.md)
 export const createRun = () => ({ defeated: new Set(), unlockedGates: new Set(), loot: new Map(), dropped: new Set(), chests: new Set(), townPortal: null, trials: new Map(),
-  quests: createQuestLog(), clock: 0, kills: new Map(), smith: { visit: 0, sold: [] } });
+  quests: createQuestLog(), clock: 0, kills: new Map(), smith: { visit: 0, sold: [] },
+  told: new Set() });   // the narrator's lines said in this world (core/narration.js ids, game/narrator.js)
 // learn: stronger.html#xp-code (see learn/README.md)
 export function awardXP(p, amount) {
   whole(amount);

@@ -5,7 +5,8 @@
 //             when the slider is let go, as the panel itself grows or shrinks with it), the
 //             minimap's size, the item names on the floor, the damage numbers, fullscreen (where
 //             the browser can: game/display.js); the music on or off, the volume of everything,
-//             the music's and the sounds', and being quiet in the background
+//             the music's, the sounds' and the narrator's, her subtitles, and being quiet in the
+//             background
 //   Graphics  the frame rate cap, the render resolution, the anti-aliasing, the lighting's quality
 //             level (Auto or pinned, game/quality.js), the particles, the brightness, reducing
 //             motion (System: as the system says); the camera (overview or close view), the zoom a
@@ -28,6 +29,7 @@ import {
   lookSpeed, setLookSpeed, invertLook, setInvertLook, clickMove, setClickMove, invertZoom, setInvertZoom,
   startZoomStep, setStartZoomStep, startZoom,
   musicOn, setMusic, masterVolume, setMasterVolume, musicVolume, setMusicVolume, soundVolume, setSoundVolume, quietBehind, setQuietBehind,
+  voiceVolume, setVoiceVolume, subtitles, setSubtitles,
   keysOf, bindKey, unbindKey, resetKeys, nameOf, onSettingsChange, languageNow, chooseLanguage,
 } from './settings.js';
 import { tr, tc, LANGUAGES, onLanguageChange } from '../i18n/i18n.js';
@@ -104,6 +106,7 @@ const TOGGLES = {
   'settings-fullscreen': [isFullscreen, setFullscreen],
   'settings-music': [musicOn, setMusic],
   'settings-quiet': [quietBehind, setQuietBehind],
+  'settings-subtitles': [subtitles, setSubtitles],
   'settings-invert': [invertLook, setInvertLook],
   'settings-click-move': [clickMove, setClickMove],
   'settings-invert-zoom': [invertZoom, setInvertZoom],
@@ -127,6 +130,7 @@ const SLIDERS = {
   'settings-music-volume': { out: 'settings-music-level', get: () => Math.round(musicVolume() * 100), show: percent, set: v => setMusicVolume(v / 100), live: true },
   'settings-sound-volume': { out: 'settings-sound-level', get: () => Math.round(soundVolume() * 100), show: percent,
     set: v => setSoundVolume(v / 100), live: true, done: () => sfx('coin') },
+  'settings-voice-volume': { out: 'settings-voice-level', get: () => Math.round(voiceVolume() * 100), show: percent, set: v => setVoiceVolume(v / 100), live: true },
   'settings-brightness': { out: 'settings-brightness-level', get: () => Math.round(brightness() * 100), show: percent, set: v => setBrightness(v / 100), live: true },
   // the zoom changes at once while playing, to see it
   'settings-start-zoom': { out: 'settings-start-zoom-level', get: () => zoomStep(startZoomStep()),

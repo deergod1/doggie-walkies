@@ -70,9 +70,10 @@ Status: implemented (`src/core/save.js`, `src/game/save.js`), with the main menu
   cubes again (`world/`). A world is named after its seed (`core/names.js`, below); a seed saved
   a second time is its copy 2, "... II". The name is written along but never read back.
   It also keeps its play time (`run.clock`) and the ordinary kills, for them to come back
-  (`run.kills`, [progression.md](progression.md#enemies-come-back)).
+  (`run.kills`, [progression.md](progression.md#enemies-come-back)), and what the narrator
+  has said in it (`run.told`, [narration.md](narration.md#in-the-game): she says nothing twice).
   `{ v, id, seed, copy, name, created, updated, deepest, run: { defeated, gates, chests, dropped,
-  loot, townPortal, quests, clock, kills }, faces, visited, spots }`
+  loot, townPortal, quests, clock, kills, told }, faces, visited, spots }`
 - Coming into a world a hero has its level and bag, full health, no potions at work
   (`heroStats`). It comes in at the entry of the cube it left that world in (or the cube a fall
   started in), else in town. What it defeated there stays defeated, until its time to come back

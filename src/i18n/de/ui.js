@@ -57,6 +57,8 @@ export default {
   Music: 'Musik',
   'Music volume': 'Musik-Lautstärke',
   'Sound volume': 'Geräusch-Lautstärke',
+  'Narrator volume': 'Lautstärke der Erzählerin',
+  Subtitles: 'Untertitel',
   Keys: 'Tasten',
   'Click a key, then press the new one (<kbd>Esc</kbd>: keep the old one, <kbd>Backspace</kbd>: no key). A key goes to one control only. <kbd>Esc</kbd> always opens the menu and closes what is open.':
     'Klick auf eine Taste und drück dann die neue (<kbd>Esc</kbd>: die alte behalten, <kbd>Backspace</kbd>: keine Taste). Eine Taste gehört immer nur zu einer Steuerung. <kbd>Esc</kbd> öffnet immer das Menü und schließt, was offen ist.',

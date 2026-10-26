@@ -29,6 +29,8 @@ import { ARENA_WEIGHTS } from '../world/arenas.js';
 import { BOSS_SHAPES } from '../cubegen/arenashapes.js';
 import { devSwapWeapon, devDropWeapon, devWear, devWearArmor, devDropArmor } from './equipment.js';
 import { forceMood } from './music.js';
+import { devNarrate } from './narrator.js';
+import { LINES } from '../core/narration.js';
 import { nextCube, newWorld } from './flow.js';
 import { pickFloor, pointer } from './pointer.js';
 import { heroLevel, MAX_WORLDS } from '../core/save.js';
@@ -385,6 +387,13 @@ dev({
   run({ 'on|off': on }) { return showPerf(on ? on === 'on' : undefined) ? 'Perf overlay on' : 'Perf overlay off'; },
 });
 dev({ name: 'bench', help: 'time the frame with a part of it off at a time (shadow maps, enemies\' shadows, fixed lights, fluid patterns)', run: () => runBench() });
+
+addType(commands, { name: 'line', values: () => [...LINES.map(l => ({ value: l.id, label: l.id, hint: l.text })),
+  { value: 'forget', label: 'forget', hint: 'she forgets what she said in this world' }] });
+dev({
+  name: 'narrate', help: 'the narrator says a line now (forget: she says everything again in this world)', args: [{ name: 'line', type: 'line' }],
+  run: ({ line }) => devNarrate(line),
+});
 
 dev({
   name: 'music', help: 'hold one mood of the music (auto: let go)', args: [{ name: 'mood', type: 'mood' }],

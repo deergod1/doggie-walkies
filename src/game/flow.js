@@ -51,6 +51,7 @@ import { enterTrial, restartTrial, refreshTrialView, sealedIn, warnTrials } from
 import { setFluidPalettes } from '../render/fluidpal.js';
 import { tr } from '../i18n/i18n.js';
 import { askRespawn, forgetDeath } from './deathask.js';
+import { narrate, arrived, stopNarrator } from './narrator.js';
 
 export function spawnAt(x, y, z) {
   cancelSword(true); cancelCast();
@@ -115,6 +116,7 @@ export function die() {
   if (!jingle('death')) sfx('death');
   raidDied();   // a raid going on is lost (game/defense.js)
   logDeath();
+  narrate('death');   // (she says it once the hero is back: game/narrator.js pauses with "You died")
   askRespawn(cause, backAfterDeath);
 }
 function backAfterDeath() {
@@ -302,7 +304,9 @@ export function settleIn(neighbors = true) {
   const c = state.cubes.cubes.get(state.cubeKey);
   showStats(c.map, state.cubeKey, state.cubes.seed, c.visits);
   // the first time this deep: into the chronicle, and the first of an act (or the core) gets its jingle
-  if (noteDepth(c.map, state.cubes.seed)) actJingle(c.map.depth);
+  const deeper = noteDepth(c.map, state.cubes.seed);
+  if (deeper) actJingle(c.map.depth);
+  arrived(c.map, state.cubeKey, c.visits, deeper);   // what the narrator has to say about it (game/narrator.js)
   if (neighbors) showNeighbors(visitedNeighbors(state.cubeKey));
   if (gateLocked(state.map, state.run)) setStatus(guardianLockMessage(state.map, guardianKind(state.map)));
   prefetchAround(c);
@@ -393,6 +397,7 @@ export function newWorld(seed = (Math.random() * 1e9) >>> 0, { keepPlayer = stat
   cancelSword(true);
   clearInput();
   forgetDeath();   // ("You died" not answered: game/deathask.js)
+  stopNarrator();
   if (!keepPlayer) Object.assign(player, createPlayerStats(state.dev));
   state.run = createRun(); state.inventoryOpen = false;
   if (restore) restoreRun(restore);
@@ -423,6 +428,7 @@ function restoreRun({ run, faces, visited, deepest = 0 }) {
   for (const [k, n] of run.trials || []) r.trials.set(k, n);
   r.townPortal = run.townPortal;
   r.smith = checkSmith(run.smith);
+  for (const id of run.told ?? []) r.told.add(id);
   r.quests = checkQuestLog(run.quests);
   r.quests.deepest = Math.max(r.quests.deepest, deepest);
   takeLoot(run.loot);
@@ -431,7 +437,7 @@ function restoreRun({ run, faces, visited, deepest = 0 }) {
 
 // Back to the main menu (game/menu.js): the world goes, and nothing of it stays in the scene
 export function endWorld() {
-  cancelSword(true); cancelCast(); clearInput(); forgetDeath();
+  cancelSword(true); cancelCast(); clearInput(); forgetDeath(); stopNarrator();
   removeEnemyViews(detachEnemies());
   clearNeighbors(); clearNeighborCache();
   disposeWorld(state.world); state.world = null;

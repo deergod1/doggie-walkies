@@ -51,6 +51,7 @@ import { jingle } from '../audio/jingles.js';
 import { online, relay } from '../net/online.js';
 import { log } from './log.js';
 import { tr } from '../i18n/i18n.js';
+import { narrate } from './narrator.js';
 
 export const TOSS_TIME = 0.55;   // the arc out of the body
 const TAKE_REACH = 0.6;          // a clicked pickup is taken from this close (cells)
@@ -175,6 +176,7 @@ function credit(p) {
       gained.color = r.css;
       // an unusual one (or better) goes into the chronicle; a remarkable one (or better) the friends hear of
       if (r.rank >= RARITY.unusual.rank) log('loot', { item: itemWords(p), rarity: r.id }, { share: r.rank >= RARITY.remarkable.rank });
+      if (r.rank >= RARITY.remarkable.rank) narrate('loot');
     }
     sfx('pickup');
   }

@@ -5,3 +5,6 @@ worktrees/
 *.blend1
 .pi/blender_mcp/
 blender/previews/
+# the narrator's clips (node tools/narration.mjs): kept out until the voice is settled, the game
+# shows subtitles without them (docs/narration.md)
+assets/narration/

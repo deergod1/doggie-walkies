@@ -53,9 +53,12 @@ docs that explain how the game works, from the big ideas down to the real code:
   - Quests (`src/core/quests.js`, `src/game/quests.js`, the inventory's Quests tab in
     `src/game/questpanel.js`, U): the villagers give quests, shared by everyone in the world and
     saved with it (`docs/quests.md`).
-  - The narrator's lines (`src/core/narration.js`, `docs/story.md`): voiced ahead with Kyutai's
-    Pocket TTS (voice Azelma; German with the 24-layer model) into `assets/narration/` by
-    `node tools/narration.mjs` (`docs/narration.md`); nothing plays them yet.
+  - The narrator (`docs/story.md`, `docs/narration.md`): the Glassmaker's lines and when she says
+    them (`src/core/narration.js`), voiced ahead with Kyutai's Pocket TTS (voice Azelma; German with
+    the 24-layer model) into `assets/narration/` by `node tools/narration.mjs`; `src/game/narrator.js`
+    plays them as things happen, one after the other, with subtitles. So far the opening and the
+    first three depths. The clips are not committed yet (`assets/narration/` is ignored): without
+    them the game shows only the subtitles.
   - Skins (main menu: **Choose Skin**, like Choose World; the painter in `src/game/skineditor.js`):
     up to ten named skins in the browser's IndexedDB, each with a thumbnail of the hero wearing
     it; choose one (or none), paint on one, delete one, or paint a new one. The painter has a
@@ -70,7 +73,8 @@ docs that explain how the game works, from the big ideas down to the real code:
       at first the browser's), the UI scale, the minimap's size (or none), the item names on the
       floor when hovered or always (X switches it too), the damage numbers, fullscreen (also
       Cmd+Enter on a Mac, Alt+Enter elsewhere: `src/game/display.js`); music on /
-      off, the volume of everything, the music's and the sounds', and quiet in the background
+      off, the volume of everything, the music's, the sounds' and the narrator's, her subtitles, and
+      quiet in the background
       (another tab or window in front; on at first, but not in the guide's game window).
     - Graphics: the frame rate cap (30, 60 or unlimited, `src/main.js`; 30 at first on touch
       screens), the render resolution (Auto: it follows the frame rate, or 50% to 100% of the

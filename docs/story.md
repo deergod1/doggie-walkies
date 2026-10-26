@@ -1,10 +1,11 @@
 # Story: the Glassmaker's memory
 
-Status: a sketch. Nothing of it is built yet. This is the story we want to tell, how it fits the
-game's rules, and the list of what the game needs before the story can go in (the end of this
-page). Every line gets an id it is recorded under: the lines written so far are in
-`src/core/narration.js`, voiced ahead with a text-to-speech model ([narration.md](narration.md)),
-but nothing plays them yet. Complements [world.md](world.md), [bosses.md](bosses.md),
+Status: a sketch, its beginning built. This is the story we want to tell, how it fits the game's
+rules, and the list of what the game needs before all of it can go in (the end of this page).
+Every line gets an id it is recorded under: the lines written so far are in
+`src/core/narration.js`, voiced ahead with a text-to-speech model, and a first narrator plays them
+as things happen, with subtitles ([narration.md](narration.md)). They tell the opening in the town,
+the road out and the first three depths (Gusto, Totnar, Squarlo) through. Complements [world.md](world.md), [bosses.md](bosses.md),
 [quests.md](quests.md), [saves.md](saves.md), [online.md](online.md) and [i18n.md](i18n.md).
 
 Tone: cheerful, with a sad edge. Like Bastion, a voice that talks while you play, in one or two
@@ -234,16 +235,17 @@ Before the story can go in. Roughly in the order to build it.
    comes twice), the shards found, whether the ending was seen. On the hero: how many worlds it
    has finished (the lines for heroes who have been here before). Playing together, the host's
    world keeps it.
-4. **The narrator.** The table of lines (id, when, conditions such as depth, theme, boss, owner or
-   guest, alone or together, how often, priority, note; `src/core/narration.js` has the ids, texts,
-   notes and forms so far, voiced: [narration.md](narration.md)) and what picks from it: a line from the
-   event, the seed and how often it came, so every screen picks the same one; a queue with
-   priorities and a pause between lines, quiet in fights except for bosses. Spine beats and what
+4. **The narrator.** Built for one player (`src/game/narrator.js`, [narration.md](narration.md)): the
+   table of lines with their moments and conditions (depth, act, theme, boss, a boss's attack,
+   a species), the lines said once a world (kept with it), a queue with priorities, a pause
+   between lines and lines left out once too late; chatter only in quiet moments, a boss's fight
+   commented as it goes. Still to do: owner or guest, alone or together, and the same line on
+   every screen. Spine beats and what
    happens to the world (a first time at a depth, a boss beaten, a cube memorized) come from the
    host to everybody; what happens to one player (a fall, a death) is told on that player's screen.
-5. **Showing it.** A subtitle line in its own style, one at a time, read at the speed it is
-   written; each line also goes into the chronicle (a new kind, `narration`), and a **Memories**
-   tab in the inventory to read the spine lines and the shards again.
+5. **Showing it.** Built: a subtitle line in its own style, one at a time, as long as its voice
+   (or reading it) takes; each line also goes into the chronicle (kind `narration`). Still to do:
+   a **Memories** tab in the inventory to read the spine lines and the shards again.
 6. **The moments to react to.** Most exist as chronicle kinds or game events already (a depth's
    first time, a boss beaten, a death, a horde, a friend joining); new ones: a cube entered, a cube
    memorized, a glass face opened, a fall, a theme's first cube, a puzzle or trial starting and

@@ -67,6 +67,7 @@ import { questEvent } from './quests.js';
 import { groundAt } from '../physics/collide.js';
 import { walkable } from '../physics/enemynav.js';
 import { tr } from '../i18n/i18n.js';
+import { narrate } from './narrator.js';
 
 let defenceThink = 0, hordeGroups = [];
 
@@ -134,7 +135,7 @@ function hordeBroken() {
 // (droppedHere). Truthy (the guardian's name): a guardian's gate opened.
 // learn: architecture.html#swing-journey, code.html#loops (see learn/README.md)
 function awardKills(list) {
-  let xp = 0, levels = 0, killed = 0, unlocked = false, boss = false;
+  let xp = 0, levels = 0, killed = 0, unlocked = false, boss = false, beaten = null;
   for (const e of list) {
     const reward = awardKill(player, state.run, e);
     if (reward) {
@@ -144,6 +145,7 @@ function awardKills(list) {
         unlocked = enemyName(e.profile);
         boss ||= e.guardianRole === 'descent';   // a boss (a real one or a Temp Boss): his jingle
         log('guardian', { label: enemyWords(e.profile), level: e.level, depth: state.map.depth, boss: !!e.boss }, { share: true });
+        if (e.boss) beaten = e.boss; else if (e.guardianRole === 'side') narrate('guardian', { what: 'beaten' });
       }
       relay.defeated?.(e);
     }
@@ -152,14 +154,19 @@ function awardKills(list) {
     setStatus([unlocked ? tr('{name} defeated · Gate unlocked!', { name: unlocked }) : tr('{n, plural, one {Defeated # enemy} other {Defeated # enemies}}', { n: killed }),
       tr('+{xp} XP', { xp }), ...levels ? [tr('Level {level}!', { level: player.level })] : []].join(' · '));
     log('kill', { count: killed, xp });
+    if (!beaten) narrate('kill', { many: killed >= 3 });   // (a boss beaten: she has more to say about him)
   }
   if (levels) log('level', { level: player.level }, { share: true });
   if (killed) hordeBroken();
   if (unlocked) { setGuardianGate(state.world, false); refreshOpenFaces(); }
   // a boss's jingle (audio/jingles.js: the music turned down under it), a level gained after it
   // (it waits its turn)
-  if (!(boss && jingle('victory')) && unlocked) sfx('unlock');
+  const victory = boss ? jingle('victory') : 0;
+  if (!victory && unlocked) sfx('unlock');
   if (levels && !jingle('levelup')) sfx('levelUp');
+  if (levels) narrate('level');
+  // the narrator on the boss beaten, once his jingle has mostly played (game/narrator.js)
+  if (beaten) narrate('beaten', { boss: beaten }, { delay: victory * 0.7 });
   return unlocked;
 }
 // Does this game drop e's loot? Its killer's does: whoever hit it last (game/sword.js; null:
@@ -220,7 +227,7 @@ export function updateEnemies(dt) {
     coordinateDefence(state.map, state.run, list, state.map.guardian ? nearestTo(state.map.guardian.x, state.map.guardian.z) : player);
   }
   const horde = hordeGroups[0], bodies = party();
-  if (coordinateHordes(hordeGroups, horde && bodies.length > 1 ? nearestTo(horde.anchor.x, horde.anchor.z, bodies) : player, dt)) { setStatus(tr('Horde awakened!')); log('horde'); jingle('horde'); }
+  if (coordinateHordes(hordeGroups, horde && bodies.length > 1 ? nearestTo(horde.anchor.x, horde.anchor.z, bodies) : player, dt)) { setStatus(tr('Horde awakened!')); log('horde'); jingle('horde'); narrate('horde'); }
   stepCalls(dt);
   // Flip's world turning (game/flipworld.js): everything in it turns with it
   updateFlipWorld(list, dt);

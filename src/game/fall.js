@@ -11,6 +11,7 @@ import { startTravel } from './travel.js';
 import { arrivalPoint } from './flow.js';
 import { knockDown } from './ragdoll.js';
 import { msg } from '../i18n/i18n.js';
+import { narrate } from './narrator.js';
 
 // fell through the void: into the cube below, if there is one there (else: false)
 export function startFall() {
@@ -23,6 +24,7 @@ export function startFall() {
   state.fallFrom ||= { key: state.cubeKey, arrival: state.arrival, portalLock: state.portalLock,
     boundaryLock: state.boundaryLock, visit: state.visit, safe: { ...player.safe } };
   startTravel({ kind: 'fall', dir: 4 });
+  narrate('fall');
   return true;
 }
 

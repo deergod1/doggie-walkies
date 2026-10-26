@@ -10,7 +10,7 @@ import { checkSkin } from './skin.js';
 // the loot on the floor, the cubes discovered, and where each hero left it (spots). Its name
 // comes from the seed (core/names.js); the same seed saved again is the second copy, "... II".
 //   { v, id, seed, copy, name, created, updated, deepest,
-//     run: { defeated, gates, chests, dropped, loot, townPortal, quests, clock, kills, trials, smith }, faces, visited,
+//     run: { defeated, gates, chests, dropped, loot, townPortal, quests, clock, kills, trials, smith, told }, faces, visited,
 //     spots: { [heroId]: { cube, arrival: { x, y, z } } } }
 // The map itself is never saved: the same seed makes the same cubes (world/). The name is
 // written along (to read the file) but never read back.
@@ -121,7 +121,7 @@ export function createWorld(seed, { copy = 1, id = newId('w'), now = Date.now() 
   seed >>>= 0;
   return { v: SAVE_VERSION, id, seed, copy, name: savedWorldName(seed, copy), created: now, updated: now, deepest: 0,
     run: { defeated: [], gates: [], chests: [], dropped: [], loot: [], townPortal: null, quests: createQuestLog(), clock: 0, kills: [], trials: [],
-      smith: { visit: 0, sold: [] } },
+      smith: { visit: 0, sold: [] }, told: [] },
     faces: [], visited: [], spots: {} };
 }
 
@@ -151,7 +151,8 @@ export function checkWorld(w) {
     created: time(w.created), updated: time(w.updated), deepest: Number.isInteger(w.deepest) && w.deepest > 0 ? w.deepest : 0,
     run: { defeated: strings(run.defeated), gates: strings(run.gates), chests: strings(run.chests), dropped: strings(run.dropped),
       loot: checkLoot(run.loot), townPortal: checkTownPortal(run.townPortal), quests: checkQuestLog(run.quests),
-      clock: time(run.clock), kills: packKills(unpackKills(run.kills)), trials: checkTrials(run.trials), smith: checkSmith(run.smith) },
+      clock: time(run.clock), kills: packKills(unpackKills(run.kills)), trials: checkTrials(run.trials), smith: checkSmith(run.smith),
+      told: strings(run.told) },
     faces: strings(w.faces), visited: strings(w.visited), spots };
 }
 // the Smith's stock (core/progression.js createRun smith): which visit, what of it was bought

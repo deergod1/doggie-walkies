@@ -97,6 +97,8 @@
             <label for="settings-master-volume" data-t>Volume</label><input id="settings-master-volume" type="range" min="0" max="100" step="5"><output id="settings-master-level" for="settings-master-volume"></output>
             <label for="settings-music-volume" data-t>Music volume</label><input id="settings-music-volume" type="range" min="0" max="100" step="5"><output id="settings-music-level" for="settings-music-volume"></output>
             <label for="settings-sound-volume" data-t>Sound volume</label><input id="settings-sound-volume" type="range" min="0" max="100" step="5"><output id="settings-sound-level" for="settings-sound-volume"></output>
+            <label for="settings-voice-volume" data-t>Narrator volume</label><input id="settings-voice-volume" type="range" min="0" max="100" step="5"><output id="settings-voice-level" for="settings-voice-volume"></output>
+            <span id="settings-subtitles-label" data-t>Subtitles</span><button id="settings-subtitles" class="settings-toggle" aria-labelledby="settings-subtitles-label settings-subtitles"></button><span></span>
             <span id="settings-quiet-label" data-t>Quiet in the background</span><button id="settings-quiet" class="settings-toggle" aria-labelledby="settings-quiet-label settings-quiet"></button><span></span>
           </div>
         </div>
@@ -176,6 +178,7 @@
   </section>
 </div>
 <div id="effects" aria-label="Potions at work" data-t="aria-label"></div>
+<div id="subtitle" role="status" aria-live="polite"><p></p></div>
 <div id="quest-track" hidden aria-live="polite"></div>
 <div id="trial-hud" hidden aria-live="polite"><b id="trial-name"></b><span id="trial-line"></span><div id="trial-meter"><i id="trial-bar"></i></div></div>
 <div id="trial-banner" hidden><b></b><span></span></div>
