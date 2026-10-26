@@ -86,7 +86,7 @@ other bosses' arenas, his has the world's days and nights (`BOSS_ARENAS.gusto.da
 | | Level 1 |
 |---|---|
 | Health | 1000 (the descent tier's floor) |
-| Damage | 24 (grab ×1.4, vortex ×0.5; breathing in: none) |
+| Damage | 24 (grab ×1.2, vortex ×0.5; breathing in: none) |
 | XP | 650; coins 120–220; two weapons and two potions like a descent guardian |
 | Poise | 2 s |
 
@@ -97,13 +97,13 @@ other bosses' arenas, his has the world's days and nights (`BOSS_ARENAS.gusto.da
   Caught, the player is held in its hands (`game/grab.js`): no moving, no striking, nothing else
   hurts them, and there is no wriggling free. It lifts them up high in front of its face along
   the clip's grip path (`grab.grip`, read off the clip by `blender/gusto.py`) and at 1.53 s throws
-  them down in front of itself: then the blow lands (34 at level 1) and they go over as a
+  them down in front of itself: then the blow lands (29 at level 1) and they go over as a
   ragdoll and get up as after any knock-down. A stagger (a heavy blow, a friend's) or its death
   makes it let go: the player drops unhurt.
 - **A grab that catches nothing** (the grab's `miss`, `game/enemyai.js whiff`): it goes on into
   `stuck` (clip `GustoStuck`, 2 s): from the catch pose it overshoots and face-plants, arms splayed
   on the floor, tentacles flopping, and heaves itself back up. Until 1.6 s (`exposed.until`)
-  every weapon blow does ×1.5 (`exposed.damage`, `core/combat.js weaponHit`, the number shown is
+  every weapon blow does ×2 (`exposed.damage`, `core/combat.js weaponHit`, the number shown is
   the bigger one) and none staggers it out of this (`damageEnemy`). Every game shows the crash
   (`game/gusts.js`, `felledFx`: a thump, dust) and says "Gusto missed! Hit him while he is
   down". So reading the tell (arms flung wide and up) and stepping out of reach pays, with any
@@ -138,22 +138,33 @@ and two **proxies**.
 
 - All three fight the same: the grab, the **vortex**, the summon and breathing in. Their attacks are out of
   step, so they do not all blow at once.
-- **Vortex** (within 4.4 cells, clip `GustoBlow`, 2.1 s): it brings both hands up in front of its
+- **Vortex** (from 2 to 4.4 cells, clip `GustoBlow`, 2.1 s; closer he grabs instead): it brings both hands up in front of its
   mouth and breathes in from 0.3 s (air spirals into its hands, it swells), and at 1 s blows a
   vortex through them for 0.6 s: a gust like the Wolla's (`core/gusts.js`, `game/gusts.js`,
   kind `vortex`), 5 cells long, 0.45 either side at the hands widening by 0.4 per cell. A player
-  in it is hit once (12 at level 1) and blown back at 10 cells/s fading over 0.7 s (about 3.5
+  in it is hit once (12 at level 1) and blown back at 7 cells/s fading over 0.7 s (about 2.5
   cells). It stops turning at 0.85 s: stepping out of the cone then dodges it.
 - Summons now fill up to **two** Custo triangles; any of the three can summon.
 - **Proxies** look exactly like it, carry its name and show its health (their bars drop with
   its own). Any hit at all, however small (a burn tick too), makes one go up in a cloud: no XP,
   no loot. The real one takes damage like any enemy: the play is to find it, and mostly to beat
   it while one proxy still stands.
-- When the **second proxy** goes, the real one can still be hit for **1 second** (if it is in
-  the middle of an attack, until that is over). Then it vanishes in a cloud (mode `gone`: it
+- When the **second proxy** goes, the real one can still be hit for **1.5 seconds** (if it is in
+  the middle of an attack, until that is over). The time a player spends within 2.5 cells of it
+  (`GUSTO_FIGHT.close`) does not count, for up to 4 s more (`hold`): a sword that popped the last
+  proxy gets to him and strikes, a bow from afar gets no more. Then it vanishes in a cloud (mode `gone`: it
   cannot be seen, hit or touched; `absent` in `core/enemies.js`), and 1.3 s later it and two new
   proxies appear on new spots, as after the split. For 0.5 s after appearing nothing hurts them.
 - Its death takes its proxies and triangles along, in clouds (no XP for them).
+
+### Without a bow
+
+A hero who reaches him with only a sword or a flail must still stand a chance (most see a bow,
+crossbow or staff before him, not all: [balance.md](balance.md)). So the fight leans towards
+those up close: the grab, which a sword has to live with, hurts less (×1.2) and a dodged one
+lays him open for twice the damage; up close he grabs rather than blows his vortex, which
+blows less far; and the last proxy gone, he waits for a player standing at him (`close`,
+`hold`). A bow keeps its own ways: it shoots the proxies from afar, and his breath brings it in.
 
 ## Custo triangle
 

@@ -13,7 +13,10 @@
 // catches nothing leaves it face down, helpless (GUSTO_STUCK).
 // Phase 2: he summons up to two triangles at a time. Once both proxies are gone he can still be
 // hit for `window` seconds, then he vanishes, and `gone` seconds later he and two new proxies
-// appear somewhere else. Only he can die, and his death takes his proxies and triangles along.
+// appear somewhere else. The window does not run while a player stands within `close` cells of
+// him, for up to `hold` s more: a sword that popped the last proxy has time to get to him and
+// strike, a bow from afar does not get more. Only he can die, and his death takes his proxies
+// and triangles along.
 export const GUSTO_FIGHT = Object.freeze({
   split: 0.5,             // the share of his health he splits at
   splitTime: 1.8,         // s he shudders before the three of him appear
@@ -21,7 +24,9 @@ export const GUSTO_FIGHT = Object.freeze({
   summonCool: [7, 8],     // s from one summon to the next, phase 1 / 2
   firstSummon: 1.5,       // s before his first summon
   proxies: 2,
-  window: 1,              // s he can still be hit after his last proxy went
+  window: 1.5,            // s he can still be hit after his last proxy went...
+  close: 2.5,             // cells: ...not counting the time a player is this close to him...
+  hold: 4,                // ...for up to this long (s)
   gone: 1.3,              // s he is away
   appear: 0.5,            // s nothing hurts the three after they appear
   apart: 3,               // cells: the least between the three and from the players, where the arena allows

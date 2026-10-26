@@ -471,10 +471,12 @@ export const ENEMY_PROFILES = [SPIDER, STUNDER, SNAKE, OCTONAUT, FIREFACE, TRIAN
 // it at `throwAt` (`throw` cells/s forward): the blow lands then, and knocks them down
 // (game/grab.js). A `summon` spits minions of kind `summon.kind` from its mouth at the hit frame
 // (game/gusto.js). The `vortex` is a gust (the Wolla's, core/gusts.js) blown through its hands; it
-// breathes in from `inhale` on (only the look).
+// breathes in from `inhale` on (only the look). Up close (within its minReach) it grabs rather
+// than blows: a sword has to stand there, and a grab can be dodged and punished (`stuck`).
+// Gusto must be fair to those without a bow, crossbow or staff (docs/balance.md, docs/bosses.md).
 const GUSTO_GRAB = {
   name: 'grab', clip: 'grab', weight: 2, reach: 1.6, hitAt: 22 / 30, trackUntil: 0.6, attackTime: 66 / 30, hitReach: 1.8,
-  arc: 0.35, power: 1.4, knock: 0, knockDown: true, hop: 2.5, reason: 'Thrown by Gusto!', miss: 'stuck',
+  arc: 0.35, power: 1.2, knock: 0, knockDown: true, hop: 2.5, reason: 'Thrown by Gusto!', miss: 'stuck',
   grab: { throwAt: 46 / 30, step: 2 / 30, hold: 0.55, throw: 4.5,
     grip: [[0, 0.973, 1.378], [0, 0.948, 1.378], [0, 0.923, 1.376], [0, 1.06, 1.295], [0, 1.389, 1.143], [0, 1.801, 0.969],
       [0, 2.107, 0.831], [0, 2.182, 0.796], [0, 2.182, 0.796], [0, 2.182, 0.796], [0.002, 2.18, 0.793], [0, 1.836, 0.944],
@@ -486,9 +488,9 @@ const GUSTO_SUMMON = {
   summon: { kind: 'custotriangle', muzzle: [0.02, 1.131, 0.795] },
 };
 const GUSTO_VORTEX = {
-  name: 'vortex', clip: 'blow', weight: 3, reach: 4.4, hitAt: 30 / 30, trackUntil: 0.85, attackTime: 63 / 30, hitReach: 0,
+  name: 'vortex', clip: 'blow', weight: 3, reach: 4.4, minReach: 2, hitAt: 30 / 30, trackUntil: 0.85, attackTime: 63 / 30, hitReach: 0,
   arc: 0.5, power: 0.5, knock: 3, knockDown: false, hop: 3, reason: 'Blown away by Gusto!',
-  gust: { kind: 'vortex', time: 18 / 30, range: 5, width: 0.45, spread: 0.4, push: 10, pushTime: 0.7,
+  gust: { kind: 'vortex', time: 18 / 30, range: 5, width: 0.45, spread: 0.4, push: 7, pushTime: 0.7,
     muzzle: [0, 1.36, 1], thunder: [], inhale: 9 / 30 },
 };
 // Breathing in (clip GustoInhale): from the hit frame for `pull.time` it sucks in whoever is in
@@ -509,7 +511,7 @@ const GUSTO_INHALE = {
 const GUSTO_STUCK = {
   name: 'stuck', clip: 'stuck', weight: 0, reach: 0, hitAt: 60 / 30, trackUntil: 0, attackTime: 60 / 30, hitReach: 0,
   arc: -1, power: 0, knock: 0, knockDown: false, hop: 0, reason: 'Gusto',
-  exposed: { until: 48 / 30, damage: 1.5, thud: true, say: msg('{name} missed! Hit him while he is down') },
+  exposed: { until: 48 / 30, damage: 2, thud: true, say: msg('{name} missed! Hit him while he is down') },
 };
 export const GUSTO = {
   type: 'gusto', species: 'gusto', label: 'Gusto', hp: 1000, damage: 24, knock: 4,

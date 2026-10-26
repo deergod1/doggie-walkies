@@ -123,6 +123,14 @@ export async function runGustoChecks() {
       damageEnemy(proxies[1], 1); run(0.5);
       const before = gusto.hp;
       check(damageEnemy(gusto, 5) && gusto.hp === before - 5, 'still there a moment after the last proxy');
+      // a player at him (a sword): the window waits; away from him, it runs out
+      while (gusto.mode === 'attack') run(0.1);
+      gusto.cool = 99;   // (no grab meanwhile)
+      Object.assign(player, { x: gusto.x + 1.5, z: gusto.z });
+      run(GUSTO_FIGHT.window);
+      check(gusto.mode !== 'gone' && damageEnemy(gusto, 5), 'he stays while a player is close to him');
+      gusto.cool = 0;
+      Object.assign(player, { x: gusto.x + 12, z: gusto.z });
       run(GUSTO_FIGHT.window);
       while (gusto.mode === 'attack') run(0.1);
       run(0.05);

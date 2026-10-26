@@ -3,7 +3,8 @@
 // they fight, collide, travel and get shown to friends like any enemy. Each Gusto has a fight of
 // its own here: { e (him), phase (1, 'split', 2, 'gone'), t (s left of the split or of being
 // away), cool (s to the next summon), proxies, minions, window (s he can still be hit after the
-// last proxy went, null before) }. A dev spawn (game/devspawn.js) gets one too.
+// last proxy went, null before), hold (s more it may stand still for a player close by) }. A dev
+// spawn (game/devspawn.js) gets one too.
 //
 // Movement and attacks are the shared enemy AI's (game/enemyai.js): the fight only says when a
 // summon or a breath may start (`barred`: the attacks not to start now), carries a summon out
@@ -87,10 +88,14 @@ function run(f, dt) {
     if ((f.t -= dt) <= 0) appear(f);
   } else if (f.phase === 2) {
     if (f.proxies.length) f.window = null;
-    else if (f.window === null) f.window = G.window;
+    else if (f.window === null) { f.window = G.window; f.hold = G.hold; }
+    else if (close(e) && f.hold > 0) f.hold -= dt;   // (someone at him: the window waits)
     else if ((f.window -= dt) <= 0 && e.mode !== 'attack') vanish(f);   // (a grab is seen through)
   } else if ((f.t -= dt) <= 0) appear(f);   // gone: back
 }
+
+// a player within G.close of him
+const close = e => players().some(p => Math.hypot(p.x - e.x, p.z - e.z) <= G.close);
 
 // how long the nearest player has kept away from body b (in the fight), and whether only a
 // grab may follow its breath; a breath starting holds the others' back for breathCool

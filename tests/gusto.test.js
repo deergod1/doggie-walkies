@@ -68,7 +68,7 @@ test('he is as strong as a descent guardian, and his attacks are telegraphed', (
   assert.ok(grab.hitAt >= 0.6 && grab.grab.throwAt > grab.hitAt + 0.5 && grab.attackTime > grab.grab.throwAt);
   assert.ok(blowOf(GUSTO, grab).knockDown);
   assert.equal(vortex.gust.kind, 'vortex'); assert.ok(vortex.hitAt >= 0.9, 'he breathes in first');
-  assert.ok(vortex.gust.push * vortex.gust.pushTime / 2 >= 3, 'a powerful push');
+  assert.ok(vortex.gust.push * vortex.gust.pushTime / 2 >= 2, 'a powerful push');
   assert.ok(!blowOf(GUSTO_SPLIT, vortex).knockDown);
   // up close he grabs; further off he can only summon or breathe in (or, split, blow); he never
   // starts lying face down (only a missed grab gets him there)
@@ -76,6 +76,9 @@ test('he is as strong as a descent guardian, and his attacks are telegraphed', (
   assert.deepEqual(attacksInReach(GUSTO, 3, 0), [1, 2]);
   assert.deepEqual(attacksInReach(GUSTO, 8.5, 0), [2]);
   assert.ok(attacksInReach(GUSTO_SPLIT, 3, 0).includes(GUSTO_SPLIT.attacks.indexOf(vortex)));
+  // up close, where a sword has to stand, he grabs (to be dodged and punished) rather than blows
+  for (const d of [0.5, 1, 1.5]) assert.ok(!attacksInReach(GUSTO_SPLIT, d, 0).includes(GUSTO_SPLIT.attacks.indexOf(vortex)));
+  assert.ok(vortex.minReach > grab.reach && vortex.minReach < vortex.reach);
   for (const d of [0, 0.5, 1, 5]) assert.ok(!attacksInReach(GUSTO_SPLIT, d, 0).includes(GUSTO_SPLIT.attacks.findIndex(a => a.exposed)));
 });
 
@@ -185,7 +188,10 @@ test('the fight rules: summons fill up to three, then two; the vortex catches wh
   assert.deepEqual(GUSTO_FIGHT.minions, [3, 2]);
   assert.equal(summonCount(1, 0), 3); assert.equal(summonCount(1, 2), 1); assert.equal(summonCount(1, 5), 0);
   assert.equal(summonCount(2, 0), 2); assert.equal(summonCount(2, 2), 0);
-  assert.equal(GUSTO_FIGHT.proxies, 2); assert.ok(GUSTO_FIGHT.window >= 0.8 && GUSTO_FIGHT.window <= 1.5);
+  assert.equal(GUSTO_FIGHT.proxies, 2); assert.ok(GUSTO_FIGHT.window >= 0.8 && GUSTO_FIGHT.window <= 2);
+  // a sword close to him when the last proxy goes gets a while longer, but not for ever
+  assert.ok(GUSTO_FIGHT.close > GUSTO.attacks[0].reach && GUSTO_FIGHT.close < GUSTO_FIGHT.far);
+  assert.ok(GUSTO_FIGHT.hold > 0 && GUSTO_FIGHT.hold <= 6);
   const e = makeEnemy({ id: 'g', level: 1, f: null, x: 8, y: 0, z: 8, yaw: 0 }, GUSTO_SPLIT);
   e.attack = GUSTO_SPLIT.attacks.findIndex(a => a.gust); e.mode = 'attack';
   const g = attackOf(e).gust, body = (x, z) => ({ x, y: 0, z, r: 0.22, h: 0.85 });
