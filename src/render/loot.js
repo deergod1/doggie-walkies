@@ -64,6 +64,7 @@ function proto(itemId) {
     wrap.add(root); wrap.scale.setScalar(scale);
     wrap.userData.half = (box.max.y - box.min.y) / 2 * scale;
     wrap.userData.scale = scale;
+    wrap.userData.size = box.getSize(new THREE.Vector3()).multiplyScalar(scale);
     protos.set(itemId, wrap);
   }).catch(e => console.error('item model failed to load', itemId, e)));
   return null;
@@ -212,15 +213,25 @@ function hop(p, time) {
 
 const ease = t => t * t * (3 - 2 * t);
 const v = new THREE.Vector3(), target = new THREE.Vector3();
+const TAU = Math.PI * 2;
 
-// where p is when nobody pulls it: on its arc out of the body, then resting (weapons lie on
-// the floor, everything else hovers and bobs)
-function rest(p, half, time, out) {
+// where p is when nobody pulls it: on its arc out of the body (lift: its middle above `from`),
+// then resting (weapons lie on the floor, everything else hovers and bobs)
+function rest(p, half, time, out, lift = 0) {
   const y = p.gen ? p.y + half + 0.01 + (rarityOf(p).glow?.rainbow ? hop(p, time).up * HOP_HEIGHT : 0)
     : p.y + half + HOVER + Math.sin(time * 2.6 + p.phase) * 0.035;
   if (p.toss >= 1) return out.set(p.x, y, p.z);
-  const u = Math.max(0, p.toss), e = ease(u);
-  return out.set(p.from.x + (p.x - p.from.x) * u, p.from.y + (y - p.from.y) * e + TOSS_HEIGHT * 4 * u * (1 - u), p.from.z + (p.z - p.from.z) * u);
+  const u = Math.max(0, p.toss), e = ease(u), fy = p.from.y + lift;
+  return out.set(p.from.x + (p.x - p.from.x) * u, fy + (y - fy) * e + TOSS_HEIGHT * 4 * u * (1 - u), p.from.z + (p.z - p.from.z) * u);
+}
+
+// how p lies in a chest before it comes out (render/chests.js stowLoot): its scale, shrunk to
+// fit its spot, and how far its middle is above the spot's bottom
+function stowed(p, ud) {
+  const { size, scale } = ud, i = p.inside;
+  const across = i.flat ? Math.max(size.x, size.y) : Math.max(size.x, size.z), high = i.flat ? size.z : size.y;
+  const k = Math.min(1, i.fit / across, i.h / high);
+  return { scale: scale * k, lift: high / 2 * k };
 }
 
 function forget(view) {
@@ -243,6 +254,7 @@ export function drawLoot(list, world, time, dt = 0) {
       const pr = proto(p.itemId);
       if (!pr) continue;
       const glow = glowOf(p), o = new THREE.Group(), model = pr.clone(), fx = glow?.glow ? makeFx(glow) : null;
+      model.rotation.order = 'YXZ';   // (a coin laid on its face in a chest, then turned)
       o.add(model); if (fx) o.add(fx);
       world.group.add(o);
       view = { o, model, fx };
@@ -252,21 +264,32 @@ export function drawLoot(list, world, time, dt = 0) {
     // flying to another player (playing together), there if we see them; taken and waiting to be
     // ours (game/loot.js claim): out of sight
     const friend = p.fly?.to != null ? partnerAt(p.fly.to) : null;
-    o.visible = p.toss >= 0 && !(p.claim && (!p.fly || p.fly.t >= p.fly.dur || (p.fly.to != null && !friend)));
+    o.visible = (p.toss >= 0 || !!p.inside) && !(p.claim && (!p.fly || p.fly.t >= p.fly.dur || (p.fly.to != null && !friend)));
     o.position.set(p.x, p.y, p.z);
-    rest(p, half, time, v);
-    let spin = p.gen ? 0 : 1.8, scale = base, yaw = p.phase;
+    // waiting in a chest: still and shrunk; on the way out it grows, turns and gets up
+    const inside = p.inside && p.toss < 1 ? stowed(p, model.userData) : null;
+    rest(p, half, time, v, inside?.lift);
+    let spin = p.gen ? 0 : 1.8, scale = base, yaw = p.phase, tilt = 0;
     if (p.toss < 1) { spin = 9; if (p.gen) { spin = 0; yaw += (1 - p.toss) * 7; } }   // tumbling out, a weapon unwinding into place
+    if (inside) {
+      const u = Math.max(0, p.toss), e = ease(u);
+      scale = inside.scale + (base - inside.scale) * e;
+      spin = 0;
+      // a weapon unwinds from how it lay into place; the rest tumbles from how it lay
+      yaw = p.gen ? p.phase + (1 - u) * ((((p.inside.yaw - p.phase) % TAU) + TAU) % TAU + TAU) : p.inside.yaw + u * 5;
+      if (p.inside.flat) tilt = -Math.PI / 2 * (1 - e);
+    }
     if (p.fly) {
       const u = Math.min(1, Math.max(0, p.fly.t / p.fly.dur)), e = u * u;   // accelerate into the player
       if (friend) target.set(friend.x - off.x, friend.y + 0.55 - off.y, friend.z - off.z);
       else target.set(player.x - off.x, player.visY + 0.55 - off.y, player.z - off.z);
       const lift = p.fly.t < 0 ? 0.12 * Math.min(1, (p.fly.t + 0.15) / 0.15) : 0;   // a little hop before it goes
       v.lerp(target, e).y += Math.sin(u * Math.PI) * 0.35 + Math.max(0, lift);
-      spin = 4 + 14 * e; scale = base * (1 - 0.65 * e);
+      spin = 4 + 14 * e; scale *= 1 - 0.65 * e;
     }
     model.position.copy(v).sub(o.position);
     model.rotation.y = time * spin + yaw;
+    model.rotation.x = tilt;
     // a hopping weapon wobbles while it is in the air
     if (p.gen && rarityOf(p).glow?.rainbow) {
       const air = p.toss >= 1 && !p.fly ? hop(p, time).air : -1;

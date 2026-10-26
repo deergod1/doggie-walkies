@@ -202,7 +202,9 @@ a second (Decent); see [armor.md](armor.md).
 
 Copper grows like enemy coins. Weapons roll with luck (0.1 to 0.45 by prestige). Opening a chest
 (`game/chests.js`) adds its site to `run.chests`, opens the model and, once the lid's `Open` clip has
-played out, spills the loot in front of it (pickups wait hidden until then). The chest stays open for the run and what it spilled is `kept`: a death takes neither
+played out, spills the loot in front of it. Until then the pickups lie in it, shrunk to fit on its
+floor (`render/chests.js stowLoot`: coins at the bottom, the weapons along the top), so the chest
+opens full; they grow back as they fly out. The chest stays open for the run and what it spilled is `kept`: a death takes neither
 back.
 
 ## Enchanting and re-rolling

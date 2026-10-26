@@ -118,12 +118,14 @@ export function dropLoot(e, copper) {
 }
 // coins and items of drop `source` bursting out of a body (or a chest: `from`) and landing
 // around `at`; extra: what every pickup carries; delay: seconds before the first one comes out
-// (hidden till then)
-export function spill(source, at, copper, items, extra = {}, from = { x: at.x, y: at.y + 0.4, z: at.z }, delay = 0) {
+// (hidden till then); stow(pickups): puts them somewhere to wait and start from instead (a
+// chest, inside it: render/chests.js stowLoot)
+export function spill(source, at, copper, items, extra = {}, from = { x: at.x, y: at.y + 0.4, z: at.z }, delay = 0, stow = null) {
   const wait = delay / TOSS_TIME, list = lootIn(state.cubeKey), out = [];
   const id = () => `${source}#${out.length}`;
   coinDrops(copper).forEach((d, i) => out.push(place(list, d, id(), source, landing(at.x, at.y, at.z), from, { toss: -wait - i * 0.06, ...extra })));   // one after another
   items.forEach((item, i) => out.push(place(list, item, id(), source, landing(at.x, at.y, at.z, 0.5, 1.1), from, { toss: -wait - 0.15 - i * 0.18, ...extra })));
+  stow?.(out);
   state.run.dropped.add(source);
   relay.drop?.(state.cubeKey, source, out);
   return out;
