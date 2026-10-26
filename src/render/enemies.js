@@ -67,6 +67,7 @@ import { isFlimmer, animateFlimmers, removeFlimmerViews, flimmerWarmup } from '.
 import { STAGE_PROFILES, enemyName } from '../core/enemies.js';
 import { SQUARLO_FIGHT } from '../core/squarlo.js';
 import { standingAt } from '../physics/fluid.js';
+import { groundAt } from '../physics/collide.js';
 import { surfaceY } from './surface.js';
 import { WIND } from './materials.js';
 import { WATER } from '../core/constants.js';
@@ -115,6 +116,64 @@ const GLOW = {
 };
 const EMBERS = ['#ffd25a', '#ff8a2a', '#ff5a14'];
 const GHOST = 0xff6a5a, GHOST_OPACITY = 0.4;
+// The silhouette is for a body hidden behind something, not for the parts of it that dip under
+// the ground it walks on (a snake's tail, a stride up a slope): it is cut off below that ground.
+// The ground under it is sampled on a 3 x 3 grid over its body (floorUnder), `reach` apart, and
+// blended between the samples (uGhostGrid: the grid's corner x, z in the scene and its spacing;
+// uGhostH: the heights, row by row; none: far down).
+const FLOOR_STEP = 0.5;   // ground this far above its feet still is ground (a slope, a step), not a wall
+const NO_FLOOR = new Array(9).fill(-1e4);
+function ghostMaterial() {
+  const grid = { value: new THREE.Vector3(0, 0, 1) }, heights = { value: NO_FLOOR.slice() };
+  const m = new THREE.MeshBasicMaterial({ color: GHOST, transparent: true, opacity: GHOST_OPACITY,
+    depthFunc: THREE.GreaterDepth, depthWrite: false });
+  m.onBeforeCompile = s => {
+    Object.assign(s.uniforms, { uGhostGrid: grid, uGhostH: heights });
+    s.vertexShader = 'varying vec3 vGhostW;\n' + s.vertexShader.replace('#include <project_vertex>',
+      '#include <project_vertex>\n  vGhostW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+    s.fragmentShader = `uniform vec3 uGhostGrid;
+      uniform float uGhostH[9];
+      varying vec3 vGhostW;
+      float ghostGround(vec2 p) {
+        vec2 g = clamp((p - uGhostGrid.xy) / uGhostGrid.z, 0.0, 1.999);
+        ivec2 c = ivec2(floor(g));
+        vec2 f = g - vec2(c);
+        int i = c.y * 3 + c.x;
+        return mix(mix(uGhostH[i], uGhostH[i + 1], f.x), mix(uGhostH[i + 3], uGhostH[i + 4], f.x), f.y);
+      }
+      ` + s.fragmentShader.replace('void main() {', 'void main() {\n  if (vGhostW.y < ghostGround(vGhostW.xz)) discard;');
+  };
+  m.customProgramCacheKey = () => 'enemy-ghost';
+  m.userData.grid = grid.value; m.userData.heights = heights.value;
+  return m;
+}
+// the ground under e on the grid (heights, row by row along z; null: none under it); where a
+// sample finds none, or drops away, it counts as level with its middle
+function floorUnder(e, reach) {
+  const at = (x, z) => groundAt(x, z, e.y + 0.05, FLOOR_STEP).h, h0 = at(e.x, e.z);
+  if (h0 === -Infinity) return null;
+  const out = [];
+  for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) {
+    const h = i || j ? at(e.x + i * reach, e.z + j * reach) : h0;
+    out.push(h > h0 - FLOOR_STEP ? h : h0);
+  }
+  return out;
+}
+// ... in the scene, where the cube is at `off` (sliding away while travelling: game/travelfx.js)
+function placeFloor(v, e, dt, off) {
+  if (dt > 0 || v.floor === undefined) v.floor = floorUnder(e, v.reach);   // (a cube going away keeps the one it had)
+  const { grid, heights } = v.ghost.userData;
+  grid.set(e.x - v.reach + off.x, e.z - v.reach + off.z, v.reach);
+  for (let i = 0; i < 9; i++) heights[i] = v.floor ? v.floor[i] + off.y : -1e4;
+}
+// how far the body reaches out from its middle (its mesh at rest), for the grid: at least its radius
+function reachOf(mesh, e) {
+  const g = mesh.geometry;
+  if (!g.boundingBox) g.computeBoundingBox();
+  mesh.updateWorldMatrix(true, false);
+  const b = g.boundingBox.clone().applyMatrix4(mesh.matrixWorld);
+  return THREE.MathUtils.clamp(Math.max(-b.min.x, b.max.x, -b.min.z, b.max.z), Math.max(0.25, e.profile.radius ?? 0), 2);
+}
 const tmp = new THREE.Vector3(), wobble = new THREE.Quaternion(), axis = new THREE.Vector3(1, 0, 0);
 let clock = 0;
 const white = new THREE.Color(0xffffff), hover = new THREE.Color(0xffd9a0), inverseYaw = new THREE.Quaternion();
@@ -551,8 +610,7 @@ function makeView(e, prefab) {
   paintParts(material, parts);
   // silhouette shown where the body is hidden behind terrain (like the player's); drawn
   // before the body, so it never shows the body's own back parts through its front
-  const ghost = new THREE.MeshBasicMaterial({ color: GHOST, transparent: true, opacity: GHOST_OPACITY,
-    depthFunc: THREE.GreaterDepth, depthWrite: false });
+  const ghost = ghostMaterial(), reach = reachOf(mesh, e);
   const silhouette = new THREE.SkinnedMesh(mesh.geometry, ghost);
   silhouette.bind(mesh.skeleton, mesh.bindMatrix);
   silhouette.renderOrder = -1; silhouette.boundingSphere = mesh.boundingSphere;
@@ -587,7 +645,7 @@ function makeView(e, prefab) {
   const embers = typeof fx?.embers?.from === 'string' ? model.getObjectByName(fx.embers.from) : null;
   const tentacles = e.profile.flail ? findTentacles(model) : [];
   if (e.proxy || e.summoned) poof(e, puffOf(e));   // it turns up
-  return { tentacles, was: { mode: e.mode, x: e.x, z: e.z }, group, model, mixer, actions, prefab, material, shell, parts, body: mesh, silhouette, colors: material.userData.parts.color, ghost, tag, bar, hpBar, label, mark, markT: 0, yaw: e.yaw, phase: e.phase,
+  return { tentacles, was: { mode: e.mode, x: e.x, z: e.z }, group, model, mixer, actions, prefab, material, shell, parts, body: mesh, silhouette, colors: material.userData.parts.color, ghost, reach, tag, bar, hpBar, label, mark, markT: 0, yaw: e.yaw, phase: e.phase,
     attacks: -1, dead: false, weights, fx, flames, light, embers, size, wheels: findWheels(model), roll: 0, spin: 0, rolled: null, waves: findWaves(model), whirl: 1, rings: findRings(model), ringSpeed: 0, flash: null, trail: null, sparks: e.profile.sparks ?? EMBERS, seed: Math.random() * 100,
     gloomColor: gloom ? new THREE.Color(...toLinear(gloom.color)) : null, gloom: 0, glimmer: 0,
     shed: findShed(model, e.profile.shed), stage: e.stage ?? 1, dark: e.dark ?? 0, ball: findBall(model, e.profile.tumble), tumble: 0, turned: 0, flash2: 0,
@@ -683,6 +741,7 @@ export function animateEnemies(list, dt, off = ZERO) {
     v.yaw = e.mode === 'attack' ? e.yaw : angleTo(v.yaw, e.yaw, Math.min(1, dt * 14));
     v.group.position.set(e.x + off.x, e.y + off.y, e.z + off.z);
     v.group.rotation.y = v.yaw;
+    placeFloor(v, e, dt, off);
     if (e.mode === 'dead') { dying(v, e, dt, off); if (e.ghost) ghostLook(v, e); continue; }
     if (!e.ghost) clouds(v, e);
     v.group.visible = e.mode !== 'gone';
