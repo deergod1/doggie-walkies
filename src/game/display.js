@@ -30,6 +30,18 @@ export function setFullscreen(on) {
   if (on) (root.requestFullscreen ?? root.webkitRequestFullscreen)?.call(root)?.catch?.(() => {});
   else (document.exitFullscreen ?? document.webkitExitFullscreen)?.call(document)?.catch?.(() => {});
 }
+// Cmd+Enter on a Mac, Alt+Enter elsewhere (Windows, Linux) switches fullscreen on and off, as in
+// most games; a key press may ask for it like a click. (Captured, so neither the chat's Enter nor a
+// focused button's sees it.)
+const mac = /mac|iphone|ipad/i.test(navigator.userAgentData?.platform ?? navigator.platform ?? '');
+addEventListener('keydown', e => {
+  if (e.code !== 'Enter' && e.code !== 'NumpadEnter') return;
+  if (e.shiftKey || e.ctrlKey || (mac ? !e.metaKey || e.altKey : !e.altKey || e.metaKey)) return;
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  if (!e.repeat && canFullscreen()) setFullscreen(!isFullscreen());
+}, true);
+
 // fn() when the page goes into fullscreen or out of it (Esc, F11, the browser's own controls)
 export function onFullscreenChange(fn) {
   document.addEventListener('fullscreenchange', fn);

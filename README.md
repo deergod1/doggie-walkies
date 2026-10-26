@@ -68,7 +68,8 @@ docs that explain how the game works, from the big ideas down to the real code:
     and the main menu; pages in tabs on the left):
     - General: the language (English, German or Indonesian, in a dropdown: `src/game/dropdown.js`;
       at first the browser's), the UI scale, the minimap's size (or none), the item names on the
-      floor when hovered or always (X switches it too), the damage numbers, fullscreen; music on /
+      floor when hovered or always (X switches it too), the damage numbers, fullscreen (also
+      Cmd+Enter on a Mac, Alt+Enter elsewhere: `src/game/display.js`); music on /
       off, the volume of everything, the music's and the sounds', and quiet in the background
       (another tab or window in front; on at first, but not in the guide's game window).
     - Graphics: the frame rate cap (30, 60 or unlimited, `src/main.js`; 30 at first on touch
