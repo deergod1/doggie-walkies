@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4efdf">
+  <title>Doggie Walkies</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="walk.css">
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three/three.module.js", "three/addons/": "./vendor/three/addons/" } }
+  </script>
+</head>
+<body>
+  <canvas id="walk-view" tabindex="0"></canvas>
+  <main id="walk-ui"></main>
+  <div id="boot" role="status">Doggie Walkies …</div>
+  <noscript><p>JavaScript is needed to take a walk. / Zum Spazierengehen wird JavaScript benötigt.</p></noscript>
+  <script type="module" src="src/walk/main.js"></script>
+</body>
+</html>

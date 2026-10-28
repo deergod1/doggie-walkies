@@ -1,4 +1,45 @@
-# The Glass Bird
+# Doggie Walkies — walking prototype
+
+A cozy dog-walking RPG evolving from the game below. The playable slice has a dog and person
+with independent intentions, a firm routed leash, sniffaris, a deterministic continuous world,
+and persistent shared exploration memory. Its compact HUD keeps the pair and leash readable while
+leaving most of the screen to the neighborhood. The original game remains intact; its design and
+systems remain foundations to adapt.
+
+```sh
+npm run serve -- 8000 --bind 127.0.0.1
+```
+
+Open **http://localhost:8000/walk.html** for the walking prototype, or
+**http://localhost:8000/** for the original game. No build step or npm dependencies are needed;
+the server command uses `uv` (or run `python3 tools/serve.py 8000 --bind 127.0.0.1`).
+
+- [Game vision and specification](docs/doggie-walkies-spec.md)
+- [Prototype controls, architecture, tests, and limitations](docs/walking-prototype.md)
+- [Original design conversation and decisions](docs/dog-walking-design.md)
+- [Future side-by-side comparison with the original game](docs/original-game-comparison.md)
+- [Development standards and checkpoint practices](docs/development-standards.md)
+
+## Moving to another machine
+
+Everything required to run either browser entry is committed or vendored; there is no generated
+build output or `node_modules` directory to copy. After pushing this branch:
+
+```sh
+git clone <your-repository-url>
+cd doggie-walkies
+python3 tools/serve.py 8000 --bind 127.0.0.1
+# or: npm run serve -- 8000 --bind 127.0.0.1  (requires uv)
+```
+
+A current Node.js installation is only needed for tests (`npm test`); runtime Three.js is in
+`vendor/`. Walking and dungeon saves live in the browser, not the Git repository, so cloning onto
+another machine starts with that browser's own local saves. The walking save remains isolated under
+`doggie-walkies.prototype.v1` and never writes the original game's `crawler.*` keys.
+
+---
+
+# The Glass Bird — original game
 
 A browser dungeon crawler made of 16x16-cell cubes stacked into themed depths.
 Plain ES modules and a vendored three.js; no build step.

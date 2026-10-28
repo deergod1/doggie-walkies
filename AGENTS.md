@@ -1,6 +1,20 @@
 # Notes for agents
 
-See `README.md` for the layout and how to run things.
+See `README.md` for the layout and how to run things. Follow
+`docs/development-standards.md`, including its repository-hygiene, validation, and long-running
+command rules. In particular, do not use arbitrary fixed sleeps to wait for work; wait for an
+actual completion/readiness condition.
+
+## Doggie Walkies direction
+
+Read `docs/doggie-walkies-spec.md` and `docs/dog-walking-design.md` before making dog-walking
+changes. They capture the vision, agreed direction, first milestone, and open decisions.
+Reuse and adapt the original game's code and design first; replace only for a specific reason.
+The isolated walking slice is a test space for the pair mechanic, not a decision to abandon the
+original world, RPG, encounter, boss, camera, cutaway, animation, or rendering systems.
+`docs/walking-prototype.md` tracks implementation and tests. Before changing the walking camera,
+occlusion, reveal, animation, or scene presentation, read `docs/original-game-comparison.md` and
+inspect the original modules it identifies. The existing README describes both launch targets.
 
 ## Translations
 
